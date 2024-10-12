@@ -186,6 +186,11 @@ void ImmediateMesh::surface_end() {
 			uv2_array.push_back(uv2s_data[i]);
 		}
 		vertex_array.push_back(vertices_data[i]);
+		if (i == 0) {
+			aabb.position = vertices_data[i];
+		} else {
+			aabb.expand_to(vertices_data[i]);
+		}
 	}
 
 	uint32_t format = ARRAY_FORMAT_VERTEX;
