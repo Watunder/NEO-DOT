@@ -278,30 +278,6 @@ public:
 		PRIMITIVE_MAX = 7,
 	};
 
-	struct SurfaceData {
-		PrimitiveType primitive = PRIMITIVE_MAX;
-
-		uint32_t format = 0;
-		PoolVector<uint8_t> vertex_data; // Vertex, Normal, Tangent (change with skinning, blendshape).
-		PoolVector<uint8_t> attribute_data; // Color, UV, UV2, Custom0-3.
-		PoolVector<uint8_t> skin_data; // Bone index, Bone weight.
-		uint32_t vertex_count = 0;
-		PoolVector<uint8_t> index_data;
-		uint32_t index_count = 0;
-
-		AABB aabb;
-		struct LOD {
-			float edge_length = 0.0f;
-			Vector<uint8_t> index_data;
-		};
-		Vector<LOD> lods;
-		Vector<AABB> bone_aabbs;
-
-		Vector<PoolVector<uint8_t>> blend_shape_data;
-
-		RID material;
-	};
-
 	virtual RID mesh_create() = 0;
 
 	virtual uint32_t mesh_surface_get_format_offset(uint32_t p_format, int p_vertex_len, int p_index_len, int p_array_index) const;
