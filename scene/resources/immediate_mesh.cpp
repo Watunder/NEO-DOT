@@ -148,154 +148,77 @@ void ImmediateMesh::surface_end() {
 	ERR_FAIL_COND_MSG(!surface_active, "Not creating any surface. Use surface_begin() to do it.");
 	ERR_FAIL_COND_MSG(!vertices.size(), "No vertices were added, surface cant be created.");
 
-	uint32_t format = ARRAY_FORMAT_VERTEX;
+	Vector3 *vertices_data = vertices.ptr();
+	Vector3 *normals_data = normals.ptr();
+	Plane *tangents_data = tangents.ptr();
+	Color *colors_data = colors.ptr();
+	Vector2 *uvs_data = uvs.ptr();
+	Vector2 *uv2s_data = uv2s.ptr();
 
-	uint32_t vertex_stride = 0;
-	if (active_surface_data.vertex_2d) {
-		format |= ARRAY_FLAG_USE_2D_VERTICES;
-		vertex_stride = sizeof(float) * 2;
-	} else {
-		vertex_stride = sizeof(float) * 3;
-	}
-
-	uint32_t normal_offset = 0;
-	if (uses_normals) {
-		format |= ARRAY_FORMAT_NORMAL;
-		normal_offset = vertex_stride;
-		vertex_stride += sizeof(uint32_t);
-	}
-	uint32_t tangent_offset = 0;
-	if (uses_tangents) {
-		format |= ARRAY_FORMAT_TANGENT;
-		tangent_offset += vertex_stride;
-		vertex_stride += sizeof(uint32_t);
-	}
+	PoolVector<Vector3> vertex_array;
+	PoolVector<Vector3> normal_array;
+	PoolVector<real_t> tangent_array;
+	PoolVector<Color> color_array;
+	PoolVector<Vector2> uv_array;
+	PoolVector<Vector2> uv2_array;
 
 	AABB aabb;
+	Array mesh_array;
+	mesh_array.resize(VS::ARRAY_MAX);
 
-	{
-		surface_vertex_create_cache.resize(vertex_stride * vertices.size());
-		uint8_t *surface_vertex_ptr = surface_vertex_create_cache.ptrw();
-		for (uint32_t i = 0; i < vertices.size(); i++) {
-			{
-				float *vtx = (float *)&surface_vertex_ptr[i * vertex_stride];
-				vtx[0] = vertices[i].x;
-				vtx[1] = vertices[i].y;
-				if (!active_surface_data.vertex_2d) {
-					vtx[2] = vertices[i].z;
-				}
-				if (i == 0) {
-					aabb.position = vertices[i];
-				} else {
-					aabb.expand_to(vertices[i]);
-				}
-			}
-			if (uses_normals) {
-				uint32_t *normal = (uint32_t *)&surface_vertex_ptr[i * vertex_stride + normal_offset];
-
-				Vector3 n = normals[i] * Vector3(0.5, 0.5, 0.5) + Vector3(0.5, 0.5, 0.5);
-
-				uint32_t value = 0;
-				value |= CLAMP(int(n.x * 1023.0), 0, 1023);
-				value |= CLAMP(int(n.y * 1023.0), 0, 1023) << 10;
-				value |= CLAMP(int(n.z * 1023.0), 0, 1023) << 20;
-
-				*normal = value;
-			}
-			if (uses_tangents) {
-				uint32_t *tangent = (uint32_t *)&surface_vertex_ptr[i * vertex_stride + tangent_offset];
-				Plane t = tangents[i];
-				uint32_t value = 0;
-				value |= CLAMP(int((t.normal.x * 0.5 + 0.5) * 1023.0), 0, 1023);
-				value |= CLAMP(int((t.normal.y * 0.5 + 0.5) * 1023.0), 0, 1023) << 10;
-				value |= CLAMP(int((t.normal.z * 0.5 + 0.5) * 1023.0), 0, 1023) << 20;
-				if (t.d > 0) {
-					value |= 3 << 30;
-				}
-
-				*tangent = value;
-			}
-		}
-	}
-
-	if (uses_colors || uses_uvs || uses_uv2s) {
-		uint32_t attribute_stride = 0;
-
+	for (uint32_t i = 0; i < vertices.size(); i++) {
 		if (uses_colors) {
-			format |= ARRAY_FORMAT_COLOR;
-			attribute_stride += sizeof(uint16_t) * 4;
+			color_array.push_back(colors_data[i]);
 		}
-		uint32_t uv_offset = 0;
+		if (uses_normals) {
+			normal_array.push_back(normals_data[i]);
+		}
+		if (uses_tangents) {
+			tangent_array.push_back(tangents_data[i].normal.x);
+			tangent_array.push_back(tangents_data[i].normal.y);
+			tangent_array.push_back(tangents_data[i].normal.z);
+			tangent_array.push_back(tangents_data[i].d);
+		}
 		if (uses_uvs) {
-			format |= ARRAY_FORMAT_TEX_UV;
-			uv_offset = attribute_stride;
-			attribute_stride += sizeof(float) * 2;
+			uv_array.push_back(uvs_data[i]);
 		}
-		uint32_t uv2_offset = 0;
 		if (uses_uv2s) {
-			format |= ARRAY_FORMAT_TEX_UV2;
-			uv2_offset = attribute_stride;
-			attribute_stride += sizeof(float) * 2;
+			uv2_array.push_back(uv2s_data[i]);
 		}
-
-		surface_attribute_create_cache.resize(vertices.size() * attribute_stride);
-
-		uint8_t *surface_attribute_ptr = surface_attribute_create_cache.ptrw();
-
-		for (uint32_t i = 0; i < vertices.size(); i++) {
-			if (uses_colors) {
-				uint16_t *color16 = (uint16_t *)&surface_attribute_ptr[i * attribute_stride];
-
-				color16[0] = Math::make_half_float(colors[i].r);
-				color16[1] = Math::make_half_float(colors[i].g);
-				color16[2] = Math::make_half_float(colors[i].b);
-				color16[3] = Math::make_half_float(colors[i].a);
-			}
-			if (uses_uvs) {
-				float *uv = (float *)&surface_attribute_ptr[i * attribute_stride + uv_offset];
-
-				uv[0] = uvs[i].x;
-				uv[0] = uvs[i].y;
-			}
-
-			if (uses_uv2s) {
-				float *uv2 = (float *)&surface_attribute_ptr[i * attribute_stride + uv2_offset];
-
-				uv2[0] = uv2s[i].x;
-				uv2[0] = uv2s[i].y;
-			}
-		}
+		vertex_array.push_back(vertices_data[i]);
 	}
 
-	VS::SurfaceData sd;
+	uint32_t format = ARRAY_FORMAT_VERTEX;
+	if (active_surface_data.vertex_2d) {
+		format |= ARRAY_FLAG_USE_2D_VERTICES;
+	}
+	if (uses_colors) {
+		format |= ARRAY_FORMAT_COLOR;
+		mesh_array[VS::ARRAY_COLOR] = color_array;
+	}
+	if (uses_normals) {
+		format |= ARRAY_FORMAT_NORMAL;
+		mesh_array[VS::ARRAY_NORMAL] = normal_array;
+	}
+	if (uses_tangents) {
+		format |= ARRAY_FORMAT_TANGENT;
+		mesh_array[VS::ARRAY_TANGENT] = tangent_array;
+	}
+	if (uses_uvs) {
+		format |= ARRAY_FORMAT_TEX_UV;
+		mesh_array[VS::ARRAY_TEX_UV] = uv_array;
+	}
+	if (uses_uv2s) {
+		format |= ARRAY_FORMAT_TEX_UV2;
+		mesh_array[VS::ARRAY_TEX_UV2] = uv2_array;
+	}
+	mesh_array[VS::ARRAY_VERTEX] = vertex_array;
 
-	sd.primitive = VS::PrimitiveType(active_surface_data.primitive);
-	sd.format = format;
-	PoolByteArray _sd_vertex_data;
-	for (uint32_t i = 0; i < surface_vertex_create_cache.size(); i++) {
-		_sd_vertex_data.push_back(surface_vertex_create_cache[i]);
-	}
-	sd.vertex_data = _sd_vertex_data;
-	if (uses_colors || uses_uvs || uses_uv2s) {
-		PoolByteArray _sd_attribute_data;
-		for (uint32_t i = 0; i < surface_attribute_create_cache.size(); i++) {
-			_sd_attribute_data.push_back(surface_attribute_create_cache[i]);
-		}
-		sd.attribute_data = _sd_attribute_data;
-	}
-	sd.vertex_count = vertices.size();
-	sd.aabb = aabb;
-	if (active_surface_data.material.is_valid()) {
-		sd.material = active_surface_data.material->get_rid();
-	}
-
-	VS::get_singleton()->mesh_add_surface(mesh, sd.format, sd.primitive, sd.vertex_data, sd.vertex_count, sd.index_data, sd.index_count, sd.aabb, sd.blend_shape_data, sd.bone_aabbs);
+	VS::get_singleton()->mesh_add_surface_from_arrays(mesh, VS::PrimitiveType(active_surface_data.primitive), mesh_array, Array(), (VS::ARRAY_COMPRESS_DEFAULT & ~VS::ARRAY_COMPRESS_TEX_UV) & ~VS::ARRAY_COMPRESS_COLOR);
 
 	active_surface_data.aabb = aabb;
-
 	active_surface_data.format = format;
 	active_surface_data.array_len = vertices.size();
-
 	surfaces.push_back(active_surface_data);
 
 	colors.clear();
