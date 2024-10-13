@@ -226,7 +226,7 @@ void ShaderCompilerGLES2::_dump_function_deps(SL::ShaderNode *p_node, const Stri
 
 		_dump_function_deps(p_node, E->get(), p_func_code, r_to_add, r_added);
 
-		SL::FunctionNode *fnode = NULL;
+		SL::FunctionNode *fnode = nullptr;
 
 		for (int i = 0; i < p_node->functions.size(); i++) {
 			if (p_node->functions[i].name == E->get()) {
@@ -241,20 +241,21 @@ void ShaderCompilerGLES2::_dump_function_deps(SL::ShaderNode *p_node, const Stri
 
 		StringBuffer<128> header;
 
-		header += _typestr(fnode->return_type);
-		header += " ";
-		header += _mkid(fnode->name);
-		header += "(";
+		if (fnode->return_type == SL::TYPE_STRUCT) {
+			header += _mkid(fnode->return_struct_name) + " " + _mkid(fnode->name) + "(";
+		} else {
+			header += _typestr(fnode->return_type) + " " + _mkid(fnode->name) + "(";
+		}
 
 		for (int i = 0; i < fnode->arguments.size(); i++) {
 			if (i > 0)
 				header += ", ";
 
-			header += _qualstr(fnode->arguments[i].qualifier);
-			header += _prestr(fnode->arguments[i].precision);
-			header += _typestr(fnode->arguments[i].type);
-			header += " ";
-			header += _mkid(fnode->arguments[i].name);
+			if (fnode->arguments[i].type == SL::TYPE_STRUCT) {
+				header += _qualstr(fnode->arguments[i].qualifier) + _mkid(fnode->arguments[i].type_str) + " " + _mkid(fnode->arguments[i].name);
+			} else {
+				header += _qualstr(fnode->arguments[i].qualifier) + _prestr(fnode->arguments[i].precision) + _typestr(fnode->arguments[i].type) + " " + _mkid(fnode->arguments[i].name);
+			}
 		}
 
 		header += ")\n";
@@ -310,6 +311,37 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 
 			StringBuilder vertex_global;
 			StringBuilder fragment_global;
+
+			// structs
+			for (int i = 0; i < snode->vstructs.size(); i++) {
+				SL::StructNode *st = snode->vstructs[i].shader_struct;
+				String struct_code;
+				struct_code += "struct ";
+				struct_code += _mkid(snode->vstructs[i].name);
+				struct_code += " ";
+				struct_code += "{\n";
+				for (int j = 0; j < st->members.size(); j++) {
+					SL::MemberNode *m = st->members[j];
+					if (m->datatype == SL::TYPE_STRUCT) {
+						struct_code += _mkid(m->struct_name);
+					} else {
+						struct_code += _prestr(m->precision);
+						struct_code += _typestr(m->datatype);
+					}
+					struct_code += " ";
+					struct_code += m->name;
+					if (m->array_size > 0) {
+						struct_code += "[";
+						struct_code += itos(m->array_size);
+						struct_code += "]";
+					}
+					struct_code += ";\n";
+				}
+				struct_code += "}";
+				struct_code += ";\n";
+				vertex_global += struct_code;
+				fragment_global += struct_code;
+			}
 
 			// uniforms
 
@@ -371,8 +403,12 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 			for (int i = 0; i < snode->vconstants.size(); i++) {
 				String gcode;
 				gcode += "const ";
-				gcode += _prestr(snode->vconstants[i].precision);
-				gcode += _typestr(snode->vconstants[i].type);
+				if (snode->vconstants[i].type == SL::TYPE_STRUCT) {
+					gcode += _mkid(snode->vconstants[i].type_str);
+				} else {
+					gcode += _prestr(snode->vconstants[i].precision);
+					gcode += _typestr(snode->vconstants[i].type);
+				}
 				gcode += " " + _mkid(String(snode->vconstants[i].name));
 				gcode += "=";
 				gcode += _dump_node_code(snode->vconstants[i].initializer, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
@@ -418,9 +454,9 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 			r_gen_code.fragment_global = fragment_global.as_string();
 
 		} break;
-
+		case SL::Node::TYPE_STRUCT: {
+		} break;
 		case SL::Node::TYPE_FUNCTION: {
-
 		} break;
 
 		case SL::Node::TYPE_BLOCK: {
@@ -457,8 +493,12 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 			if (var_dec_node->is_const) {
 				declaration += "const ";
 			}
-			declaration += _prestr(var_dec_node->precision);
-			declaration += _typestr(var_dec_node->datatype);
+			if (var_dec_node->datatype == SL::TYPE_STRUCT) {
+				declaration += _mkid(var_dec_node->struct_name);
+			} else {
+				declaration += _prestr(var_dec_node->precision);
+				declaration += _typestr(var_dec_node->datatype);
+			}
 
 			for (int i = 0; i < var_dec_node->declarations.size(); i++) {
 
@@ -520,13 +560,37 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				}
 			}
 		} break;
+		case SL::Node::TYPE_ARRAY_CONSTRUCT: {
+			SL::ArrayConstructNode *arr_con_node = (SL::ArrayConstructNode *)p_node;
+			int sz = arr_con_node->initializer.size();
+			if (arr_con_node->datatype == SL::TYPE_STRUCT) {
+				code += _mkid(arr_con_node->struct_name);
+			} else {
+				code += _typestr(arr_con_node->datatype);
+			}
+			code += "[";
+			code += itos(arr_con_node->initializer.size());
+			code += "]";
+			code += "(";
+			for (int i = 0; i < sz; i++) {
+				code += _dump_node_code(arr_con_node->initializer[i], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+				if (i != sz - 1) {
+					code += ", ";
+				}
+			}
+			code += ")";
+		} break;
 		case SL::Node::TYPE_ARRAY_DECLARATION: {
 
 			SL::ArrayDeclarationNode *arr_dec_node = (SL::ArrayDeclarationNode *)p_node;
 
 			StringBuffer<> declaration;
-			declaration += _prestr(arr_dec_node->precision);
-			declaration += _typestr(arr_dec_node->datatype);
+			if (arr_dec_node->datatype == SL::TYPE_STRUCT) {
+				declaration += _mkid(arr_dec_node->struct_name);
+			} else {
+				declaration += _prestr(arr_dec_node->precision);
+				declaration += _typestr(arr_dec_node->datatype);
+			}
 
 			for (int i = 0; i < arr_dec_node->declarations.size(); i++) {
 
@@ -576,12 +640,12 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				code += _mkid(arr_node->name);
 			}
 
-			if (arr_node->call_expression != NULL) {
+			if (arr_node->call_expression != nullptr) {
 				code += ".";
 				code += _dump_node_code(arr_node->call_expression, p_level, r_gen_code, p_actions, p_default_actions, p_assigning, false);
 			}
 
-			if (arr_node->index_expression != NULL) {
+			if (arr_node->index_expression != nullptr) {
 				code += "[";
 				code += _dump_node_code(arr_node->index_expression, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 				code += "]";
@@ -647,12 +711,15 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				} break;
 
 				case SL::OP_CALL:
+				case SL::OP_STRUCT:
 				case SL::OP_CONSTRUCT: {
 					ERR_FAIL_COND_V(op_node->arguments[0]->type != SL::Node::TYPE_VARIABLE, String());
 
 					SL::VariableNode *var_node = (SL::VariableNode *)op_node->arguments[0];
 
-					if (op_node->op == SL::OP_CONSTRUCT) {
+					if (op_node->op == SL::OP_STRUCT) {
+						code += _mkid(var_node->name);
+					} else if (op_node->op == SL::OP_CONSTRUCT) {
 						code += var_node->name;
 					} else {
 
@@ -853,6 +920,11 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 			code += _dump_node_code(member_node->owner, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 			code += ".";
 			code += member_node->name;
+			if (member_node->index_expression != nullptr) {
+				code += "[";
+				code += _dump_node_code(member_node->index_expression, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+				code += "]";
+			}
 		} break;
 	}
 
@@ -870,7 +942,7 @@ Error ShaderCompilerGLES2::compile(VS::ShaderMode p_mode, const String &p_code, 
 			print_line(itos(i + 1) + " " + shader[i]);
 		}
 
-		_err_print_error(NULL, p_path.utf8().get_data(), parser.get_error_line(), parser.get_error_text().utf8().get_data(), ERR_HANDLER_SHADER);
+		_err_print_error(nullptr, p_path.utf8().get_data(), parser.get_error_line(), parser.get_error_text().utf8().get_data(), ERR_HANDLER_SHADER);
 		return err;
 	}
 
