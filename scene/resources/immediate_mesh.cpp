@@ -144,7 +144,7 @@ void ImmediateMesh::surface_add_vertex_2d(const Vector2 &p_vertex) {
 
 	active_surface_data.vertex_2d = true;
 }
-void ImmediateMesh::surface_end() {
+void ImmediateMesh::surface_end(const Array &p_indices) {
 	ERR_FAIL_COND_MSG(!surface_active, "Not creating any surface. Use surface_begin() to do it.");
 	ERR_FAIL_COND_MSG(!vertices.size(), "No vertices were added, surface cant be created.");
 
@@ -156,11 +156,28 @@ void ImmediateMesh::surface_end() {
 	Vector2 *uv2s_data = uv2s.ptr();
 
 	PoolVector<Vector3> vertex_array;
+	vertex_array.resize(vertices.size());
+	PoolVector<Vector3>::Write vertex_array_write = vertex_array.write();
+
 	PoolVector<Vector3> normal_array;
+	normal_array.resize(vertices.size());
+	PoolVector<Vector3>::Write normal_array_write = normal_array.write();
+
 	PoolVector<real_t> tangent_array;
+	tangent_array.resize(vertices.size() * 4);
+	PoolVector<real_t>::Write tangent_array_write = tangent_array.write();
+
 	PoolVector<Color> color_array;
+	color_array.resize(vertices.size());
+	PoolVector<Color>::Write color_array_write = color_array.write();
+
 	PoolVector<Vector2> uv_array;
+	uv_array.resize(vertices.size());
+	PoolVector<Vector2>::Write uv_array_write = uv_array.write();
+
 	PoolVector<Vector2> uv2_array;
+	uv2_array.resize(vertices.size());
+	PoolVector<Vector2>::Write uv2_array_write = uv2_array.write();
 
 	AABB aabb;
 	Array mesh_array;
@@ -168,24 +185,24 @@ void ImmediateMesh::surface_end() {
 
 	for (uint32_t i = 0; i < vertices.size(); i++) {
 		if (uses_colors) {
-			color_array.push_back(colors_data[i]);
+			color_array_write[i] = colors_data[i];
 		}
 		if (uses_normals) {
-			normal_array.push_back(normals_data[i]);
+			normal_array_write[i] = normals_data[i];
 		}
 		if (uses_tangents) {
-			tangent_array.push_back(tangents_data[i].normal.x);
-			tangent_array.push_back(tangents_data[i].normal.y);
-			tangent_array.push_back(tangents_data[i].normal.z);
-			tangent_array.push_back(tangents_data[i].d);
+			tangent_array_write[i * 4 + 0] = tangents_data[i].normal.x;
+			tangent_array_write[i * 4 + 1] = tangents_data[i].normal.y;
+			tangent_array_write[i * 4 + 2] = tangents_data[i].normal.z;
+			tangent_array_write[i * 4 + 3] = tangents_data[i].d;
 		}
 		if (uses_uvs) {
-			uv_array.push_back(uvs_data[i]);
+			uv_array_write[i] = uvs_data[i];
 		}
 		if (uses_uv2s) {
-			uv2_array.push_back(uv2s_data[i]);
+			uv2_array_write[i] = uv2s_data[i];
 		}
-		vertex_array.push_back(vertices_data[i]);
+		vertex_array_write[i] = vertices_data[i];
 		if (i == 0) {
 			aabb.position = vertices_data[i];
 		} else {
@@ -218,6 +235,15 @@ void ImmediateMesh::surface_end() {
 		mesh_array[VS::ARRAY_TEX_UV2] = uv2_array;
 	}
 	mesh_array[VS::ARRAY_VERTEX] = vertex_array;
+	if (p_indices.size() > 0) {
+		PoolVector<int> indices_array;
+		indices_array.resize(p_indices.size());
+		PoolVector<int>::Write indices_array_write = indices_array.write();
+		for (uint32_t i = 0; i < p_indices.size(); i++) {
+			indices_array_write[i] = p_indices[i];
+		}
+		mesh_array[VS::ARRAY_INDEX] = indices_array;
+	}
 
 	VS::get_singleton()->mesh_add_surface_from_arrays(mesh, VS::PrimitiveType(active_surface_data.primitive), mesh_array, Array(), (VS::ARRAY_COMPRESS_DEFAULT & ~VS::ARRAY_COMPRESS_TEX_UV) & ~VS::ARRAY_COMPRESS_COLOR);
 
@@ -335,7 +361,7 @@ void ImmediateMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("surface_set_uv2", "uv2"), &ImmediateMesh::surface_set_uv2);
 	ClassDB::bind_method(D_METHOD("surface_add_vertex", "vertex"), &ImmediateMesh::surface_add_vertex);
 	ClassDB::bind_method(D_METHOD("surface_add_vertex_2d", "vertex"), &ImmediateMesh::surface_add_vertex_2d);
-	ClassDB::bind_method(D_METHOD("surface_end"), &ImmediateMesh::surface_end);
+	ClassDB::bind_method(D_METHOD("surface_end", "indices"), &ImmediateMesh::surface_end, DEFVAL(Array()));
 
 	ClassDB::bind_method(D_METHOD("clear_surfaces"), &ImmediateMesh::clear_surfaces);
 }
