@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ImmediateMesh" inherits="Mesh" version="4.0">
+<class name="ImmediateMesh" inherits="Mesh" version="3.3">
 	<brief_description>
 		Mesh optimized for creating geometry manually.
 	</brief_description>
@@ -48,6 +48,7 @@
 		<method name="surface_end">
 			<return type="void">
 			</return>
+			<argument index="0" name="indices" type="Array" default="[  ]" />
 			<description>
 				End and commit current surface. Note that surface being created will not be visible until this function is called.
 			</description>
