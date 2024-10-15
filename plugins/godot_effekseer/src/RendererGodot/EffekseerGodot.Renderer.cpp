@@ -811,11 +811,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 		const SimpleVertex* vertices = (const SimpleVertex*)vertexData;
 		for (int32_t i = 0; i < spriteCount; i++)
 		{
-			// Generate degenerate triangles
-			mesh->surface_set_color(godot::Color());
-			mesh->surface_set_uv(godot::Vector2());
-			mesh->surface_add_vertex(ConvertVector3(vertices[i * 4 + 0].Pos));
-
 			for (int32_t j = 0; j < 4; j++)
 			{
 				auto& v = vertices[i * 4 + j];
@@ -823,10 +818,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 				mesh->surface_set_uv(ConvertUV(v.UV));
 				mesh->surface_add_vertex(ConvertVector3(v.Pos));
 			}
-
-			mesh->surface_set_color(godot::Color());
-			mesh->surface_set_uv(godot::Vector2());
-			mesh->surface_add_vertex(ConvertVector3(vertices[i * 4 + 3].Pos));
 		}
 	}
 	else if (shaderType == RendererShaderType::BackDistortion || shaderType == RendererShaderType::Lit)
@@ -834,13 +825,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 		const LightingVertex* vertices = (const LightingVertex*)vertexData;
 		for (int32_t i = 0; i < spriteCount; i++)
 		{
-			// Generate degenerate triangles
-			mesh->surface_set_color(godot::Color());
-			mesh->surface_set_uv(godot::Vector2());
-			mesh->surface_set_normal(godot::Vector3());
-			mesh->surface_set_tangent(godot::Plane());
-			mesh->surface_add_vertex(ConvertVector3(vertices[i * 4 + 0].Pos));
-
 			for (int32_t j = 0; j < 4; j++)
 			{
 				auto& v = vertices[i * 4 + j];
@@ -850,12 +834,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 				mesh->surface_set_tangent(ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
 				mesh->surface_add_vertex(ConvertVector3(v.Pos));
 			}
-
-			mesh->surface_set_color(godot::Color());
-			mesh->surface_set_uv(godot::Vector2());
-			mesh->surface_set_normal(godot::Vector3());
-			mesh->surface_set_tangent(godot::Plane());
-			mesh->surface_add_vertex(ConvertVector3(vertices[i * 4 + 3].Pos));
 		}
 	}
 	else if (shaderType == RendererShaderType::Material)
@@ -874,14 +852,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 			
 			for (int32_t i = 0; i < spriteCount; i++)
 			{
-				// Generate degenerate triangles
-				mesh->surface_set_color(godot::Color());
-				mesh->surface_set_uv(godot::Vector2());
-				mesh->surface_set_uv2(godot::Vector2());
-				mesh->surface_set_normal(godot::Vector3());
-				mesh->surface_set_tangent(godot::Plane());
-				mesh->surface_add_vertex(ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
-
 				for (int32_t j = 0; j < 4; j++)
 				{
 					auto& v = *(const DynamicVertex*)vertexPtr;
@@ -896,13 +866,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 					if (customData1TexPtr) CopyCustomData(customData1TexPtr, vertexPtr, customData1Count);
 					if (customData2TexPtr) CopyCustomData(customData2TexPtr, vertexPtr, customData2Count);
 				}
-
-				mesh->surface_set_color(godot::Color());
-				mesh->surface_set_uv(godot::Vector2());
-				mesh->surface_set_uv2(godot::Vector2());
-				mesh->surface_set_normal(godot::Vector3());
-				mesh->surface_set_tangent(godot::Plane());
-				mesh->surface_add_vertex(ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
 			}
 
 			if (customData1TexPtr) m_customData1Texture.Unlock();
@@ -914,13 +877,6 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 			const uint8_t* vertexPtr = (const uint8_t*)vertexData;
 			for (int32_t i = 0; i < spriteCount; i++)
 			{
-				// Generate degenerate triangles
-				mesh->surface_set_color(godot::Color());
-				mesh->surface_set_uv(godot::Vector2());
-				mesh->surface_set_normal(godot::Vector3());
-				mesh->surface_set_tangent(godot::Plane());
-				mesh->surface_add_vertex(ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
-
 				for (int32_t j = 0; j < 4; j++)
 				{
 					auto& v = *(const DynamicVertex*)vertexPtr;
@@ -931,17 +887,29 @@ void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh,
 					mesh->surface_add_vertex(ConvertVector3(v.Pos));
 					vertexPtr += sizeof(DynamicVertex);
 				}
-
-				mesh->surface_set_color(godot::Color());
-				mesh->surface_set_uv(godot::Vector2());
-				mesh->surface_set_normal(godot::Vector3());
-				mesh->surface_set_tangent(godot::Plane());
-				mesh->surface_add_vertex(ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
 			}
 		}
 	}
 
-	mesh->surface_end();
+	// Generate index data
+
+	godot::PoolIntArray indexArray;
+	indexArray.resize(spriteCount * 6);
+	{
+		int* indices = indexArray.write().ptr();
+
+		for (int32_t i = 0; i < spriteCount; i++)
+		{
+			indices[i * 6 + 0] = i * 4 + 0;
+			indices[i * 6 + 1] = i * 4 + 0;
+			indices[i * 6 + 2] = i * 4 + 1;
+			indices[i * 6 + 3] = i * 4 + 2;
+			indices[i * 6 + 4] = i * 4 + 3;
+			indices[i * 6 + 5] = i * 4 + 3;
+		}
+	}
+
+	mesh->surface_end(indexArray);
 }
 
 void Renderer::TransferVertexToCanvasItem2D(godot::RID canvas_item, 
