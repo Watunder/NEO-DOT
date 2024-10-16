@@ -1801,13 +1801,18 @@ void Control::set_global_position(const Point2 &p_point, bool p_keep_margins) {
 void Control::_compute_anchors(Rect2 p_rect, const float p_margins[4], float (&r_anchors)[4]) {
 
 	Size2 parent_rect_size = get_parent_anchorable_rect().size;
-	ERR_FAIL_COND(parent_rect_size.x == 0.0);
-	ERR_FAIL_COND(parent_rect_size.y == 0.0);
+	Control *control = Object::cast_to<Control>(data.parent_canvas_item);
+	if (control) {
+		ERR_FAIL_COND(parent_rect_size.x == 0.0);
+		ERR_FAIL_COND(parent_rect_size.y == 0.0);
 
-	r_anchors[0] = (p_rect.position.x - p_margins[0]) / parent_rect_size.x;
-	r_anchors[1] = (p_rect.position.y - p_margins[1]) / parent_rect_size.y;
-	r_anchors[2] = (p_rect.position.x + p_rect.size.x - p_margins[2]) / parent_rect_size.x;
-	r_anchors[3] = (p_rect.position.y + p_rect.size.y - p_margins[3]) / parent_rect_size.y;
+		r_anchors[0] = (p_rect.position.x - p_margins[0]) / parent_rect_size.x;
+		r_anchors[1] = (p_rect.position.y - p_margins[1]) / parent_rect_size.y;
+		r_anchors[2] = (p_rect.position.x + p_rect.size.x - p_margins[2]) / parent_rect_size.x;
+		r_anchors[3] = (p_rect.position.y + p_rect.size.y - p_margins[3]) / parent_rect_size.y;
+	} else {
+		WARN_PRINT("Cannot get a vaild anchor rect from the parent node");
+	}
 }
 
 void Control::_compute_margins(Rect2 p_rect, const float p_anchors[4], float (&r_margins)[4]) {
