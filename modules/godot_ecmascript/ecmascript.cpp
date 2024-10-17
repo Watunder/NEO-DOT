@@ -28,6 +28,7 @@ StringName ECMAScript::get_instance_base_type() const {
 	static StringName empty;
 	ERR_FAIL_NULL_V(ecma_class, empty);
 	ERR_FAIL_NULL_V(ecma_class->native_class, empty);
+
 	return ecma_class->native_class->name;
 }
 
@@ -35,13 +36,16 @@ ScriptInstance *ECMAScript::instance_create(Object *p_this) {
 
 	ECMAScriptBinder *binder = ECMAScriptLanguage::get_thread_binder(Thread::get_caller_id());
 	ERR_FAIL_NULL_V_MSG(binder, NULL, "Cannot create instance from this thread");
+
 	const ECMAClassInfo *cls = NULL;
 	ECMAscriptScriptError ecma_err;
+
 	if (!bytecode.empty()) {
 		cls = binder->parse_ecma_class(bytecode, script_path, false, &ecma_err);
 	} else {
 		cls = binder->parse_ecma_class(code, script_path, false, &ecma_err);
 	}
+
 	ERR_FAIL_NULL_V_MSG(cls, NULL, vformat("Cannot parse class from %s", get_script_path()));
 
 	if (!ClassDB::is_parent_class(p_this->get_class_name(), cls->native_class->name)) {
@@ -59,6 +63,7 @@ ScriptInstance *ECMAScript::instance_create(Object *p_this) {
 	instance->ecma_class = cls;
 	instance->owner->set_script_instance(instance);
 	instances.insert(p_this);
+
 	return instance;
 }
 
@@ -84,10 +89,14 @@ bool ECMAScript::is_placeholder_fallback_enabled() const {
 
 Error ECMAScript::reload(bool p_keep_state) {
 	ecma_class = NULL;
+
 	Error err = OK;
+
 	ECMAScriptBinder *binder = ECMAScriptLanguage::get_thread_binder(Thread::get_caller_id());
 	ERR_FAIL_COND_V_MSG(binder == NULL, ERR_INVALID_DATA, "Cannot load script in this thread");
+
 	ECMAscriptScriptError ecma_err;
+
 	if (!bytecode.empty()) {
 		ecma_class = binder->parse_ecma_class(bytecode, script_path, true, &ecma_err);
 	} else {
@@ -125,6 +134,7 @@ Error ECMAScript::reload(bool p_keep_state) {
 				owner->set_script_instance(psi);
 				instances.insert(owner);
 			}
+
 			if (ecma_class->tool) { // re-create as an instance
 				instance_create(owner);
 			}
@@ -242,16 +252,25 @@ void ECMAScript::_bind_methods() {
 
 RES ResourceFormatLoaderECMAScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	Error err = OK;
+
 	Ref<ECMAScriptModule> module = ResourceFormatLoaderECMAScriptModule::load_static(p_path, p_original_path, &err);
-	if (r_error) *r_error = err;
+
+	if (r_error)
+		*r_error = err;
+
 	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load script file '" + p_path + "'.");
+
 	Ref<ECMAScript> script;
 	script.instance();
 	script->set_script_path(p_path);
 	script->bytecode = module->get_bytecode();
 	script->set_source_code(module->get_source_code());
+
 	err = script->reload();
-	if (r_error) *r_error = err;
+
+	if (r_error)
+		*r_error = err;
+
 	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Parse source code from file '" + p_path + "' failed.");
 #ifdef TOOLS_ENABLED
 	ECMAScriptLanguage::get_singleton()->get_scripts().insert(script);
@@ -280,20 +299,23 @@ String ResourceFormatLoaderECMAScript::get_resource_type(const String &p_path) c
 }
 
 Error ResourceFormatSaverECMAScript::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
-
 	Ref<ECMAScript> script = p_resource;
 	ERR_FAIL_COND_V(script.is_null(), ERR_INVALID_PARAMETER);
 
 	String source = script->get_source_code();
 
 	Error err;
-	FileAccessRef file = FileAccess::open(p_path, FileAccess::WRITE, &err);
+	FileAccess *file = FileAccess::open(p_path, FileAccess::WRITE, &err);
+
 	ERR_FAIL_COND_V_MSG(err, err, "Cannot save file '" + p_path + "'.");
+
 	file->store_string(source);
 	if (file->get_error() != OK && file->get_error() != ERR_FILE_EOF) {
+		memdelete(file);
 		return ERR_CANT_CREATE;
 	}
 	file->close();
+	memdelete(file);
 
 	if (ScriptServer::is_reload_scripts_on_save_enabled()) {
 		script->reload();
@@ -327,7 +349,77 @@ ECMAScriptModule::ECMAScriptModule() {
 }
 
 RES ResourceFormatLoaderECMAScriptModule::load(const String &p_path, const String &p_original_path, Error *r_error) {
-	return load_static(p_path, p_original_path, r_error);
+	return ResourceFormatLoaderECMAScriptModule::load_static(p_path, p_original_path, r_error);
+}
+
+RES ResourceFormatLoaderECMAScriptModule::load_static(const String &p_path, const String &p_original_path, Error *r_error) {
+	Error err = ERR_FILE_CANT_OPEN;
+
+	Ref<ECMAScriptModule> module;
+	module.instance();
+	module->set_script_path(p_path);
+
+	if (p_path.ends_with("." EXT_JSMODULE) || p_path.ends_with("." EXT_JSCLASS) || p_path.ends_with("." EXT_JSON)) {
+		String code = FileAccess::get_file_as_string(p_path, &err);
+
+		if (r_error)
+			*r_error = err;
+
+		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load source code from file '" + p_path + "'.");
+
+		module->set_source_code(code);
+	} else if (p_path.ends_with("." EXT_JSMODULE_BYTECODE) || p_path.ends_with("." EXT_JSCLASS_BYTECODE)) {
+		module->set_bytecode(FileAccess::get_file_as_array(p_path, &err));
+
+		if (r_error)
+			*r_error = err;
+
+		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load bytecode from file '" + p_path + "'.");
+	} else if (p_path.ends_with("." EXT_JSMODULE_ENCRYPTED) || p_path.ends_with("." EXT_JSCLASS_ENCRYPTED)) {
+		FileAccess *fa = FileAccess::open(p_path, FileAccess::READ);
+		if (fa->is_open()) {
+			FileAccessEncrypted *fae = memnew(FileAccessEncrypted);
+
+			Vector<uint8_t> key;
+			key.resize(32);
+			for (int i = 0; i < key.size(); i++) {
+				key.write[i] = script_encryption_key[i];
+			}
+
+			err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_READ);
+			if (err == OK) {
+				Vector<uint8_t> encrypted_code;
+				encrypted_code.resize(fae->get_len());
+				fae->get_buffer(encrypted_code.ptrw(), encrypted_code.size());
+
+				String code;
+				if (code.parse_utf8((const char *)encrypted_code.ptr(), encrypted_code.size())) {
+					err = ERR_PARSE_ERROR;
+				} else {
+					module->set_source_code(code);
+				}
+
+				fa->close();
+				memdelete(fa);
+				fae->close();
+				memdelete(fae);
+			} else {
+				fa->close();
+				memdelete(fa);
+				fae->close();
+				memdelete(fae);
+			}
+		} else {
+			err = ERR_CANT_OPEN;
+		}
+	}
+
+	if (r_error)
+		*r_error = err;
+
+	ERR_FAIL_COND_V(err != OK, RES());
+
+	return module;
 }
 
 void ResourceFormatLoaderECMAScriptModule::get_recognized_extensions(List<String> *p_extensions) const {
@@ -350,71 +442,24 @@ String ResourceFormatLoaderECMAScriptModule::get_resource_type(const String &p_p
 	return "";
 }
 
-RES ResourceFormatLoaderECMAScriptModule::load_static(const String &p_path, const String &p_original_path, Error *r_error) {
-	Error err = ERR_FILE_CANT_OPEN;
-	Ref<ECMAScriptModule> module;
-	module.instance();
-	module->set_script_path(p_path);
-	if (p_path.ends_with("." EXT_JSMODULE) || p_path.ends_with("." EXT_JSCLASS) || p_path.ends_with("." EXT_JSON)) {
-		String code = FileAccess::get_file_as_string(p_path, &err);
-		if (r_error) *r_error = err;
-		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load source code from file '" + p_path + "'.");
-		module->set_source_code(code);
-	} else if (p_path.ends_with("." EXT_JSMODULE_BYTECODE) || p_path.ends_with("." EXT_JSCLASS_BYTECODE)) {
-		module->set_bytecode(FileAccess::get_file_as_array(p_path, &err));
-		if (r_error) *r_error = err;
-		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load bytecode from file '" + p_path + "'.");
-	} else if (p_path.ends_with("." EXT_JSMODULE_ENCRYPTED) || p_path.ends_with("." EXT_JSCLASS_ENCRYPTED)) {
-		FileAccess *fa = FileAccess::open(p_path, FileAccess::READ);
-		if (fa->is_open()) {
-			FileAccessEncrypted *fae = memnew(FileAccessEncrypted);
-			Vector<uint8_t> key;
-			key.resize(32);
-			for (int i = 0; i < key.size(); i++) {
-				key.write[i] = script_encryption_key[i];
-			}
-			err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_READ);
-			if (err == OK) {
-				Vector<uint8_t> encrypted_code;
-				encrypted_code.resize(fae->get_len());
-				fae->get_buffer(encrypted_code.ptrw(), encrypted_code.size());
-
-				String code;
-				if (code.parse_utf8((const char *)encrypted_code.ptr(), encrypted_code.size())) {
-					err = ERR_PARSE_ERROR;
-				} else {
-					module->set_source_code(code);
-				}
-				fa->close();
-				fae->close();
-				memdelete(fae);
-			} else {
-				fa->close();
-				fae->close();
-				memdelete(fae);
-				memdelete(fa);
-			}
-		} else {
-			err = ERR_CANT_OPEN;
-		}
-	}
-	if (r_error) *r_error = err;
-	ERR_FAIL_COND_V(err != OK, RES());
-	return module;
-}
-
 Error ResourceFormatSaverECMAScriptModule::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
 	Ref<ECMAScriptModule> module = p_resource;
 	ERR_FAIL_COND_V(module.is_null(), ERR_INVALID_PARAMETER);
+
 	String source = module->get_source_code();
+
 	Error err;
-	FileAccessRef file = FileAccess::open(p_path, FileAccess::WRITE, &err);
+	FileAccess *file = FileAccess::open(p_path, FileAccess::WRITE, &err);
 	ERR_FAIL_COND_V_MSG(err, err, "Cannot save file '" + p_path + "'.");
+
 	file->store_string(source);
 	if (file->get_error() != OK && file->get_error() != ERR_FILE_EOF) {
+		memdelete(file);
 		return ERR_CANT_CREATE;
 	}
 	file->close();
+	memdelete(file);
+
 	return OK;
 }
 

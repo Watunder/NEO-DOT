@@ -34,7 +34,7 @@ public:
 		return NULL;
 	}
 
-	_FORCE_INLINE_ virtual String get_name() const { return "JavaScript"; }
+	_FORCE_INLINE_ virtual String get_name() const { return "ECMAScript"; }
 	_FORCE_INLINE_ int get_language_index() const { return language_index; }
 	_FORCE_INLINE_ void set_language_index(int value) { language_index = value; }
 
@@ -43,7 +43,7 @@ public:
 #endif
 	/* LANGUAGE FUNCTIONS */
 
-	_FORCE_INLINE_ virtual String get_type() const { return "JavaScript"; }
+	_FORCE_INLINE_ virtual String get_type() const { return "ECMAScript"; }
 	_FORCE_INLINE_ virtual String get_extension() const { return EXT_JSCLASS; }
 	_FORCE_INLINE_ virtual bool has_named_classes() const { return true; }
 	_FORCE_INLINE_ virtual bool supports_builtin_mode() const { return false; }

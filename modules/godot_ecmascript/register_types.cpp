@@ -33,11 +33,11 @@
 #include "ecmascript_language.h"
 
 #ifdef TOOLS_ENABLED
+
 #include "core/io/file_access_encrypted.h"
 #include "editor/editor_export.h"
 #include "editor/editor_node.h"
 #include "tools/editor_tools.h"
-void editor_init_callback();
 
 class EditorExportECMAScript : public EditorExportPlugin {
 
@@ -107,18 +107,27 @@ public:
 			DirAccess::remove_file_or_error(tmp_path);
 
 		} else {
-#if 0 // Disable compile to bytecode as it is not battle tested on all platform
-			Error err;
-			String code = FileAccess::get_file_as_string(p_path, &err);
-			ERR_FAIL_COND(err != OK);
+			// Disable compile to bytecode as it is not battle tested on all platform
 
-			Vector<uint8_t> file;
-			ERR_FAIL_COND(ECMAScriptLanguage::get_singleton()->get_main_binder()->compile_to_bytecode(code, p_path, file) != OK);
-			add_file(p_path.get_basename() + "." + extension + "b", file, true);
-#endif
+			// Error err;
+			// String code = FileAccess::get_file_as_string(p_path, &err);
+			// ERR_FAIL_COND(err != OK);
+
+			// Vector<uint8_t> file;
+			// ERR_FAIL_COND(ECMAScriptLanguage::get_singleton()->get_main_binder()->compile_to_bytecode(code, p_path, file) != OK);
+			// add_file(p_path.get_basename() + "." + extension + "b", file, true);
 		}
 	}
 };
+
+void editor_init_callback() {
+	ECMAScriptPlugin *plugin = memnew(ECMAScriptPlugin(EditorNode::get_singleton()));
+	EditorNode::get_singleton()->add_editor_plugin(plugin);
+
+	Ref<EditorExportECMAScript> js_export;
+	js_export.instance();
+	EditorExport::get_singleton()->add_export_plugin(js_export);
+}
 
 #endif
 
@@ -126,7 +135,7 @@ Ref<ResourceFormatLoaderECMAScript> resource_loader_ecmascript;
 Ref<ResourceFormatSaverECMAScript> resource_saver_ecmascript;
 Ref<ResourceFormatLoaderECMAScriptModule> resource_loader_ecmascript_module;
 Ref<ResourceFormatSaverECMAScriptModule> resource_saver_ecmascript_module;
-static ECMAScriptLanguage *script_language_js = NULL;
+static ECMAScriptLanguage *script_language_ecma = NULL;
 
 void register_godot_ecmascript_types() {
 
@@ -143,9 +152,9 @@ void register_godot_ecmascript_types() {
 	ResourceLoader::add_resource_format_loader(resource_loader_ecmascript_module, true);
 	ResourceSaver::add_resource_format_saver(resource_saver_ecmascript_module, true);
 
-	script_language_js = memnew(ECMAScriptLanguage);
-	script_language_js->set_language_index(ScriptServer::get_language_count());
-	ScriptServer::register_language(script_language_js);
+	script_language_ecma = memnew(ECMAScriptLanguage);
+	script_language_ecma->set_language_index(ScriptServer::get_language_count());
+	ScriptServer::register_language(script_language_ecma);
 
 #ifdef TOOLS_ENABLED
 	EditorNode::add_init_callback(editor_init_callback);
@@ -153,8 +162,8 @@ void register_godot_ecmascript_types() {
 }
 
 void unregister_godot_ecmascript_types() {
-	ScriptServer::unregister_language(script_language_js);
-	memdelete(script_language_js);
+	ScriptServer::unregister_language(script_language_ecma);
+	memdelete(script_language_ecma);
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_ecmascript);
 	ResourceSaver::remove_resource_format_saver(resource_saver_ecmascript);
@@ -166,14 +175,3 @@ void unregister_godot_ecmascript_types() {
 	resource_loader_ecmascript_module.unref();
 	resource_saver_ecmascript_module.unref();
 }
-
-#ifdef TOOLS_ENABLED
-void editor_init_callback() {
-	ECMAScriptPlugin *plugin = memnew(ECMAScriptPlugin(EditorNode::get_singleton()));
-	EditorNode::get_singleton()->add_editor_plugin(plugin);
-
-	Ref<EditorExportECMAScript> js_export;
-	js_export.instance();
-	EditorExport::get_singleton()->add_export_plugin(js_export);
-}
-#endif

@@ -16,6 +16,7 @@
 #define EXT_JSON "json"
 
 class ECMAScript : public Script {
+
 	GDCLASS(ECMAScript, Script);
 
 private:
@@ -87,26 +88,10 @@ public:
 	virtual ~ECMAScript();
 };
 
-class ResourceFormatLoaderECMAScript : public ResourceFormatLoader {
-	GDCLASS(ResourceFormatLoaderECMAScript, ResourceFormatLoader)
-public:
-	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
-	virtual void get_recognized_extensions(List<String> *p_extensions) const;
-	virtual void get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const;
-	virtual bool handles_type(const String &p_type) const;
-	virtual String get_resource_type(const String &p_path) const;
-};
-
-class ResourceFormatSaverECMAScript : public ResourceFormatSaver {
-	GDCLASS(ResourceFormatSaverECMAScript, ResourceFormatSaver)
-public:
-	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
-	virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const;
-	virtual bool recognize(const RES &p_resource) const;
-};
-
 class ECMAScriptModule : public TextFile {
-	GDCLASS(ECMAScriptModule, Resource)
+
+	GDCLASS(ECMAScriptModule, Resource);
+
 protected:
 	static void _bind_methods();
 	String script_path;
@@ -122,8 +107,23 @@ public:
 	ECMAScriptModule();
 };
 
+class ResourceFormatLoaderECMAScript : public ResourceFormatLoader {
+public:
+	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
+	virtual void get_recognized_extensions(List<String> *p_extensions) const;
+	virtual void get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const;
+	virtual bool handles_type(const String &p_type) const;
+	virtual String get_resource_type(const String &p_path) const;
+};
+
+class ResourceFormatSaverECMAScript : public ResourceFormatSaver {
+public:
+	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
+	virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const;
+	virtual bool recognize(const RES &p_resource) const;
+};
+
 class ResourceFormatLoaderECMAScriptModule : public ResourceFormatLoader {
-	GDCLASS(ResourceFormatLoaderECMAScriptModule, ResourceFormatLoader)
 public:
 	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
@@ -135,7 +135,6 @@ public:
 };
 
 class ResourceFormatSaverECMAScriptModule : public ResourceFormatSaver {
-	GDCLASS(ResourceFormatSaverECMAScriptModule, ResourceFormatSaver)
 public:
 	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
 	virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const;

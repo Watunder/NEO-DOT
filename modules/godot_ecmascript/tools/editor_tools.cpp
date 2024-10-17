@@ -63,7 +63,6 @@ void ECMAScriptPlugin::_on_menu_item_pressed(int item) {
 }
 
 ECMAScriptPlugin::ECMAScriptPlugin(EditorNode *p_node) {
-
 	PopupMenu *menu = memnew(PopupMenu);
 	add_tool_submenu_item(TTR("ECMAScript"), menu);
 	menu->add_item(TTR("Generate TypeScript Declaration File"), ITEM_GEN_DECLARE_FILE);

@@ -15,6 +15,7 @@ typedef SSIZE_T ssize_t;
 /* GODOT END */
 
 class QuickJSDebugger : public Reference {
+	
 	GDCLASS(QuickJSDebugger, Reference)
 
 	Ref<StreamPeerTCP> peer;
