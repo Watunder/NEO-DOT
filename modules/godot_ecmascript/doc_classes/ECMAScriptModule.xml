@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ECMAScriptModule" inherits="Resource" version="3.3">
+	<brief_description>
+		A ECMAScript module resource for managing ECMAScript source code and bytecode.
+	</brief_description>
+	<description>
+		The JavaScriptModule class provides methods to manage ECMAScript source code and bytecode. It allows you to get and set both the source code and bytecode of a ECMAScript module.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_bytecode" qualifiers="const">
+			<return type="PackedByteArray" />
+			<description>
+				Returns the bytecode of the ECMAScript module as a PackedByteArray.
+			</description>
+		</method>
+		<method name="get_source_code" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the source code of the ECMAScript module as a String.
+			</description>
+		</method>
+		<method name="set_bytecode">
+			<return type="void" />
+			<param index="0" name="bytecode" type="PackedByteArray" />
+			<description>
+				Sets the bytecode of the ECMAScript module using a PackedByteArray.
+			</description>
+		</method>
+		<method name="set_source_code">
+			<return type="void" />
+			<param index="0" name="source_code" type="String" />
+			<description>
+				Sets the source code of the ECMAScript module using a String.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="script_path" type="String" setter="set_script_path" getter="get_script_path" default="&quot;&quot;">
+			The path to the ECMAScript script file.
+		</member>
+	</members>
+</class>
