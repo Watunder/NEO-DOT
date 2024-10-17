@@ -54,30 +54,36 @@
 
 void ViewportTexture::setup_local_to_scene() {
 
-	if (vp) {
-		vp->viewport_textures.erase(this);
-	}
-
-	vp = NULL;
-
 	Node *local_scene = get_local_scene();
 	if (!local_scene) {
 		return;
 	}
 
-	Node *vpn = local_scene->get_node(path);
-	ERR_FAIL_COND_MSG(!vpn, "ViewportTexture: Path to node is invalid.");
+	if (path.is_empty()) {
+		VS::get_singleton()->texture_set_proxy(proxy, RID());
+		WARN_PRINT("ViewportTexture: Path must be set to use it.");
+		return;
+	} else {
+		if (vp) {
+			vp->viewport_textures.erase(this);
+		}
 
-	vp = Object::cast_to<Viewport>(vpn);
+		vp = NULL;
 
-	ERR_FAIL_COND_MSG(!vp, "ViewportTexture: Path to node does not point to a viewport.");
+		Node *vpn = local_scene->get_node(path);
+		ERR_FAIL_COND_MSG(!vpn, "ViewportTexture: Path to node is invalid.");
 
-	vp->viewport_textures.insert(this);
+		vp = Object::cast_to<Viewport>(vpn);
 
-	VS::get_singleton()->texture_set_proxy(proxy, vp->texture_rid);
+		ERR_FAIL_COND_MSG(!vp, "ViewportTexture: Path to node does not point to a viewport.");
 
-	vp->texture_flags = flags;
-	VS::get_singleton()->texture_set_flags(vp->texture_rid, flags);
+		vp->viewport_textures.insert(this);
+
+		VS::get_singleton()->texture_set_proxy(proxy, vp->texture_rid);
+
+		vp->texture_flags = flags;
+		VS::get_singleton()->texture_set_flags(vp->texture_rid, flags);
+	}
 }
 
 void ViewportTexture::set_viewport_path_in_scene(const NodePath &p_path) {
@@ -88,7 +94,9 @@ void ViewportTexture::set_viewport_path_in_scene(const NodePath &p_path) {
 	path = p_path;
 
 	if (get_local_scene()) {
-		setup_local_to_scene();
+		if (vp && vp->is_inside_tree()) {
+			setup_local_to_scene();
+		}
 	}
 }
 
