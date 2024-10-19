@@ -776,18 +776,51 @@ Error QuickJSBinder::js_evalute_module(JSContext *ctx, QuickJSBinder::ModuleCach
 		return ERR_PARSE_ERROR;
 	}
 
+	JSValue ret = JS_UNDEFINED;
 	if (!(p_module->flags & MODULE_FLAG_EVALUATED)) {
-		JSValue ret = JS_EvalFunction(ctx, module);
+		ret = JS_EvalFunction(ctx, module);
 		if (JS_IsException(ret)) {
 			JSValue e = JS_GetException(ctx);
 			dump_exception(ctx, e, r_error);
 			JS_Throw(ctx, e);
 			return ERR_PARSE_ERROR;
 		} else {
+			int state;
+			for(;;) {
+				state = JS_PromiseState(ctx, ret);
+				if (state == JS_PROMISE_FULFILLED) {
+					ret = JS_PromiseResult(ctx, ret);
+					break;
+				} else if (state == JS_PROMISE_REJECTED) {
+					ret = JS_Throw(ctx, JS_PromiseResult(ctx, ret));
+					break;
+				} else if (state == JS_PROMISE_PENDING) {
+					JSContext *ctx1;
+					int err;
+					err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
+					if (err <= 0) {
+						if (err < 0) {
+							JSValue e = JS_GetException(ctx1);
+							dump_exception(ctx1, e, r_error);
+							JS_Throw(ctx1, e);
+							return ERR_PARSE_ERROR;
+						}
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+			if (JS_IsException(ret)) {
+				JSValue e = JS_GetException(ctx);
+				dump_exception(ctx, e, r_error);
+				JS_Throw(ctx, e);
+				return ERR_PARSE_ERROR;
+			}
 			p_module->flags |= MODULE_FLAG_EVALUATED;
 		}
-		JS_FreeValue(ctx, ret);
 	}
+	JS_FreeValue(ctx, ret);
 
 	return OK;
 }
