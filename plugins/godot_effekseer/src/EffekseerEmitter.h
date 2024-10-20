@@ -71,6 +71,8 @@ public:
 
 	void send_trigger(int index);
 
+	void set_editor_mode(bool enabled);
+
 private:
 	Ref<EffekseerEffect> m_effect;
 	int32_t m_layer = -1;
@@ -80,6 +82,7 @@ private:
 	float m_speed = 1.0f;
 	Effekseer::Color m_color = {255, 255, 255, 255};
 	Vector3 m_target_position = {};
+	bool m_editor_mode = false;
 };
 
 }
