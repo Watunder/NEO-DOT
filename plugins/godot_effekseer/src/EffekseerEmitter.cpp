@@ -21,6 +21,7 @@ void EffekseerEmitter::_register_methods()
 	register_method("is_playing", &EffekseerEmitter::is_playing);
 	register_method("set_dynamic_input", &EffekseerEmitter::set_dynamic_input);
 	register_method("send_trigger", &EffekseerEmitter::send_trigger);
+	register_method("set_editor_mode", &EffekseerEmitter::set_editor_mode);
 	register_property<EffekseerEmitter, Ref<EffekseerEffect>>("effect", 
 		&EffekseerEmitter::set_effect, &EffekseerEmitter::get_effect, nullptr);
 	register_property<EffekseerEmitter, bool>("autoplay", 
@@ -63,7 +64,7 @@ void EffekseerEmitter::_ready()
 void EffekseerEmitter::_enter_tree()
 {
 	if (auto system = EffekseerSystem::get_instance()) {
-		m_layer = system->attach_layer(get_viewport(), EffekseerSystem::LayerType::_3D);
+		m_layer = system->attach_layer(get_viewport(), EffekseerSystem::LayerType::Render3D);
 	}
 }
 
@@ -72,7 +73,8 @@ void EffekseerEmitter::_exit_tree()
 	stop();
 
 	if (auto system = EffekseerSystem::get_instance()) {
-		system->detach_layer(get_viewport(), EffekseerSystem::LayerType::_3D);
+		system->detach_layer(get_viewport(), EffekseerSystem::LayerType::Render3D);
+		m_layer = EFFEKSEER_INVALID_LAYER;
 	}
 }
 
@@ -149,15 +151,15 @@ void EffekseerEmitter::play()
 	if (m_effect.is_valid() && m_layer >= 0) {
 		Effekseer::Handle handle = manager->Play(m_effect->get_native(), Effekseer::Vector3D(0, 0, 0));
 		if (handle >= 0) {
-			manager->SetLayer(handle, m_layer);
+			manager->SetLayer(handle, m_editor_mode ? EffekseerSystem::LAYER_EDITOR_3D : m_layer);
 			manager->SetMatrix(handle, EffekseerGodot::ToEfkMatrix43(get_global_transform()));
 			manager->SetUserData(handle, this);
 			manager->SetRemovingCallback(handle, [](Effekseer::Manager* manager, Effekseer::Handle handle, bool isRemovingManager){
 				if (!isRemovingManager) {
 					EffekseerEmitter* emitter = static_cast<EffekseerEmitter*>(manager->GetUserData(handle));
 					if (emitter) {
-						emitter->emit_signal("finished");
 						emitter->remove_handle(handle);
+						emitter->emit_signal("finished");
 					}
 				}
 			});
@@ -324,6 +326,13 @@ void EffekseerEmitter::send_trigger(int index)
 
 	for (int i = 0; i < m_handles.size(); i++) {
 		manager->SendTrigger(m_handles[i], index);
+	}
+}
+
+void EffekseerEmitter::set_editor_mode(bool enabled)
+{
+	if (Engine::get_singleton()->is_editor_hint()) {
+		m_editor_mode = enabled;
 	}
 }
 
