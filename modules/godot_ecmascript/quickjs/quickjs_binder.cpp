@@ -764,6 +764,36 @@ QuickJSBinder::ModuleCache *QuickJSBinder::js_compile_and_cache_module(JSContext
 	return NULL;
 }
 
+JSValue QuickJSBinder::await_promise(JSContext *ctx, JSValue obj)
+{
+    JSValue ret = JS_UNDEFINED;
+
+    for(;;) {
+        int state = JS_PromiseState(ctx, obj);
+        if (state == JS_PROMISE_FULFILLED) {
+            ret = JS_PromiseResult(ctx, obj);
+            JS_FreeValue(ctx, obj);
+            break;
+        } else if (state == JS_PROMISE_REJECTED) {
+            ret = JS_Throw(ctx, JS_PromiseResult(ctx, obj));
+            JS_FreeValue(ctx, obj);
+            break;
+        } else if (state == JS_PROMISE_PENDING) {
+            JSContext *ctx1;
+            int err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
+            if (err < 0) {
+				JSValue e = JS_GetException(ctx1);
+				ret = JS_Throw(ctx1, e);
+            }
+        } else {
+            ret = obj;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 Error QuickJSBinder::js_evalute_module(JSContext *ctx, QuickJSBinder::ModuleCache *p_module, ECMAscriptScriptError *r_error) {
 	if (p_module->flags & MODULE_FLAG_EVALUATED)
 		return OK;
@@ -776,51 +806,26 @@ Error QuickJSBinder::js_evalute_module(JSContext *ctx, QuickJSBinder::ModuleCach
 		return ERR_PARSE_ERROR;
 	}
 
-	JSValue ret = JS_UNDEFINED;
 	if (!(p_module->flags & MODULE_FLAG_EVALUATED)) {
-		ret = JS_EvalFunction(ctx, module);
+		JSValue ret = JS_EvalFunction(ctx, module);
 		if (JS_IsException(ret)) {
 			JSValue e = JS_GetException(ctx);
 			dump_exception(ctx, e, r_error);
 			JS_Throw(ctx, e);
 			return ERR_PARSE_ERROR;
 		} else {
-			int state;
-			for(;;) {
-				state = JS_PromiseState(ctx, ret);
-				if (state == JS_PROMISE_FULFILLED) {
-					ret = JS_PromiseResult(ctx, ret);
-					break;
-				} else if (state == JS_PROMISE_REJECTED) {
-					ret = JS_Throw(ctx, JS_PromiseResult(ctx, ret));
-					break;
-				} else if (state == JS_PROMISE_PENDING) {
-					JSContext *ctx1;
-					int err;
-					err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
-					if (err <= 0) {
-						if (err < 0) {
-							JSValue e = JS_GetException(ctx1);
-							dump_exception(ctx1, e, r_error);
-							JS_Throw(ctx1, e);
-							return ERR_PARSE_ERROR;
-						}
-						break;
-					}
-				} else {
-					break;
-				}
-			}
+			ret = await_promise(ctx, ret);
 			if (JS_IsException(ret)) {
 				JSValue e = JS_GetException(ctx);
 				dump_exception(ctx, e, r_error);
 				JS_Throw(ctx, e);
 				return ERR_PARSE_ERROR;
+			} else {
+				p_module->flags |= MODULE_FLAG_EVALUATED;
 			}
-			p_module->flags |= MODULE_FLAG_EVALUATED;
 		}
+		JS_FreeValue(ctx, ret);
 	}
-	JS_FreeValue(ctx, ret);
 
 	return OK;
 }
