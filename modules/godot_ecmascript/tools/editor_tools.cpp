@@ -29,6 +29,7 @@ static Error dump_to_file(const String &p_path, const String &p_content) {
 
 void ECMAScriptPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_on_menu_item_pressed"), &ECMAScriptPlugin::_on_menu_item_pressed);
+	ClassDB::bind_method(D_METHOD("_export_typescript_classes_file"), &ECMAScriptPlugin::_export_typescript_classes_file);
 	ClassDB::bind_method(D_METHOD("_export_typescript_declare_file"), &ECMAScriptPlugin::_export_typescript_declare_file);
 	ClassDB::bind_method(D_METHOD("_export_enumeration_binding_file"), &ECMAScriptPlugin::_export_enumeration_binding_file);
 }
@@ -50,6 +51,9 @@ void ECMAScriptPlugin::_notification(int p_what) {
 
 void ECMAScriptPlugin::_on_menu_item_pressed(int item) {
 	switch (item) {
+		case MenuItem::ITEM_GEN_CLASSES_FILE:
+			classes_file_dialog->popup_centered_ratio();
+			break;
 		case MenuItem::ITEM_GEN_DECLARE_FILE:
 			declaration_file_dialog->popup_centered_ratio();
 			break;
@@ -65,10 +69,19 @@ void ECMAScriptPlugin::_on_menu_item_pressed(int item) {
 ECMAScriptPlugin::ECMAScriptPlugin(EditorNode *p_node) {
 	PopupMenu *menu = memnew(PopupMenu);
 	add_tool_submenu_item(TTR("ECMAScript"), menu);
+	menu->add_item(TTR("Generate TypeScript Classes File"), ITEM_GEN_CLASSES_FILE);
 	menu->add_item(TTR("Generate TypeScript Declaration File"), ITEM_GEN_DECLARE_FILE);
 	menu->add_item(TTR("Generate Enumeration Binding Script"), ITEM_GEN_ENUM_BINDING_SCRIPT);
 	menu->add_item(TTR("Generate TypeScript Project"), ITEM_GEN_TYPESCRIPT_PROJECT);
 	menu->connect("id_pressed", this, "_on_menu_item_pressed");
+
+	classes_file_dialog = memnew(EditorFileDialog);
+	classes_file_dialog->set_title(TTR("Generate TypeScript Classes File"));
+	classes_file_dialog->set_mode(EditorFileDialog::MODE_SAVE_FILE);
+	classes_file_dialog->set_access(EditorFileDialog::ACCESS_FILESYSTEM);
+	classes_file_dialog->add_filter(TTR("*.ts;TypeScript Module file"));
+	classes_file_dialog->connect("file_selected", this, "_export_typescript_classes_file");
+	EditorNode::get_singleton()->get_gui_base()->add_child(classes_file_dialog);
 
 	declaration_file_dialog = memnew(EditorFileDialog);
 	declaration_file_dialog->set_title(TTR("Generate TypeScript Declaration File"));
@@ -471,6 +484,43 @@ String _export_class(const DocData::ClassDoc &class_doc) {
 	return apply_pattern(class_template, dict);
 }
 
+void ECMAScriptPlugin::_export_typescript_classes_file(const String &p_path) {
+	Set<String> ignored_classes;
+	ignored_classes.insert("int");
+	ignored_classes.insert("float");
+	ignored_classes.insert("bool");
+	ignored_classes.insert("String");
+	ignored_classes.insert("Nil");
+	ignored_classes.insert("Variant");
+	ignored_classes.insert("Array");
+	ignored_classes.insert("Dictionary");
+	ignored_classes.insert("Semaphore");
+	ignored_classes.insert("Thread");
+	ignored_classes.insert("Mutex");
+	ignored_classes.insert("NodePath");
+
+	String text = "";
+
+	DocData *doc = EditorHelp::get_doc_data();
+	for (Map<String, DocData::ClassDoc>::Element *E = doc->class_list.front(); E; E = E->next()) {
+		DocData::ClassDoc class_doc = E->get();
+		if (ignored_classes.has(class_doc.name)) {
+			continue;
+		}
+		if (class_doc.name.begins_with("@")) {
+			continue;
+		}
+
+		text += "export const " + class_doc.name + " = " GODOT_OBJECT_NAME "." + class_doc.name + "\n";
+	}
+
+	FileAccessRef f = FileAccess::open(p_path, FileAccess::WRITE);
+	if (f.f && f->is_open()) {
+		f->store_string(text);
+		f->close();
+	}
+}
+
 void ECMAScriptPlugin::_export_typescript_declare_file(const String &p_path) {
 	modified_api = &ECMAScriptLanguage::get_singleton()->get_main_binder()->get_modified_api();
 
@@ -712,6 +762,7 @@ void ECMAScriptPlugin::_export_enumeration_binding_file(const String &p_path) {
 
 void ECMAScriptPlugin::_generate_typescript_project() {
 	_export_typescript_declare_file("res://godot.d.ts");
+	_export_typescript_classes_file("res://godot-class.ts");
 	dump_to_file("res://tsconfig.json", TSCONFIG_CONTENT);
 	dump_to_file("res://decorators.ts", TS_DECORATORS_CONTENT);
 	dump_to_file("res://package.json", PACKAGE_JSON_CONTENT);

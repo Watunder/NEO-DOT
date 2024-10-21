@@ -8,11 +8,13 @@ class ECMAScriptPlugin : public EditorPlugin {
 	GDCLASS(ECMAScriptPlugin, EditorPlugin);
 
 	enum MenuItem {
+		ITEM_GEN_CLASSES_FILE,
 		ITEM_GEN_DECLARE_FILE,
 		ITEM_GEN_TYPESCRIPT_PROJECT,
 		ITEM_GEN_ENUM_BINDING_SCRIPT,
 	};
 
+	EditorFileDialog *classes_file_dialog;
 	EditorFileDialog *declaration_file_dialog;
 	EditorFileDialog *enumberation_file_dialog;
 	const Dictionary *modified_api;
@@ -27,6 +29,7 @@ protected:
 
 	void _notification(int p_what);
 	void _on_menu_item_pressed(int item);
+	void _export_typescript_classes_file(const String &p_path);
 	void _export_typescript_declare_file(const String &p_path);
 	void _export_enumeration_binding_file(const String &p_path);
 	void _generate_typescript_project();
