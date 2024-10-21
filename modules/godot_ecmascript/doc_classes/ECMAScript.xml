@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ECMAScript" inherits="Script" version="3.3">
+	<brief_description>
+		A ECMAScript script resource for creating and managing ECMAScript scripts in Godot.
+	</brief_description>
+	<description>
+		The ECMAScript class provides a way to create and manage ECMAScript scripts within the Godot game engine. It inherits from the Script class and allows you to write game logic using ECMAScript as the scripting language.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>
