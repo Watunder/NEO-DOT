@@ -129,6 +129,7 @@ private:
 	struct MethodKey : public Key {
 
 		StringName method;
+		bool call_in_editor = false;
 		Vector<Variant> params;
 	};
 
@@ -350,6 +351,7 @@ public:
 	UpdateMode value_track_get_update_mode(int p_track) const;
 
 	void method_track_get_key_indices(int p_track, float p_time, float p_delta, List<int> *p_indices) const;
+	bool method_track_get_call_in_editor(int p_track, int p_key_idx) const;
 	Vector<Variant> method_track_get_params(int p_track, int p_key_idx) const;
 	StringName method_track_get_name(int p_track, int p_key_idx) const;
 

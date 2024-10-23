@@ -1019,12 +1019,13 @@ void AnimationTree::_process_graph(float p_delta) {
 						for (List<int>::Element *F = indices.front(); F; F = F->next()) {
 
 							StringName method = a->method_track_get_name(i, F->get());
+							bool call_in_editor = a->method_track_get_call_in_editor(i, F->get());
 							Vector<Variant> params = a->method_track_get_params(i, F->get());
 
 							int s = params.size();
 
 							ERR_CONTINUE(s > VARIANT_ARG_MAX);
-							if (can_call) {
+							if (can_call || call_in_editor) {
 								t->object->call_deferred(
 										method,
 										s >= 1 ? params[0] : Variant(),
