@@ -413,6 +413,7 @@ private:
 
 	void _own_world_changed();
 
+	void _update_viewport_path();
 protected:
 	void _notification(int p_what);
 	void _process_picking(bool p_ignore_paused);
