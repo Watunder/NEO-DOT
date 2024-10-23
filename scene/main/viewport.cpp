@@ -288,11 +288,26 @@ void Viewport::_own_world_changed() {
 	_update_listener();
 }
 
+void Viewport::_update_viewport_path() {
+	if (!is_inside_tree()) {
+		return;
+	}
+
+	for (Set<ViewportTexture *>::Element *E = viewport_textures.front(); E; E = E->next()) {
+		Node *local_scene = E->get()->get_local_scene();
+		if (!local_scene) {
+			continue;
+		}
+		E->get()->path = local_scene->get_path_to(this);
+	}
+}
+
 void Viewport::_notification(int p_what) {
 
 	switch (p_what) {
 
 		case NOTIFICATION_ENTER_TREE: {
+			_update_viewport_path();
 
 			if (get_parent()) {
 				parent = get_parent()->get_viewport();
