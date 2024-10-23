@@ -218,6 +218,9 @@ public:
 				if (name == "name") {
 
 					d_new["method"] = p_value;
+				} else if (name == "call_in_editor") {
+
+					d_new["call_in_editor"] = p_value;
 				} else if (name == "arg_count") {
 
 					Vector<Variant> args = d_old["args"];
@@ -462,6 +465,13 @@ public:
 					return true;
 				}
 
+				if (name == "call_in_editor") {
+
+					ERR_FAIL_COND_V(!d.has("call_in_editor"), false);
+					r_ret = d["call_in_editor"];
+					return true;
+				}
+
 				ERR_FAIL_COND_V(!d.has("args"), false);
 
 				Vector<Variant> args = d["args"];
@@ -594,6 +604,7 @@ public:
 			case Animation::TYPE_METHOD: {
 
 				p_list->push_back(PropertyInfo(Variant::STRING, "name"));
+				p_list->push_back(PropertyInfo(Variant::BOOL, "call_in_editor"));
 				p_list->push_back(PropertyInfo(Variant::INT, "arg_count", PROPERTY_HINT_RANGE, "0,5,1"));
 
 				Dictionary d = animation->track_get_key_value(track, key);
@@ -1122,6 +1133,13 @@ public:
 							return true;
 						}
 
+						if (name == "call_in_editor") {
+
+							ERR_FAIL_COND_V(!d.has("call_in_editor"), false);
+							r_ret = d["call_in_editor"];
+							return true;
+						}
+
 						ERR_FAIL_COND_V(!d.has("args"), false);
 
 						Vector<Variant> args = d["args"];
@@ -1293,6 +1311,7 @@ public:
 				case Animation::TYPE_METHOD: {
 
 					p_list->push_back(PropertyInfo(Variant::STRING, "name"));
+					p_list->push_back(PropertyInfo(Variant::BOOL, "call_in_editor"));
 					p_list->push_back(PropertyInfo(Variant::INT, "arg_count", PROPERTY_HINT_RANGE, "0,5,1"));
 
 					Dictionary d = animation->track_get_key_value(first_track, first_key);
@@ -4746,6 +4765,7 @@ void AnimationTrackEditor::_add_method_key(const String &p_method) {
 
 			Dictionary d;
 			d["method"] = p_method;
+			d["call_in_editor"] = false;
 			Array params;
 			int first_defarg = E->get().arguments.size() - E->get().default_arguments.size();
 

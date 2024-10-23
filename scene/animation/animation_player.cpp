@@ -545,6 +545,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, float 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
 
 					StringName method = a->method_track_get_name(i, E->get());
+					bool call_in_editor = a->method_track_get_call_in_editor(i, E->get());
 					Vector<Variant> params = a->method_track_get_params(i, E->get());
 
 					int s = params.size();
@@ -556,7 +557,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, float 
 					}
 #endif
 
-					if (can_call) {
+					if (can_call || call_in_editor) {
 						if (method_call_mode == ANIMATION_METHOD_CALL_DEFERRED) {
 							MessageQueue::get_singleton()->push_call(
 									nc->node,
