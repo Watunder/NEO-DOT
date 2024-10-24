@@ -32,12 +32,12 @@ public:
 	void DrawSprites(godot::World* world, int32_t priority);
 	void DrawModel(godot::World* world, godot::RID mesh, int32_t priority);
 
-	godot::ImmediateMesh* GetImmediateMesh() { return m_mesh; }
+	godot::Ref<godot::ImmediateMesh> GetImmediateMesh() { return m_mesh; }
 	godot::RID GetInstance() { return m_instance; }
 	godot::RID GetMaterial() { return m_material; }
 
 private:
-	godot::ImmediateMesh* m_mesh;
+	godot::Ref<godot::ImmediateMesh> m_mesh;
 	godot::RID m_instance;
 	godot::RID m_material;
 };
@@ -227,7 +227,7 @@ public:
 	virtual int Release() override { return Effekseer::ReferenceObject::Release(); }
 
 private:
-	void TransferVertexToImmediate3D(godot::ImmediateMesh *immediate, 
+	void TransferVertexToImmediate3D(godot::Ref<godot::ImmediateMesh> immediate, 
 		const void* vertexData, int32_t spriteCount);
 
 	void TransferVertexToCanvasItem2D(godot::RID canvas_item, 
