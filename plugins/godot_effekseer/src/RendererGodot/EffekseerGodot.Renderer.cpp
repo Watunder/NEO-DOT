@@ -244,7 +244,7 @@ inline void CopyCustomData(float*& dst, const uint8_t*& src, int32_t count)
 RenderCommand::RenderCommand()
 {
 	auto vs = godot::VisualServer::get_singleton();
-	m_mesh = godot::ImmediateMesh::_new();
+	m_mesh.instance();
 	m_instance = vs->instance_create();
 	m_material = vs->material_create();
 	vs->instance_geometry_set_material_override(m_instance, m_material);
@@ -254,7 +254,6 @@ RenderCommand::~RenderCommand()
 {
 	auto vs = godot::VisualServer::get_singleton();
 	vs->free_rid(m_instance);
-	vs->free_rid(m_mesh->get_rid());
 	vs->free_rid(m_material);
 }
 
@@ -795,12 +794,10 @@ void Renderer::DeleteProxyTexture(Effekseer::Backend::TextureRef& texture)
 	texture = nullptr;
 }
 
-void Renderer::TransferVertexToImmediate3D(godot::ImmediateMesh* mesh, 
+void Renderer::TransferVertexToImmediate3D(godot::Ref<godot::ImmediateMesh> mesh, 
 	const void* vertexData, int32_t spriteCount)
 {
 	using namespace EffekseerRenderer;
-
-	auto vs = godot::VisualServer::get_singleton();
 
 	mesh->surface_begin(godot::Mesh::PRIMITIVE_TRIANGLE_STRIP);
 
