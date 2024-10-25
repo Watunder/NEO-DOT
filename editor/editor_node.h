@@ -679,7 +679,6 @@ public:
 		EDITOR_2D = 0,
 		EDITOR_3D,
 		EDITOR_SCRIPT,
-		EDITOR_ASSETLIB
 	};
 
 	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }

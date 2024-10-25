@@ -38,7 +38,6 @@
 const char *EditorFeatureProfile::feature_names[FEATURE_MAX] = {
 	TTRC("3D Editor"),
 	TTRC("Script Editor"),
-	TTRC("Asset Library"),
 	TTRC("Scene Tree Editing"),
 	TTRC("Node Dock"),
 	TTRC("FileSystem Dock"),
