@@ -5,7 +5,7 @@
 	</brief_description>
 	<description>
 		Every class which is not a built-in type inherits from this class.
-		You can construct Objects from scripting languages, using [code]Object.new()[/code] in GDScript, [code]new Object[/code] in C#, or the "Construct Object" node in VisualScript.
+		You can construct Objects from scripting languages, using [code]Object.new()[/code] in GDScript, or the "Construct Object" node in VisualScript.
 		Objects do not manage memory. If a class inherits from Object, you will have to delete instances of it manually. To do so, call the [method free] method from your script or delete the instance from C++.
 		Some classes that extend Object add memory management. This is the case of [Reference], which counts references and deletes itself automatically when no longer referenced. [Node], another fundamental type, deletes all its children when freed from memory.
 		Objects export properties, which are mainly useful for storage and editing, but not really so much in programming. Properties are exported in [method _get_property_list] and handled in [method _get] and [method _set]. However, scripting languages and C++ have simpler means to export them.
@@ -86,7 +86,6 @@
 				[codeblock]
 				call("set", "position", Vector2(42.0, 0.0))
 				[/codeblock]
-				[b]Note:[/b] In C#, the method name must be specified as snake_case if it is defined by a built-in Godot node. This doesn't apply to user-defined methods where you should use the same convention as in the C# source (typically PascalCase).
 			</description>
 		</method>
 		<method name="call_deferred" qualifiers="vararg">
@@ -97,7 +96,6 @@
 				[codeblock]
 				call_deferred("set", "position", Vector2(42.0, 0.0))
 				[/codeblock]
-				[b]Note:[/b] In C#, the method name must be specified as snake_case if it is defined by a built-in Godot node. This doesn't apply to user-defined methods where you should use the same convention as in the C# source (typically PascalCase).
 			</description>
 		</method>
 		<method name="callv">
@@ -176,7 +174,6 @@
 			<argument index="0" name="property" type="String" />
 			<description>
 				Returns the [Variant] value of the given [code]property[/code]. If the [code]property[/code] doesn't exist, this will return [code]null[/code].
-				[b]Note:[/b] In C#, the property name must be specified as snake_case if it is defined by a built-in Godot node. This doesn't apply to user-defined properties where you should use the same convention as in the C# source (typically PascalCase).
 			</description>
 		</method>
 		<method name="get_class" qualifiers="const">
@@ -340,7 +337,6 @@
 			<argument index="1" name="value" type="Variant" />
 			<description>
 				Assigns a new value to the given property. If the [code]property[/code] does not exist, nothing will happen.
-				[b]Note:[/b] In C#, the property name must be specified as snake_case if it is defined by a built-in Godot node. This doesn't apply to user-defined properties where you should use the same convention as in the C# source (typically PascalCase).
 			</description>
 		</method>
 		<method name="set_block_signals">
@@ -356,7 +352,6 @@
 			<argument index="1" name="value" type="Variant" />
 			<description>
 				Assigns a new value to the given property, after the current frame's physics step. This is equivalent to calling [method set] via [method call_deferred], i.e. [code]call_deferred("set", property, value)[/code].
-				[b]Note:[/b] In C#, the property name must be specified as snake_case if it is defined by a built-in Godot node. This doesn't apply to user-defined properties where you should use the same convention as in the C# source (typically PascalCase).
 			</description>
 		</method>
 		<method name="set_indexed">
