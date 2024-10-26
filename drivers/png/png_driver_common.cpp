@@ -46,7 +46,7 @@ static bool check_error(const png_image &image) {
 		return true;
 	} else if (failed) {
 #ifdef TOOLS_ENABLED
-		// suppress this warning, to avoid log spam when opening assetlib
+		// suppress this warning, to avoid log spam
 		const static char *const noisy = "iCCP: known incorrect sRGB profile";
 		const Engine *const eng = Engine::get_singleton();
 		if (eng && eng->is_editor_hint() && !strcmp(image.message, noisy)) {
