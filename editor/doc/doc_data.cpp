@@ -703,7 +703,7 @@ void DocData::generate(bool p_basic_types) {
 				c.constants.push_back(cd);
 			}
 
-			// Skip adding the lang if it doesn't expose anything (e.g. C#).
+			// Skip adding the lang if it doesn't expose anything.
 			if (c.methods.empty() && c.constants.empty()) {
 				continue;
 			}

@@ -254,7 +254,7 @@ PluginConfigDialog::PluginConfigDialog() {
 	script_edit->set_placeholder("\"plugin.gd\" -> res://addons/my_plugin/plugin.gd");
 	grid->add_child(script_edit);
 
-	// TODO Make this option work better with languages like C#. Right now, it does not work because the C# project must be compiled first.
+	// TODO Make this option work better with other program languages.
 	Label *active_lb = memnew(Label);
 	active_lb->set_text(TTR("Activate now?"));
 	grid->add_child(active_lb);

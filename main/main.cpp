@@ -149,7 +149,6 @@ static bool print_fps = false;
 
 /* Helper methods */
 
-// Used by Mono module, should likely be registered in Engine singleton instead
 // FIXME: This is also not 100% accurate, `project_manager` is only true when it was requested,
 // but not if e.g. we fail to load and project and fallback to the manager.
 bool Main::is_project_manager() {
@@ -303,7 +302,7 @@ void Main::print_help(const char *p_binary) {
 	OS::get_singleton()->print("  --export-pack <preset> <path>    Same as --export, but only export the game pack for the given preset. The <path> extension determines whether it will be in PCK or ZIP format.\n");
 	OS::get_singleton()->print("  --doctool <path>                 Dump the engine API reference to the given <path> in XML format, merging if existing files are found.\n");
 	OS::get_singleton()->print("  --no-docbase                     Disallow dumping the base types (used with --doctool).\n");
-	OS::get_singleton()->print("  --build-solutions                Build the scripting solutions (e.g. for C# projects). Implies --editor and requires a valid project to edit.\n");
+	OS::get_singleton()->print("  --build-solutions                Build the scripting solutions. Implies --editor and requires a valid project to edit.\n");
 #ifdef DEBUG_METHODS_ENABLED
 	OS::get_singleton()->print("  --gdnative-generate-json-api     Generate JSON dump of the Godot API for GDNative bindings.\n");
 #endif
@@ -703,7 +702,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		} else if (I->get() == "-p" || I->get() == "--project-manager") { // starts project manager
 
 			project_manager = true;
-		} else if (I->get() == "--build-solutions") { // Build the scripting solution such C#
+		} else if (I->get() == "--build-solutions") { // Build the scripting solution
 
 			auto_build_solutions = true;
 			editor = true;
