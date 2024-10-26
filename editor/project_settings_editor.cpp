@@ -38,6 +38,7 @@
 #include "editor/editor_export.h"
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/tab_container.h"
 
@@ -1774,7 +1775,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 	singleton = this;
 	set_title(TTR("Project Settings (project.godot)"));
 	set_resizable(true);
-	undo_redo = &p_data->get_undo_redo();
+	undo_redo = p_data->get_undo_redo();
 	data = p_data;
 
 	tab_container = memnew(TabContainer);
@@ -1847,7 +1848,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 
 	globals_editor = memnew(SectionedInspector);
 	props_base->add_child(globals_editor);
-	globals_editor->get_inspector()->set_undo_redo(EditorNode::get_singleton()->get_undo_redo());
+	globals_editor->get_inspector()->set_undo_redo(EditorNode::get_undo_redo());
 	globals_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	globals_editor->register_search_box(search_box);
 	globals_editor->get_inspector()->connect("property_selected", this, "_item_selected");

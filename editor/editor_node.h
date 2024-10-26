@@ -65,6 +65,7 @@ class EditorQuickOpen;
 class EditorResourcePreview;
 class EditorRunNative;
 class EditorSettingsDialog;
+class EditorUndoRedoManager;
 class ExportTemplateManager;
 class FileSystemDock;
 class HSplitContainer;
@@ -386,8 +387,6 @@ private:
 	String run_custom_filename;
 	bool reference_resource_mem;
 	bool save_external_resources_mem;
-	uint64_t saved_version;
-	uint64_t last_checked_version;
 	bool unsaved_cache;
 	String open_navigate;
 	bool changing_scene;
@@ -758,7 +757,6 @@ public:
 
 	bool is_scene_open(const String &p_path);
 
-	void set_current_version(uint64_t p_version);
 	void set_current_scene(int p_idx);
 
 	static EditorData &get_editor_data() { return singleton->editor_data; }
@@ -773,7 +771,7 @@ public:
 	ImportDock *get_import_dock();
 	SceneTreeDock *get_scene_tree_dock();
 	InspectorDock *get_inspector_dock();
-	static UndoRedo *get_undo_redo() { return &singleton->editor_data.get_undo_redo(); }
+	static Ref<EditorUndoRedoManager> &get_undo_redo();
 
 	EditorSelection *get_editor_selection() { return editor_selection; }
 

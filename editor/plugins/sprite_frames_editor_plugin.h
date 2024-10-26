@@ -40,6 +40,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tree.h"
 
+class EditorUndoRedoManager;
+
 class SpriteFramesEditor : public HSplitContainer {
 
 	GDCLASS(SpriteFramesEditor, HSplitContainer);
@@ -106,7 +108,7 @@ class SpriteFramesEditor : public HSplitContainer {
 
 	bool updating;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	bool _is_drop_valid(const Dictionary &p_drag_data, const Dictionary &p_item_data) const;
 	Variant get_drag_data_fw(const Point2 &p_point, Control *p_from);
@@ -128,7 +130,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 
 	void edit(SpriteFrames *p_frames);
 	SpriteFramesEditor();

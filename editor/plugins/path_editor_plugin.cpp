@@ -31,6 +31,7 @@
 #include "path_editor_plugin.h"
 
 #include "core/os/keyboard.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/resources/curve.h"
 #include "spatial_editor_plugin.h"
 
@@ -160,7 +161,7 @@ void PathSpatialGizmo::commit_handle(int p_idx, const Variant &p_restore, bool p
 	if (c.is_null())
 		return;
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> ur = SpatialEditor::get_singleton()->get_undo_redo();
 
 	if (p_idx < c->get_point_count()) {
 
@@ -373,7 +374,7 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 				}
 			}
 
-			UndoRedo *ur = editor->get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = editor->get_undo_redo();
 			if (closest_seg != -1) {
 				//subdivide
 
@@ -418,7 +419,7 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 				// Also check for the control points.
 				if (dist_to_p < click_dist) {
 
-					UndoRedo *ur = editor->get_undo_redo();
+					Ref<EditorUndoRedoManager> &ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove Path Point"));
 					ur->add_do_method(c.ptr(), "remove_point", i);
 					ur->add_undo_method(c.ptr(), "add_point", c->get_point_position(i), c->get_point_in(i), c->get_point_out(i), i);
@@ -426,7 +427,7 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 					return true;
 				} else if (dist_to_p_out < click_dist) {
 
-					UndoRedo *ur = editor->get_undo_redo();
+					Ref<EditorUndoRedoManager> &ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove Out-Control Point"));
 					ur->add_do_method(c.ptr(), "set_point_out", i, Vector3());
 					ur->add_undo_method(c.ptr(), "set_point_out", i, c->get_point_out(i));
@@ -434,7 +435,7 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 					return true;
 				} else if (dist_to_p_in < click_dist) {
 
-					UndoRedo *ur = editor->get_undo_redo();
+					Ref<EditorUndoRedoManager> &ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove In-Control Point"));
 					ur->add_do_method(c.ptr(), "set_point_in", i, Vector3());
 					ur->add_undo_method(c.ptr(), "set_point_in", i, c->get_point_in(i));

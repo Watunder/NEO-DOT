@@ -36,8 +36,9 @@
 #include "scene/gui/option_button.h"
 #include "scene/gui/spin_box.h"
 
-#include "core/undo_redo.h"
 #include "editor/scene_tree_editor.h"
+
+class EditorUndoRedoManager;
 
 /**
 @author Blazej Floch
@@ -64,7 +65,7 @@ class RenameDialog : public ConfirmationDialog {
 	static void _error_handler(void *p_self, const char *p_func, const char *p_file, int p_line, const char *p_error, const char *p_errorexp, ErrorHandlerType p_type);
 
 	SceneTreeEditor *scene_tree_editor;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	int global_count;
 
 	LineEdit *lne_search;
@@ -111,7 +112,7 @@ public:
 	void reset();
 	void rename();
 
-	RenameDialog(SceneTreeEditor *p_scene_tree_editor, UndoRedo *p_undo_redo = NULL);
+	RenameDialog(SceneTreeEditor *p_scene_tree_editor, Ref<EditorUndoRedoManager> p_undo_redo = Ref<EditorUndoRedoManager>());
 	~RenameDialog(){};
 };
 

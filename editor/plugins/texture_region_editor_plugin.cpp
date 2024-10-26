@@ -34,6 +34,7 @@
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/check_box.h"
 
 /**

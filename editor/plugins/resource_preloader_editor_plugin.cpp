@@ -31,6 +31,7 @@
 #include "resource_preloader_editor_plugin.h"
 
 #include "core/io/resource_loader.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "core/project_settings.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
@@ -243,6 +244,10 @@ void ResourcePreloaderEditor::_cell_button_pressed(Object *p_item, int p_column,
 	}
 }
 
+void ResourcePreloaderEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
 void ResourcePreloaderEditor::edit(ResourcePreloader *p_preloader) {
 
 	preloader = p_preloader;
@@ -405,7 +410,7 @@ ResourcePreloaderEditor::ResourcePreloaderEditor() {
 
 void ResourcePreloaderEditorPlugin::edit(Object *p_object) {
 
-	preloader_editor->set_undo_redo(&get_undo_redo());
+	preloader_editor->set_undo_redo(get_undo_redo());
 	ResourcePreloader *s = Object::cast_to<ResourcePreloader>(p_object);
 	if (!s)
 		return;

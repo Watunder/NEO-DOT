@@ -36,6 +36,7 @@
 #include "core/project_settings.h"
 #include "editor/editor_inspector.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/animation/animation_player.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/panel.h"

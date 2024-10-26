@@ -36,6 +36,7 @@
 #include "scene/resources/capsule_shape.h"
 #include "scene/resources/sphere_shape.h"
 #include "spatial_editor_plugin.h"
+#include "editor/editor_undo_redo_manager.h"
 
 void SkeletonEditor::_on_click_option(int p_option) {
 	if (!skeleton) {
@@ -50,7 +51,7 @@ void SkeletonEditor::_on_click_option(int p_option) {
 }
 
 void SkeletonEditor::create_physical_skeleton() {
-	UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	Node *owner = skeleton == get_tree()->get_edited_scene_root() ? skeleton : skeleton->get_owner();
 
 	const int bc = skeleton->get_bone_count();

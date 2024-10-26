@@ -41,6 +41,7 @@
 
 class AnimationTrackEditor;
 class AnimationPlayerEditorPlugin;
+class EditorUndoRedoManager;
 
 class AnimationPlayerEditor : public VBoxContainer {
 
@@ -104,7 +105,7 @@ class AnimationPlayerEditor : public VBoxContainer {
 	LineEdit *scale;
 	LineEdit *name;
 	Label *name_title;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	Ref<Texture> autoplay_icon;
 	bool last_active;
 	float timeline_position;
@@ -236,7 +237,7 @@ public:
 
 	void ensure_visibility();
 
-	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 	void edit(AnimationPlayer *p_player);
 	void forward_canvas_force_draw_over_viewport(Control *p_overlay);
 

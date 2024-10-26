@@ -31,6 +31,7 @@
 #include "particles_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "core/io/image_loader.h"
 #include "scene/2d/cpu_particles_2d.h"
 #include "scene/gui/separator.h"
@@ -93,7 +94,7 @@ void Particles2DEditorPlugin::_menu_callback(int p_idx) {
 			cpu_particles->set_pause_mode(particles->get_pause_mode());
 			cpu_particles->set_z_index(particles->get_z_index());
 
-			UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_singleton()->get_undo_redo();
 			ur->create_action(TTR("Convert to CPUParticles"));
 			ur->add_do_method(EditorNode::get_singleton()->get_scene_tree_dock(), "replace_node", particles, cpu_particles, true, false);
 			ur->add_do_reference(cpu_particles);

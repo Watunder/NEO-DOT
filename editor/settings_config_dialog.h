@@ -40,6 +40,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tool_button.h"
 
+class EditorUndoRedoManager;
+
 class EditorSettingsDialog : public AcceptDialog {
 
 	GDCLASS(EditorSettingsDialog, AcceptDialog);
@@ -56,7 +58,7 @@ class EditorSettingsDialog : public AcceptDialog {
 
 	Timer *timer;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	Tree *shortcuts;
 
 	ConfirmationDialog *press_a_key;

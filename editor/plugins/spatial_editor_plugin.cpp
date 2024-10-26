@@ -38,6 +38,7 @@
 #include "core/sort_array.h"
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_settings.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
 #include "editor/plugins/script_editor_plugin.h"
@@ -3693,15 +3694,15 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 		instanced_scene->set_filename(ProjectSettings::get_singleton()->localize_path(path));
 	}
 
-	editor_data->get_undo_redo().add_do_method(parent, "add_child", instanced_scene);
-	editor_data->get_undo_redo().add_do_method(instanced_scene, "set_owner", editor->get_edited_scene());
-	editor_data->get_undo_redo().add_do_reference(instanced_scene);
-	editor_data->get_undo_redo().add_undo_method(parent, "remove_child", instanced_scene);
+	editor_data->get_undo_redo()->add_do_method(parent, "add_child", instanced_scene);
+	editor_data->get_undo_redo()->add_do_method(instanced_scene, "set_owner", editor->get_edited_scene());
+	editor_data->get_undo_redo()->add_do_reference(instanced_scene);
+	editor_data->get_undo_redo()->add_undo_method(parent, "remove_child", instanced_scene);
 
 	String new_name = parent->validate_child_name(instanced_scene);
 	ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-	editor_data->get_undo_redo().add_do_method(sed, "live_debug_instance_node", editor->get_edited_scene()->get_path_to(parent), path, new_name);
-	editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(editor->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
+	editor_data->get_undo_redo()->add_do_method(sed, "live_debug_instance_node", editor->get_edited_scene()->get_path_to(parent), path, new_name);
+	editor_data->get_undo_redo()->add_undo_method(sed, "live_debug_remove_node", NodePath(String(editor->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
 
 	Spatial *spatial = Object::cast_to<Spatial>(instanced_scene);
 	if (spatial) {
@@ -3714,7 +3715,7 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 		global_transform.origin = spatial_editor->snap_point(_get_instance_position(p_point));
 		global_transform.basis *= spatial->get_transform().basis;
 
-		editor_data->get_undo_redo().add_do_method(instanced_scene, "set_global_transform", global_transform);
+		editor_data->get_undo_redo()->add_do_method(instanced_scene, "set_global_transform", global_transform);
 	}
 
 	return true;
@@ -3725,7 +3726,7 @@ void SpatialEditorViewport::_perform_drop_data() {
 
 	Vector<String> error_files;
 
-	editor_data->get_undo_redo().create_action(TTR("Create Node"));
+	editor_data->get_undo_redo()->create_action(TTR("Create Node"));
 
 	for (int i = 0; i < selected_files.size(); i++) {
 		String path = selected_files[i];
@@ -3743,7 +3744,7 @@ void SpatialEditorViewport::_perform_drop_data() {
 		}
 	}
 
-	editor_data->get_undo_redo().commit_action();
+	editor_data->get_undo_redo()->commit_action();
 
 	if (error_files.size() > 0) {
 		String files_str;
@@ -6114,6 +6115,14 @@ void SpatialEditor::_notification(int p_what) {
 			tool_option_button[TOOL_OPT_OVERRIDE_CAMERA]->set_pressed(false);
 		}
 	}
+}
+
+void SpatialEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
+Ref<EditorUndoRedoManager> SpatialEditor::get_undo_redo() {
+	return undo_redo;
 }
 
 void SpatialEditor::add_control_to_menu_panel(Control *p_control) {

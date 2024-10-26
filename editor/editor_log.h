@@ -43,6 +43,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tool_button.h"
 
+class UndoRedo;
+
 class EditorLog : public VBoxContainer {
 
 	GDCLASS(EditorLog, VBoxContainer);
@@ -80,6 +82,7 @@ public:
 
 	void add_message(const String &p_msg, MessageType p_type = MSG_TYPE_STD);
 	void set_tool_button(ToolButton *p_tool_button);
+	void register_undo_redo(UndoRedo *p_undo_redo);
 	void deinit();
 
 	void clear();

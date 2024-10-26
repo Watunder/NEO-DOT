@@ -36,6 +36,7 @@
 #include "editor_log.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor_settings.h"
 #include "scene/gui/margin_container.h"
 #include "script_editor_debugger.h"
@@ -120,9 +121,9 @@ void EditorSettingsDialog::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
 			ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-			undo_redo->set_method_notify_callback(sed->_method_changeds, sed);
-			undo_redo->set_property_notify_callback(sed->_property_changeds, sed);
-			undo_redo->set_commit_notify_callback(_undo_redo_callback, this);
+			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_method_notify_callback(sed->_method_changeds, sed);
+			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_property_notify_callback(sed->_property_changeds, sed);
+			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_commit_notify_callback(_undo_redo_callback, this);
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
 			_update_icons();
@@ -408,7 +409,7 @@ EditorSettingsDialog::EditorSettingsDialog() {
 
 	set_title(TTR("Editor Settings"));
 	set_resizable(true);
-	undo_redo = memnew(UndoRedo);
+	undo_redo = EditorNode::get_undo_redo();
 
 	tabs = memnew(TabContainer);
 	tabs->set_tab_align(TabContainer::ALIGN_LEFT);
@@ -514,5 +515,4 @@ EditorSettingsDialog::EditorSettingsDialog() {
 }
 
 EditorSettingsDialog::~EditorSettingsDialog() {
-	memdelete(undo_redo);
 }

@@ -32,6 +32,7 @@
 #include "editor/scene_tree_editor.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/label.h"
 #include "scene/resources/packed_scene.h"
@@ -371,6 +372,10 @@ void GroupDialog::_notification(int p_what) {
 	}
 }
 
+void GroupDialog::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
 void GroupDialog::edit() {
 	popup_centered();
 
@@ -654,6 +659,10 @@ void GroupsEditor::update_tree() {
 			item->set_selectable(0, false);
 		}
 	}
+}
+
+void GroupsEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
 }
 
 void GroupsEditor::set_current(Node *p_node) {

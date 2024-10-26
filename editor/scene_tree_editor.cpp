@@ -33,6 +33,7 @@
 #include "core/message_queue.h"
 #include "core/print_string.h"
 #include "editor/editor_node.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/node_dock.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
@@ -330,7 +331,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		item->set_tooltip(0, tooltip);
 	}
 
-	if (can_open_instance && undo_redo) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
+	if (can_open_instance && undo_redo.is_valid()) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
 
 		if (!p_node->is_connected("script_changed", this, "_node_script_changed"))
 			p_node->connect("script_changed", this, "_node_script_changed", varray(p_node));
@@ -807,7 +808,7 @@ void SceneTreeEditor::_renamed() {
 	// Trim leading/trailing whitespace to prevent node names from containing accidental whitespace, which would make it more difficult to get the node via `get_node()`.
 	new_name = new_name.strip_edges();
 
-	if (!undo_redo) {
+	if (!undo_redo.is_valid()) {
 		n->set_name(new_name);
 		which->set_metadata(0, n->get_path());
 		emit_signal("node_renamed");
@@ -852,6 +853,10 @@ void SceneTreeEditor::set_filter(const String &p_filter) {
 String SceneTreeEditor::get_filter() const {
 
 	return filter;
+}
+
+void SceneTreeEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
 }
 
 void SceneTreeEditor::set_display_foreign_nodes(bool p_display) {
@@ -1173,7 +1178,6 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 
 	connect_to_script_mode = false;
 	connecting_signal = false;
-	undo_redo = NULL;
 	tree_dirty = true;
 	selected = NULL;
 

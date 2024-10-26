@@ -31,6 +31,7 @@
 #include "cpu_particles_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "core/io/image_loader.h"
 #include "scene/2d/cpu_particles_2d.h"
 #include "scene/gui/separator.h"

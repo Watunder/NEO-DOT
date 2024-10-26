@@ -35,12 +35,14 @@
 #include "editor/editor_file_system.h"
 #include "editor/project_settings_editor.h"
 
+class EditorUndoRedoManager;
+
 class GDNativeLibrarySingletonEditor : public VBoxContainer {
 	GDCLASS(GDNativeLibrarySingletonEditor, VBoxContainer);
 
 private:
 	Tree *libraries;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	bool updating;
 

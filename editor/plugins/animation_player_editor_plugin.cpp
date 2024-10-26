@@ -37,6 +37,7 @@
 #include "core/project_settings.h"
 #include "editor/animation_track_editor.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_settings.h"
 
 // For onion skinning.
@@ -1836,9 +1837,13 @@ void AnimationPlayerEditorPlugin::_notification(int p_what) {
 	}
 }
 
+void AnimationPlayerEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
 void AnimationPlayerEditorPlugin::edit(Object *p_object) {
 
-	anim_editor->set_undo_redo(&get_undo_redo());
+	anim_editor->set_undo_redo(get_undo_redo());
 	if (!p_object)
 		return;
 	anim_editor->edit(Object::cast_to<AnimationPlayer>(p_object));

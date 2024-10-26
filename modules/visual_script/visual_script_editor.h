@@ -38,6 +38,7 @@
 #include "visual_script.h"
 #include "visual_script_property_selector.h"
 
+class EditorUndoRedoManager;
 class VisualScriptEditorSignalEdit;
 class VisualScriptEditorVariableEdit;
 
@@ -111,7 +112,7 @@ class VisualScriptEditor : public ScriptEditorBase {
 
 	CustomPropertyEditor *default_value_edit;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	Tree *members;
 	PopupDialog *function_name_edit;

@@ -42,6 +42,7 @@
 #include "scene/gui/tree.h"
 
 class ProgressBar;
+class EditorUndoRedoManager;
 
 class AnimationNodeBlendTreeEditor : public AnimationTreeNodeEditorPlugin {
 
@@ -56,7 +57,7 @@ class AnimationNodeBlendTreeEditor : public AnimationTreeNodeEditorPlugin {
 	PanelContainer *error_panel;
 	Label *error_label;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	AcceptDialog *filter_dialog;
 	Tree *filters;

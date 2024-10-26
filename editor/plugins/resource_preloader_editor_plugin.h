@@ -38,6 +38,8 @@
 #include "scene/gui/tree.h"
 #include "scene/main/resource_preloader.h"
 
+class EditorUndoRedoManager;
+
 class ResourcePreloaderEditor : public PanelContainer {
 
 	GDCLASS(ResourcePreloaderEditor, PanelContainer);
@@ -68,7 +70,7 @@ class ResourcePreloaderEditor : public PanelContainer {
 	void _cell_button_pressed(Object *p_item, int p_column, int p_id);
 	void _item_edited();
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	Variant get_drag_data_fw(const Point2 &p_point, Control *p_from);
 	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
@@ -80,7 +82,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 
 	void edit(ResourcePreloader *p_preloader);
 	ResourcePreloaderEditor();

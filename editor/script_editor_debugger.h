@@ -52,6 +52,7 @@ class HSplitContainer;
 class ItemList;
 class EditorProfiler;
 class EditorNetworkProfiler;
+class UndoRedo;
 
 class ScriptEditorDebuggerInspectedObject;
 

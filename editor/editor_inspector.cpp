@@ -34,6 +34,7 @@
 #include "editor_feature_profile.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "multi_node_edit.h"
 #include "scene/resources/packed_scene.h"
 
@@ -1345,7 +1346,7 @@ void EditorInspector::cleanup_plugins() {
 	inspector_plugin_count = 0;
 }
 
-void EditorInspector::set_undo_redo(UndoRedo *p_undo_redo) {
+void EditorInspector::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 	undo_redo = p_undo_redo;
 }
 
@@ -2027,7 +2028,7 @@ void EditorInspector::_edit_set(const String &p_name, const Variant &p_value, bo
 		}
 	}
 
-	if (!undo_redo || bool(object->call("_dont_undo_redo"))) {
+	if (!undo_redo.is_valid() || bool(object->call("_dont_undo_redo"))) {
 
 		object->set(p_name, p_value);
 		if (p_refresh_all)
@@ -2354,7 +2355,6 @@ void EditorInspector::_bind_methods() {
 
 EditorInspector::EditorInspector() {
 	object = NULL;
-	undo_redo = NULL;
 	main_vbox = memnew(VBoxContainer);
 	main_vbox->set_h_size_flags(SIZE_EXPAND_FILL);
 	main_vbox->add_constant_override("separation", 0);
