@@ -39,6 +39,7 @@
 
 #define WORKSPACE_MARGIN Vector2(10, 10)
 class TilesetEditorContext;
+class EditorUndoRedoManager;
 
 class TileSetEditor : public HSplitContainer {
 
@@ -104,7 +105,7 @@ class TileSetEditor : public HSplitContainer {
 	Ref<TileSet> tileset;
 	TilesetEditorContext *helper;
 	EditorNode *editor;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	ConfirmationDialog *cd;
 	AcceptDialog *err_dialog;

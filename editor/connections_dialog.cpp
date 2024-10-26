@@ -33,6 +33,7 @@
 #include "core/print_string.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor_settings.h"
 #include "plugins/script_editor_plugin.h"
 #include "scene/gui/label.h"
@@ -878,6 +879,10 @@ void ConnectionsDock::_bind_methods() {
 	ClassDB::bind_method("_connect_pressed", &ConnectionsDock::_connect_pressed);
 	ClassDB::bind_method("_filter_changed", &ConnectionsDock::_filter_changed);
 	ClassDB::bind_method("update_tree", &ConnectionsDock::update_tree);
+}
+
+void ConnectionsDock::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
 }
 
 void ConnectionsDock::set_node(Node *p_node) {

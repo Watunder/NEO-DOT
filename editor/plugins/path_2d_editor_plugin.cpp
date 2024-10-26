@@ -31,6 +31,7 @@
 #include "path_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "core/os/file_access.h"
 #include "core/os/keyboard.h"
 #include "editor/editor_scale.h"

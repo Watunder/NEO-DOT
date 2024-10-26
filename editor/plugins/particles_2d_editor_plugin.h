@@ -38,6 +38,8 @@
 #include "scene/gui/box_container.h"
 #include "scene/gui/file_dialog.h"
 
+class EditorUndoRedoManager;
+
 class Particles2DEditorPlugin : public EditorPlugin {
 
 	GDCLASS(Particles2DEditorPlugin, EditorPlugin);
@@ -76,7 +78,7 @@ class Particles2DEditorPlugin : public EditorPlugin {
 
 	String source_emission_file;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	void _file_selected(const String &p_file);
 	void _menu_callback(int p_idx);
 	void _generate_visibility_rect();

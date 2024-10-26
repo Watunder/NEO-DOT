@@ -32,6 +32,7 @@
 
 #include "core/os/keyboard.h"
 #include "core/version.h"
+#include "core/undo_redo.h"
 #include "editor_node.h"
 #include "editor_scale.h"
 #include "scene/gui/center_container.h"
@@ -191,8 +192,10 @@ EditorLog::EditorLog() {
 	current = Thread::get_caller_id();
 
 	add_constant_override("separation", get_constant("separation", "VBoxContainer"));
+}
 
-	EditorNode::get_undo_redo()->set_commit_notify_callback(_undo_redo_cbk, this);
+void EditorLog::register_undo_redo(UndoRedo *p_undo_redo) {
+	p_undo_redo->set_commit_notify_callback(_undo_redo_cbk, this);
 }
 
 void EditorLog::deinit() {

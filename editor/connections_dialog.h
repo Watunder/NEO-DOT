@@ -35,7 +35,6 @@
 #ifndef CONNECTIONS_DIALOG_H
 #define CONNECTIONS_DIALOG_H
 
-#include "core/undo_redo.h"
 #include "editor/editor_inspector.h"
 #include "editor/scene_tree_editor.h"
 #include "scene/gui/button.h"
@@ -48,6 +47,7 @@
 
 class PopupMenu;
 class ConnectDialogBinds;
+class EditorUndoRedoManager;
 
 class ConnectDialog : public ConfirmationDialog {
 
@@ -139,7 +139,7 @@ class ConnectionsDock : public VBoxContainer {
 	Button *connect_button;
 	PopupMenu *signal_menu;
 	PopupMenu *slot_menu;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	LineEdit *search_box;
 
 	Map<StringName, Map<StringName, String> > descr_cache;
@@ -170,7 +170,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_undoredo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 	void set_node(Node *p_node);
 	void update_tree();
 

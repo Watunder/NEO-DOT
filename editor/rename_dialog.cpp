@@ -33,6 +33,7 @@
 #include "core/print_string.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor_settings.h"
 #include "editor_themes.h"
 #include "modules/regex/regex.h"
@@ -41,7 +42,7 @@
 #include "scene/gui/label.h"
 #include "scene/gui/tab_container.h"
 
-RenameDialog::RenameDialog(SceneTreeEditor *p_scene_tree_editor, UndoRedo *p_undo_redo) {
+RenameDialog::RenameDialog(SceneTreeEditor *p_scene_tree_editor, Ref<EditorUndoRedoManager> p_undo_redo) {
 
 	scene_tree_editor = p_scene_tree_editor;
 	undo_redo = p_undo_redo;
@@ -591,7 +592,7 @@ void RenameDialog::rename() {
 	// Forward recursive as opposed to the actual renaming.
 	_iterate_scene(root_node, selected_node_list, &global_count);
 
-	if (undo_redo && !to_rename.empty()) {
+	if (undo_redo.is_valid() && !to_rename.empty()) {
 
 		undo_redo->create_action(TTR("Batch Rename"));
 

@@ -33,8 +33,8 @@
 
 #include "core/list.h"
 #include "core/pair.h"
-#include "core/undo_redo.h"
 #include "editor/editor_plugin.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/plugins/script_editor_plugin.h"
 #include "scene/resources/texture.h"
 
@@ -124,8 +124,9 @@ public:
 		Vector<EditorHistory::History> history_stored;
 		int history_current;
 		Dictionary custom_state;
-		uint64_t version;
 		NodePath live_edit_root;
+		int history_id = 0;
+		uint64_t last_checked_version = 0;
 	};
 
 private:
@@ -139,12 +140,13 @@ private:
 	Map<String, Vector<CustomType> > custom_types;
 
 	List<PropertyData> clipboard;
-	UndoRedo undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo_manager;
 
 	void _cleanup_history();
 
 	Vector<EditedScene> edited_scene;
-	int current_edited_scene;
+	int current_edited_scene = -1;
+	int last_created_scene = 1;
 
 	bool _find_updated_instances(Node *p_root, Node *p_node, Set<String> &checked_paths);
 
@@ -174,7 +176,7 @@ public:
 	int get_editor_plugin_count() const;
 	EditorPlugin *get_editor_plugin(int p_idx);
 
-	UndoRedo &get_undo_redo();
+	Ref<EditorUndoRedoManager> &get_undo_redo();
 
 	void save_editor_global_states();
 	void restore_editor_global_states();
@@ -198,9 +200,6 @@ public:
 	String get_scene_type(int p_idx) const;
 	void set_scene_path(int p_idx, const String &p_path);
 	Ref<Script> get_scene_root_script(int p_idx) const;
-	void set_edited_scene_version(uint64_t version, int p_scene_idx = -1);
-	uint64_t get_edited_scene_version() const;
-	uint64_t get_scene_version(int p_idx) const;
 	void set_scene_modified_time(int p_idx, uint64_t p_time);
 	uint64_t get_scene_modified_time(int p_idx) const;
 	void clear_edited_scenes();
@@ -209,6 +208,13 @@ public:
 	bool check_and_update_scene(int p_idx);
 	void move_edited_scene_to_index(int p_idx);
 	bool call_build();
+
+	void set_scene_as_saved(int p_idx);
+	bool is_scene_changed(int p_idx);
+
+	int get_scene_history_id_from_path(const String &p_path) const;
+	int get_current_edited_scene_history_id() const;
+	int get_scene_history_id(int p_idx) const;
 
 	void set_plugin_window_layout(Ref<ConfigFile> p_layout);
 	void get_plugin_window_layout(Ref<ConfigFile> p_layout);

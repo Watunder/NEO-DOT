@@ -40,6 +40,8 @@
 #include "scene/resources/style_box.h"
 #include "scene/resources/texture.h"
 
+class EditorUndoRedoManager;
+
 /**
 	@author Mariano Suligoy
 */
@@ -73,7 +75,7 @@ class TextureRegionEditor : public VBoxContainer {
 	HScrollBar *hscroll;
 
 	EditorNode *editor;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	Vector2 draw_ofs;
 	float draw_zoom;

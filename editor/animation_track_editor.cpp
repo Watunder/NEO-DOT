@@ -37,6 +37,7 @@
 #include "editor/plugins/animation_player_editor_plugin.h"
 #include "editor_node.h"
 #include "editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/main/viewport.h"
 #include "servers/audio/audio_stream.h"
 
@@ -675,7 +676,7 @@ public:
 		}
 	}
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	Ref<Animation> animation;
 	int track;
 	float key_ofs;
@@ -1388,7 +1389,7 @@ public:
 
 	bool use_fps;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	void notify_change() {
 
@@ -1709,7 +1710,7 @@ Size2 AnimationTimelineEdit::get_minimum_size() const {
 	return ms;
 }
 
-void AnimationTimelineEdit::set_undo_redo(UndoRedo *p_undo_redo) {
+void AnimationTimelineEdit::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 	undo_redo = p_undo_redo;
 }
 
@@ -2441,8 +2442,12 @@ Size2 AnimationTrackEdit::get_minimum_size() const {
 	return Vector2(1, max_h + separation);
 }
 
-void AnimationTrackEdit::set_undo_redo(UndoRedo *p_undo_redo) {
+void AnimationTrackEdit::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 	undo_redo = p_undo_redo;
+}
+
+Ref<EditorUndoRedoManager> AnimationTrackEdit::get_undo_redo() const {
+	return undo_redo;
 }
 
 void AnimationTrackEdit::set_timeline(AnimationTimelineEdit *p_timeline) {
@@ -3113,7 +3118,6 @@ void AnimationTrackEdit::_bind_methods() {
 }
 
 AnimationTrackEdit::AnimationTrackEdit() {
-	undo_redo = NULL;
 	timeline = NULL;
 	root = NULL;
 	path = NULL;
@@ -5601,7 +5605,7 @@ void AnimationTrackEditor::_edit_menu_pressed(int p_option) {
 		case EDIT_OPTIMIZE_ANIMATION_CONFIRM: {
 			animation->optimize(optimize_linear_error->get_value(), optimize_angular_error->get_value(), optimize_max_angle->get_value());
 			_update_tracks();
-			undo_redo->clear_history();
+			undo_redo->clear_history(true, undo_redo->get_history_for_object(animation.ptr()).id);
 
 		} break;
 		case EDIT_CLEAN_UP_ANIMATION: {
@@ -5672,7 +5676,7 @@ void AnimationTrackEditor::_cleanup_animation(Ref<Animation> p_animation) {
 		}
 	}
 
-	undo_redo->clear_history();
+	undo_redo->clear_history(true, undo_redo->get_history_for_object(animation.ptr()).id);
 	_update_tracks();
 }
 
@@ -5806,7 +5810,7 @@ void AnimationTrackEditor::_bind_methods() {
 AnimationTrackEditor::AnimationTrackEditor() {
 	root = NULL;
 
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 
 	main_panel = memnew(PanelContainer);
 	add_child(main_panel);

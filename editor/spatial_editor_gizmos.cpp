@@ -29,6 +29,7 @@
 /*************************************************************************/
 
 #include "spatial_editor_gizmos.h"
+#include "editor/editor_undo_redo_manager.h"
 
 #include "core/math/geometry.h"
 #include "core/math/quick_hull.h"
@@ -921,14 +922,14 @@ void LightSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int p_i
 
 	} else if (p_idx == 0) {
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Light Radius"));
 		ur->add_do_method(light, "set_param", Light::PARAM_RANGE, light->get_param(Light::PARAM_RANGE));
 		ur->add_undo_method(light, "set_param", Light::PARAM_RANGE, p_restore);
 		ur->commit_action();
 	} else if (p_idx == 1) {
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Light Radius"));
 		ur->add_do_method(light, "set_param", Light::PARAM_SPOT_ANGLE, light->get_param(Light::PARAM_SPOT_ANGLE));
 		ur->add_undo_method(light, "set_param", Light::PARAM_SPOT_ANGLE, p_restore);
@@ -1160,7 +1161,7 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_
 
 	} else {
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change AudioStreamPlayer3D Emission Angle"));
 		ur->add_do_method(player, "set_emission_angle", player->get_emission_angle());
 		ur->add_undo_method(player, "set_emission_angle", p_restore);
@@ -1311,7 +1312,7 @@ void CameraSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int p_
 
 			camera->set("fov", p_restore);
 		} else {
-			UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 			ur->create_action(TTR("Change Camera FOV"));
 			ur->add_do_property(camera, "fov", camera->get_fov());
 			ur->add_undo_property(camera, "fov", p_restore);
@@ -1324,7 +1325,7 @@ void CameraSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int p_
 
 			camera->set("size", p_restore);
 		} else {
-			UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 			ur->create_action(TTR("Change Camera Size"));
 			ur->add_do_property(camera, "size", camera->get_size());
 			ur->add_undo_property(camera, "size", p_restore);
@@ -2289,7 +2290,7 @@ void VisibilityNotifierGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, i
 		return;
 	}
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Change Notifier AABB"));
 	ur->add_do_method(notifier, "set_aabb", notifier->get_aabb());
 	ur->add_undo_method(notifier, "set_aabb", p_restore);
@@ -2479,7 +2480,7 @@ void ParticlesGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int p_idx,
 		return;
 	}
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Change Particles AABB"));
 	ur->add_do_method(particles, "set_visibility_aabb", particles->get_visibility_aabb());
 	ur->add_undo_method(particles, "set_visibility_aabb", p_restore);
@@ -2653,7 +2654,7 @@ void ReflectionProbeGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int 
 		return;
 	}
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Change Probe Extents"));
 	ur->add_do_method(probe, "set_extents", probe->get_extents());
 	ur->add_do_method(probe, "set_origin_offset", probe->get_origin_offset());
@@ -2809,7 +2810,7 @@ void GIProbeGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int p_idx, c
 		return;
 	}
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Change Probe Extents"));
 	ur->add_do_method(probe, "set_extents", probe->get_extents());
 	ur->add_undo_method(probe, "set_extents", restore);
@@ -2977,7 +2978,7 @@ void BakedIndirectLightGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, i
 		return;
 	}
 
-	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Change Probe Extents"));
 	ur->add_do_method(baker, "set_extents", baker->get_extents());
 	ur->add_undo_method(baker, "set_extents", restore);
@@ -3316,7 +3317,7 @@ void CollisionShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Sphere Shape Radius"));
 		ur->add_do_method(ss.ptr(), "set_radius", ss->get_radius());
 		ur->add_undo_method(ss.ptr(), "set_radius", p_restore);
@@ -3331,7 +3332,7 @@ void CollisionShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Box Shape Extents"));
 		ur->add_do_method(ss.ptr(), "set_extents", ss->get_extents());
 		ur->add_undo_method(ss.ptr(), "set_extents", p_restore);
@@ -3349,7 +3350,7 @@ void CollisionShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		if (p_idx == 0) {
 			ur->create_action(TTR("Change Capsule Shape Radius"));
 			ur->add_do_method(ss.ptr(), "set_radius", ss->get_radius());
@@ -3374,7 +3375,7 @@ void CollisionShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		if (p_idx == 0) {
 			ur->create_action(TTR("Change Cylinder Shape Radius"));
 			ur->add_do_method(ss.ptr(), "set_radius", ss->get_radius());
@@ -3400,7 +3401,7 @@ void CollisionShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Ray Shape Length"));
 		ur->add_do_method(ss.ptr(), "set_length", ss->get_length());
 		ur->add_undo_method(ss.ptr(), "set_length", p_restore);

@@ -31,7 +31,6 @@
 #ifndef PROJECT_SETTINGS_H
 #define PROJECT_SETTINGS_H
 
-#include "core/undo_redo.h"
 #include "editor/editor_autoload_settings.h"
 #include "editor/editor_data.h"
 #include "editor/editor_plugin_settings.h"
@@ -39,6 +38,8 @@
 #include "editor/import_defaults_editor.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/tab_container.h"
+
+class EditorUndoRedoManager;
 
 class ProjectSettingsEditor : public AcceptDialog {
 
@@ -64,7 +65,7 @@ class ProjectSettingsEditor : public AcceptDialog {
 	int edit_idx;
 
 	EditorData *data;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	SectionedInspector *globals_editor;
 
 	HBoxContainer *search_bar;

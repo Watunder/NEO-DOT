@@ -51,6 +51,7 @@ class EditorImportPlugin;
 class EditorExportPlugin;
 class EditorSpatialGizmoPlugin;
 class EditorResourcePreview;
+class EditorUndoRedoManager;
 class EditorFileSystem;
 class EditorToolAddons;
 class FileSystemDock;
@@ -123,9 +124,8 @@ class EditorPlugin : public Node {
 
 	GDCLASS(EditorPlugin, Node);
 	friend class EditorData;
-	UndoRedo *undo_redo;
 
-	UndoRedo *_get_undo_redo() { return undo_redo; }
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	bool input_event_forwarding_always_enabled;
 	bool force_draw_over_forwarding_enabled;
@@ -134,7 +134,7 @@ class EditorPlugin : public Node {
 
 protected:
 	static void _bind_methods();
-	UndoRedo &get_undo_redo() { return *undo_redo; }
+	Ref<EditorUndoRedoManager> get_undo_redo();
 
 	void add_custom_type(const String &p_type, const String &p_base, const Ref<Script> &p_script, const Ref<Texture> &p_icon);
 	void remove_custom_type(const String &p_type);

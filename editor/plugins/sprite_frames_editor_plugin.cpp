@@ -35,6 +35,7 @@
 #include "core/os/keyboard.h"
 #include "core/project_settings.h"
 #include "editor/editor_scale.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_settings.h"
 #include "scene/3d/sprite_3d.h"
 #include "scene/gui/center_container.h"
@@ -741,6 +742,10 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 	//player->add_resource("default",resource);
 }
 
+void SpriteFramesEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
 void SpriteFramesEditor::edit(SpriteFrames *p_frames) {
 
 	if (frames == p_frames)
@@ -1125,7 +1130,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
 
-	frames_editor->set_undo_redo(&get_undo_redo());
+	frames_editor->set_undo_redo(get_undo_redo());
 
 	SpriteFrames *s;
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);

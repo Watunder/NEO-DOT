@@ -35,7 +35,7 @@
 #include "scene/gui/line_edit.h"
 #include "scene/gui/scroll_container.h"
 
-class UndoRedo;
+class EditorUndoRedoManager;
 
 class EditorPropertyRevert {
 public:
@@ -251,7 +251,7 @@ public:
 class EditorInspector : public ScrollContainer {
 	GDCLASS(EditorInspector, ScrollContainer);
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	enum {
 		MAX_PLUGINS = 1024
 	};
@@ -341,7 +341,7 @@ public:
 
 	static EditorProperty *instantiate_property_editor(Object *p_object, Variant::Type p_type, const String &p_path, PropertyHint p_hint, const String &p_hint_text, int p_usage);
 
-	void set_undo_redo(UndoRedo *p_undo_redo);
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 
 	String get_selected_path() const;
 

@@ -48,6 +48,8 @@
 #include "scene/resources/animation.h"
 #include "scene_tree_editor.h"
 
+class EditorUndoRedoManager;
+
 class AnimationTimelineEdit : public Range {
 	GDCLASS(AnimationTimelineEdit, Range);
 
@@ -71,7 +73,7 @@ class AnimationTimelineEdit : public Range {
 	void _anim_loop_pressed();
 
 	void _play_position_draw();
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	Rect2 hsize_rect;
 
 	bool editing;
@@ -102,7 +104,7 @@ public:
 	void set_animation(const Ref<Animation> &p_animation);
 	void set_zoom(Range *p_zoom);
 	Range *get_zoom() const { return zoom; }
-	void set_undo_redo(UndoRedo *p_undo_redo);
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 
 	void set_play_position(float p_pos);
 	float get_play_position() const;
@@ -139,7 +141,7 @@ class AnimationTrackEdit : public Control {
 		MENU_KEY_DELETE
 	};
 	AnimationTimelineEdit *timeline;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	LineEdit *path;
 	Node *root;
 	Control *play_position; //separate control used to draw so updates for only position changed are much faster
@@ -216,12 +218,12 @@ public:
 	Ref<Animation> get_animation() const;
 	AnimationTimelineEdit *get_timeline() const { return timeline; }
 	AnimationTrackEditor *get_editor() const { return editor; }
-	UndoRedo *get_undo_redo() const { return undo_redo; }
+	Ref<EditorUndoRedoManager> get_undo_redo() const;
 	NodePath get_path() const;
 	void set_animation_and_track(const Ref<Animation> &p_animation, int p_track);
 	virtual Size2 get_minimum_size() const;
 
-	void set_undo_redo(UndoRedo *p_undo_redo);
+	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
 	void set_timeline(AnimationTimelineEdit *p_timeline);
 	void set_editor(AnimationTrackEditor *p_editor);
 	void set_root(Node *p_root);
@@ -331,7 +333,7 @@ class AnimationTrackEditor : public VBoxContainer {
 	void _track_remove_request(int p_track);
 	void _track_grab_focus(int p_track);
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	void _update_scroll(double);
 	void _update_step(double p_new_step);

@@ -37,12 +37,13 @@
 #include "scene/gui/tool_button.h"
 
 class CanvasItemEditor;
+class EditorUndoRedoManager;
 
 class Path2DEditor : public HBoxContainer {
 
 	GDCLASS(Path2DEditor, HBoxContainer);
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 
 	CanvasItemEditor *canvas_item_editor;
 	EditorNode *editor;
