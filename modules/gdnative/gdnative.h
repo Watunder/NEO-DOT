@@ -54,6 +54,9 @@ class GDNativeLibrary : public Resource {
 
 	Ref<ConfigFile> config_file;
 
+#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+	String temp_library_path;
+#endif
 	String current_library_path;
 	Vector<String> current_dependencies;
 
@@ -76,6 +79,11 @@ public:
 
 	// things that change per-platform
 	// so there are no setters for this
+#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+	_FORCE_INLINE_ String get_temp_library_path() const {
+		return temp_library_path;
+	}
+#endif
 	_FORCE_INLINE_ String get_current_library_path() const {
 		return current_library_path;
 	}

@@ -33,6 +33,7 @@
 #include "core/global_constants.h"
 #include "core/io/file_access_encrypted.h"
 #include "core/os/file_access.h"
+#include "core/os/dir_access.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
 
@@ -218,6 +219,20 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 			break;
 		}
 	}
+
+#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+	if (!entry_lib_path.empty() && Engine::get_singleton()->is_editor_hint()) {
+		temp_library_path = entry_lib_path.get_base_dir().plus_file("~" + entry_lib_path.get_file());
+
+		DirAccess *d = DirAccess::create(DirAccess::ACCESS_RESOURCES);
+		if (!d->file_exists(temp_library_path)) {
+			Error copy_err = d->copy(entry_lib_path, temp_library_path);
+		}
+		memdelete(d);
+
+		entry_lib_path = temp_library_path;
+	}
+#endif
 
 	current_library_path = entry_lib_path;
 	current_dependencies = dependency_paths;
@@ -446,6 +461,15 @@ bool GDNative::terminate() {
 
 	OS::get_singleton()->close_dynamic_library(native_handle);
 	native_handle = NULL;
+
+#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+	DirAccess *d = DirAccess::create(DirAccess::ACCESS_RESOURCES);
+	String temp_lib_path = library->get_temp_library_path();
+	if (d->file_exists(temp_lib_path)) {
+		Error remove_err = d->remove(temp_lib_path);
+	}
+	memdelete(d);
+#endif
 
 	return true;
 }
