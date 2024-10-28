@@ -89,9 +89,6 @@ env_base.__class__.add_program = methods.add_program
 env_base.__class__.CommandNoCache = methods.CommandNoCache
 env_base.__class__.disable_warnings = methods.disable_warnings
 
-env_base["x86_libtheora_opt_gcc"] = False
-env_base["x86_libtheora_opt_vc"] = False
-
 # avoid issues when building with different versions of python out of the same directory
 env_base.SConsignFile(".sconsign{0}.dblite".format(pickle.HIGHEST_PROTOCOL))
 
@@ -154,16 +151,11 @@ opts.Add(BoolVariable("builtin_certs", "Use the built-in SSL certificates bundle
 opts.Add(BoolVariable("builtin_embree", "Use the built-in Embree library", True))
 opts.Add(BoolVariable("builtin_enet", "Use the built-in ENet library", True))
 opts.Add(BoolVariable("builtin_freetype", "Use the built-in FreeType library", True))
-opts.Add(BoolVariable("builtin_libogg", "Use the built-in libogg library", True))
 opts.Add(BoolVariable("builtin_libpng", "Use the built-in libpng library", True))
-opts.Add(BoolVariable("builtin_libtheora", "Use the built-in libtheora library", True))
-opts.Add(BoolVariable("builtin_libvorbis", "Use the built-in libvorbis library", True))
-opts.Add(BoolVariable("builtin_libvpx", "Use the built-in libvpx library", True))
 opts.Add(BoolVariable("builtin_libwebp", "Use the built-in libwebp library", True))
 opts.Add(BoolVariable("builtin_wslay", "Use the built-in wslay library", True))
 opts.Add(BoolVariable("builtin_mbedtls", "Use the built-in mbedTLS library", True))
 opts.Add(BoolVariable("builtin_miniupnpc", "Use the built-in miniupnpc library", True))
-opts.Add(BoolVariable("builtin_opus", "Use the built-in Opus library", True))
 opts.Add(BoolVariable("builtin_pcre2", "Use the built-in PCRE2 library", True))
 opts.Add(BoolVariable("builtin_pcre2_with_jit", "Use JIT compiler for the built-in PCRE2 library", True))
 opts.Add(BoolVariable("builtin_recast", "Use the built-in Recast library", True))
