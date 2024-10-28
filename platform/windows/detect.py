@@ -114,7 +114,6 @@ def setup_msvc_manual(env):
     # Force bits arg
     # (Actually msys2 mingw can support 64-bit, we could detect that)
     env["bits"] = "32"
-    env["x86_libtheora_opt_vc"] = True
 
     # find compiler manually
     compiler_version_str = methods.detect_visual_c_compiler_version(env["ENV"])
@@ -123,7 +122,6 @@ def setup_msvc_manual(env):
     # If building for 64bit architecture, disable assembly optimisations for 32 bit builds (theora as of writing)... vc compiler for 64bit can not compile _asm
     if compiler_version_str == "amd64" or compiler_version_str == "x86_amd64":
         env["bits"] = "64"
-        env["x86_libtheora_opt_vc"] = False
         print("Compiled program architecture will be a 64 bit executable (forcing bits=64).")
     elif compiler_version_str == "x86" or compiler_version_str == "amd64_x86":
         print("Compiled program architecture will be a 32 bit executable. (forcing bits=32).")
@@ -161,8 +159,6 @@ def setup_msvc_auto(env):
     else:
         env["bits"] = "32"
     print("Found MSVC version %s, arch %s, bits=%s" % (env["MSVC_VERSION"], env["TARGET_ARCH"], env["bits"]))
-    if env["TARGET_ARCH"] in ("amd64", "x86_64"):
-        env["x86_libtheora_opt_vc"] = False
 
 
 def setup_mingw(env):
@@ -388,7 +384,6 @@ def configure_mingw(env):
         env["AR"] = mingw_prefix + "gcc-ar"
         env["RANLIB"] = mingw_prefix + "gcc-ranlib"
 
-    env["x86_libtheora_opt_gcc"] = True
 
     if env["use_lto"]:
         if not env["use_llvm"] and env.GetOption("num_jobs") > 1:
