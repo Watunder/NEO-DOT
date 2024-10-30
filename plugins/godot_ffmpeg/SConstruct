@@ -1,0 +1,151 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import shutil
+import subprocess
+
+if sys.version_info < (3,):
+    def decode_utf8(x):
+        return x
+else:
+    import codecs
+    def decode_utf8(x):
+        return codecs.utf_8_decode(x)[0]
+
+# Workaround for MinGW. See:
+# http://www.scons.org/wiki/LongCmdLinesOnWin32
+if (os.name=="nt"):
+    import subprocess
+
+    def mySubProcess(cmdline,env):
+        #print "SPAWNED : " + cmdline
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, startupinfo=startupinfo, shell = False, env = env)
+        data, err = proc.communicate()
+        rv = proc.wait()
+        if rv:
+            print("=====")
+            print(err.decode("utf-8"))
+            print("=====")
+        return rv
+
+    def mySpawn(sh, escape, cmd, args, env):
+
+        newargs = " ".join(args[1:])
+        cmdline = cmd + " " + newargs
+
+        rv=0
+        if len(cmdline) > 32000 and cmd.endswith("ar") :
+            cmdline = cmd + " " + args[1] + " " + args[2] + " "
+            for i in range(3,len(args)) :
+                rv = mySubProcess( cmdline + args[i], env )
+                if rv :
+                    break
+        else:
+            rv = mySubProcess( cmdline, env )
+
+        return rv
+
+def add_sources(sources, dir, extension):
+    for f in os.listdir(dir):
+        if f.endswith("." + extension):
+            sources.append(dir + "/" + f)
+
+# Try to detect the host platform automatically.
+# This is used if no `platform` argument is passed
+if sys.platform == "win32" or sys.platform == "msys":
+    host_platform = "windows"
+else:
+    raise ValueError(
+        "Could not detect platform automatically, please specify with "
+        "platform=<platform>"
+    )
+
+opts = Variables([], ARGUMENTS)
+opts.Add(EnumVariable(
+    "platform",
+    "Target platform",
+    host_platform,
+    allowed_values=("windows"),
+    ignorecase=2
+))
+opts.Add(EnumVariable(
+    "bits",
+    "Target platform bits",
+    "default",
+    ("default", "64")
+))
+opts.Add(BoolVariable(
+    "use_mingw",
+    "Use the MinGW compiler instead of MSVC - only effective on Windows",
+    False
+))
+# Must be the same setting as used for cpp_bindings
+opts.Add(EnumVariable(
+    "target",
+    "Compilation target",
+    "debug",
+    allowed_values=("debug", "release"),
+    ignorecase=2
+))
+
+env = Environment(ENV = os.environ)
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
+
+
+if env["bits"] == "default":
+    env["bits"] = "64"
+
+
+if env["platform"] == "windows":
+    # MSVC
+    env.Append(LINKFLAGS=["/DEFAULTLIB:winmm.lib"])
+    if env["target"] == "debug":
+        env.Append(CFLAGS=["/std:c17", "/WX", "/D_DEBUG", "/MDd"])
+    elif env["target"] == "release":
+        env.Append(CFLAGS=["/std:c17", "/WX", "/DNDEBUG", "/MD"])
+
+    target_path = "libffmpeg.win" + env["bits"] + ".dll"
+
+
+# Sources to compile
+sources = []
+
+
+## godot_ffmpeg
+godot_ffmpeg_source_root = "src"
+add_sources(sources, godot_ffmpeg_source_root, "c")
+
+
+## ffmpeg
+ffmpeg_headers_path = "ffmpeg/{}/{}/".format(
+    env["platform"],
+    env["arch"] if env["platform"] != "windows" else "x64"
+)
+
+## gdnative
+godot_headers_path = "../../modules/gdnative/include/"
+
+env.Append(CPPPATH=[
+    godot_headers_path,
+    ffmpeg_headers_path + "include/"
+])
+
+env.Append(LIBPATH=[
+    ffmpeg_headers_path + "lib/"
+])
+
+env.Append(LIBS=[
+    "avformat",
+    "avcodec",
+    "avutil",
+    "swresample",
+    "swscale"
+])
+
+library = env.SharedLibrary("bin/" + target_path, source=sources)
+Default(library)
