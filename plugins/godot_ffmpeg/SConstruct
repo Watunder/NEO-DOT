@@ -2,7 +2,6 @@
 
 import os
 import sys
-import shutil
 import subprocess
 
 if sys.version_info < (3,):
@@ -78,6 +77,13 @@ opts.Add(EnumVariable(
     "default",
     ("default", "64")
 ))
+opts.Add(EnumVariable(
+    "arch",
+    "Target platform arch",
+    "x86_64",
+    allowed_values=("x86_64"),
+    ignorecase=2
+))
 opts.Add(BoolVariable(
     "use_mingw",
     "Use the MinGW compiler instead of MSVC - only effective on Windows",
@@ -105,9 +111,9 @@ if env["platform"] == "windows":
     # MSVC
     env.Append(LINKFLAGS=["/DEFAULTLIB:winmm.lib"])
     if env["target"] == "debug":
-        env.Append(CFLAGS=["/std:c17", "/WX", "/D_DEBUG", "/MDd"])
+        env.Append(CFLAGS=["/std:c17", "/WX", "/D_DEBUG", "/MDd", "/utf-8"])
     elif env["target"] == "release":
-        env.Append(CFLAGS=["/std:c17", "/WX", "/DNDEBUG", "/MD"])
+        env.Append(CFLAGS=["/std:c17", "/WX", "/DNDEBUG", "/MD" , "/utf-8"])
 
     target_path = "libffmpeg.win" + env["bits"] + ".dll"
 
@@ -122,9 +128,9 @@ add_sources(sources, godot_ffmpeg_source_root, "c")
 
 
 ## ffmpeg
-ffmpeg_headers_path = "ffmpeg/{}/{}/".format(
+ffmpeg_headers_path = "ffmpeg_build/{}/{}/".format(
     env["platform"],
-    env["arch"] if env["platform"] != "windows" else "x64"
+    env["arch"]
 )
 
 ## gdnative
@@ -136,7 +142,7 @@ env.Append(CPPPATH=[
 ])
 
 env.Append(LIBPATH=[
-    ffmpeg_headers_path + "lib/"
+    ffmpeg_headers_path + "bin/"
 ])
 
 env.Append(LIBS=[
