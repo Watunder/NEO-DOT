@@ -1,3 +1,6 @@
 [submodule "plugins/godot_effekseer/effekseer"]
 	path = plugins/godot_effekseer/effekseer
 	url = git@github.com:effekseer/Effekseer.git
+[submodule "plugins/godot_ffmpeg/ffmpeg"]
+	path = plugins/godot_ffmpeg/ffmpeg
+	url = git@github.com:FFmpeg/FFmpeg.git
