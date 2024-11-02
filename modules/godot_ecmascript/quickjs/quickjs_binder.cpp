@@ -814,15 +814,14 @@ Error QuickJSBinder::js_evalute_module(JSContext *ctx, QuickJSBinder::ModuleCach
 			JS_Throw(ctx, e);
 			return ERR_PARSE_ERROR;
 		} else {
-			ret = await_promise(ctx, ret);
-			if (JS_IsException(ret)) {
-				JSValue e = JS_GetException(ctx);
-				dump_exception(ctx, e, r_error);
-				JS_Throw(ctx, e);
-				return ERR_PARSE_ERROR;
-			} else {
-				p_module->flags |= MODULE_FLAG_EVALUATED;
-			}
+			p_module->flags |= MODULE_FLAG_EVALUATED;
+		}
+		ret = await_promise(ctx, ret);
+		if (JS_IsException(ret)) {
+			JSValue e = JS_GetException(ctx);
+			dump_exception(ctx, e, r_error);
+			JS_Throw(ctx, e);
+			return ERR_PARSE_ERROR;
 		}
 		JS_FreeValue(ctx, ret);
 	}

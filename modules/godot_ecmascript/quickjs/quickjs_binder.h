@@ -16,7 +16,7 @@
 #define BINDING_DATA_FROM_JS(ctx, p_val) (ECMAScriptGCHandler *)JS_GetOpaque((p_val), QuickJSBinder::get_origin_class_id((ctx)))
 #define GET_JSVALUE(p_gc_handler) JS_MKPTR(JS_TAG_OBJECT, (p_gc_handler).ecma_object)
 #define NO_MODULE_EXPORT_SUPPORT 0
-#define MODULE_HAS_REFCOUNT 0 // module seems don't follow the refrence count rule in quickjs
+#define MODULE_HAS_REFCOUNT 1
 #define MAX_ARGUMENT_COUNT 50
 #define PROP_NAME_CONSOLE_LOG_OBJECT_TO_JSON "LOG_OBJECT_TO_JSON"
 #define ENDL "\r\n"
