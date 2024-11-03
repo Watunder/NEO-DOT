@@ -473,7 +473,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 				owner = paste_parent;
 			}
 
-			editor_data->get_undo_redo()->create_action(TTR("Paste Node(s)"));
+			editor_data->get_undo_redo()->create_action(TTR("Paste Node(s)"), UndoRedo::MERGE_DISABLE, edited_scene);
 			editor_data->get_undo_redo()->add_do_method(editor_selection, "clear");
 
 			Map<RES, RES> resource_remap;
@@ -555,7 +555,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			if (selection.empty())
 				return;
 
-			editor_data->get_undo_redo()->create_action(TTR("Detach Script"));
+			editor_data->get_undo_redo()->create_action(TTR("Detach Script"), UndoRedo::MERGE_DISABLE, EditorNode::get_singleton()->get_edited_scene());
 			editor_data->get_undo_redo()->add_do_method(editor, "push_item", (Script *)NULL);
 
 			for (int i = 0; i < selection.size(); i++) {
@@ -663,7 +663,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			if (selection.size() == 0)
 				break;
 
-			editor_data->get_undo_redo()->create_action(TTR("Duplicate Node(s)"));
+			editor_data->get_undo_redo()->create_action(TTR("Duplicate Node(s)"), UndoRedo::MERGE_DISABLE, selection.front()->get());
 			editor_data->get_undo_redo()->add_do_method(editor_selection, "clear");
 
 			Node *dupsingle = NULL;
@@ -1942,9 +1942,9 @@ void SceneTreeDock::_delete_confirm(bool p_cut) {
 	editor->get_editor_plugins_over()->make_visible(false);
 
 	if (p_cut) {
-		editor_data->get_undo_redo()->create_action(TTR("Cut Node(s)"));
+		editor_data->get_undo_redo()->create_action(TTR("Cut Node(s)"), UndoRedo::MERGE_DISABLE, remove_list.front()->get());
 	} else {
-		editor_data->get_undo_redo()->create_action(TTR("Remove Node(s)"));
+		editor_data->get_undo_redo()->create_action(TTR("Remove Node(s)"), UndoRedo::MERGE_DISABLE, remove_list.front()->get());
 	}
 
 	bool entire_scene = false;
@@ -1953,6 +1953,7 @@ void SceneTreeDock::_delete_confirm(bool p_cut) {
 
 		if (E->get() == edited_scene) {
 			entire_scene = true;
+			break;
 		}
 	}
 
@@ -2089,7 +2090,7 @@ void SceneTreeDock::_do_create(Node *p_parent) {
 	Node *child = Object::cast_to<Node>(c);
 	ERR_FAIL_COND(!child);
 
-	editor_data->get_undo_redo()->create_action(TTR("Create Node"));
+	editor_data->get_undo_redo()->create_action_for_history(TTR("Create Node"), editor_data->get_current_edited_scene_history_id());
 
 	if (edited_scene) {
 

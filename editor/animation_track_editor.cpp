@@ -3426,7 +3426,7 @@ void AnimationTrackEditor::_track_remove_request(int p_track) {
 	int idx = p_track;
 	if (idx >= 0 && idx < animation->get_track_count()) {
 
-		undo_redo->create_action(TTR("Remove Anim Track"));
+		undo_redo->create_action(TTR("Remove Anim Track"), UndoRedo::MERGE_DISABLE, animation.ptr());
 		undo_redo->add_do_method(this, "_clear_selection", false);
 		undo_redo->add_do_method(animation.ptr(), "remove_track", idx);
 		undo_redo->add_undo_method(animation.ptr(), "add_track", animation->track_get_type(idx), idx);
