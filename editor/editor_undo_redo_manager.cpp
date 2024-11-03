@@ -132,15 +132,15 @@ void EditorUndoRedoManager::create_action(const String &p_name, UndoRedo::MergeM
 
 void EditorUndoRedoManager::add_do_method(Object *p_object, const String &p_method, VARIANT_ARG_DECLARE) {
 	UndoRedo *undo_redo = get_history_for_object(p_object).undo_redo;
-	if (p_arg5) {
+	if (p_arg5.get_type() != Variant::NIL) {
 		undo_redo->add_do_method(p_object, p_method, p_arg1, p_arg2, p_arg3, p_arg4, p_arg5);
-	} else if (p_arg4) {
+	} else if (p_arg4.get_type() != Variant::NIL) {
 		undo_redo->add_do_method(p_object, p_method, p_arg1, p_arg2, p_arg3, p_arg4);
-	} else if (p_arg3) {
+	} else if (p_arg3.get_type() != Variant::NIL) {
 		undo_redo->add_do_method(p_object, p_method, p_arg1, p_arg2, p_arg3);
-	} else if (p_arg2) {
+	} else if (p_arg2.get_type() != Variant::NIL) {
 		undo_redo->add_do_method(p_object, p_method, p_arg1, p_arg2);
-	} else if (p_arg1) {
+	} else if (p_arg1.get_type() != Variant::NIL) {
 		undo_redo->add_do_method(p_object, p_method, p_arg1);
 	} else {
 		undo_redo->add_do_method(p_object, p_method);
@@ -149,15 +149,15 @@ void EditorUndoRedoManager::add_do_method(Object *p_object, const String &p_meth
 
 void EditorUndoRedoManager::add_undo_method(Object *p_object, const String &p_method, VARIANT_ARG_DECLARE) {
 	UndoRedo *undo_redo = get_history_for_object(p_object).undo_redo;
-	if (p_arg5) {
+	if (p_arg5.get_type() != Variant::NIL) {
 		undo_redo->add_undo_method(p_object, p_method, p_arg1, p_arg2, p_arg3, p_arg4, p_arg5);
-	} else if (p_arg4) {
+	} else if (p_arg4.get_type() != Variant::NIL) {
 		undo_redo->add_undo_method(p_object, p_method, p_arg1, p_arg2, p_arg3, p_arg4);
-	} else if (p_arg3) {
+	} else if (p_arg3.get_type() != Variant::NIL) {
 		undo_redo->add_undo_method(p_object, p_method, p_arg1, p_arg2, p_arg3);
-	} else if (p_arg2) {
+	} else if (p_arg2.get_type() != Variant::NIL) {
 		undo_redo->add_undo_method(p_object, p_method, p_arg1, p_arg2);
-	} else if (p_arg1) {
+	} else if (p_arg1.get_type() != Variant::NIL) {
 		undo_redo->add_undo_method(p_object, p_method, p_arg1);
 	} else {
 		undo_redo->add_undo_method(p_object, p_method);
