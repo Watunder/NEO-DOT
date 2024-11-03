@@ -473,7 +473,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 				owner = paste_parent;
 			}
 
-			editor_data->get_undo_redo()->create_action(TTR("Paste Node(s)"));
+			editor_data->get_undo_redo()->create_action(TTR("Paste Node(s)"), UndoRedo::MERGE_DISABLE, edited_scene);
 			editor_data->get_undo_redo()->add_do_method(editor_selection, "clear");
 
 			Map<RES, RES> resource_remap;
@@ -663,7 +663,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			if (selection.size() == 0)
 				break;
 
-			editor_data->get_undo_redo()->create_action(TTR("Duplicate Node(s)"));
+			editor_data->get_undo_redo()->create_action(TTR("Duplicate Node(s)"), UndoRedo::MERGE_DISABLE, selection.front()->get());
 			editor_data->get_undo_redo()->add_do_method(editor_selection, "clear");
 
 			Node *dupsingle = NULL;
