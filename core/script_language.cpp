@@ -173,9 +173,17 @@ void ScriptServer::init_languages() {
 		}
 	}
 
+	int idx_NativeScript;
 	for (int i = 0; i < _language_count; i++) {
+		if (_languages[i]->get_type() == "NativeScript") {
+			idx_NativeScript = i;
+			continue;
+		}
+
 		_languages[i]->init();
 	}
+	// this avoids language init interruption (when running with "--gdnative-generate-json-api")
+	_languages[idx_NativeScript]->init();
 }
 
 void ScriptServer::finish_languages() {
