@@ -1942,9 +1942,9 @@ void SceneTreeDock::_delete_confirm(bool p_cut) {
 	editor->get_editor_plugins_over()->make_visible(false);
 
 	if (p_cut) {
-		editor_data->get_undo_redo()->create_action(TTR("Cut Node(s)"));
+		editor_data->get_undo_redo()->create_action(TTR("Cut Node(s)"), UndoRedo::MERGE_DISABLE, remove_list.front()->get());
 	} else {
-		editor_data->get_undo_redo()->create_action(TTR("Remove Node(s)"));
+		editor_data->get_undo_redo()->create_action(TTR("Remove Node(s)"), UndoRedo::MERGE_DISABLE, remove_list.front()->get());
 	}
 
 	bool entire_scene = false;
@@ -1953,6 +1953,7 @@ void SceneTreeDock::_delete_confirm(bool p_cut) {
 
 		if (E->get() == edited_scene) {
 			entire_scene = true;
+			break;
 		}
 	}
 
