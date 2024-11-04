@@ -1688,8 +1688,12 @@ void EditorNode::_dialog_action(String p_file) {
 				_add_to_recent_scenes(p_file);
 				save_layout();
 
-				if (scene_idx != -1)
+				if (scene_idx != -1) {
 					_discard_changes();
+				} else {
+					// Update the path of the edited scene
+					editor_data.set_scene_path(editor_data.get_edited_scene(), p_file);
+				}
 			}
 
 		} break;
