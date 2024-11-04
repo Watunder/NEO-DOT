@@ -555,7 +555,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			if (selection.empty())
 				return;
 
-			editor_data->get_undo_redo()->create_action(TTR("Detach Script"));
+			editor_data->get_undo_redo()->create_action(TTR("Detach Script"), UndoRedo::MERGE_DISABLE, EditorNode::get_singleton()->get_edited_scene());
 			editor_data->get_undo_redo()->add_do_method(editor, "push_item", (Script *)NULL);
 
 			for (int i = 0; i < selection.size(); i++) {
