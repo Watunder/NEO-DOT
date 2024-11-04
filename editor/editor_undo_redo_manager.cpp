@@ -259,7 +259,9 @@ void EditorUndoRedoManager::add_undo_reference(Object *p_object) {
 }
 
 void EditorUndoRedoManager::commit_action() {
-	ERR_FAIL_COND(pending_action.history_id == INVALID_HISTORY);
+	if (pending_action.history_id == INVALID_HISTORY) {
+		return; // Empty action, do nothing.
+	}
 	is_committing = true;
 
 	History &history = get_or_create_history(pending_action.history_id);
