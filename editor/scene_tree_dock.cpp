@@ -2089,7 +2089,7 @@ void SceneTreeDock::_do_create(Node *p_parent) {
 	Node *child = Object::cast_to<Node>(c);
 	ERR_FAIL_COND(!child);
 
-	editor_data->get_undo_redo()->create_action_for_history(TTR("Create Node"), editor_data->get_current_edited_scene_history_id());
+	editor_data->get_undo_redo()->create_action(TTR("Create Node"));
 
 	if (edited_scene) {
 
