@@ -291,6 +291,8 @@ public:
 
 	bool is_skip_breakpoints();
 
+	void register_undo_redo(UndoRedo *p_undo_redo);
+
 	virtual Size2 get_minimum_size() const;
 	ScriptEditorDebugger(EditorNode *p_editor = NULL);
 	~ScriptEditorDebugger();

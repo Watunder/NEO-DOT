@@ -45,8 +45,8 @@ EditorUndoRedoManager::History &EditorUndoRedoManager::get_or_create_history(int
 		history.id = p_idx;
 		history_map[p_idx] = history;
 
-		//EditorNode::get_singleton()->get_log()->register_undo_redo(history.undo_redo);
-		//ScriptEditorDebugger::get_singleton()->register_undo_redo(history.undo_redo);
+		EditorNode::get_singleton()->get_log()->register_undo_redo(history.undo_redo);
+		ScriptEditor::get_singleton()->get_debugger()->register_undo_redo(history.undo_redo);
 	}
 	return history_map[p_idx];
 }
