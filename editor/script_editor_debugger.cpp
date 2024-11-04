@@ -2392,6 +2392,11 @@ void ScriptEditorDebugger::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("show_debugger", PropertyInfo(Variant::BOOL, "reallydid")));
 }
 
+void ScriptEditorDebugger::register_undo_redo(UndoRedo *p_undo_redo) {
+	p_undo_redo->set_method_notify_callback(_method_changeds, this);
+	p_undo_redo->set_property_notify_callback(_property_changeds, this);
+}
+
 ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 
 	add_constant_override("margin_left", -EditorNode::get_singleton()->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_LEFT));
