@@ -225,6 +225,7 @@ private:
 	void _network_profiler_activate(bool p_enable);
 
 	void _paused();
+	void _next();
 
 	void _set_remote_object(ObjectID p_id, ScriptEditorDebuggerInspectedObject *p_obj);
 	void _clear_remote_objects();

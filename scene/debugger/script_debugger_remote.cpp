@@ -818,6 +818,17 @@ void ScriptDebuggerRemote::_poll_events() {
 
 			multiplayer->profiling_end();
 			profiling_network = false;
+		} else if (command == "pause_changed") {
+			bool enable = cmd[1];
+
+			if (scene_tree) {
+				scene_tree->set_pause(enable);
+			}
+		} else if (command == "next_frame") {
+			if (scene_tree && scene_tree->is_paused()) {
+				scene_tree->set_pause(false);
+				VisualServer::get_singleton()->connect("frame_post_draw", scene_tree, "_next_frame");
+			}
 		} else if (command == "override_camera_2D:set") {
 			bool enforce = cmd[1];
 
