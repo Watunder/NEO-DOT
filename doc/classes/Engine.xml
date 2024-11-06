@@ -136,6 +136,12 @@
 				Returns [code]true[/code] if the game is inside the fixed process and physics phase of the game loop.
 			</description>
 		</method>
+		<method name="get_unfrozen_time_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the value of [code]time_scale[/code], ignoring whether [code]freeze_time_scale[/code] is true or not.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="editor_hint" type="bool" setter="set_editor_hint" getter="is_editor_hint" default="true">
@@ -161,6 +167,9 @@
 		</member>
 		<member name="time_scale" type="float" setter="set_time_scale" getter="get_time_scale" default="1.0">
 			Controls how fast or slow the in-game clock ticks versus the real life one. It defaults to 1.0. A value of 2.0 means the game moves twice as fast as real life, whilst a value of 0.5 means the game moves at half the regular speed.
+		</member>
+		<member name="freeze_time_scale" type="bool" setter="set_freeze_time_scale" getter="get_freeze_time_scale" default="false">
+			If [code]true[/code], [code]time_scale[/code] always get 0.
 		</member>
 	</members>
 	<constants>

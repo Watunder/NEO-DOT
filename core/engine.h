@@ -70,6 +70,8 @@ private:
 
 	bool editor_hint;
 
+	bool freeze_time_scale;
+
 	static Engine *singleton;
 
 public:
@@ -97,6 +99,9 @@ public:
 
 	void set_time_scale(float p_scale);
 	float get_time_scale() const;
+	void set_freeze_time_scale(bool p_frozen);
+	bool get_freeze_time_scale() const;
+	float get_unfrozen_time_scale() const;
 
 	void set_frame_delay(uint32_t p_msec);
 	uint32_t get_frame_delay() const;
