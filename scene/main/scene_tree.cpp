@@ -904,6 +904,14 @@ void SceneTree::set_pause(bool p_enabled) {
 	if (p_enabled == pause)
 		return;
 	pause = p_enabled;
+
+#ifdef TOOLS_ENABLED
+	Array arr;
+	arr.push_back(pause);
+	ScriptDebugger::get_singleton()->send_message("set_pause", arr);
+#endif
+
+	Engine::get_singleton()->set_freeze_time_scale(p_enabled);
 	PhysicsServer::get_singleton()->set_active(!p_enabled);
 	Physics2DServer::get_singleton()->set_active(!p_enabled);
 	if (get_root())
@@ -914,6 +922,16 @@ bool SceneTree::is_paused() const {
 
 	return pause;
 }
+
+#ifdef TOOLS_ENABLED
+void SceneTree::_next_frame() {
+	if (VisualServer::get_singleton()->is_connected("frame_post_draw", this, "_next_frame")) {
+		VisualServer::get_singleton()->disconnect("frame_post_draw", this, "_next_frame");
+
+		set_pause(true);
+	}
+}
+#endif
 
 void SceneTree::_call_input_pause(const StringName &p_group, const StringName &p_method, const Ref<InputEvent> &p_input) {
 
@@ -1848,6 +1866,9 @@ void SceneTree::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_pause", "enable"), &SceneTree::set_pause);
 	ClassDB::bind_method(D_METHOD("is_paused"), &SceneTree::is_paused);
+#ifdef TOOLS_ENABLED
+	ClassDB::bind_method(D_METHOD("_next_frame"), &SceneTree::_next_frame);
+#endif
 	ClassDB::bind_method(D_METHOD("set_input_as_handled"), &SceneTree::set_input_as_handled);
 	ClassDB::bind_method(D_METHOD("is_input_handled"), &SceneTree::is_input_handled);
 

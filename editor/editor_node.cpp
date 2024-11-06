@@ -596,7 +596,6 @@ void EditorNode::_notification(int p_what) {
 			play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 			play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 			pause_button->set_icon(gui_base->get_icon("Pause", "EditorIcons"));
-			stop_button->set_icon(gui_base->get_icon("Stop", "EditorIcons"));
 
 			prev_scene->set_icon(gui_base->get_icon("PrevScene", "EditorIcons"));
 			distraction_free->set_icon(gui_base->get_icon("DistractionFree", "EditorIcons"));
@@ -2180,11 +2179,8 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	}
 
 	play_button->set_pressed(false);
-	play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
 	play_scene_button->set_pressed(false);
-	play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 	play_custom_scene_button->set_pressed(false);
-	play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 
 	String run_filename;
 	String args;
@@ -2262,16 +2258,18 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	emit_signal("play_pressed");
 	if (p_current) {
 		play_scene_button->set_pressed(true);
-		play_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		play_scene_button->set_tooltip(TTR("Stop the edited scene."));
+		play_scene_button->get_shortcut()->set_name(TTR("Stop Current"));
 	} else if (p_custom != "") {
 		run_custom_filename = p_custom;
 		play_custom_scene_button->set_pressed(true);
-		play_custom_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		play_custom_scene_button->set_tooltip(TTR("Stop the custom scene."));
+		play_custom_scene_button->get_shortcut()->set_name(TTR("Stop Custom"));
 	} else {
 		play_button->set_pressed(true);
-		play_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		play_button->set_tooltip(TTR("Stop the main scene."));
+		play_button->get_shortcut()->set_name(TTR("Stop Main"));
 	}
-	stop_button->set_disabled(false);
 
 	_playing_edited = p_current;
 }
@@ -2620,12 +2618,14 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			editor_run.stop();
 			run_custom_filename.clear();
 			play_button->set_pressed(false);
-			play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
+			play_button->set_tooltip(TTR("Play the main scene."));
+			play_button->get_shortcut()->set_name(TTR("Play Main"));
 			play_scene_button->set_pressed(false);
-			play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
+			play_scene_button->set_tooltip(TTR("Play the current scene."));
+			play_scene_button->get_shortcut()->set_name(TTR("Play Current"));
 			play_custom_scene_button->set_pressed(false);
-			play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
-			stop_button->set_disabled(true);
+			play_custom_scene_button->set_tooltip(TTR("Play the custom scene."));
+			play_custom_scene_button->get_shortcut()->set_name(TTR("Play Custom"));
 
 			if (bool(EDITOR_GET("run/output/always_close_output_on_stop"))) {
 				for (int i = 0; i < bottom_panel_items.size(); i++) {
@@ -3828,7 +3828,6 @@ void EditorNode::_quick_run() {
 void EditorNode::notify_child_process_exited() {
 
 	_menu_option_confirm(RUN_STOP, false);
-	stop_button->set_pressed(false);
 	editor_run.stop();
 }
 
@@ -4760,19 +4759,31 @@ bool EditorNode::ensure_main_scene(bool p_from_native) {
 }
 
 void EditorNode::run_play() {
-	_menu_option_confirm(RUN_STOP, true);
-	_run(false);
+	if (is_run_playing() && !play_scene_button->is_pressed() && !play_custom_scene_button->is_pressed()) {
+		_menu_option_confirm(RUN_STOP, false);
+	} else {
+		_menu_option_confirm(RUN_STOP, true);
+		_run(false);
+	}
 }
 
 void EditorNode::run_play_current() {
-	_save_default_environment();
-	_menu_option_confirm(RUN_STOP, true);
-	_run(true);
+	if (is_run_playing() && !play_button->is_pressed() && !play_custom_scene_button->is_pressed()) {
+		_menu_option_confirm(RUN_STOP, false);
+	} else {
+		_save_default_environment();
+		_menu_option_confirm(RUN_STOP, true);
+		_run(true);
+	}
 }
 
 void EditorNode::run_play_custom(const String &p_custom) {
-	_menu_option_confirm(RUN_STOP, true);
-	_run(false, p_custom);
+	if (is_run_playing() && !play_button->is_pressed() && !play_scene_button->is_pressed()) {
+		_menu_option_confirm(RUN_STOP, false);
+	} else {
+		_menu_option_confirm(RUN_STOP, true);
+		_run(false, p_custom);
+	}
 }
 
 void EditorNode::run_stop() {
@@ -6557,24 +6568,28 @@ EditorNode::EditorNode() {
 	HBoxContainer *play_hb = memnew(HBoxContainer);
 	menu_hb->add_child(play_hb);
 
+	run_native = memnew(EditorRunNative);
+	play_hb->add_child(run_native);
+	run_native->connect("native_run", this, "_menu_option", varray(RUN_PLAY_NATIVE));
+
 	play_button = memnew(ToolButton);
 	play_hb->add_child(play_button);
 	play_button->set_toggle_mode(true);
 	play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
 	play_button->set_focus_mode(Control::FOCUS_NONE);
 	play_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY));
-	play_button->set_tooltip(TTR("Play the project."));
+	play_button->set_tooltip(TTR("Play the main scene."));
 #ifdef OSX_ENABLED
-	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play"), KEY_MASK_CMD | KEY_B));
+	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play Main"), KEY_MASK_CMD | KEY_B));
 #else
-	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play"), KEY_F5));
+	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play Main"), KEY_F5));
 #endif
 
 	pause_button = memnew(ToolButton);
 	pause_button->set_toggle_mode(true);
 	pause_button->set_icon(gui_base->get_icon("Pause", "EditorIcons"));
 	pause_button->set_focus_mode(Control::FOCUS_NONE);
-	pause_button->set_tooltip(TTR("Pause the scene execution for debugging."));
+	pause_button->set_tooltip(TTR("Pause the scene."));
 	pause_button->set_disabled(true);
 	play_hb->add_child(pause_button);
 #ifdef OSX_ENABLED
@@ -6583,22 +6598,18 @@ EditorNode::EditorNode() {
 	pause_button->set_shortcut(ED_SHORTCUT("editor/pause_scene", TTR("Pause Scene"), KEY_F7));
 #endif
 
-	stop_button = memnew(ToolButton);
-	play_hb->add_child(stop_button);
-	stop_button->set_focus_mode(Control::FOCUS_NONE);
-	stop_button->set_icon(gui_base->get_icon("Stop", "EditorIcons"));
-	stop_button->connect("pressed", this, "_menu_option", make_binds(RUN_STOP));
-	stop_button->set_tooltip(TTR("Stop the scene."));
-	stop_button->set_disabled(true);
+	next_button = memnew(ToolButton);
+	next_button->set_toggle_mode(false);
+	next_button->set_icon(gui_base->get_icon("Next", "EditorIcons"));
+	next_button->set_focus_mode(Control::FOCUS_NONE);
+	next_button->set_tooltip(TTR("Call the next frame."));
+	next_button->set_disabled(true);
+	play_hb->add_child(next_button);
 #ifdef OSX_ENABLED
-	stop_button->set_shortcut(ED_SHORTCUT("editor/stop", TTR("Stop"), KEY_MASK_CMD | KEY_PERIOD));
+	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_X));
 #else
-	stop_button->set_shortcut(ED_SHORTCUT("editor/stop", TTR("Stop"), KEY_F8));
+	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_F8));
 #endif
-
-	run_native = memnew(EditorRunNative);
-	play_hb->add_child(run_native);
-	run_native->connect("native_run", this, "_menu_option", varray(RUN_PLAY_NATIVE));
 
 	play_scene_button = memnew(ToolButton);
 	play_hb->add_child(play_scene_button);
@@ -6606,11 +6617,11 @@ EditorNode::EditorNode() {
 	play_scene_button->set_focus_mode(Control::FOCUS_NONE);
 	play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 	play_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_SCENE));
-	play_scene_button->set_tooltip(TTR("Play the edited scene."));
+	play_scene_button->set_tooltip(TTR("Play the current scene."));
 #ifdef OSX_ENABLED
-	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Scene"), KEY_MASK_CMD | KEY_R));
+	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Current"), KEY_MASK_CMD | KEY_R));
 #else
-	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Scene"), KEY_F6));
+	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Current"), KEY_F6));
 #endif
 
 	play_custom_scene_button = memnew(ToolButton);
@@ -6619,11 +6630,11 @@ EditorNode::EditorNode() {
 	play_custom_scene_button->set_focus_mode(Control::FOCUS_NONE);
 	play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 	play_custom_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_CUSTOM_SCENE));
-	play_custom_scene_button->set_tooltip(TTR("Play custom scene"));
+	play_custom_scene_button->set_tooltip(TTR("Play the custom scene."));
 #ifdef OSX_ENABLED
-	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom Scene"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_R));
+	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_R));
 #else
-	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom Scene"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F5));
+	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F5));
 #endif
 
 	HBoxContainer *right_menu_hb = memnew(HBoxContainer);

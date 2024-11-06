@@ -277,7 +277,7 @@ private:
 	ToolButton *prev_scene;
 	ToolButton *play_button;
 	ToolButton *pause_button;
-	ToolButton *stop_button;
+	ToolButton *next_button;
 	ToolButton *run_settings_button;
 	ToolButton *play_scene_button;
 	ToolButton *play_custom_scene_button;
@@ -831,6 +831,7 @@ public:
 	bool is_exiting() const { return exiting; }
 
 	ToolButton *get_pause_button() { return pause_button; }
+	ToolButton *get_next_button() { return next_button; }
 
 	ToolButton *add_bottom_panel_item(String p_text, Control *p_item);
 	bool are_bottom_panels_hidden() const;

@@ -311,6 +311,7 @@ public:
 	_FORCE_INLINE_ float get_idle_process_time() const { return idle_process_time; }
 
 #ifdef TOOLS_ENABLED
+	void _next_frame();
 	bool is_node_being_edited(const Node *p_node) const;
 #else
 	bool is_node_being_edited(const Node *p_node) const { return false; }

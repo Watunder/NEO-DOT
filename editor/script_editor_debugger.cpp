@@ -254,6 +254,18 @@ void ScriptEditorDebugger::debug_break() {
 	ERR_FAIL_COND(connection.is_null());
 	ERR_FAIL_COND(!connection->is_connected_to_host());
 
+	if (EditorNode::get_singleton()->get_pause_button()->is_pressed()) {
+		dobreak->set_pressed(false);
+		return;
+	}
+
+	if (dobreak->is_pressed()) {
+		copy->set_disabled(false);
+		step->set_disabled(false);
+		next->set_disabled(false);
+		docontinue->set_disabled(false);
+	}
+
 	Array msg;
 	msg.push_back("break");
 	ppeer->put_var(msg);
@@ -573,8 +585,6 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 			tabs->set_current_tab(0);
 		}
 		profiler->set_enabled(false);
-		EditorNode::get_singleton()->get_pause_button()->set_pressed(true);
-		EditorNode::get_singleton()->make_bottom_panel_item_visible(this);
 		_clear_remote_objects();
 
 	} else if (p_msg == "debug_exit") {
@@ -593,7 +603,6 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		emit_signal("breaked", false, false, Variant());
 		profiler->set_enabled(true);
 		profiler->disable_seeking();
-		EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 	} else if (p_msg == "message:click_ctrl") {
 
 		clicked_ctrl->set_text(p_data[0]);
@@ -738,6 +747,10 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		vmem_total->set_tooltip(TTR("Bytes:") + " " + itos(total));
 		vmem_total->set_text(String::humanize_size(total));
 
+	} else if (p_msg == "message:set_pause") {
+		bool enable = p_data[0];
+		EditorNode::get_singleton()->get_pause_button()->set_pressed(enable);
+		EditorNode::get_singleton()->get_next_button()->set_disabled(!enable);
 	} else if (p_msg == "stack_dump") {
 
 		stack_dump->clear();
@@ -1665,6 +1678,8 @@ void ScriptEditorDebugger::stop() {
 	inspector->edit(NULL);
 	EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 	EditorNode::get_singleton()->get_pause_button()->set_disabled(true);
+	EditorNode::get_singleton()->get_next_button()->set_pressed(false);
+	EditorNode::get_singleton()->get_next_button()->set_disabled(true);
 	EditorNode::get_singleton()->get_scene_tree_dock()->hide_remote_tree();
 	EditorNode::get_singleton()->get_scene_tree_dock()->hide_tab_buttons();
 
@@ -2208,12 +2223,29 @@ void ScriptEditorDebugger::_paused() {
 	ERR_FAIL_COND(connection.is_null());
 	ERR_FAIL_COND(!connection->is_connected_to_host());
 
-	if (!breaked && EditorNode::get_singleton()->get_pause_button()->is_pressed()) {
-		debug_break();
+	if (breaked) {
+		EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
+		return;
 	}
 
-	if (breaked && !EditorNode::get_singleton()->get_pause_button()->is_pressed()) {
-		debug_continue();
+	bool enable = EditorNode::get_singleton()->get_pause_button()->is_pressed();
+
+	Array msg;
+	msg.push_back("pause_changed");
+	msg.push_back(enable);
+	ppeer->put_var(msg);
+
+	EditorNode::get_singleton()->get_next_button()->set_disabled(!enable);
+}
+
+void ScriptEditorDebugger::_next() {
+	ERR_FAIL_COND(connection.is_null());
+	ERR_FAIL_COND(!connection->is_connected_to_host());
+
+	if (EditorNode::get_singleton()->get_pause_button()->is_pressed()) {
+		Array msg;
+		msg.push_back("next_frame");
+		ppeer->put_var(msg);
 	}
 }
 
@@ -2369,6 +2401,7 @@ void ScriptEditorDebugger::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_tab_changed"), &ScriptEditorDebugger::_tab_changed);
 
 	ClassDB::bind_method(D_METHOD("_paused"), &ScriptEditorDebugger::_paused);
+	ClassDB::bind_method(D_METHOD("_next"), &ScriptEditorDebugger::_next);
 
 	ClassDB::bind_method(D_METHOD("_scene_tree_selected"), &ScriptEditorDebugger::_scene_tree_selected);
 	ClassDB::bind_method(D_METHOD("_scene_tree_folded"), &ScriptEditorDebugger::_scene_tree_folded);
@@ -2444,6 +2477,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		copy = memnew(ToolButton);
 		hbc->add_child(copy);
 		copy->set_tooltip(TTR("Copy Error"));
+		copy->set_disabled(true);
 		copy->connect("pressed", this, "debug_copy");
 
 		hbc->add_child(memnew(VSeparator));
@@ -2452,12 +2486,14 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		hbc->add_child(step);
 		step->set_tooltip(TTR("Step Into"));
 		step->set_shortcut(ED_GET_SHORTCUT("debugger/step_into"));
+		step->set_disabled(true);
 		step->connect("pressed", this, "debug_step");
 
 		next = memnew(ToolButton);
 		hbc->add_child(next);
 		next->set_tooltip(TTR("Step Over"));
 		next->set_shortcut(ED_GET_SHORTCUT("debugger/step_over"));
+		next->set_disabled(true);
 		next->connect("pressed", this, "debug_next");
 
 		hbc->add_child(memnew(VSeparator));
@@ -2472,6 +2508,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		hbc->add_child(docontinue);
 		docontinue->set_tooltip(TTR("Continue"));
 		docontinue->set_shortcut(ED_GET_SHORTCUT("debugger/continue"));
+		docontinue->set_disabled(true);
 		docontinue->connect("pressed", this, "debug_continue");
 
 		back = memnew(Button);
@@ -2770,6 +2807,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	last_warning_count = 0;
 
 	EditorNode::get_singleton()->get_pause_button()->connect("pressed", this, "_paused");
+	EditorNode::get_singleton()->get_next_button()->connect("pressed", this, "_next");
 }
 
 ScriptEditorDebugger::~ScriptEditorDebugger() {
