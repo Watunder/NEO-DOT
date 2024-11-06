@@ -776,6 +776,9 @@ public:
 
 	void set_time_scale(float p_scale);
 	float get_time_scale();
+	void set_freeze_time_scale(bool p_frozen);
+	bool get_freeze_time_scale();
+	float get_unfrozen_time_scale();
 
 	MainLoop *get_main_loop() const;
 

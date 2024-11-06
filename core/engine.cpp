@@ -86,6 +86,19 @@ void Engine::set_time_scale(float p_scale) {
 
 float Engine::get_time_scale() const {
 
+	return freeze_time_scale ? 0 : _time_scale;
+}
+
+void Engine::set_freeze_time_scale(bool p_frozen) {
+	freeze_time_scale = p_frozen;
+}
+
+bool Engine::get_freeze_time_scale() const {
+
+	return freeze_time_scale;
+}
+
+float Engine::get_unfrozen_time_scale() const {
 	return _time_scale;
 }
 
@@ -234,6 +247,7 @@ Engine::Engine() {
 	_frame_ticks = 0;
 	_frame_step = 0;
 	editor_hint = false;
+	freeze_time_scale = false;
 }
 
 Engine::Singleton::Singleton(const StringName &p_name, Object *p_ptr) :
