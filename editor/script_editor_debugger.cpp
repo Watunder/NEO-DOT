@@ -132,7 +132,7 @@ protected:
 			return false;
 
 		prop_values[p_name] = p_value;
-		emit_signal("value_edited", p_name, p_value);
+		emit_signal("value_edited", remote_object_id, p_name, p_value);
 		return true;
 	}
 
@@ -418,15 +418,16 @@ void ScriptEditorDebugger::_file_selected(const String &p_file) {
 	}
 }
 
-void ScriptEditorDebugger::_scene_tree_property_value_edited(const String &p_prop, const Variant &p_value) {
+void ScriptEditorDebugger::_scene_tree_property_value_edited(ObjectID p_object, const String &p_prop, const Variant &p_value) {
 
+	inspect_edited_object_timeout = 0.7; //avoid annoyance, don't request soon after editing
 	Array msg;
 	msg.push_back("set_object_property");
-	msg.push_back(inspected_object_id);
+	msg.push_back(p_object);
 	msg.push_back(p_prop);
 	msg.push_back(p_value);
+	msg.push_back(inspect_edited_object_timeout);
 	ppeer->put_var(msg);
-	inspect_edited_object_timeout = 0.7; //avoid annoyance, don't request soon after editing
 }
 
 void ScriptEditorDebugger::_scene_tree_property_select_object(ObjectID p_object) {
@@ -493,7 +494,8 @@ int ScriptEditorDebugger::_update_scene_tree(TreeItem *parent, const Array &node
 			cti = cti->get_parent();
 		}
 		item->select(0);
-		scroll = filter != last_filter;
+		scroll = scrolling_to_item || filter != last_filter;
+		scrolling_to_item = false;
 	}
 
 	// Set current item as collapsed if necessary
@@ -629,6 +631,11 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		String type = p_data[1];
 		Array properties = p_data[2];
 
+		if (inspected_object_id != id) {
+			inspected_object_id = id;
+			scrolling_to_item = true;
+		}
+
 		if (remote_objects.has(id)) {
 			debugObj = remote_objects[id];
 		} else {
@@ -751,6 +758,12 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		bool enable = p_data[0];
 		EditorNode::get_singleton()->get_pause_button()->set_pressed(enable);
 		EditorNode::get_singleton()->get_next_button()->set_disabled(!enable);
+	} else if (p_msg == "message:setup_runtime_node_selector") {
+		bool enable = p_data[0];
+		enable_runtime_node_selector = enable;
+		if (enable) {
+			EditorNode::get_singleton()->get_scene_tree_dock()->show_remote_tree();
+		}
 	} else if (p_msg == "stack_dump") {
 
 		stack_dump->clear();
@@ -1368,7 +1381,7 @@ void ScriptEditorDebugger::_notification(int p_what) {
 				inspect_edited_object_timeout -= get_process_delta_time();
 				if (inspect_edited_object_timeout < 0) {
 					inspect_edited_object_timeout = EditorSettings::get_singleton()->get("debugger/remote_inspect_refresh_interval");
-					if (inspected_object_id) {
+					if (inspected_object_id && !enable_runtime_node_selector) {
 						if (ScriptEditorDebuggerInspectedObject *obj = Object::cast_to<ScriptEditorDebuggerInspectedObject>(ObjectDB::get_instance(editor->get_editor_history()->get_current()))) {
 							if (obj->remote_object_id == inspected_object_id) {
 								//take the chance and re-inspect selected object
@@ -1479,6 +1492,8 @@ void ScriptEditorDebugger::_notification(int p_what) {
 
 					EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 					EditorNode::get_singleton()->get_pause_button()->set_disabled(false);
+					EditorNode::get_singleton()->get_select_button()->set_pressed(false);
+					EditorNode::get_singleton()->get_select_button()->set_disabled(false);
 
 					update_live_edit_root();
 					if (profiler->is_profiling()) {
@@ -1680,6 +1695,10 @@ void ScriptEditorDebugger::stop() {
 	EditorNode::get_singleton()->get_pause_button()->set_disabled(true);
 	EditorNode::get_singleton()->get_next_button()->set_pressed(false);
 	EditorNode::get_singleton()->get_next_button()->set_disabled(true);
+	EditorNode::get_singleton()->get_select_button()->set_pressed(false);
+	EditorNode::get_singleton()->get_select_button()->set_disabled(true);
+	EditorNode::get_singleton()->get_select_button()->get_shortcut()->set_name(TTR("Enable Selector"));
+	EditorNode::get_singleton()->get_select_button()->set_tooltip(TTR("Enable the runtime node selector."));
 	EditorNode::get_singleton()->get_scene_tree_dock()->hide_remote_tree();
 	EditorNode::get_singleton()->get_scene_tree_dock()->hide_tab_buttons();
 
@@ -2249,6 +2268,25 @@ void ScriptEditorDebugger::_next() {
 	}
 }
 
+void ScriptEditorDebugger::_select() {
+	ERR_FAIL_COND(connection.is_null());
+	ERR_FAIL_COND(!connection->is_connected_to_host());
+
+	bool enable = EditorNode::get_singleton()->get_select_button()->is_pressed();
+
+	Array msg;
+	msg.push_back("select_changed");
+	ppeer->put_var(msg);
+
+	if (enable) {
+		EditorNode::get_singleton()->get_select_button()->get_shortcut()->set_name(TTR("Disable Selector"));
+		EditorNode::get_singleton()->get_select_button()->set_tooltip(TTR("Disable the runtime node selector."));
+	} else {
+		EditorNode::get_singleton()->get_select_button()->get_shortcut()->set_name(TTR("Enable Selector"));
+		EditorNode::get_singleton()->get_select_button()->set_tooltip(TTR("Enable the runtime node selector."));
+	}
+}
+
 void ScriptEditorDebugger::_set_remote_object(ObjectID p_id, ScriptEditorDebuggerInspectedObject *p_obj) {
 
 	if (remote_objects.has(p_id))
@@ -2402,6 +2440,7 @@ void ScriptEditorDebugger::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_paused"), &ScriptEditorDebugger::_paused);
 	ClassDB::bind_method(D_METHOD("_next"), &ScriptEditorDebugger::_next);
+	ClassDB::bind_method(D_METHOD("_select"), &ScriptEditorDebugger::_select);
 
 	ClassDB::bind_method(D_METHOD("_scene_tree_selected"), &ScriptEditorDebugger::_scene_tree_selected);
 	ClassDB::bind_method(D_METHOD("_scene_tree_folded"), &ScriptEditorDebugger::_scene_tree_folded);
@@ -2808,6 +2847,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 
 	EditorNode::get_singleton()->get_pause_button()->connect("pressed", this, "_paused");
 	EditorNode::get_singleton()->get_next_button()->connect("pressed", this, "_next");
+	EditorNode::get_singleton()->get_select_button()->connect("pressed", this, "_select");
 }
 
 ScriptEditorDebugger::~ScriptEditorDebugger() {

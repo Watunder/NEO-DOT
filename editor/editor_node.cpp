@@ -2258,7 +2258,7 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	emit_signal("play_pressed");
 	if (p_current) {
 		play_scene_button->set_pressed(true);
-		play_scene_button->set_tooltip(TTR("Stop the edited scene."));
+		play_scene_button->set_tooltip(TTR("Stop the current scene."));
 		play_scene_button->get_shortcut()->set_name(TTR("Stop Current"));
 	} else if (p_custom != "") {
 		run_custom_filename = p_custom;
@@ -6609,6 +6609,19 @@ EditorNode::EditorNode() {
 	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_X));
 #else
 	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_F8));
+#endif
+
+	select_button = memnew(ToolButton);
+	select_button->set_toggle_mode(true);
+	select_button->set_icon(gui_base->get_icon("ToolSelect", "EditorIcons"));
+	select_button->set_focus_mode(Control::FOCUS_NONE);
+	select_button->set_tooltip(TTR("Enable the runtime node selector."));
+	select_button->set_disabled(true);
+	play_hb->add_child(select_button);
+#ifdef OSX_ENABLED
+	select_button->set_shortcut(ED_SHORTCUT("editor/runtime_node_selector", TTR("Enable Selector"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_C));
+#else
+	select_button->set_shortcut(ED_SHORTCUT("editor/runtime_node_selector", TTR("Enable Selector"), KEY_F9));
 #endif
 
 	play_scene_button = memnew(ToolButton);
