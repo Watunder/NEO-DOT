@@ -6111,6 +6111,9 @@ EditorNode::EditorNode() {
 	main_hsplit->add_child(center_vb);
 	center_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 
+	main_editor_button_vb = memnew(HBoxContainer);
+	center_vb->add_child(main_editor_button_vb);
+
 	center_split = memnew(VSplitContainer);
 	center_split->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	center_split->set_collapsed(false);
@@ -6245,16 +6248,11 @@ EditorNode::EditorNode() {
 	scene_tabs->connect("resized", this, "_update_scene_tabs");
 
 	tabbar_container = memnew(HBoxContainer);
+	tabbar_container->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	scene_tabs->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 
-	scene_tabs_context_menu = memnew(PopupMenu);
-	tabbar_container->add_child(scene_tabs_context_menu);
-	scene_tabs_context_menu->connect("id_pressed", this, "_menu_option");
-	scene_tabs_context_menu->set_hide_on_window_lose_focus(true);
-
-	srt->add_child(tabbar_container);
-	tabbar_container->add_child(scene_tabs);
 	distraction_free = memnew(ToolButton);
+	tabbar_container->add_child(distraction_free);
 #ifdef OSX_ENABLED
 	distraction_free->set_shortcut(ED_SHORTCUT("editor/distraction_free_mode", TTR("Distraction Free Mode"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_D));
 #else
@@ -6265,9 +6263,15 @@ EditorNode::EditorNode() {
 	distraction_free->set_icon(gui_base->get_icon("DistractionFree", "EditorIcons"));
 	distraction_free->set_toggle_mode(true);
 
+	scene_tabs_context_menu = memnew(PopupMenu);
+	tabbar_container->add_child(scene_tabs_context_menu);
+	scene_tabs_context_menu->connect("id_pressed", this, "_menu_option");
+	scene_tabs_context_menu->set_hide_on_window_lose_focus(true);
+
+	tabbar_container->add_child(scene_tabs);
+
 	scene_tab_add = memnew(ToolButton);
 	tabbar_container->add_child(scene_tab_add);
-	tabbar_container->add_child(distraction_free);
 	scene_tab_add->set_tooltip(TTR("Add a new scene."));
 	scene_tab_add->set_icon(gui_base->get_icon("Add", "EditorIcons"));
 	scene_tab_add->add_color_override("icon_color_normal", Color(0.6f, 0.6f, 0.6f, 0.8f));
@@ -6443,10 +6447,7 @@ EditorNode::EditorNode() {
 	p->add_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_SHIFT + KEY_MASK_CMD + KEY_Q), RUN_PROJECT_MANAGER, true);
 #endif
 
-	menu_hb->add_spacer();
-
-	main_editor_button_vb = memnew(HBoxContainer);
-	menu_hb->add_child(main_editor_button_vb);
+	menu_hb->add_child(tabbar_container);
 
 	debug_menu = memnew(MenuButton);
 	debug_menu->set_flat(false);
@@ -6485,8 +6486,6 @@ EditorNode::EditorNode() {
 			p->get_item_count() - 1,
 			TTR("When this option is enabled, any script that is saved will be reloaded in the running project.\nWhen used remotely on a device, this is more efficient when the network filesystem option is enabled."));
 	p->connect("id_pressed", this, "_menu_option");
-
-	menu_hb->add_spacer();
 
 	settings_menu = memnew(MenuButton);
 	settings_menu->set_flat(false);
