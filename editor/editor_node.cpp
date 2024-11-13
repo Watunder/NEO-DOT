@@ -3178,7 +3178,7 @@ void EditorNode::add_editor_plugin(EditorPlugin *p_editor, bool p_config_changed
 		singleton->main_editor_button_vb->add_child(tb);
 		singleton->editor_table.push_back(p_editor);
 
-		singleton->distraction_free->raise();
+		singleton->run_panel_button_vb->raise();
 	}
 	singleton->editor_data.add_editor_plugin(p_editor);
 	singleton->add_child(p_editor);
@@ -6564,8 +6564,13 @@ EditorNode::EditorNode() {
 	p->add_icon_shortcut(gui_base->get_icon("Godot", "EditorIcons"), ED_SHORTCUT("editor/about", TTR("About")), HELP_ABOUT);
 	p->add_icon_shortcut(gui_base->get_icon("Heart", "EditorIcons"), ED_SHORTCUT("editor/support_development", TTR("Support Godot Development")), HELP_SUPPORT_GODOT_DEVELOPMENT);
 
+	run_panel_button_vb = memnew(HBoxContainer);
+	run_panel_button_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	run_panel_button_vb->set_alignment(VBoxContainer::ALIGN_END);
+	main_editor_button_vb->add_child(run_panel_button_vb);
+
 	HBoxContainer *play_hb = memnew(HBoxContainer);
-	menu_hb->add_child(play_hb);
+	run_panel_button_vb->add_child(play_hb);
 
 	run_native = memnew(EditorRunNative);
 	play_hb->add_child(run_native);
@@ -6650,7 +6655,7 @@ EditorNode::EditorNode() {
 #endif
 
 	HBoxContainer *right_menu_hb = memnew(HBoxContainer);
-	menu_hb->add_child(right_menu_hb);
+	run_panel_button_vb->add_child(right_menu_hb);
 
 	// Toggle for video driver
 	video_driver = memnew(OptionButton);
