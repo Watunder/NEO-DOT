@@ -98,6 +98,8 @@ private:
 	float inspect_scene_tree_timeout;
 	float inspect_edited_object_timeout;
 	bool auto_switch_remote_scene_tree;
+	bool enable_runtime_node_selector = false;
+	bool scrolling_to_item = false;
 	ObjectID inspected_object_id;
 	String last_filter;
 	ScriptEditorDebuggerVariables *variables;
@@ -197,7 +199,7 @@ private:
 	void _parse_message(const String &p_msg, const Array &p_data);
 	void _set_reason_text(const String &p_reason, MessageType p_type);
 	void _scene_tree_property_select_object(ObjectID p_object);
-	void _scene_tree_property_value_edited(const String &p_prop, const Variant &p_value);
+	void _scene_tree_property_value_edited(ObjectID p_object, const String &p_prop, const Variant &p_value);
 	int _update_scene_tree(TreeItem *parent, const Array &nodes, int current_index);
 
 	void _video_mem_request();
@@ -226,6 +228,7 @@ private:
 
 	void _paused();
 	void _next();
+	void _select();
 
 	void _set_remote_object(ObjectID p_id, ScriptEditorDebuggerInspectedObject *p_obj);
 	void _clear_remote_objects();

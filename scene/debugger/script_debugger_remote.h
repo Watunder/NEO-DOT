@@ -41,6 +41,10 @@ class SceneTree;
 
 class ScriptDebuggerRemote : public ScriptDebugger {
 
+	friend class RuntimeNodeSelector;
+
+	RuntimeNodeSelector* runtime_node_selector;
+
 	struct Message {
 
 		String message;
@@ -204,6 +208,51 @@ public:
 
 	ScriptDebuggerRemote();
 	~ScriptDebuggerRemote();
+};
+
+class RuntimeNodeSelector : public Object {
+	GDCLASS(RuntimeNodeSelector, Object);
+
+	friend class ScriptDebuggerRemote;
+
+	ScriptDebuggerRemote *remote_debugger;
+
+	static RuntimeNodeSelector *singleton;
+
+	struct SelectResult {
+		Node *item = NULL;
+		real_t order = 0;
+		_FORCE_INLINE_ bool operator<(const SelectResult &p_rr) const { return p_rr.order < order; }
+	};
+
+	float inspect_edited_object_timeout = 0.2;
+
+	ObjectID inspect_edited_object_id;
+
+	Point2 selection_position = Point2(INFINITY, INFINITY);
+
+	float ray_distance = 10000.0;
+
+	void _setup();
+	void _viewport_input(const Ref<InputEvent> &p_event);
+	void _physics_frame();
+	void _inspect_object(ObjectID p_id);
+
+	void _find_items_at_pos(const Point2 &p_pos, Vector<SelectResult> &r_items);
+protected:
+	static void _bind_methods();
+
+public:
+	static RuntimeNodeSelector *get_singleton();
+
+	void set_ray_distance(float p_disance) { ray_distance = p_disance; }
+	float get_ray_distance() const { return ray_distance; }
+
+	void set_inspect_edited_object_id(ObjectID p_id) { inspect_edited_object_id = p_id; }
+	void set_inspect_edited_object_timeout(float p_timeout) { inspect_edited_object_timeout = p_timeout; }
+
+	RuntimeNodeSelector(ScriptDebuggerRemote *p_remote_debugger);
+	~RuntimeNodeSelector();
 };
 
 #endif // SCRIPT_DEBUGGER_REMOTE_H

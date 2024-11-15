@@ -36,11 +36,21 @@
 #include "core/os/input.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "scene/2d/collision_polygon_2d.h"
+#include "scene/2d/collision_shape_2d.h"
+#include "scene/2d/cpu_particles_2d.h"
+#include "scene/3d/camera.h"
+#include "scene/3d/collision_object.h"
+#include "scene/3d/visual_instance.h"
+#include "scene/3d/mesh_instance.h"
+#include "scene/3d/sprite_3d.h"
+#include "scene/main/canvas_layer.h"
 #include "scene/main/node.h"
 #include "scene/main/scene_tree.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/packed_scene.h"
 #include "servers/visual_server.h"
+#include "servers/physics_server.h"
 
 void ScriptDebuggerRemote::_send_video_memory() {
 
@@ -299,9 +309,11 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue, 
 			} else if (command == "inspect_object") {
 
 				ObjectID id = cmd[1];
+				runtime_node_selector->set_inspect_edited_object_id(id);
 				_send_object_id(id);
 			} else if (command == "set_object_property") {
 
+				runtime_node_selector->set_inspect_edited_object_timeout(cmd[4]);
 				_set_object_property(cmd[1], cmd[2], cmd[3]);
 
 			} else if (command == "override_camera_2D:set") {
@@ -781,9 +793,11 @@ void ScriptDebuggerRemote::_poll_events() {
 		} else if (command == "inspect_object") {
 
 			ObjectID id = cmd[1];
+			runtime_node_selector->set_inspect_edited_object_id(id);
 			_send_object_id(id);
 		} else if (command == "set_object_property") {
 
+			runtime_node_selector->set_inspect_edited_object_timeout(cmd[4]);
 			_set_object_property(cmd[1], cmd[2], cmd[3]);
 
 		} else if (command == "start_profiling") {
@@ -829,6 +843,8 @@ void ScriptDebuggerRemote::_poll_events() {
 				scene_tree->set_pause(false);
 				VisualServer::get_singleton()->connect("frame_post_draw", scene_tree, "_next_frame");
 			}
+		} else if (command == "select_changed") {
+			runtime_node_selector->_setup();
 		} else if (command == "override_camera_2D:set") {
 			bool enforce = cmd[1];
 
@@ -1282,6 +1298,9 @@ ScriptDebuggerRemote::ScriptDebuggerRemote() :
 		poll_every(0),
 		scene_tree(NULL) {
 
+	RuntimeNodeSelector::singleton = memnew(RuntimeNodeSelector(this));
+	runtime_node_selector = RuntimeNodeSelector::get_singleton();
+
 	packet_peer_stream->set_stream_peer(tcp_client);
 	packet_peer_stream->set_output_buffer_max_size((1024 * 1024 * 8) - 4); // 8 MiB should be way more than enough, minus 4 bytes for separator.
 
@@ -1303,3 +1322,179 @@ ScriptDebuggerRemote::~ScriptDebuggerRemote() {
 	remove_print_handler(&phl);
 	remove_error_handler(&eh);
 }
+
+void RuntimeNodeSelector::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_viewport_input"), &RuntimeNodeSelector::_viewport_input);
+	ClassDB::bind_method(D_METHOD("_physics_frame"), &RuntimeNodeSelector::_physics_frame);
+
+	ClassDB::bind_method(D_METHOD("set_ray_distance"), &RuntimeNodeSelector::set_ray_distance);
+	ClassDB::bind_method(D_METHOD("get_ray_distance"), &RuntimeNodeSelector::get_ray_distance);
+
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "ray_distance"), "set_ray_distance", "get_ray_distance");
+}
+
+void RuntimeNodeSelector::_setup() {
+	SceneTree *scene_tree = SceneTree::get_singleton();
+	Viewport *root = scene_tree->get_root();
+
+	if (root->is_connected("viewport_input", this, "_viewport_input")) {
+		root->disconnect("viewport_input", this, "_viewport_input");
+	} else {
+		root->connect("viewport_input", this, "_viewport_input");
+	}
+
+	Array msg;
+	if (scene_tree->is_connected("physics_frame", this, "_physics_frame")) {
+		scene_tree->disconnect("physics_frame", this, "_physics_frame");
+		msg.push_back(false);
+	} else {
+		scene_tree->connect("physics_frame", this, "_physics_frame");
+		msg.push_back(true);
+	}
+	remote_debugger->send_message("setup_runtime_node_selector", msg);
+}
+
+void RuntimeNodeSelector::_viewport_input(const Ref<InputEvent> &p_event) {
+	Ref<InputEventMouseButton> mb = p_event;
+
+	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
+		selection_position = mb->get_position();
+	}
+}
+
+void RuntimeNodeSelector::_physics_frame() {
+	if (!Math::is_inf(selection_position.x) || !Math::is_inf(selection_position.y)) {
+		Vector<SelectResult> items;
+
+		_find_items_at_pos(selection_position, items);
+
+		if (items.empty()) {
+			_inspect_object(inspect_edited_object_id);
+			return;
+		}
+
+		items.sort();
+
+		inspect_edited_object_id = items[0].item->get_instance_id();
+
+		remote_debugger->_send_object_id(inspect_edited_object_id);
+
+		selection_position = Point2(INFINITY, INFINITY);
+	} else {
+		_inspect_object(inspect_edited_object_id);
+	}
+}
+
+void RuntimeNodeSelector::_inspect_object(ObjectID p_id) {
+	SceneTree *scene_tree = SceneTree::get_singleton();
+
+	inspect_edited_object_timeout -= scene_tree->get_idle_process_time();
+	if (inspect_edited_object_timeout < 0 || Engine::get_singleton()->get_time_scale() <= 0) {
+		inspect_edited_object_timeout = 0.2;
+
+		remote_debugger->_send_object_id(p_id);
+	}
+
+	selection_position = Point2(INFINITY, INFINITY);
+}
+
+void RuntimeNodeSelector::_find_items_at_pos(const Point2 &p_pos, Vector<SelectResult> &r_items) {
+	SceneTree *scene_tree = SceneTree::get_singleton();
+	Viewport *root = scene_tree->get_root();
+	Camera *camera = root->get_camera();
+
+	if (!camera)
+		return;
+
+	Vector3 ray = camera->project_ray_normal(p_pos);
+	Vector3 pos = camera->project_ray_origin(p_pos);
+	Vector3 to = pos + ray * ray_distance;
+
+	PhysicsDirectSpaceState *space_state = root->get_world()->get_direct_space_state();
+	PhysicsDirectSpaceState::RayResult result;
+	Set<RID> excludes;
+
+	while (true) {
+		if (space_state->intersect_ray(pos, to, result, excludes, 0xFFFFFFFF, true, true)) {
+			SelectResult res;
+			res.item = Object::cast_to<Spatial>(result.collider);
+			res.order = -pos.distance_to(Object::cast_to<Spatial>(res.item)->get_global_transform().xform(result.position));
+
+			CollisionObject *collision = Object::cast_to<CollisionObject>(result.collider);
+			if (collision) {
+				List<uint32_t> owners;
+				collision->get_shape_owners(&owners);
+				for (List<uint32_t>::Element *E = owners.front(); E; E = E->next()) {
+					SelectResult res_shape;
+					res_shape.item = Object::cast_to<Spatial>(collision->shape_owner_get_owner(E->get()));
+					res_shape.order = res.order;
+					r_items.push_back(res_shape);
+				}
+			}
+
+			r_items.push_back(res);
+
+			excludes.insert(result.rid);
+		} else {
+			break;
+		}
+	}
+
+	Vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(pos, to, root->get_world()->get_scenario());
+
+	for (int i = 0; i < instances.size(); i++) {
+		Object *obj = ObjectDB::get_instance(instances[i]);
+		GeometryInstance *geo_instance = NULL;
+		Ref<TriangleMesh> mesh_collision;
+
+		MeshInstance *mesh_instance = Object::cast_to<MeshInstance>(obj);
+		if (mesh_instance) {
+			if (mesh_instance->get_mesh().is_valid()) {
+				geo_instance = mesh_instance;
+				mesh_collision = mesh_instance->get_mesh()->generate_triangle_mesh();
+			}
+		} else {
+			Sprite3D *sprite = Object::cast_to<Sprite3D>(obj);
+			if (sprite) {
+				geo_instance = sprite;
+				mesh_collision = sprite->generate_triangle_mesh();
+			}
+		}
+
+		if (mesh_collision.is_valid()) {
+			Transform gt = geo_instance->get_global_transform();
+			Transform ai = gt.affine_inverse();
+
+			Vector3 point;
+			Vector3 normal;
+
+			if (mesh_collision->intersect_ray(ai.xform(pos), ai.basis.xform(ray).normalized(), point, normal)) {
+				SelectResult res;
+				res.item = Object::cast_to<Spatial>(obj);
+				res.order = -pos.distance_to(gt.xform(point));
+				r_items.push_back(res);
+
+				continue;
+			}
+		}
+
+		instances.remove(i);
+		i--;
+	}
+}
+
+RuntimeNodeSelector *RuntimeNodeSelector::singleton = NULL;
+
+RuntimeNodeSelector *RuntimeNodeSelector::get_singleton() {
+	return singleton;
+}
+
+RuntimeNodeSelector::RuntimeNodeSelector(ScriptDebuggerRemote *p_remote_debugger) {
+	remote_debugger = p_remote_debugger;
+
+	singleton = this;
+};
+
+RuntimeNodeSelector::~RuntimeNodeSelector() {
+	singleton = NULL;
+};
