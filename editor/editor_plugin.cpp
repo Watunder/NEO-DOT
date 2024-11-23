@@ -312,8 +312,6 @@ void EditorInterface::set_distraction_free_mode(bool p_enter) {
 	EditorNode::get_singleton()->set_distraction_free_mode(p_enter);
 }
 
-EditorInterface *EditorInterface::singleton = NULL;
-
 bool EditorInterface::is_distraction_free_mode_enabled() const {
 	return EditorNode::get_singleton()->is_distraction_free_mode_enabled();
 }
@@ -361,6 +359,8 @@ void EditorInterface::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "distraction_free_mode"), "set_distraction_free_mode", "is_distraction_free_mode_enabled");
 }
+
+EditorInterface *EditorInterface::singleton = NULL;
 
 EditorInterface::EditorInterface() {
 	singleton = this;
