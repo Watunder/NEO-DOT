@@ -47,7 +47,6 @@ const char *EditorFeatureProfile::feature_names[FEATURE_MAX] = {
 const char *EditorFeatureProfile::feature_identifiers[FEATURE_MAX] = {
 	"3d",
 	"script",
-	"asset_lib",
 	"scene_tree",
 	"node_dock",
 	"filesystem_dock",
@@ -272,7 +271,6 @@ void EditorFeatureProfile::_bind_methods() {
 
 	BIND_ENUM_CONSTANT(FEATURE_3D);
 	BIND_ENUM_CONSTANT(FEATURE_SCRIPT);
-	BIND_ENUM_CONSTANT(FEATURE_ASSET_LIB);
 	BIND_ENUM_CONSTANT(FEATURE_SCENE_TREE);
 	BIND_ENUM_CONSTANT(FEATURE_NODE_DOCK);
 	BIND_ENUM_CONSTANT(FEATURE_FILESYSTEM_DOCK);

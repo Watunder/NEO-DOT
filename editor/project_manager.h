@@ -79,7 +79,6 @@ class ProjectManager : public Control {
 
 	bool importing;
 
-	void _open_asset_library();
 	void _scan_projects();
 	void _run_project();
 	void _run_project_confirm();
