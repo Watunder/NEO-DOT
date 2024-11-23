@@ -1704,6 +1704,8 @@ void EditorNode::_dialog_action(String p_file) {
 				_save_default_environment();
 				_save_scene_with_preview(p_file);
 				_run(false, p_file);
+
+				editor_data.set_scene_path(editor_data.get_edited_scene(), p_file);
 			}
 		} break;
 
