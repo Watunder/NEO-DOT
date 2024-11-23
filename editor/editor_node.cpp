@@ -593,9 +593,10 @@ void EditorNode::_notification(int p_what) {
 			_build_icon_type_cache();
 
 			play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
+			pause_button->set_icon(gui_base->get_icon("Pause", "EditorIcons"));
+			select_button->set_icon(gui_base->get_icon("ToolSelect", "EditorIcons"));
 			play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 			play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
-			pause_button->set_icon(gui_base->get_icon("Pause", "EditorIcons"));
 
 			prev_scene->set_icon(gui_base->get_icon("PrevScene", "EditorIcons"));
 			distraction_free->set_icon(gui_base->get_icon("DistractionFree", "EditorIcons"));

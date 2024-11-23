@@ -634,6 +634,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		if (inspected_object_id != id) {
 			inspected_object_id = id;
 			scrolling_to_item = true;
+			_scene_tree_request();
 		}
 
 		if (remote_objects.has(id)) {
