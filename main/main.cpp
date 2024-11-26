@@ -55,7 +55,7 @@
 #include "main/performance.h"
 #include "main/splash.gen.h"
 #include "main/splash_editor.gen.h"
-#include "main/tests/test_main.h"
+#include "tests/runtime/test_main.h"
 #include "modules/register_module_types.h"
 #include "platform/register_platform_apis.h"
 #include "scene/debugger/script_debugger_remote.h"
@@ -306,7 +306,7 @@ void Main::print_help(const char *p_binary) {
 #ifdef DEBUG_METHODS_ENABLED
 	OS::get_singleton()->print("  --gdnative-generate-json-api     Generate JSON dump of the Godot API for GDNative bindings.\n");
 #endif
-	OS::get_singleton()->print("  --test <test>                    Run a unit test (");
+	OS::get_singleton()->print("  --test <test>                    Run a test (");
 	const char **test_names = tests_get_names();
 	const char *comma = "";
 	while (*test_names) {
