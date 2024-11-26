@@ -1,0 +1,9 @@
+#!/usr/bin/python
+
+Import("env")
+
+env.runtime_tests_sources = []
+env.add_source_files(env.runtime_tests_sources, "*.cpp")
+
+lib = env.add_library("runtime_tests", env.runtime_tests_sources)
+env.Prepend(LIBS=[lib])
