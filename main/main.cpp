@@ -71,12 +71,8 @@
 #include "servers/register_server_types.h"
 
 #ifdef TOOLS_ENABLED
-#include "editor/doc/doc_data.h"
-#include "editor/doc/doc_data_class_path.gen.h"
+#include "editor/editor.h"
 #include "editor/editor_node.h"
-#include "editor/editor_settings.h"
-#include "editor/progress_dialog.h"
-#include "editor/project_manager.h"
 #endif
 
 /* Static members */
@@ -1489,20 +1485,10 @@ bool Main::start() {
 	ERR_FAIL_COND_V(!_start_success, false);
 
 	bool hasicon = false;
-	String doc_tool;
-	List<String> removal_docs;
-	String positional_arg;
 	String game_path;
 	String script;
 	String test;
 	bool check_only = false;
-
-#ifdef TOOLS_ENABLED
-	bool doc_base = true;
-	String _export_preset;
-	bool export_debug = false;
-	bool export_pack_only = false;
-#endif
 
 	main_timer_sync.init(OS::get_singleton()->get_ticks_usec());
 
@@ -1512,54 +1498,18 @@ bool Main::start() {
 		if (args[i] == "--check-only") {
 			check_only = true;
 #ifdef TOOLS_ENABLED
-		} else if (args[i] == "--no-docbase") {
-			doc_base = false;
 		} else if (args[i] == "-e" || args[i] == "--editor") {
 			editor = true;
 		} else if (args[i] == "-p" || args[i] == "--project-manager") {
 			project_manager = true;
 #endif
-		} else if (args[i].length() && args[i][0] != '-' && positional_arg == "") {
-			positional_arg = args[i];
-
-			if (args[i].ends_with(".scn") ||
-					args[i].ends_with(".tscn") ||
-					args[i].ends_with(".escn") ||
-					args[i].ends_with(".res") ||
-					args[i].ends_with(".tres")) {
-				// Only consider the positional argument to be a scene path if it ends with
-				// a file extension associated with Godot scenes. This makes it possible
-				// for projects to parse command-line arguments for custom CLI arguments
-				// or other file extensions without trouble. This can be used to implement
-				// "drag-and-drop onto executable" logic, which can prove helpful
-				// for non-game applications.
-				game_path = args[i];
-			}
-		}
 		//parameters that have an argument to the right
-		else if (i < (args.size() - 1)) {
+		} else if (i < (args.size() - 1)) {
 			bool parsed_pair = true;
 			if (args[i] == "-s" || args[i] == "--script") {
 				script = args[i + 1];
 			} else if (args[i] == "--test") {
 				test = args[i + 1];
-#ifdef TOOLS_ENABLED
-			} else if (args[i] == "--doctool") {
-				doc_tool = args[i + 1];
-				for (int j = i + 2; j < args.size(); j++)
-					removal_docs.push_back(args[j]);
-			} else if (args[i] == "--export") {
-				editor = true; //needs editor
-				_export_preset = args[i + 1];
-			} else if (args[i] == "--export-debug") {
-				editor = true; //needs editor
-				_export_preset = args[i + 1];
-				export_debug = true;
-			} else if (args[i] == "--export-pack") {
-				editor = true;
-				_export_preset = args[i + 1];
-				export_pack_only = true;
-#endif
 			} else {
 				// The parameter does not match anything known, don't skip the next argument
 				parsed_pair = false;
@@ -1571,68 +1521,6 @@ bool Main::start() {
 	}
 
 	String main_loop_type;
-#ifdef TOOLS_ENABLED
-	if (doc_tool != "") {
-
-		Engine::get_singleton()->set_editor_hint(true); // Needed to instance editor-only classes for their default values
-
-		{
-			DirAccessRef da = DirAccess::open(doc_tool);
-			ERR_FAIL_COND_V_MSG(!da, false, "Argument supplied to --doctool must be a valid directory path.");
-		}
-		DocData doc;
-		doc.generate(doc_base);
-
-		DocData docsrc;
-		Map<String, String> doc_data_classes;
-		Set<String> checked_paths;
-		print_line("Loading docs...");
-
-		for (int i = 0; i < _doc_data_class_path_count; i++) {
-			// Custom modules are always located by absolute path.
-			String path = _doc_data_class_paths[i].path;
-			if (path.is_rel_path()) {
-				path = doc_tool.plus_file(path);
-			}
-			String name = _doc_data_class_paths[i].name;
-			doc_data_classes[name] = path;
-			if (!checked_paths.has(path)) {
-				checked_paths.insert(path);
-
-				// Create the module documentation directory if it doesn't exist
-				DirAccess *da = DirAccess::create_for_path(path);
-				da->make_dir_recursive(path);
-				memdelete(da);
-
-				docsrc.load_classes(path);
-				print_line("Loading docs from: " + path);
-			}
-		}
-
-		String index_path = doc_tool.plus_file("doc/classes");
-		// Create the main documentation directory if it doesn't exist
-		DirAccess *da = DirAccess::create_for_path(index_path);
-		da->make_dir_recursive(index_path);
-		memdelete(da);
-
-		docsrc.load_classes(index_path);
-		checked_paths.insert(index_path);
-		print_line("Loading docs from: " + index_path);
-
-		print_line("Merging docs...");
-		doc.merge_from(docsrc);
-		for (Set<String>::Element *E = checked_paths.front(); E; E = E->next()) {
-			print_line("Erasing old docs at: " + E->get());
-			DocData::erase_classes(E->get());
-		}
-
-		print_line("Generating new docs...");
-		doc.save_classes(index_path, doc_data_classes);
-
-		return false;
-	}
-
-#endif
 
 	if (script == "" && game_path == "" && String(GLOBAL_DEF("application/run/main_scene", "")) != "") {
 		game_path = GLOBAL_DEF("application/run/main_scene", "");
@@ -1640,7 +1528,7 @@ bool Main::start() {
 
 	MainLoop *main_loop = NULL;
 	if (editor) {
-		main_loop = memnew(SceneTree);
+		main_loop = editor_main("editor", args);
 	};
 
 	if (test != "") {
@@ -1684,6 +1572,14 @@ bool Main::start() {
 	} else {
 		main_loop_type = GLOBAL_DEF("application/run/main_loop_type", "");
 	}
+
+#ifdef TOOLS_ENABLED
+	if (project_manager || (script == "" && test == "" && game_path == "" && !editor)) {
+		main_loop = editor_main("project_manager", args);
+		OS::get_singleton()->set_context(OS::CONTEXT_PROJECTMAN);
+		project_manager = true;
+	}
+#endif
 
 	if (!main_loop && main_loop_type == "")
 		main_loop_type = "SceneTree";
@@ -1810,15 +1706,8 @@ bool Main::start() {
 		}
 
 #ifdef TOOLS_ENABLED
-		EditorNode *editor_node = NULL;
-		if (editor) {
-			editor_node = memnew(EditorNode);
-			sml->get_root()->add_child(editor_node);
-
-			if (_export_preset != "") {
-				editor_node->export_preset(_export_preset, positional_arg, export_debug, export_pack_only);
-				game_path = ""; // Do not load anything.
-			}
+		if (Editor::may_export_preset()) {
+			game_path = "";
 		}
 #endif
 
@@ -1932,12 +1821,7 @@ bool Main::start() {
 
 #ifdef TOOLS_ENABLED
 			if (editor) {
-
-				if (game_path != GLOBAL_GET("application/run/main_scene") || !editor_node->has_scenes_in_session()) {
-					Error serr = editor_node->load_scene(local_game_path);
-					if (serr != OK)
-						ERR_PRINT("Failed to load scene");
-				}
+				Editor::load_scene(local_game_path);
 				OS::get_singleton()->set_context(OS::CONTEXT_EDITOR);
 			}
 #endif
@@ -1987,28 +1871,6 @@ bool Main::start() {
 				}
 			}
 		}
-
-#ifdef TOOLS_ENABLED
-		if (project_manager || (script == "" && test == "" && game_path == "" && !editor)) {
-
-			Engine::get_singleton()->set_editor_hint(true);
-			ProjectManager *pmanager = memnew(ProjectManager);
-			ProgressDialog *progress_dialog = memnew(ProgressDialog);
-			pmanager->add_child(progress_dialog);
-			sml->get_root()->add_child(pmanager);
-			OS::get_singleton()->set_context(OS::CONTEXT_PROJECTMAN);
-			project_manager = true;
-		}
-
-		if (project_manager || editor) {
-			// Hide console window if requested (Windows-only).
-			bool hide_console = EditorSettings::get_singleton()->get_setting("interface/editor/hide_console_window");
-			OS::get_singleton()->set_console_visible(!hide_console);
-
-			// Load SSL Certificates from Editor Settings (or builtin)
-			Crypto::load_default_certificates(EditorSettings::get_singleton()->get_setting("network/ssl/editor_ssl_certificates").operator String());
-		}
-#endif
 	}
 
 	if (!hasicon) {
