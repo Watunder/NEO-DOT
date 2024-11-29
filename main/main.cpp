@@ -605,7 +605,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				goto error;
 			}
 
-		} else if (I->get() == "--low-dpi") { // force low DPI (macOS only)
+		} else if (I->get() == "--low-dpi") { // force low DPI
 
 			force_lowdpi = true;
 		} else if (I->get() == "--no-window") { // run with an invisible window
@@ -1078,7 +1078,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	}
 
 	if (!force_lowdpi) {
-		OS::get_singleton()->_allow_hidpi = GLOBAL_DEF("display/window/dpi/allow_hidpi", false);
+		OS::get_singleton()->_allow_hidpi = GLOBAL_DEF("display/window/dpi/allow_hidpi", true);
 	}
 
 	video_mode.use_vsync = GLOBAL_DEF_RST("display/window/vsync/use_vsync", true);
@@ -1116,8 +1116,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	GLOBAL_DEF("rendering/quality/intended_usage/framebuffer_allocation.mobile", 3);
 
 	if (editor || project_manager) {
-		// The editor and project manager always detect and use hiDPI if needed
-		OS::get_singleton()->_allow_hidpi = true;
 		OS::get_singleton()->_allow_layered = false;
 	}
 
