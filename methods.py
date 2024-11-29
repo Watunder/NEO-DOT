@@ -230,6 +230,8 @@ def write_modules(modules):
     register_cpp = ""
     unregister_cpp = ""
 
+    tests_h = "// THIS FILE IS GENERATED DO NOT EDIT"
+
     for name, path in modules.items():
         try:
             with open(os.path.join(path, "register_types.h")):
@@ -240,12 +242,16 @@ def write_modules(modules):
                 unregister_cpp += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
                 unregister_cpp += "\tunregister_" + name + "_types();\n"
                 unregister_cpp += "#endif\n"
+
+            for header in glob.glob(path + "/tests/*.h"):
+                header = header.replace("\\","/")
+                tests_h += '#include "' + header + '"\n'
         except IOError:
             pass
 
     modules_cpp = (
         """
-// modules.cpp - THIS FILE IS GENERATED, DO NOT EDIT!!!!!!!
+// THIS FILE IS GENERATED DO NOT EDIT
 #include "register_module_types.h"
 
 """
@@ -269,6 +275,9 @@ void unregister_module_types() {
     # NOTE: It is safe to generate this file here, since this is still executed serially
     with open("modules/register_module_types.gen.cpp", "w") as f:
         f.write(modules_cpp)
+
+    with open("tests/modules_tests.gen.h", "w") as f:
+        f.write(tests_h)
 
 
 def convert_custom_modules_path(path):
