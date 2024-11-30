@@ -230,7 +230,7 @@ def write_modules(modules):
     register_cpp = ""
     unregister_cpp = ""
 
-    tests_h = "// THIS FILE IS GENERATED DO NOT EDIT"
+    tests_h = "// THIS FILE IS GENERATED DO NOT EDIT\n"
 
     for name, path in modules.items():
         try:
