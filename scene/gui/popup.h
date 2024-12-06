@@ -42,6 +42,9 @@ class Popup : public Control {
 
 private:
 	void _popup(const Rect2 &p_bounds = Rect2(), const bool p_centered = false);
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+	void _update_region();
+#endif
 
 protected:
 	virtual void _post_popup() {}

@@ -429,9 +429,18 @@ void Viewport::_notification(int p_what) {
 				_process_picking(false);
 			}
 		} break;
+		case SceneTree::NOTIFICATION_WM_MOUSE_ENTER: {
+			if (gui.mouse_over) {
+				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_ENTER);
+			}
+		} break;
 		case SceneTree::NOTIFICATION_WM_MOUSE_EXIT: {
 
 			_drop_physics_mouseover();
+
+			if (gui.mouse_over) {
+				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_EXIT);
+			}
 
 			// Unlike on loss of focus (NOTIFICATION_WM_WINDOW_FOCUS_OUT), do not
 			// drop the gui mouseover here, as a scrollbar may be dragged while the
@@ -1674,6 +1683,11 @@ void Viewport::_gui_show_tooltip() {
 
 	gui.tooltip_popup->raise();
 	gui.tooltip_popup->show();
+
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+	if (!custom_tooltip)
+		gui.tooltip_popup->call("_update_region");
+#endif
 }
 
 void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_input) {

@@ -300,12 +300,20 @@ void ScriptEditor::_script_created(Ref<Script> p_script) {
 
 void ScriptEditor::_goto_script_line2(int p_line) {
 
+	if (EditorNode::get_singleton()->is_embed_window_mode_enabled()) {
+		EditorNode::get_singleton()->set_embed_window_mode(false);
+	}
+
 	ScriptEditorBase *current = _get_current_editor();
 	if (current)
 		current->goto_line(p_line);
 }
 
 void ScriptEditor::_goto_script_line(REF p_script, int p_line) {
+
+	if (EditorNode::get_singleton()->is_embed_window_mode_enabled()) {
+		EditorNode::get_singleton()->set_embed_window_mode(false);
+	}
 
 	Ref<Script> script = Object::cast_to<Script>(*p_script);
 	if (script.is_valid() && (script->has_source_code() || script->get_path().is_resource_file())) {

@@ -765,6 +765,11 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		if (enable) {
 			EditorNode::get_singleton()->get_scene_tree_dock()->show_remote_tree();
 		}
+	} else if (p_msg == "message:set_remote_window_handle") {
+		remote_window_handle = p_data[0];
+		if (EditorNode::get_singleton()->is_embed_window_mode_enabled()) {
+			EditorNode::get_singleton()->emit_signal("embed_window_mode_changed", true);
+		}
 	} else if (p_msg == "stack_dump") {
 
 		stack_dump->clear();
@@ -2845,6 +2850,8 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	enable_external_editor = false;
 	last_error_count = 0;
 	last_warning_count = 0;
+
+	remote_window_handle = 0;
 
 	EditorNode::get_singleton()->get_pause_button()->connect("pressed", this, "_paused");
 	EditorNode::get_singleton()->get_next_button()->connect("pressed", this, "_next");

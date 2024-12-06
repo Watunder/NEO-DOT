@@ -1626,6 +1626,10 @@ void EditorHelpBit::_meta_clicked(String p_select) {
 
 void EditorHelpBit::_minimum_size_changed() {
 	set_size(rich_text->get_size());
+
+#ifdef EMBED_WINDOW_ENABLED
+	call("_update_region");
+#endif
 }
 
 void EditorHelpBit::_bind_methods() {
