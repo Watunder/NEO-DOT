@@ -1624,9 +1624,18 @@ void EditorHelpBit::_meta_clicked(String p_select) {
 	}
 }
 
+void EditorHelpBit::_minimum_size_changed() {
+	set_size(rich_text->get_size());
+
+#ifdef EMBED_WINDOW_ENABLED
+	call("_update_region");
+#endif
+}
+
 void EditorHelpBit::_bind_methods() {
 
 	ClassDB::bind_method("_meta_clicked", &EditorHelpBit::_meta_clicked);
+	ClassDB::bind_method("_minimum_size_changed", &EditorHelpBit::_minimum_size_changed);
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &EditorHelpBit::set_text);
 	ADD_SIGNAL(MethodInfo("request_hide"));
 }
@@ -1645,7 +1654,9 @@ void EditorHelpBit::_notification(int p_what) {
 void EditorHelpBit::set_text(const String &p_text) {
 
 	rich_text->clear();
+	rich_text->set_fit_content_height(true);
 	_add_text_to_rt(p_text, rich_text);
+	rich_text->set_fit_content_height(false);
 }
 
 EditorHelpBit::EditorHelpBit() {
@@ -1653,6 +1664,7 @@ EditorHelpBit::EditorHelpBit() {
 	rich_text = memnew(RichTextLabel);
 	add_child(rich_text);
 	rich_text->connect("meta_clicked", this, "_meta_clicked");
+	rich_text->connect("minimum_size_changed", this, "_minimum_size_changed");
 	rich_text->add_color_override("selection_color", get_color("accent_color", "Editor") * Color(1, 1, 1, 0.4));
 	rich_text->set_override_selected_font_color(false);
 	set_custom_minimum_size(Size2(0, 70 * EDSCALE));

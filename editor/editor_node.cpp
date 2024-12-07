@@ -600,6 +600,7 @@ void EditorNode::_notification(int p_what) {
 
 			prev_scene->set_icon(gui_base->get_icon("PrevScene", "EditorIcons"));
 			distraction_free->set_icon(gui_base->get_icon("DistractionFree", "EditorIcons"));
+			embed_window->set_icon(gui_base->get_icon("EmbedWindow", "EditorIcons"));
 			scene_tab_add->set_icon(gui_base->get_icon("Add", "EditorIcons"));
 
 			bottom_panel_raise->set_icon(gui_base->get_icon("ExpandBottomDock", "EditorIcons"));
@@ -2274,6 +2275,11 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 		play_button->get_shortcut()->set_name(TTR("Stop Main"));
 	}
 
+	if (is_embed_window_mode_enabled()) {
+		embed_window_mode->show();
+		main_editor_button_vb->hide();
+	}
+
 	_playing_edited = p_current;
 }
 
@@ -2617,6 +2623,13 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 
 			if (editor_run.get_status() == EditorRun::STATUS_STOP)
 				break;
+
+			if (is_embed_window_mode_enabled()) {
+				embed_window_mode->hide();
+				main_editor_button_vb->show();
+
+				emit_signal("embed_window_mode_changed", false);
+			}
 
 			editor_run.stop();
 			run_custom_filename.clear();
@@ -3100,7 +3113,23 @@ Control *EditorNode::get_viewport() {
 	return viewport;
 }
 
+Control *EditorNode::get_embed_viewport() {
+
+	return embed_viewport;
+}
+
 void EditorNode::_editor_select(int p_which) {
+
+	if (is_run_playing() && is_embed_window_mode_enabled()) {
+		if (p_which == EDITOR_SCRIPT) {
+			embed_window_mode->hide();
+			main_editor_button_vb->show();
+
+			embed_window->set_pressed(false);
+
+			emit_signal("embed_window_mode_changed", false);
+		}
+	}
 
 	static bool selecting = false;
 	if (selecting || changing_scene)
@@ -5132,7 +5161,9 @@ void EditorNode::_bottom_panel_switch(bool p_enable, int p_idx) {
 		if (bottom_panel_raise->is_pressed()) {
 			top_split->hide();
 		}
-		bottom_panel_raise->show();
+		if (!embed_viewport->is_visible()) {
+			bottom_panel_raise->show();
+		}
 
 	} else {
 		bottom_panel->add_style_override("panel", gui_base->get_stylebox("panel", "TabContainer"));
@@ -5194,6 +5225,33 @@ void EditorNode::set_distraction_free_mode(bool p_enter) {
 
 bool EditorNode::is_distraction_free_mode_enabled() const {
 	return distraction_free->is_pressed();
+}
+
+void EditorNode::_toggle_embed_window_mode() {
+	if (ScriptEditor::get_singleton()->get_debugger()->is_breaked()) {
+		return;
+	}
+
+	set_embed_window_mode(embed_window->is_pressed());
+}
+
+void EditorNode::set_embed_window_mode(bool p_enter) {
+	embed_window->set_pressed(p_enter);
+
+	if (is_run_playing()) {
+		if (p_enter) {
+			embed_window_mode->show();
+			main_editor_button_vb->hide();
+		} else {
+			embed_window_mode->hide();
+			main_editor_button_vb->show();
+		}
+		emit_signal("embed_window_mode_changed", p_enter);
+	}
+}
+
+bool EditorNode::is_embed_window_mode_enabled() const {
+	return embed_window->is_pressed();
 }
 
 void EditorNode::add_control_to_dock(DockSlot p_slot, Control *p_control) {
@@ -5716,6 +5774,7 @@ void EditorNode::_bind_methods() {
 	ClassDB::bind_method("_dropped_files", &EditorNode::_dropped_files);
 	ClassDB::bind_method(D_METHOD("_global_menu_action"), &EditorNode::_global_menu_action, DEFVAL(Variant()));
 	ClassDB::bind_method("_toggle_distraction_free_mode", &EditorNode::_toggle_distraction_free_mode);
+	ClassDB::bind_method("_toggle_embed_window_mode", &EditorNode::_toggle_embed_window_mode);
 	ClassDB::bind_method("_version_control_menu_option", &EditorNode::_version_control_menu_option);
 	ClassDB::bind_method("edit_item_resource", &EditorNode::edit_item_resource);
 
@@ -5748,6 +5807,7 @@ void EditorNode::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("pause_pressed"));
 	ADD_SIGNAL(MethodInfo("stop_pressed"));
 	ADD_SIGNAL(MethodInfo("request_help_search"));
+	ADD_SIGNAL(MethodInfo("embed_window_mode_changed", PropertyInfo(Variant::BOOL, "enable")));
 	ADD_SIGNAL(MethodInfo("script_add_function_request", PropertyInfo(Variant::OBJECT, "obj"), PropertyInfo(Variant::STRING, "function"), PropertyInfo(Variant::POOL_STRING_ARRAY, "args")));
 	ADD_SIGNAL(MethodInfo("resource_saved", PropertyInfo(Variant::OBJECT, "obj")));
 }
@@ -6116,8 +6176,18 @@ EditorNode::EditorNode() {
 	main_hsplit->add_child(center_vb);
 	center_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 
+	center_button_vb = memnew(HBoxContainer);
+	center_vb->add_child(center_button_vb);
+
+	embed_window_mode = memnew(Label);
+	embed_window_mode->add_font_override("font", gui_base->get_font("bold", "EditorFonts"));
+	embed_window_mode->add_color_override("font_color", Color::hex(0x699ce8ff));
+	embed_window_mode->set_text(TTR("Embed-Window"));
+	embed_window_mode->hide();
+	center_button_vb->add_child(embed_window_mode);
+
 	main_editor_button_vb = memnew(HBoxContainer);
-	center_vb->add_child(main_editor_button_vb);
+	center_button_vb->add_child(main_editor_button_vb);
 
 	center_split = memnew(VSplitContainer);
 	center_split->set_v_size_flags(Control::SIZE_EXPAND_FILL);
@@ -6268,6 +6338,18 @@ EditorNode::EditorNode() {
 	distraction_free->set_icon(gui_base->get_icon("DistractionFree", "EditorIcons"));
 	distraction_free->set_toggle_mode(true);
 
+	embed_window = memnew(ToolButton);
+	tabbar_container->add_child(embed_window);
+#ifdef OSX_ENABLED
+	embed_window->set_shortcut(ED_SHORTCUT("editor/embed", TTR("Embed Window Mode"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_E));
+#else
+	embed_window->set_shortcut(ED_SHORTCUT("editor/embed", TTR("Embed Window Mode"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F12));
+#endif
+	embed_window->set_tooltip(TTR("Toggle embed-window mode."));
+	embed_window->connect("pressed", this, "_toggle_embed_window_mode");
+	embed_window->set_icon(gui_base->get_icon("EmbedWindow", "EditorIcons"));
+	embed_window->set_toggle_mode(true);
+
 	scene_tabs_context_menu = memnew(PopupMenu);
 	tabbar_container->add_child(scene_tabs_context_menu);
 	scene_tabs_context_menu->connect("id_pressed", this, "_menu_option");
@@ -6301,6 +6383,12 @@ EditorNode::EditorNode() {
 	viewport->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	viewport->add_constant_override("separation", 0);
 	scene_root_parent->add_child(viewport);
+
+	embed_viewport = memnew(VBoxContainer);
+	embed_viewport->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	embed_viewport->add_constant_override("separation", 0);
+	scene_root_parent->add_child(embed_viewport);
+	embed_viewport->hide();
 
 	HBoxContainer *left_menu_hb = memnew(HBoxContainer);
 	menu_hb->add_child(left_menu_hb);
@@ -6572,7 +6660,7 @@ EditorNode::EditorNode() {
 	run_panel_button_vb = memnew(HBoxContainer);
 	run_panel_button_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	run_panel_button_vb->set_alignment(VBoxContainer::ALIGN_END);
-	main_editor_button_vb->add_child(run_panel_button_vb);
+	center_button_vb->add_child(run_panel_button_vb);
 
 	HBoxContainer *play_hb = memnew(HBoxContainer);
 	run_panel_button_vb->add_child(play_hb);

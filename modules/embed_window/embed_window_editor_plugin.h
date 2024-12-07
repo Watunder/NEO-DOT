@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  popup.h                                                              */
+/*  embed_window_editor_plugin.h                                         */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,66 +28,73 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef POPUP_H
-#define POPUP_H
+#ifndef EMBED_WINDOW_EDITOR_PLUGIN_H
+#define EMBED_WINDOW_EDITOR_PLUGIN_H
 
-#include "scene/gui/control.h"
+#define EMBED_WINDOW_ENABLED
+#include "editor/editor_node.h"
+#include "editor/editor_plugin.h"
+#include "editor/script_editor_debugger.h"
 
-class Popup : public Control {
+#include <windows.h>
 
-	GDCLASS(Popup, Control);
+class EmbedWindowEditorPlugin : public EditorPlugin {
 
-	bool exclusive;
-	bool popped_up;
+	GDCLASS(EmbedWindowEditorPlugin, EditorPlugin);
 
-private:
-	void _popup(const Rect2 &p_bounds = Rect2(), const bool p_centered = false);
-#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
-	void _update_region();
-#endif
+	EditorNode *editor;
 
-protected:
-	virtual void _post_popup() {}
+	VBoxContainer *vbox;
 
-	void _gui_input(Ref<InputEvent> p_event);
-	void _notification(int p_what);
-	virtual void _fix_size();
-	static void _bind_methods();
+	HBoxContainer *hb;
+	MenuButton *settings_menu;
 
-public:
-	enum {
-		NOTIFICATION_POST_POPUP = 80,
-		NOTIFICATION_POPUP_HIDE = 81
+	Control *window_area;
+	Ref<StyleBoxFlat> window_area_ttp;
+
+	ScriptEditorDebugger *debugger;
+
+	struct StoredWindowInfo {
+		LONG style = 0;
+		LONG ex_style = 0;
+		WINDOWPLACEMENT placement = { 0 };
+	} stored_window_info;
+
+	HWND embed_window_handle = NULL;
+	HWND editor_window_handle = NULL;
+
+	Rect2 last_region_rect;
+	Rect2 last_embed_window_rect;
+
+	HRGN last_popups_region = NULL;
+	HRGN last_embed_window_region = NULL;
+
+	bool region_rect_changed = false;
+	bool region_visibility_changed = false;
+
+	struct RegionData {
+		HRGN region = NULL;
+		Rect2 rect;
 	};
+	int last_region_map_size = 0;
+	Map<ObjectID, RegionData> region_map;
 
-	void set_exclusive(bool p_exclusive);
-	bool is_exclusive() const;
+	void _update_region(ObjectID p_object, const Rect2 &p_exclude);
+	void _clear_region();
 
-	void popup_centered_ratio(float p_screen_ratio = 0.75);
-	void popup_centered(const Size2 &p_size = Size2());
-	void popup_centered_minsize(const Size2 &p_minsize = Size2());
-	void set_as_minsize();
-	void popup_centered_clamped(const Size2 &p_size = Size2(), float p_fallback_ratio = 0.75);
-	virtual void popup(const Rect2 &p_bounds = Rect2());
-
-	virtual String get_configuration_warning() const;
-
-	Popup();
-	~Popup();
-};
-
-class PopupPanel : public Popup {
-
-	GDCLASS(PopupPanel, Popup);
+	void _embed_window_mode_changed(bool p_enable);
+	void _draw_focus();
 
 protected:
-	void _update_child_rects();
-	void _notification(int p_what);
+	static void _bind_methods();
+	void _notification(int p_option);
 
 public:
-	void set_child_rect(Control *p_child);
-	virtual Size2 get_minimum_size() const;
-	PopupPanel();
+	virtual String get_name() const { return "EmbedWindow"; }
+	bool has_main_screen() const { return false; }
+
+	EmbedWindowEditorPlugin(EditorNode *p_node);
+	~EmbedWindowEditorPlugin();
 };
 
-#endif
+#endif // EMBED_WINDOW_EDITOR_PLUGIN_H

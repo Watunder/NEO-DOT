@@ -70,6 +70,7 @@ public:
 	static EditorInterface *get_singleton() { return singleton; }
 
 	Control *get_editor_viewport();
+	Control *get_editor_embed_viewport();
 	void edit_resource(const Ref<Resource> &p_resource);
 	void edit_node(Node *p_node);
 	void open_scene_from_path(const String &scene_path);
@@ -116,6 +117,8 @@ public:
 	void set_main_screen_editor(const String &p_name);
 	void set_distraction_free_mode(bool p_enter);
 	bool is_distraction_free_mode_enabled() const;
+	void set_embed_window_mode(bool p_enter);
+	bool is_embed_window_mode_enabled() const;
 
 	EditorInterface();
 };

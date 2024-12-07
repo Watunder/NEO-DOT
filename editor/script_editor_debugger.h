@@ -126,6 +126,8 @@ private:
 	int last_error_count;
 	int last_warning_count;
 
+	int64_t remote_window_handle;
+
 	bool hide_on_stop;
 	bool enable_external_editor;
 
@@ -259,6 +261,10 @@ public:
 	void debug_step();
 	void debug_break();
 	void debug_continue();
+
+	bool is_breaked() const { return breaked; }
+
+	int64_t get_remote_window_handle() const { return remote_window_handle; }
 
 	String get_var_value(const String &p_var) const;
 

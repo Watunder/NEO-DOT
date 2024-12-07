@@ -267,6 +267,7 @@ private:
 
 	HBoxContainer *menu_hb;
 	Control *viewport;
+	Control *embed_viewport;
 	MenuButton *file_menu;
 	MenuButton *project_menu;
 	MenuButton *debug_menu;
@@ -344,10 +345,12 @@ private:
 	EditorQuickOpen *quick_open;
 	EditorQuickOpen *quick_run;
 
+	HBoxContainer *center_button_vb;
 	HBoxContainer *main_editor_button_vb;
 	HBoxContainer *run_panel_button_vb;
 	Vector<ToolButton *> main_editor_buttons;
 	Vector<EditorPlugin *> editor_table;
+	Label *embed_window_mode;
 
 	AudioStreamPreviewGenerator *preview_gen;
 	ProgressDialog *progress_dialog;
@@ -373,6 +376,7 @@ private:
 
 	HBoxContainer *tabbar_container;
 	ToolButton *distraction_free;
+	ToolButton *embed_window;
 	ToolButton *scene_tab_add;
 
 	bool scene_distraction;
@@ -620,6 +624,7 @@ private:
 	static void _file_access_close_error_notify(const String &p_str);
 
 	void _toggle_distraction_free_mode();
+	void _toggle_embed_window_mode();
 
 	enum {
 		MAX_INIT_CALLBACKS = 128,
@@ -685,6 +690,11 @@ public:
 	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }
 	static EditorNode *get_singleton() { return singleton; }
 
+#ifdef EMBED_WINDOW_ENABLED
+	int idx_embed_window_editor_plugin = -1;
+	void set_embed_window_editor_plugin(int p_idx) { idx_embed_window_editor_plugin = p_idx; }
+	EditorPlugin *get_embed_window_editor_plugin() { return editor_data.get_editor_plugin(idx_embed_window_editor_plugin); }
+#endif
 	EditorPlugin *get_editor_plugin_screen() { return editor_plugin_screen; }
 	EditorPluginList *get_editor_plugins_over() { return editor_plugins_over; }
 	EditorPluginList *get_editor_plugins_force_over() { return editor_plugins_force_over; }
@@ -707,6 +717,9 @@ public:
 
 	void set_distraction_free_mode(bool p_enter);
 	bool is_distraction_free_mode_enabled() const;
+
+	void set_embed_window_mode(bool p_enter);
+	bool is_embed_window_mode_enabled() const;
 
 	void add_control_to_dock(DockSlot p_slot, Control *p_control);
 	void remove_control_from_dock(Control *p_control);
@@ -744,6 +757,7 @@ public:
 
 	static EditorLog *get_log() { return singleton->log; }
 	Control *get_viewport();
+	Control *get_embed_viewport();
 
 	void set_edited_scene(Node *p_scene);
 
@@ -835,6 +849,7 @@ public:
 	ToolButton *get_pause_button() { return pause_button; }
 	ToolButton *get_next_button() { return next_button; }
 	ToolButton *get_select_button() { return select_button; }
+	ToolButton *get_bottom_panel_raise_button() { return bottom_panel_raise; }
 
 	ToolButton *add_bottom_panel_item(String p_text, Control *p_item);
 	bool are_bottom_panels_hidden() const;

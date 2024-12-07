@@ -162,6 +162,11 @@ Control *EditorInterface::get_editor_viewport() {
 	return EditorNode::get_singleton()->get_viewport();
 }
 
+Control *EditorInterface::get_editor_embed_viewport() {
+
+	return EditorNode::get_singleton()->get_embed_viewport();
+}
+
 void EditorInterface::edit_resource(const Ref<Resource> &p_resource) {
 
 	EditorNode::get_singleton()->edit_resource(p_resource);
@@ -316,6 +321,14 @@ bool EditorInterface::is_distraction_free_mode_enabled() const {
 	return EditorNode::get_singleton()->is_distraction_free_mode_enabled();
 }
 
+void EditorInterface::set_embed_window_mode(bool p_enter) {
+	EditorNode::get_singleton()->set_embed_window_mode(p_enter);
+}
+
+bool EditorInterface::is_embed_window_mode_enabled() const {
+	return EditorNode::get_singleton()->is_embed_window_mode_enabled();
+}
+
 void EditorInterface::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("inspect_object", "object", "for_property", "inspector_only"), &EditorInterface::inspect_object, DEFVAL(String()), DEFVAL(false));
@@ -339,6 +352,7 @@ void EditorInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_resource_previewer"), &EditorInterface::get_resource_previewer);
 	ClassDB::bind_method(D_METHOD("get_resource_filesystem"), &EditorInterface::get_resource_file_system);
 	ClassDB::bind_method(D_METHOD("get_editor_viewport"), &EditorInterface::get_editor_viewport);
+	ClassDB::bind_method(D_METHOD("get_editor_embed_viewport"), &EditorInterface::get_editor_embed_viewport);
 	ClassDB::bind_method(D_METHOD("make_mesh_previews", "meshes", "preview_size"), &EditorInterface::_make_mesh_previews);
 	ClassDB::bind_method(D_METHOD("select_file", "file"), &EditorInterface::select_file);
 	ClassDB::bind_method(D_METHOD("get_selected_path"), &EditorInterface::get_selected_path);
@@ -356,8 +370,11 @@ void EditorInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_main_screen_editor", "name"), &EditorInterface::set_main_screen_editor);
 	ClassDB::bind_method(D_METHOD("set_distraction_free_mode", "enter"), &EditorInterface::set_distraction_free_mode);
 	ClassDB::bind_method(D_METHOD("is_distraction_free_mode_enabled"), &EditorInterface::is_distraction_free_mode_enabled);
+	ClassDB::bind_method(D_METHOD("set_embed_window_mode", "enter"), &EditorInterface::set_embed_window_mode);
+	ClassDB::bind_method(D_METHOD("is_embed_window_mode_enabled"), &EditorInterface::is_embed_window_mode_enabled);
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "distraction_free_mode"), "set_distraction_free_mode", "is_distraction_free_mode_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "embed_window_mode"), "set_embed_window_mode", "is_embed_window_mode_enabled");
 }
 
 EditorInterface *EditorInterface::singleton = NULL;

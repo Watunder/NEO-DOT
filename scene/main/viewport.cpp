@@ -46,6 +46,7 @@
 #include "scene/gui/panel.h"
 #include "scene/gui/panel_container.h"
 #include "scene/gui/popup_menu.h"
+#include "scene/gui/tree.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/timer.h"
 #include "scene/resources/mesh.h"
@@ -174,29 +175,6 @@ ViewportTexture::~ViewportTexture() {
 
 	VS::get_singleton()->free(proxy);
 }
-
-/////////////////////////////////////
-
-// Aliases used to provide custom styles to tooltips in the default
-// theme and editor theme.
-// TooltipPanel is also used for custom tooltips, while TooltipLabel
-// is only relevant for default tooltips.
-
-class TooltipPanel : public PanelContainer {
-
-	GDCLASS(TooltipPanel, PanelContainer);
-
-public:
-	TooltipPanel(){};
-};
-
-class TooltipLabel : public Label {
-
-	GDCLASS(TooltipLabel, Label);
-
-public:
-	TooltipLabel(){};
-};
 
 /////////////////////////////////////
 
@@ -451,9 +429,18 @@ void Viewport::_notification(int p_what) {
 				_process_picking(false);
 			}
 		} break;
+		case SceneTree::NOTIFICATION_WM_MOUSE_ENTER: {
+			if (gui.mouse_over) {
+				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_ENTER);
+			}
+		} break;
 		case SceneTree::NOTIFICATION_WM_MOUSE_EXIT: {
 
 			_drop_physics_mouseover();
+
+			if (gui.mouse_over) {
+				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_EXIT);
+			}
 
 			// Unlike on loss of focus (NOTIFICATION_WM_WINDOW_FOCUS_OUT), do not
 			// drop the gui mouseover here, as a scrollbar may be dragged while the
@@ -1635,6 +1622,10 @@ void Viewport::_gui_show_tooltip() {
 		return;
 	}
 
+	if (gui.tooltip_popup) {
+		return;
+	}
+
 	// Get the Control under cursor and the relevant tooltip text, if any.
 	Control *tooltip_owner = NULL;
 	String tooltip_text = _gui_get_tooltip(
@@ -1646,34 +1637,26 @@ void Viewport::_gui_show_tooltip() {
 		return; // Nothing to show.
 	}
 
-	// Remove previous popup if we change something.
-	if (gui.tooltip_popup) {
-		memdelete(gui.tooltip_popup);
-		gui.tooltip_popup = NULL;
-		gui.tooltip_label = NULL;
-	}
-
 	if (!tooltip_owner) {
 		return;
 	}
 
 	// Controls can implement `make_custom_tooltip` to provide their own tooltip.
 	// This should be a Control node which will be added as child to the tooltip owner.
+	bool custom_tooltip = true;
 	gui.tooltip_popup = tooltip_owner->make_custom_tooltip(tooltip_text);
 
 	// If no custom tooltip is given, use a default implementation.
 	if (!gui.tooltip_popup) {
-		gui.tooltip_popup = memnew(TooltipPanel);
-		gui.tooltip_label = memnew(TooltipLabel);
-		gui.tooltip_popup->add_child(gui.tooltip_label);
+		custom_tooltip = false;
+		gui.tooltip_popup = memnew(PopupPanel);
+		gui.tooltip_popup->add_style_override("panel", tooltip_owner->get_stylebox("panel", "TooltipPanel"));
 
-		Ref<StyleBox> ttp = gui.tooltip_label->get_stylebox("panel", "TooltipPanel");
-
-		gui.tooltip_label->set_anchor_and_margin(MARGIN_LEFT, Control::ANCHOR_BEGIN, ttp->get_margin(MARGIN_LEFT));
-		gui.tooltip_label->set_anchor_and_margin(MARGIN_TOP, Control::ANCHOR_BEGIN, ttp->get_margin(MARGIN_TOP));
-		gui.tooltip_label->set_anchor_and_margin(MARGIN_RIGHT, Control::ANCHOR_END, -ttp->get_margin(MARGIN_RIGHT));
-		gui.tooltip_label->set_anchor_and_margin(MARGIN_BOTTOM, Control::ANCHOR_END, -ttp->get_margin(MARGIN_BOTTOM));
+		gui.tooltip_label = memnew(Label);
+		gui.tooltip_label->add_color_override("font_color", tooltip_owner->get_color("font_color", "TooltipLabel"));
+		gui.tooltip_label->add_color_override("font_color_shadow", tooltip_owner->get_color("font_color_shadow", "TooltipLabel"));
 		gui.tooltip_label->set_text(tooltip_text);
+		gui.tooltip_popup->add_child(gui.tooltip_label);
 	}
 
 	tooltip_owner->add_child(gui.tooltip_popup);
@@ -1700,6 +1683,11 @@ void Viewport::_gui_show_tooltip() {
 
 	gui.tooltip_popup->raise();
 	gui.tooltip_popup->show();
+
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+	if (!custom_tooltip)
+		gui.tooltip_popup->call("_update_region");
+#endif
 }
 
 void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_input) {
@@ -2322,11 +2310,13 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				if (can_tooltip && gui.tooltip_control) {
 					String tooltip = _gui_get_tooltip(over, gui.tooltip_control->get_global_transform().xform_inv(mpos));
 
-					if (tooltip.length() == 0)
+					if (tooltip.length() == 0) {
 						_gui_cancel_tooltip();
-					else if (gui.tooltip_label) {
+					} else if (gui.tooltip_label) {
 						if (tooltip == gui.tooltip_label->get_text()) {
 							is_tooltip_shown = true;
+						} else {
+							_gui_cancel_tooltip();
 						}
 					} else if (tooltip == String(gui.tooltip_popup->call("get_tooltip_text"))) {
 						is_tooltip_shown = true;

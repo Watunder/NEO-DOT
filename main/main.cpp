@@ -1622,6 +1622,11 @@ bool Main::start() {
 					ScriptDebuggerRemote *remote_debugger = static_cast<ScriptDebuggerRemote *>(script_debugger);
 
 					remote_debugger->set_scene_tree(sml);
+
+					Array msg;
+					int64_t handle = (int64_t)OS::get_singleton()->get_native_handle(OS::HandleType::WINDOW_HANDLE);
+					msg.push_back(handle);
+					remote_debugger->send_message("set_remote_window_handle", msg);
 				}
 
 				//autoload

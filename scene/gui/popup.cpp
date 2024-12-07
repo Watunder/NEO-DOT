@@ -33,6 +33,10 @@
 #include "core/engine.h"
 #include "core/os/keyboard.h"
 
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+#include "editor/editor_node.h"
+#endif
+
 void Popup::_gui_input(Ref<InputEvent> p_event) {
 }
 
@@ -193,7 +197,19 @@ void Popup::_popup(const Rect2 &p_bounds, const bool p_centered) {
 	_post_popup();
 	notification(NOTIFICATION_POST_POPUP);
 	popped_up = true;
+
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+	_update_region();
+#endif
 }
+
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+void Popup::_update_region() {
+	if (Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton()->is_run_playing() && EditorNode::get_singleton()->is_embed_window_mode_enabled()) {
+		EditorNode::get_singleton()->get_embed_window_editor_plugin()->call("_update_region", get_instance_id(), get_global_rect());
+	}
+}
+#endif
 
 void Popup::set_exclusive(bool p_exclusive) {
 
@@ -215,6 +231,11 @@ void Popup::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("popup", "bounds"), &Popup::popup, DEFVAL(Rect2()));
 	ClassDB::bind_method(D_METHOD("set_exclusive", "enable"), &Popup::set_exclusive);
 	ClassDB::bind_method(D_METHOD("is_exclusive"), &Popup::is_exclusive);
+
+#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+	ClassDB::bind_method(D_METHOD("_update_region"), &Popup::_update_region);
+#endif
+
 	ADD_SIGNAL(MethodInfo("about_to_show"));
 	ADD_SIGNAL(MethodInfo("popup_hide"));
 	ADD_GROUP("Popup", "popup_");

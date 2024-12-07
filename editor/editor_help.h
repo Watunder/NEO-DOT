@@ -36,7 +36,7 @@
 #include "editor/editor_plugin.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/menu_button.h"
-#include "scene/gui/panel_container.h"
+#include "scene/gui/popup.h"
 #include "scene/gui/rich_text_label.h"
 #include "scene/gui/split_container.h"
 #include "scene/gui/tab_container.h"
@@ -192,13 +192,14 @@ public:
 	~EditorHelp();
 };
 
-class EditorHelpBit : public PanelContainer {
+class EditorHelpBit : public PopupPanel {
 
-	GDCLASS(EditorHelpBit, PanelContainer);
+	GDCLASS(EditorHelpBit, PopupPanel);
 
 	RichTextLabel *rich_text;
 	void _go_to_help(String p_what);
 	void _meta_clicked(String p_select);
+	void _minimum_size_changed();
 
 protected:
 	static void _bind_methods();
