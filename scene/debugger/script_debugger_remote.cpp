@@ -1321,6 +1321,10 @@ ScriptDebuggerRemote::~ScriptDebuggerRemote() {
 
 	remove_print_handler(&phl);
 	remove_error_handler(&eh);
+	
+	if (runtime_node_selector) {
+		memdelete(runtime_node_selector);
+	}
 }
 
 void RuntimeNodeSelector::_bind_methods() {
@@ -1493,8 +1497,8 @@ RuntimeNodeSelector::RuntimeNodeSelector(ScriptDebuggerRemote *p_remote_debugger
 	remote_debugger = p_remote_debugger;
 
 	singleton = this;
-};
+}
 
 RuntimeNodeSelector::~RuntimeNodeSelector() {
 	singleton = NULL;
-};
+}
