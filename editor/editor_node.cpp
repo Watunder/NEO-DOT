@@ -2277,7 +2277,7 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 
 	if (is_embed_window_mode_enabled()) {
 		embed_window_mode->show();
-		main_editor_button_vb->hide();
+		main_editor_button_hb->hide();
 	}
 
 	_playing_edited = p_current;
@@ -2626,7 +2626,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 
 			if (is_embed_window_mode_enabled()) {
 				embed_window_mode->hide();
-				main_editor_button_vb->show();
+				main_editor_button_hb->show();
 
 				emit_signal("embed_window_mode_changed", false);
 			}
@@ -3123,7 +3123,7 @@ void EditorNode::_editor_select(int p_which) {
 	if (is_run_playing() && is_embed_window_mode_enabled()) {
 		if (p_which == EDITOR_SCRIPT) {
 			embed_window_mode->hide();
-			main_editor_button_vb->show();
+			main_editor_button_hb->show();
 
 			embed_window->set_pressed(false);
 
@@ -3207,10 +3207,10 @@ void EditorNode::add_editor_plugin(EditorPlugin *p_editor, bool p_config_changed
 
 		tb->set_name(p_editor->get_name());
 		singleton->main_editor_buttons.push_back(tb);
-		singleton->main_editor_button_vb->add_child(tb);
+		singleton->main_editor_button_hb->add_child(tb);
 		singleton->editor_table.push_back(p_editor);
 
-		singleton->run_panel_button_vb->raise();
+		singleton->run_panel_button_hb->raise();
 	}
 	singleton->editor_data.add_editor_plugin(p_editor);
 	singleton->add_child(p_editor);
@@ -5241,10 +5241,10 @@ void EditorNode::set_embed_window_mode(bool p_enter) {
 	if (is_run_playing()) {
 		if (p_enter) {
 			embed_window_mode->show();
-			main_editor_button_vb->hide();
+			main_editor_button_hb->hide();
 		} else {
 			embed_window_mode->hide();
-			main_editor_button_vb->show();
+			main_editor_button_hb->show();
 		}
 		emit_signal("embed_window_mode_changed", p_enter);
 	}
@@ -6176,18 +6176,18 @@ EditorNode::EditorNode() {
 	main_hsplit->add_child(center_vb);
 	center_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 
-	center_button_vb = memnew(HBoxContainer);
-	center_vb->add_child(center_button_vb);
+	center_button_hb = memnew(HBoxContainer);
+	center_vb->add_child(center_button_hb);
 
 	embed_window_mode = memnew(Label);
 	embed_window_mode->add_font_override("font", gui_base->get_font("bold", "EditorFonts"));
 	embed_window_mode->add_color_override("font_color", Color::hex(0x699ce8ff));
 	embed_window_mode->set_text(TTR("Embed-Window"));
 	embed_window_mode->hide();
-	center_button_vb->add_child(embed_window_mode);
+	center_button_hb->add_child(embed_window_mode);
 
-	main_editor_button_vb = memnew(HBoxContainer);
-	center_button_vb->add_child(main_editor_button_vb);
+	main_editor_button_hb = memnew(HBoxContainer);
+	center_button_hb->add_child(main_editor_button_hb);
 
 	center_split = memnew(VSplitContainer);
 	center_split->set_v_size_flags(Control::SIZE_EXPAND_FILL);
@@ -6657,13 +6657,13 @@ EditorNode::EditorNode() {
 	p->add_icon_shortcut(gui_base->get_icon("Godot", "EditorIcons"), ED_SHORTCUT("editor/about", TTR("About")), HELP_ABOUT);
 	p->add_icon_shortcut(gui_base->get_icon("Heart", "EditorIcons"), ED_SHORTCUT("editor/support_development", TTR("Support Godot Development")), HELP_SUPPORT_GODOT_DEVELOPMENT);
 
-	run_panel_button_vb = memnew(HBoxContainer);
-	run_panel_button_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	run_panel_button_vb->set_alignment(VBoxContainer::ALIGN_END);
-	center_button_vb->add_child(run_panel_button_vb);
+	run_panel_button_hb = memnew(HBoxContainer);
+	run_panel_button_hb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	run_panel_button_hb->set_alignment(HBoxContainer::ALIGN_END);
+	center_button_hb->add_child(run_panel_button_hb);
 
 	HBoxContainer *play_hb = memnew(HBoxContainer);
-	run_panel_button_vb->add_child(play_hb);
+	run_panel_button_hb->add_child(play_hb);
 
 	run_native = memnew(EditorRunNative);
 	play_hb->add_child(run_native);
@@ -6748,7 +6748,7 @@ EditorNode::EditorNode() {
 #endif
 
 	HBoxContainer *right_menu_hb = memnew(HBoxContainer);
-	run_panel_button_vb->add_child(right_menu_hb);
+	run_panel_button_hb->add_child(right_menu_hb);
 
 	// Toggle for video driver
 	video_driver = memnew(OptionButton);

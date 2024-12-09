@@ -60,8 +60,6 @@ void EmbedWindowEditorPlugin::_notification(int p_option) {
 				Object *obj = ObjectDB::get_instance(E->key());
 				Control *control = Object::cast_to<Control>(obj);
 				if (control) {
-					StringName class_name = control->get_class_name();
-
 					bool visible = control->is_visible();
 					if (!visible) {
 						region_map.erase(E);
@@ -125,6 +123,7 @@ void EmbedWindowEditorPlugin::_embed_window_mode_changed(bool p_enable) {
 		editor->get_viewport()->hide();
 		editor->get_embed_viewport()->show();
 		editor->get_bottom_panel_raise_button()->hide();
+		editor->get_top_split()->show();
 
 		HWND child_handle = (HWND)debugger->get_remote_window_handle();
 		HWND parent_handle = editor_window_handle;
