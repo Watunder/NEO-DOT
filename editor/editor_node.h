@@ -345,9 +345,9 @@ private:
 	EditorQuickOpen *quick_open;
 	EditorQuickOpen *quick_run;
 
-	HBoxContainer *center_button_vb;
-	HBoxContainer *main_editor_button_vb;
-	HBoxContainer *run_panel_button_vb;
+	HBoxContainer *center_button_hb;
+	HBoxContainer *main_editor_button_hb;
+	HBoxContainer *run_panel_button_hb;
 	Vector<ToolButton *> main_editor_buttons;
 	Vector<EditorPlugin *> editor_table;
 	Label *embed_window_mode;
