@@ -466,6 +466,8 @@ public:
 	virtual bool is_window_maximized() const;
 	virtual void set_window_always_on_top(bool p_enabled);
 	virtual bool is_window_always_on_top() const;
+	virtual void set_window_keep_aspect_ratio(bool p_enabled);
+	virtual bool is_window_keep_aspect_ratio() const;
 	virtual bool is_window_focused() const;
 	virtual void set_console_visible(bool p_enabled);
 	virtual bool is_console_visible() const;

@@ -1033,6 +1033,40 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			}
 		} break;
 
+		case WM_SIZING: {
+			if (video_mode.keep_aspect_ratio) {
+				RECT rect, crect;
+				GetWindowRect(hWnd, &rect);
+				GetClientRect(hWnd, &crect);
+
+				POINT viewport_offset = {
+					(rect.right - rect.left) - crect.right,
+					(rect.bottom - rect.top) - crect.bottom,
+				};
+
+				float aspect_ratio = get_window_aspect_ratio();
+
+				RECT *r = reinterpret_cast<RECT *>(lParam);
+				switch(wParam)
+				{
+					case WMSZ_LEFT:
+					case WMSZ_BOTTOMLEFT:
+					case WMSZ_BOTTOMRIGHT:
+					case WMSZ_RIGHT:
+						r->bottom = r->top + (LONG)Math::ceil((r->right - r->left - viewport_offset.x) / aspect_ratio) + viewport_offset.y;
+						break;
+					case WMSZ_TOPRIGHT:
+					case WMSZ_TOP:
+					case WMSZ_BOTTOM:
+						r->right = r->left + (LONG)Math::ceil((r->bottom - r->top - viewport_offset.y) * aspect_ratio) + viewport_offset.x;
+						break;
+					case WMSZ_TOPLEFT:
+						r->left = r->right - (LONG)Math::ceil((r->bottom - r->top - viewport_offset.y) * aspect_ratio) - viewport_offset.x;
+						break;
+				}
+			}
+		} break;
+
 		case WM_SIZE: {
 			// Ignore size when a SIZE_MINIMIZED event is triggered
 			if (wParam != SIZE_MINIMIZED) {
@@ -1398,6 +1432,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	}
 
 	video_mode = p_desired;
+	set_window_aspect_ratio(video_mode.get_aspect());
 	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
 	RECT WindowRect;
 
@@ -2307,6 +2342,17 @@ void OS_Windows::set_window_always_on_top(bool p_enabled) {
 
 bool OS_Windows::is_window_always_on_top() const {
 	return video_mode.always_on_top;
+}
+
+void OS_Windows::set_window_keep_aspect_ratio(bool p_enabled) {
+	if (video_mode.keep_aspect_ratio == p_enabled)
+		return;
+
+	video_mode.keep_aspect_ratio = p_enabled;
+}
+
+bool OS_Windows::is_window_keep_aspect_ratio() const {
+	return video_mode.keep_aspect_ratio;
 }
 
 bool OS_Windows::is_window_focused() const {

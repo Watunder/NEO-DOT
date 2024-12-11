@@ -63,6 +63,7 @@ class OS {
 	bool _allow_layered;
 	bool _use_vsync;
 	bool _vsync_via_compositor;
+	float _aspect_ratio;
 
 	char *last_error;
 
@@ -102,11 +103,12 @@ public:
 		bool borderless_window;
 		bool maximized;
 		bool always_on_top;
+		bool keep_aspect_ratio;
 		bool use_vsync;
 		bool vsync_via_compositor;
 		bool layered;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_maximized = false, bool p_always_on_top = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_maximized = false, bool p_always_on_top = false, bool p_keep_aspect_ratio = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
@@ -114,6 +116,7 @@ public:
 			borderless_window = p_borderless_window;
 			maximized = p_maximized;
 			always_on_top = p_always_on_top;
+			keep_aspect_ratio = p_keep_aspect_ratio;
 			use_vsync = p_use_vsync;
 			vsync_via_compositor = p_vsync_via_compositor;
 			layered = false;
@@ -231,6 +234,8 @@ public:
 	virtual bool is_window_maximized() const { return true; }
 	virtual void set_window_always_on_top(bool p_enabled) {}
 	virtual bool is_window_always_on_top() const { return false; }
+	virtual void set_window_keep_aspect_ratio(bool p_enabled) {}
+	virtual bool is_window_keep_aspect_ratio() const { return false; }
 	virtual bool is_window_focused() const { return true; }
 	virtual void set_console_visible(bool p_enabled) {}
 	virtual bool is_console_visible() const { return false; }
@@ -550,6 +555,9 @@ public:
 
 	void set_vsync_via_compositor(bool p_enable);
 	bool is_vsync_via_compositor_enabled() const;
+
+	void set_window_aspect_ratio(float p_ratio);
+	float get_window_aspect_ratio() const;
 
 	virtual OS::PowerState get_power_state();
 	virtual int get_power_seconds_left();
