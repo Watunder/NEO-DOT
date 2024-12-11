@@ -451,6 +451,10 @@
 			Forces the main window to be always on top.
 			[b]Note:[/b] This setting is ignored on iOS, Android, and HTML5.
 		</member>
+		<member name="display/window/size/keep_aspect_ratio" type="bool" setter="" getter="" default="false">
+			Forces the main window keep aspect ratio when it resizing.
+			[b]Note:[/b] This setting is ignored on iOS, Android, and HTML5.
+		</member>
 		<member name="display/window/size/borderless" type="bool" setter="" getter="" default="false">
 			Forces the main window to be borderless.
 			[b]Note:[/b] This setting is ignored on iOS, Android, and HTML5.
