@@ -413,6 +413,14 @@ bool _OS::is_window_always_on_top() const {
 	return OS::get_singleton()->is_window_always_on_top();
 }
 
+void _OS::set_window_keep_aspect_ratio(bool p_enabled) {
+	OS::get_singleton()->set_window_keep_aspect_ratio(p_enabled);
+}
+
+bool _OS::is_window_keep_aspect_ratio() const {
+	return OS::get_singleton()->is_window_keep_aspect_ratio();
+}
+
 bool _OS::is_window_focused() const {
 	return OS::get_singleton()->is_window_focused();
 }
@@ -638,6 +646,14 @@ void _OS::set_vsync_via_compositor(bool p_enable) {
 bool _OS::is_vsync_via_compositor_enabled() const {
 
 	return OS::get_singleton()->is_vsync_via_compositor_enabled();
+}
+
+void _OS::set_window_aspect_ratio(float p_ratio) {
+	OS::get_singleton()->set_window_aspect_ratio(p_ratio);
+}
+
+float _OS::get_window_aspect_ratio() const {
+	return OS::get_singleton()->get_window_aspect_ratio();
 }
 
 _OS::PowerState _OS::get_power_state() {
@@ -1303,6 +1319,8 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_window_maximized"), &_OS::is_window_maximized);
 	ClassDB::bind_method(D_METHOD("set_window_always_on_top", "enabled"), &_OS::set_window_always_on_top);
 	ClassDB::bind_method(D_METHOD("is_window_always_on_top"), &_OS::is_window_always_on_top);
+	ClassDB::bind_method(D_METHOD("set_window_keep_aspect_ratio", "enabled"), &_OS::set_window_keep_aspect_ratio);
+	ClassDB::bind_method(D_METHOD("is_window_keep_aspect_ratio"), &_OS::is_window_keep_aspect_ratio);
 	ClassDB::bind_method(D_METHOD("is_window_focused"), &_OS::is_window_focused);
 	ClassDB::bind_method(D_METHOD("request_attention"), &_OS::request_attention);
 	ClassDB::bind_method(D_METHOD("get_real_window_size"), &_OS::get_real_window_size);
@@ -1439,6 +1457,9 @@ void _OS::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_vsync_via_compositor", "enable"), &_OS::set_vsync_via_compositor);
 	ClassDB::bind_method(D_METHOD("is_vsync_via_compositor_enabled"), &_OS::is_vsync_via_compositor_enabled);
+
+	ClassDB::bind_method(D_METHOD("set_window_aspect_ratio", "ratio"), &_OS::set_window_aspect_ratio);
+	ClassDB::bind_method(D_METHOD("get_window_aspect_ratio"), &_OS::get_window_aspect_ratio);
 
 	ClassDB::bind_method(D_METHOD("has_feature", "tag_name"), &_OS::has_feature);
 

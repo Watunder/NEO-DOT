@@ -633,6 +633,14 @@ bool OS::is_vsync_via_compositor_enabled() const {
 	return _vsync_via_compositor;
 }
 
+void OS::set_window_aspect_ratio(float p_ratio) {
+	_aspect_ratio = p_ratio;
+}
+
+float OS::get_window_aspect_ratio() const {
+	return _aspect_ratio;
+}
+
 OS::PowerState OS::get_power_state() {
 	return POWERSTATE_UNKNOWN;
 }

@@ -210,6 +210,8 @@ public:
 	virtual bool is_window_maximized() const;
 	virtual void set_window_always_on_top(bool p_enabled);
 	virtual bool is_window_always_on_top() const;
+	virtual void set_window_keep_aspect_ratio(bool p_enabled);
+	virtual bool is_window_keep_aspect_ratio() const;
 	virtual bool is_window_focused() const;
 	virtual void request_attention();
 	virtual void center_window();
@@ -369,6 +371,9 @@ public:
 
 	void set_vsync_via_compositor(bool p_enable);
 	bool is_vsync_via_compositor_enabled() const;
+
+	void set_window_aspect_ratio(float p_ratio);
+	float get_window_aspect_ratio() const;
 
 	PowerState get_power_state();
 	int get_power_seconds_left();
