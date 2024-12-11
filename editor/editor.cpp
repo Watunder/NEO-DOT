@@ -91,16 +91,14 @@ void load_scene(const String &p_path) {
 void handle_cmdline(const List<String> &p_args) {
 	bool doc_base = true;
 	String doc_tool;
-	List<String> removal_docs;
 
 	for (int i = 0; i < p_args.size(); i++) {
 		if (p_args[i] == "--no-docbase") {
 			doc_base = false;
-		} else if (i < (p_args.size() - 2)) {
+		} else if (i < (p_args.size() - 1)) {
+			bool parsed_pair = true;
 			if (p_args[i] == "--doctool") {
 				doc_tool = p_args[i + 1];
-				for (int j = i + 2; j < p_args.size(); j++)
-					removal_docs.push_back(p_args[j]);
 			} else if (p_args[i] == "--export") {
 				export_preset = p_args[i + 1];
 			} else if (p_args[i] == "--export-debug") {
@@ -109,68 +107,73 @@ void handle_cmdline(const List<String> &p_args) {
 			} else if (p_args[i] == "--export-pack") {
 				export_preset = p_args[i + 1];
 				export_pack_only = true;
+			} else {
+				parsed_pair = false;
+			}
+			if (parsed_pair) {
+				i++;
 			}
 		} else if (p_args[i].length() && p_args[i][0] != '-' && export_path == "") {
 			export_path = p_args[i];
 		}
+	}
 
-		if (doc_tool != "") {
+	if (doc_tool != "") {
 
-			Engine::get_singleton()->set_editor_hint(true); // Needed to instance editor-only classes for their default values
+		Engine::get_singleton()->set_editor_hint(true); // Needed to instance editor-only classes for their default values
 
-			{
-				DirAccessRef da = DirAccess::open(doc_tool);
-				ERR_FAIL_COND_MSG(!da, "Argument supplied to --doctool must be a valid directory path.");
-			}
-			DocData doc;
-			doc.generate(doc_base);
-
-			DocData docsrc;
-			Map<String, String> doc_data_classes;
-			Set<String> checked_paths;
-			print_line("Loading docs...");
-
-			for (int i = 0; i < _doc_data_class_path_count; i++) {
-				// Custom modules are always located by absolute path.
-				String path = _doc_data_class_paths[i].path;
-				if (path.is_rel_path()) {
-					path = doc_tool.plus_file(path);
-				}
-				String name = _doc_data_class_paths[i].name;
-				doc_data_classes[name] = path;
-				if (!checked_paths.has(path)) {
-					checked_paths.insert(path);
-
-					// Create the module documentation directory if it doesn't exist
-					DirAccess *da = DirAccess::create_for_path(path);
-					da->make_dir_recursive(path);
-					memdelete(da);
-
-					docsrc.load_classes(path);
-					print_line("Loading docs from: " + path);
-				}
-			}
-
-			String index_path = doc_tool.plus_file("doc/classes");
-			// Create the main documentation directory if it doesn't exist
-			DirAccess *da = DirAccess::create_for_path(index_path);
-			da->make_dir_recursive(index_path);
-			memdelete(da);
-
-			docsrc.load_classes(index_path);
-			checked_paths.insert(index_path);
-			print_line("Loading docs from: " + index_path);
-
-			print_line("Merging docs...");
-			doc.merge_from(docsrc);
-			for (Set<String>::Element *E = checked_paths.front(); E; E = E->next()) {
-				print_line("Erasing old docs at: " + E->get());
-				DocData::erase_classes(E->get());
-			}
-
-			print_line("Generating new docs...");
-			doc.save_classes(index_path, doc_data_classes);
+		{
+			DirAccessRef da = DirAccess::open(doc_tool);
+			ERR_FAIL_COND_MSG(!da, "Argument supplied to --doctool must be a valid directory path.");
 		}
+		DocData doc;
+		doc.generate(doc_base);
+
+		DocData docsrc;
+		Map<String, String> doc_data_classes;
+		Set<String> checked_paths;
+		print_line("Loading docs...");
+
+		for (int i = 0; i < _doc_data_class_path_count; i++) {
+			// Custom modules are always located by absolute path.
+			String path = _doc_data_class_paths[i].path;
+			if (path.is_rel_path()) {
+				path = doc_tool.plus_file(path);
+			}
+			String name = _doc_data_class_paths[i].name;
+			doc_data_classes[name] = path;
+			if (!checked_paths.has(path)) {
+				checked_paths.insert(path);
+
+				// Create the module documentation directory if it doesn't exist
+				DirAccess *da = DirAccess::create_for_path(path);
+				da->make_dir_recursive(path);
+				memdelete(da);
+
+				docsrc.load_classes(path);
+				print_line("Loading docs from: " + path);
+			}
+		}
+
+		String index_path = doc_tool.plus_file("doc/classes");
+		// Create the main documentation directory if it doesn't exist
+		DirAccess *da = DirAccess::create_for_path(index_path);
+		da->make_dir_recursive(index_path);
+		memdelete(da);
+
+		docsrc.load_classes(index_path);
+		checked_paths.insert(index_path);
+		print_line("Loading docs from: " + index_path);
+
+		print_line("Merging docs...");
+		doc.merge_from(docsrc);
+		for (Set<String>::Element *E = checked_paths.front(); E; E = E->next()) {
+			print_line("Erasing old docs at: " + E->get());
+			DocData::erase_classes(E->get());
+		}
+
+		print_line("Generating new docs...");
+		doc.save_classes(index_path, doc_data_classes);
 	}
 }
 } // namespace Editor
