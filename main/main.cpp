@@ -959,8 +959,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 #ifdef TOOLS_ENABLED
 	if (editor) {
-		Engine::get_singleton()->set_editor_hint(true);
-		main_args.push_back("--editor");
 		if (!init_windowed) {
 			init_maximized = true;
 			video_mode.maximized = true;
@@ -1497,12 +1495,6 @@ bool Main::start() {
 		//parameters that do not have an argument to the right
 		if (args[i] == "--check-only") {
 			check_only = true;
-#ifdef TOOLS_ENABLED
-		} else if (args[i] == "-e" || args[i] == "--editor") {
-			editor = true;
-		} else if (args[i] == "-p" || args[i] == "--project-manager") {
-			project_manager = true;
-#endif
 		//parameters that have an argument to the right
 		} else if (i < (args.size() - 1)) {
 			bool parsed_pair = true;
@@ -1516,6 +1508,14 @@ bool Main::start() {
 			}
 			if (parsed_pair) {
 				i++;
+			}
+		} else if (args[i].length() && args[i][0] != '-') {
+			if (args[i].ends_with(".scn") ||
+					args[i].ends_with(".tscn") ||
+					args[i].ends_with(".escn") ||
+					args[i].ends_with(".res") ||
+					args[i].ends_with(".tres")) {
+				game_path = args[i];
 			}
 		}
 	}
