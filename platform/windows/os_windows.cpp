@@ -1250,6 +1250,60 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 		} break;
 
+		case WM_NCCALCSIZE: {
+			if (video_mode.borderless && video_mode.borderless_resizable && wParam == TRUE) {
+				if (GetWindowLongPtr(hWnd, GWLP_HWNDPARENT))
+					return 0;
+
+				POINT border = {
+					GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
+					GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
+				};
+
+				NCCALCSIZE_PARAMS *Params = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
+				Params->rgrc[0].right += border.x;
+				Params->rgrc[0].bottom += border.y;
+
+				return 0;
+			}
+		} break;
+
+		case WM_NCHITTEST: {
+			if (video_mode.borderless && video_mode.borderless_resizable) {
+				if (GetWindowLongPtr(hWnd, GWLP_HWNDPARENT))
+					return HTCLIENT;
+
+				POINT mouse_pos = {
+					GET_X_LPARAM(lParam),
+					GET_Y_LPARAM(lParam),
+				};
+
+				POINT border = {
+					GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
+					GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
+				};
+
+				RECT rect;
+				GetWindowRect(hWnd, &rect);
+
+				bool hitLeft = (mouse_pos.x < (rect.left + border.x));
+				bool hitRight = (mouse_pos.x >= (rect.right - border.x));
+				bool hitTop = (mouse_pos.y < (rect.top + border.y));
+				bool hitBottom = (mouse_pos.y >= (rect.bottom - border.y));
+
+				if (hitLeft) {
+					return (hitTop ? HTTOPLEFT : (hitBottom ? HTBOTTOMLEFT : HTLEFT));
+				} else if (hitRight) {
+					return (hitTop ? HTTOPRIGHT : (hitBottom ? HTBOTTOMRIGHT : HTRIGHT));
+				} else if (hitTop) {
+					return HTTOP;
+				} else if (hitBottom) {
+					return HTBOTTOM;
+				}
+				return HTCLIENT;
+			}
+		} break;
+
 		default: {
 
 			if (user_proc) {
@@ -1512,7 +1566,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	DWORD dwExStyle;
 	DWORD dwStyle;
 
-	if (video_mode.fullscreen || video_mode.borderless_window) {
+	if (video_mode.fullscreen || video_mode.borderless) {
 
 		dwExStyle = WS_EX_APPWINDOW;
 		dwStyle = WS_POPUP;
@@ -1992,7 +2046,7 @@ void OS_Windows::_update_window_mouse_passthrough() {
 	} else {
 		POINT *points = (POINT *)memalloc(sizeof(POINT) * mpath.size());
 		for (int i = 0; i < mpath.size(); i++) {
-			if (video_mode.borderless_window) {
+			if (video_mode.borderless) {
 				points[i].x = mpath[i].x;
 				points[i].y = mpath[i].y;
 			} else {
@@ -2206,7 +2260,7 @@ void OS_Windows::set_window_size(const Size2 p_size) {
 	RECT rect;
 	GetWindowRect(hWnd, &rect);
 
-	if (!video_mode.borderless_window) {
+	if (!video_mode.borderless) {
 		RECT crect;
 		GetClientRect(hWnd, &crect);
 
@@ -2406,23 +2460,34 @@ void OS_Windows::set_window_per_pixel_transparency_enabled(bool p_enabled) {
 	}
 }
 
-void OS_Windows::set_borderless_window(bool p_borderless) {
-	if (video_mode.borderless_window == p_borderless)
+void OS_Windows::set_window_borderless(bool p_borderless) {
+	if (video_mode.borderless == p_borderless)
 		return;
 
-	video_mode.borderless_window = p_borderless;
+	video_mode.borderless = p_borderless;
 
 	preserve_window_size = true;
 	_update_window_style();
 	_update_window_mouse_passthrough();
 }
 
-bool OS_Windows::get_borderless_window() {
-	return video_mode.borderless_window;
+bool OS_Windows::get_window_borderless() {
+	return video_mode.borderless;
+}
+
+void OS_Windows::set_window_borderless_resizable(bool p_enabled) {
+	if (video_mode.borderless_resizable == p_enabled)
+		return;
+
+	video_mode.borderless_resizable = p_enabled;
+}
+
+bool OS_Windows::get_window_borderless_resizable() {
+	return video_mode.borderless_resizable;
 }
 
 void OS_Windows::_update_window_style(bool p_repaint, bool p_maximized) {
-	if (video_mode.fullscreen || video_mode.borderless_window) {
+	if (video_mode.fullscreen || video_mode.borderless) {
 		SetWindowLongPtr(hWnd, GWL_STYLE, WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
 	} else {
 		if (video_mode.resizable) {

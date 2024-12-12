@@ -425,8 +425,8 @@ bool _OS::is_window_focused() const {
 	return OS::get_singleton()->is_window_focused();
 }
 
-void _OS::set_borderless_window(bool p_borderless) {
-	OS::get_singleton()->set_borderless_window(p_borderless);
+void _OS::set_window_borderless(bool p_borderless) {
+	OS::get_singleton()->set_window_borderless(p_borderless);
 }
 
 bool _OS::get_window_per_pixel_transparency_enabled() const {
@@ -437,8 +437,8 @@ void _OS::set_window_per_pixel_transparency_enabled(bool p_enabled) {
 	OS::get_singleton()->set_window_per_pixel_transparency_enabled(p_enabled);
 }
 
-bool _OS::get_borderless_window() const {
-	return OS::get_singleton()->get_borderless_window();
+bool _OS::get_window_borderless() const {
+	return OS::get_singleton()->get_window_borderless();
 }
 
 void _OS::set_ime_active(const bool p_active) {
@@ -1329,8 +1329,8 @@ void _OS::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_native_handle", "handle_type"), &_OS::get_native_handle);
 
-	ClassDB::bind_method(D_METHOD("set_borderless_window", "borderless"), &_OS::set_borderless_window);
-	ClassDB::bind_method(D_METHOD("get_borderless_window"), &_OS::get_borderless_window);
+	ClassDB::bind_method(D_METHOD("set_window_borderless", "borderless"), &_OS::set_window_borderless);
+	ClassDB::bind_method(D_METHOD("get_window_borderless"), &_OS::get_window_borderless);
 
 	ClassDB::bind_method(D_METHOD("get_window_per_pixel_transparency_enabled"), &_OS::get_window_per_pixel_transparency_enabled);
 	ClassDB::bind_method(D_METHOD("set_window_per_pixel_transparency_enabled", "enabled"), &_OS::set_window_per_pixel_transparency_enabled);
@@ -1490,7 +1490,7 @@ void _OS::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "max_window_size"), "set_max_window_size", "get_max_window_size");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "screen_orientation", PROPERTY_HINT_ENUM, "Landscape,Portrait,Reverse Landscape,Reverse Portrait,Sensor Landscape,Sensor Portrait,Sensor"), "set_screen_orientation", "get_screen_orientation");
 	ADD_GROUP("Window", "window_");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "window_borderless"), "set_borderless_window", "get_borderless_window");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "window_borderless"), "set_window_borderless", "get_window_borderless");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "window_per_pixel_transparency_enabled"), "set_window_per_pixel_transparency_enabled", "get_window_per_pixel_transparency_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "window_fullscreen"), "set_window_fullscreen", "is_window_fullscreen");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "window_maximized"), "set_window_maximized", "is_window_maximized");

@@ -219,8 +219,8 @@ public:
 
 	virtual int64_t get_native_handle(HandleType p_handle_type);
 
-	virtual void set_borderless_window(bool p_borderless);
-	virtual bool get_borderless_window() const;
+	virtual void set_window_borderless(bool p_borderless);
+	virtual bool get_window_borderless() const;
 
 	virtual bool get_window_per_pixel_transparency_enabled() const;
 	virtual void set_window_per_pixel_transparency_enabled(bool p_enabled);
