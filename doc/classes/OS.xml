@@ -934,7 +934,7 @@
 			[b]Note:[/b] This option is experimental and meant to alleviate stutter experienced by some users. However, some users have experienced a Vsync framerate halving (e.g. from 60 FPS to 30 FPS) when using it.
 			[b]Note:[/b] This property is only implemented on Windows.
 		</member>
-		<member name="window_borderless" type="bool" setter="set_borderless_window" getter="get_borderless_window" default="false">
+		<member name="window_borderless" type="bool" setter="set_window_borderless" getter="get_window_borderless" default="false">
 			If [code]true[/code], removes the window frame.
 			[b]Note:[/b] Setting [code]window_borderless[/code] to [code]false[/code] disables per-pixel transparency.
 		</member>

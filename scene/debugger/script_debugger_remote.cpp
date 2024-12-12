@@ -1321,7 +1321,7 @@ ScriptDebuggerRemote::~ScriptDebuggerRemote() {
 
 	remove_print_handler(&phl);
 	remove_error_handler(&eh);
-	
+
 	if (runtime_node_selector) {
 		memdelete(runtime_node_selector);
 	}
