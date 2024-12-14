@@ -126,6 +126,8 @@ private:
 	StringName node_removed_name;
 	StringName node_renamed_name;
 
+	bool last_custom_title_bar_visible;
+
 	bool use_font_oversampling;
 	int64_t current_frame;
 	int64_t current_event;

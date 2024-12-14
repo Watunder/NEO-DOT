@@ -49,6 +49,7 @@
 #include "servers/audio_server.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/visual_server.h"
+#include "system_theme_windows.h"
 #ifdef XAUDIO2_ENABLED
 #include "drivers/xaudio2/audio_driver_xaudio2.h"
 #endif
@@ -326,7 +327,9 @@ class OS_Windows : public OS {
 	Size2 min_size;
 	Size2 max_size;
 
-	Size2 window_rect;
+	MARGINS hit_test_margins = { 0 };
+	Map<SystemTheme::ThemeType, Rect2> custom_title_bar_button_map;
+
 	VideoMode video_mode;
 	bool preserve_window_size = false;
 
@@ -414,6 +417,7 @@ protected:
 	bool window_focused;
 	bool console_visible;
 	bool was_maximized;
+	bool custom_title_bar_visible;
 
 public:
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -434,6 +438,10 @@ public:
 	virtual void set_video_mode(const VideoMode &p_video_mode, int p_screen = 0);
 	virtual VideoMode get_video_mode(int p_screen = 0) const;
 	virtual void get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen = 0) const;
+
+	void insert_custom_title_bar_button_rect(const SystemTheme::ThemeType &p_type, const Rect2 &p_rect);
+	virtual void set_custom_title_bar_visible(bool p_enabled);
+	virtual bool is_custom_title_bar_visible() const;
 
 	virtual int get_tablet_driver_count() const;
 	virtual String get_tablet_driver_name(int p_driver) const;
