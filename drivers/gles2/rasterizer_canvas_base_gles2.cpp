@@ -302,6 +302,16 @@ void RasterizerCanvasBaseGLES2::draw_window_margins(int *black_margin, RID *blac
 		draw_generic_textured_rect(Rect2(window_w - black_margin[MARGIN_RIGHT], 0, black_margin[MARGIN_RIGHT], window_h), Rect2(0, 0, 1, 1));
 	}
 
+	Vector2 fix_offset;
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled && OS::get_singleton()->is_custom_title_bar_visible()) {
+		fix_offset.y += OS::get_singleton()->get_video_mode().custom_title_bar_height;
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, storage->resources.white_tex);
+
+		draw_generic_textured_rect(Rect2(0, 0, black_margin[MARGIN_LEFT] + window_w + black_margin[MARGIN_RIGHT], fix_offset.y), Rect2(0, 0, 1, 1));
+	}
+
 	if (black_image[MARGIN_TOP].is_valid()) {
 		_bind_canvas_texture(black_image[MARGIN_TOP], RID());
 
@@ -313,7 +323,7 @@ void RasterizerCanvasBaseGLES2::draw_window_margins(int *black_margin, RID *blac
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, storage->resources.black_tex);
 
-		draw_generic_textured_rect(Rect2(0, 0, window_w, black_margin[MARGIN_TOP]), Rect2(0, 0, 1, 1));
+		draw_generic_textured_rect(Rect2(0, fix_offset.y, window_w, black_margin[MARGIN_TOP]), Rect2(0, 0, 1, 1));
 	}
 
 	if (black_image[MARGIN_BOTTOM].is_valid()) {

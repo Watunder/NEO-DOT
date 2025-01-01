@@ -530,10 +530,12 @@ bool SceneTree::idle(float p_time) {
 	_notify_group_pause("idle_process", Node::NOTIFICATION_PROCESS);
 
 	Size2 win_size = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	bool custom_title_bar_visible = OS::get_singleton()->is_custom_title_bar_visible();
 
-	if (win_size != last_screen_size) {
+	if (win_size != last_screen_size || custom_title_bar_visible != last_custom_title_bar_visible) {
 
 		last_screen_size = win_size;
+		last_custom_title_bar_visible = custom_title_bar_visible;
 		_update_root_rect();
 		emit_signal("screen_resized");
 	}
@@ -1154,11 +1156,19 @@ int SceneTree::get_node_count() const {
 
 void SceneTree::_update_root_rect() {
 
+	Vector2 fix_offset;
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled && OS::get_singleton()->is_custom_title_bar_visible()) {
+		fix_offset.y += OS::get_singleton()->get_video_mode().custom_title_bar_height;
+	}
+
 	if (stretch_mode == STRETCH_MODE_DISABLED) {
 
+		Size2 screen_size = last_screen_size;
+		screen_size -= fix_offset;
+
 		_update_font_oversampling(1.0);
-		root->set_size((last_screen_size / stretch_shrink).floor());
-		root->set_attach_to_screen_rect(Rect2(Point2(), last_screen_size));
+		root->set_size((screen_size / stretch_shrink).floor());
+		root->set_attach_to_screen_rect(Rect2(fix_offset, screen_size));
 		root->set_size_override_stretch(false);
 		root->set_size_override(false, Size2());
 		root->update_canvas_items();
@@ -1167,6 +1177,7 @@ void SceneTree::_update_root_rect() {
 
 	//actual screen video mode
 	Size2 video_mode = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	video_mode -= fix_offset;
 	Size2 desired_res = stretch_min;
 
 	Size2 viewport_size;
@@ -1233,6 +1244,7 @@ void SceneTree::_update_root_rect() {
 	} else {
 		VisualServer::get_singleton()->black_bars_set_margins(0, 0, 0, 0);
 	}
+	margin += fix_offset;
 
 	switch (stretch_mode) {
 		case STRETCH_MODE_DISABLED: {
@@ -2162,6 +2174,7 @@ SceneTree::SceneTree() {
 	stretch_shrink = 1;
 
 	last_screen_size = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	last_custom_title_bar_visible = OS::get_singleton()->is_custom_title_bar_visible();
 	_update_root_rect();
 
 	if (ScriptDebugger::get_singleton()) {

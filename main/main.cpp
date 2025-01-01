@@ -1043,6 +1043,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	ProjectSettings::get_singleton()->set_custom_property_info("display/window/size/height", PropertyInfo(Variant::INT, "display/window/size/height", PROPERTY_HINT_RANGE, "0,4320,or_greater")); // 8K resolution
 	GLOBAL_DEF("display/window/size/resizable", true);
 	GLOBAL_DEF("display/window/size/borderless", false);
+	GLOBAL_DEF("display/window/size/borderless_shadow", false);
 	GLOBAL_DEF("display/window/size/borderless_resizable", false);
 	GLOBAL_DEF("display/window/size/fullscreen", false);
 	GLOBAL_DEF("display/window/size/always_on_top", false);
@@ -1051,6 +1052,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	ProjectSettings::get_singleton()->set_custom_property_info("display/window/size/test_width", PropertyInfo(Variant::INT, "display/window/size/test_width", PROPERTY_HINT_RANGE, "0,7680,or_greater")); // 8K resolution
 	GLOBAL_DEF("display/window/size/test_height", 0);
 	ProjectSettings::get_singleton()->set_custom_property_info("display/window/size/test_height", PropertyInfo(Variant::INT, "display/window/size/test_height", PROPERTY_HINT_RANGE, "0,4320,or_greater")); // 8K resolution
+
+	GLOBAL_DEF("display/window/custom_title_bar/enabled", false);
+	GLOBAL_DEF("display/window/custom_title_bar/height", 32);
 
 	if (use_custom_res) {
 
@@ -1073,10 +1077,13 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 		video_mode.resizable = GLOBAL_GET("display/window/size/resizable");
 		video_mode.borderless = GLOBAL_GET("display/window/size/borderless");
+		video_mode.borderless_shadow = GLOBAL_GET("display/window/size/borderless_shadow");
 		video_mode.borderless_resizable = GLOBAL_GET("display/window/size/borderless_resizable");
 		video_mode.fullscreen = GLOBAL_GET("display/window/size/fullscreen");
 		video_mode.always_on_top = GLOBAL_GET("display/window/size/always_on_top");
 		video_mode.keep_aspect_ratio = GLOBAL_GET("display/window/size/keep_aspect_ratio");
+		video_mode.custom_title_bar_enabled = GLOBAL_GET("display/window/custom_title_bar/enabled");
+		video_mode.custom_title_bar_height = GLOBAL_GET("display/window/custom_title_bar/height");
 	}
 
 	if (!force_lowdpi) {
