@@ -221,6 +221,10 @@ public:
 
 	virtual void set_window_borderless(bool p_borderless);
 	virtual bool get_window_borderless() const;
+	virtual void set_window_borderless_resizable(bool p_enabled);
+	virtual bool get_window_borderless_resizable() const;
+	virtual void set_window_borderless_shadow(bool p_enabled);
+	virtual bool get_window_borderless_shadow() const;
 
 	virtual bool get_window_per_pixel_transparency_enabled() const;
 	virtual void set_window_per_pixel_transparency_enabled(bool p_enabled);

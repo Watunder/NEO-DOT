@@ -376,6 +376,7 @@ class OS_Windows : public OS {
 	void _drag_event(float p_x, float p_y, int idx);
 	void _touch_event(bool p_pressed, float p_x, float p_y, int idx);
 
+	void _set_window_shadow(bool p_enabled);
 	void _update_window_style(bool p_repaint = true, bool p_maximized = false);
 	void _update_window_mouse_passthrough();
 
@@ -415,6 +416,8 @@ protected:
 	bool console_visible;
 	bool was_maximized;
 
+	float scale;
+
 public:
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -446,6 +449,7 @@ public:
 	virtual Point2 get_screen_position(int p_screen = -1) const;
 	virtual Size2 get_screen_size(int p_screen = -1) const;
 	virtual int get_screen_dpi(int p_screen = -1) const;
+	virtual float get_screen_scale(int p_screen = -1) const;
 
 	virtual Point2 get_window_position() const;
 	virtual void set_window_position(const Point2 &p_position);
@@ -478,6 +482,8 @@ public:
 	virtual bool get_window_borderless();
 	virtual void set_window_borderless_resizable(bool p_enabled);
 	virtual bool get_window_borderless_resizable();
+	virtual void set_window_borderless_shadow(bool p_enabled);
+	virtual bool get_window_borderless_shadow();
 
 	virtual bool get_window_per_pixel_transparency_enabled() const;
 	virtual void set_window_per_pixel_transparency_enabled(bool p_enabled);
