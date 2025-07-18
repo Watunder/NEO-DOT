@@ -379,7 +379,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			return 0; // Return  To The Message Loop
 		}
 		case WM_GETMINMAXINFO: {
-			if (video_mode.resizable && !video_mode.fullscreen) {
+			if ((video_mode.resizable || video_mode.borderless) && !video_mode.fullscreen) {
 				Size2 decor = get_real_window_size() - get_window_size(); // Size of window decorations
 				MINMAXINFO *min_max_info = (MINMAXINFO *)lParam;
 				if (min_size != Size2()) {
@@ -1250,26 +1250,41 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 		} break;
 
+		case WM_CREATE: {
+			if (video_mode.borderless) {
+				if (video_mode.borderless_shadow) {
+					_set_window_shadow(true);
+				}
+
+				SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+			}
+		} break;
+
 		case WM_NCCALCSIZE: {
-			if (video_mode.borderless && video_mode.borderless_resizable && wParam == TRUE) {
+			if (video_mode.borderless && wParam == TRUE) {
 				if (GetWindowLongPtr(hWnd, GWLP_HWNDPARENT))
 					return 0;
 
-				POINT border = {
-					GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
-					GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
-				};
+				NCCALCSIZE_PARAMS *pncsp = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
+				if (IsMaximized(hWnd)) {
+					int cs = get_current_screen();
+					Point2 pos = get_screen_position(cs);
+					Size2 size = get_screen_size(cs);
 
-				NCCALCSIZE_PARAMS *Params = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
-				Params->rgrc[0].right += border.x;
-				Params->rgrc[0].bottom += border.y;
+					pncsp->rgrc[0].left = pos.x;
+					pncsp->rgrc[0].top = pos.y;
+					pncsp->rgrc[0].right = pos.x + size.width;
+					pncsp->rgrc[0].bottom = pos.y + size.height;
+
+					return WVR_REDRAW;
+				}
 
 				return 0;
 			}
 		} break;
 
 		case WM_NCHITTEST: {
-			if (video_mode.borderless && video_mode.borderless_resizable) {
+			if (video_mode.borderless && !video_mode.fullscreen) {
 				if (GetWindowLongPtr(hWnd, GWLP_HWNDPARENT))
 					return HTCLIENT;
 
@@ -1277,31 +1292,40 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					GET_X_LPARAM(lParam),
 					GET_Y_LPARAM(lParam),
 				};
+				ScreenToClient(hWnd, &mouse_pos);
 
-				POINT border = {
-					GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
-					GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
-				};
+				if (video_mode.borderless_resizable) {
+					RECT rect;
+					GetClientRect(hWnd, &rect);
 
-				RECT rect;
-				GetWindowRect(hWnd, &rect);
+					POINT border = {
+						GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER),
+						GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER)
+					};
 
-				bool hitLeft = (mouse_pos.x < (rect.left + border.x));
-				bool hitRight = (mouse_pos.x >= (rect.right - border.x));
-				bool hitTop = (mouse_pos.y < (rect.top + border.y));
-				bool hitBottom = (mouse_pos.y >= (rect.bottom - border.y));
+					bool hit_left = (mouse_pos.x < rect.left + border.x);
+					bool hit_right = (mouse_pos.x > rect.right - border.x);
+					bool hit_top = (mouse_pos.y < rect.top + border.y);
+					bool hit_bottom = (mouse_pos.y > rect.bottom - border.y);
 
-				if (hitLeft) {
-					return (hitTop ? HTTOPLEFT : (hitBottom ? HTBOTTOMLEFT : HTLEFT));
-				} else if (hitRight) {
-					return (hitTop ? HTTOPRIGHT : (hitBottom ? HTBOTTOMRIGHT : HTRIGHT));
-				} else if (hitTop) {
-					return HTTOP;
-				} else if (hitBottom) {
-					return HTBOTTOM;
+					if (hit_left) {
+						return (hit_top ? HTTOPLEFT : (hit_bottom ? HTBOTTOMLEFT : HTLEFT));
+					} else if (hit_right) {
+						return (hit_top ? HTTOPRIGHT : (hit_bottom ? HTBOTTOMRIGHT : HTRIGHT));
+					} else if (hit_top && !maximized) {
+						return HTTOP;
+					} else if (hit_bottom) {
+						return HTBOTTOM;
+					}
 				}
+
 				return HTCLIENT;
 			}
+		} break;
+
+		case WM_DPICHANGED: {
+			int dpi = HIWORD(wParam);
+			scale = (float)dpi / USER_DEFAULT_SCREEN_DPI;
 		} break;
 
 		default: {
@@ -1485,6 +1509,9 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		}
 	}
 
+	int cs = get_current_screen();
+	scale = get_screen_scale(cs);
+
 	video_mode = p_desired;
 	set_window_aspect_ratio(video_mode.get_aspect());
 	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
@@ -1582,6 +1609,14 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
 
+	if (video_mode.borderless) {
+		dwStyle |= (WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
+		if (!video_mode.borderless_resizable) {
+			dwStyle &= ~WS_THICKFRAME;
+			dwStyle &= ~WS_MAXIMIZEBOX;
+		}
+	}
+
 	char *windowid;
 #ifdef MINGW_ENABLED
 	windowid = getenv("GODOT_WINDOWID");
@@ -1634,6 +1669,9 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		}
 	};
 
+	if (video_mode.borderless_shadow) {
+		_set_window_shadow(true);
+	}
 	if (video_mode.always_on_top) {
 		SetWindowPos(hWnd, video_mode.always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
@@ -2166,6 +2204,14 @@ int OS_Windows::get_screen_dpi(int p_screen) const {
 	return data.dpi;
 }
 
+float OS_Windows::get_screen_scale(int p_screen) const {
+	if (p_screen == -1)
+		return scale;
+
+	int dpi = get_screen_dpi(p_screen);
+	return (float)dpi / USER_DEFAULT_SCREEN_DPI;
+}
+
 Point2 OS_Windows::get_window_position() const {
 
 	if (minimized) {
@@ -2179,7 +2225,9 @@ Point2 OS_Windows::get_window_position() const {
 
 void OS_Windows::set_window_position(const Point2 &p_position) {
 
-	if (video_mode.fullscreen) return;
+	if (video_mode.fullscreen)
+		return;
+
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	MoveWindow(hWnd, p_position.x, p_position.y, r.right - r.left, r.bottom - r.top, TRUE);
@@ -2247,15 +2295,14 @@ Size2 OS_Windows::get_real_window_size() const {
 
 void OS_Windows::set_window_size(const Size2 p_size) {
 
+	if (video_mode.fullscreen || maximized)
+		return;
+
 	int w = p_size.width;
 	int h = p_size.height;
 
 	video_mode.width = w;
 	video_mode.height = h;
-
-	if (video_mode.fullscreen) {
-		return;
-	}
 
 	RECT rect;
 	GetWindowRect(hWnd, &rect);
@@ -2303,6 +2350,9 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 
 		_update_window_style(false);
 
+		if (video_mode.borderless_shadow)
+			_set_window_shadow(false);
+
 		MoveWindow(hWnd, pos.x, pos.y, size.width, size.height, TRUE);
 
 	} else {
@@ -2321,6 +2371,10 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 		}
 
 		_update_window_style(false, was_maximized);
+
+		if (video_mode.borderless_shadow) {
+			_set_window_shadow(true);
+		}
 
 		MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
@@ -2369,6 +2423,9 @@ void OS_Windows::set_window_maximized(bool p_enabled) {
 	if (is_no_window_mode_enabled()) {
 		return;
 	}
+
+	if (video_mode.fullscreen)
+		return;
 
 	if (p_enabled) {
 		maximized = true;
@@ -2480,15 +2537,43 @@ void OS_Windows::set_window_borderless_resizable(bool p_enabled) {
 		return;
 
 	video_mode.borderless_resizable = p_enabled;
+
+	_update_window_style();
 }
 
 bool OS_Windows::get_window_borderless_resizable() {
 	return video_mode.borderless_resizable;
 }
 
+void OS_Windows::_set_window_shadow(bool p_enabled) {
+	MARGINS margins[2]{ { 0, 0, 0, 0 }, { 1, 1, 1, 1 } };
+	DwmExtendFrameIntoClientArea(hWnd, &margins[p_enabled]);
+}
+
+void OS_Windows::set_window_borderless_shadow(bool p_enabled) {
+	if (video_mode.borderless_shadow == p_enabled)
+		return;
+
+	video_mode.borderless_shadow = p_enabled;
+
+	_set_window_shadow(p_enabled);
+}
+
+bool OS_Windows::get_window_borderless_shadow() {
+	return video_mode.borderless_shadow;
+}
+
 void OS_Windows::_update_window_style(bool p_repaint, bool p_maximized) {
 	if (video_mode.fullscreen || video_mode.borderless) {
-		SetWindowLongPtr(hWnd, GWL_STYLE, WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+		if (video_mode.borderless) {
+			if (video_mode.borderless_resizable) {
+				SetWindowLongPtr(hWnd, GWL_STYLE, WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | (video_mode.fullscreen ? 0 : WS_MAXIMIZEBOX) | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+			} else {
+				SetWindowLongPtr(hWnd, GWL_STYLE, WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+			}
+		} else {
+			SetWindowLongPtr(hWnd, GWL_STYLE, WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE);
+		}
 	} else {
 		if (video_mode.resizable) {
 			if (p_maximized) {

@@ -455,7 +455,7 @@
 			Forces the main window keep aspect ratio when it resizing.
 			[b]Note:[/b] This setting is ignored on iOS, Android, and HTML5.
 		</member>
-		<member name="display/window/size/borderless" type="bool" setter="" getter="" default="false">
+		<member name="display/window/borderless/enabled" type="bool" setter="" getter="" default="false">
 			Forces the main window to be borderless.
 			[b]Note:[/b] This setting is ignored on iOS, Android, and HTML5.
 		</member>
