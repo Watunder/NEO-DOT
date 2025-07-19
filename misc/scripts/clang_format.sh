@@ -12,7 +12,13 @@ CLANG_FORMAT_FILE_EXTS=(".c" ".h" ".cpp" ".hpp" ".cc" ".hh" ".cxx" ".m" ".mm" ".
 git grep -zIl '' |
 while IFS= read -rd '' f; do
     # Exclude some files.
-    if [[ "$f" == "thirdparty"* ]]; then
+    if [[ "$f" == "plugins"* ]]; then
+        continue
+    elif [[ "$f" == "thirdparty"* ]]; then
+        continue
+    elif [[ "$f" == "tests/catch.hpp" ]]; then
+        continue
+    elif [[ "$f" == "modules/godot_ecmascript/quickjs/quickjs"* ]]; then
         continue
     elif [[ "$f" == "platform/android/java/lib/src/com/google"* ]]; then
         continue

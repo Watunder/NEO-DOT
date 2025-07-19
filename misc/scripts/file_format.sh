@@ -26,7 +26,13 @@ while IFS= read -rd '' f; do
         continue
     elif [[ "$f" == *"po" ]]; then
         continue
+    elif [[ "$f" == "plugins"* ]]; then
+        continue
     elif [[ "$f" == "thirdparty"* ]]; then
+        continue
+    elif [[ "$f" == "tests/catch.hpp" ]]; then
+        continue
+    elif [[ "$f" == "modules/godot_ecmascript/quickjs/quickjs"* ]]; then
         continue
     elif [[ "$f" == "platform/android/java/lib/src/com/google"* ]]; then
         continue
