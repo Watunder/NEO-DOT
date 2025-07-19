@@ -384,7 +384,6 @@ def configure_mingw(env):
         env["AR"] = mingw_prefix + "gcc-ar"
         env["RANLIB"] = mingw_prefix + "gcc-ranlib"
 
-
     if env["use_lto"]:
         if not env["use_llvm"] and env.GetOption("num_jobs") > 1:
             env.Append(CCFLAGS=["-flto"])

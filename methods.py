@@ -244,7 +244,7 @@ def write_modules(modules):
                 unregister_cpp += "#endif\n"
 
             for header in glob.glob(path + "/tests/*.h"):
-                header = header.replace("\\","/")
+                header = header.replace("\\", "/")
                 tests_h += '#include "' + header + '"\n'
         except IOError:
             pass
