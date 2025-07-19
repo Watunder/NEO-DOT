@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -434,16 +434,15 @@ bool ReadScope(TokenList &output_tokens, const char *input, const char *&cursor,
 // ------------------------------------------------------------------------------------------------
 // TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
 void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length) {
-
 	if (length < 0x1b) {
 		//TokenizeError("file is too short",0);
 	}
 
 	//uint32_t offset = 0x15;
 	/*    const char* cursor = input + 0x15;
-    const uint32_t flags = ReadWord(input, cursor, input + length);
-    const uint8_t padding_0 = ReadByte(input, cursor, input + length); // unused
-    const uint8_t padding_1 = ReadByte(input, cursor, input + length); // unused*/
+	const uint32_t flags = ReadWord(input, cursor, input + length);
+	const uint8_t padding_0 = ReadByte(input, cursor, input + length); // unused
+	const uint8_t padding_1 = ReadByte(input, cursor, input + length); // unused*/
 
 	if (strncmp(input, "Kaydara FBX Binary", 18)) {
 		TokenizeError("magic bytes not found", 0);

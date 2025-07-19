@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +38,6 @@
 #include "scene/resources/texture.h"
 
 class EditorResourcePreviewGenerator : public Reference {
-
 	GDCLASS(EditorResourcePreviewGenerator, Reference);
 
 protected:
@@ -56,7 +55,6 @@ public:
 };
 
 class EditorResourcePreview : public Node {
-
 	GDCLASS(EditorResourcePreview, Node);
 
 	static EditorResourcePreview *singleton;
@@ -95,7 +93,7 @@ class EditorResourcePreview : public Node {
 	static void _thread_func(void *ud);
 	void _thread();
 
-	Vector<Ref<EditorResourcePreviewGenerator> > preview_generators;
+	Vector<Ref<EditorResourcePreviewGenerator>> preview_generators;
 
 protected:
 	static void _bind_methods();

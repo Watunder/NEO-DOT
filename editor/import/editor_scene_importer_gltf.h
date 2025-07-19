@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +41,6 @@ class BoneAttachment;
 class MeshInstance;
 
 class EditorSceneImporterGLTF : public EditorSceneImporter {
-
 	GDCLASS(EditorSceneImporterGLTF, EditorSceneImporter);
 
 	typedef int GLTFAccessorIndex;
@@ -94,7 +93,6 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	String _get_type_name(const GLTFType p_component);
 
 	struct GLTFNode {
-
 		//matrices need to be transformed to this
 		GLTFNodeIndex parent;
 		int height;
@@ -131,7 +129,6 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	};
 
 	struct GLTFBufferView {
-
 		GLTFBufferIndex buffer;
 		int byte_offset;
 		int byte_length;
@@ -149,7 +146,6 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	};
 
 	struct GLTFAccessor {
-
 		GLTFBufferViewIndex buffer_view;
 		int byte_offset;
 		int component_type;
@@ -250,7 +246,6 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	};
 
 	struct GLTFCamera {
-
 		bool perspective;
 		float fov_size;
 		float zfar;
@@ -299,11 +294,10 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		};
 
 		struct Track {
-
 			Channel<Vector3> translation_track;
 			Channel<Quat> rotation_track;
 			Channel<Vector3> scale_track;
-			Vector<Channel<float> > weight_tracks;
+			Vector<Channel<float>> weight_tracks;
 		};
 
 		String name;
@@ -312,7 +306,6 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	};
 
 	struct GLTFState {
-
 		Dictionary json;
 		int major_version;
 		int minor_version;
@@ -322,18 +315,18 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		bool use_legacy_names;
 
 		Vector<GLTFNode *> nodes;
-		Vector<Vector<uint8_t> > buffers;
+		Vector<Vector<uint8_t>> buffers;
 		Vector<GLTFBufferView> buffer_views;
 		Vector<GLTFAccessor> accessors;
 
 		Vector<GLTFMesh> meshes; //meshes are loaded directly, no reason not to.
-		Vector<Ref<Material> > materials;
+		Vector<Ref<Material>> materials;
 
 		String scene_name;
 		Vector<int> root_nodes;
 
 		Vector<GLTFTexture> textures;
-		Vector<Ref<Texture> > images;
+		Vector<Ref<Texture>> images;
 
 		Vector<GLTFSkin> skins;
 		Vector<GLTFCamera> cameras;

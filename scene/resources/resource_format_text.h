@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +38,6 @@
 #include "scene/resources/packed_scene.h"
 
 class ResourceInteractiveLoaderText : public ResourceInteractiveLoader {
-
 	bool translation_remapped;
 	String local_path;
 	String res_path;
@@ -85,7 +84,6 @@ class ResourceInteractiveLoaderText : public ResourceInteractiveLoader {
 	};
 
 	struct DummyReadData {
-
 		Map<RES, int> external_resources;
 		Map<int, RES> rev_external_resources;
 		Set<RES> resource_set;
@@ -144,7 +142,6 @@ public:
 };
 
 class ResourceFormatSaverTextInstance {
-
 	String local_path;
 
 	Ref<PackedScene> packed_scene;

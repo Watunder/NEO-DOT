@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -112,7 +112,7 @@ public:
 
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
 	virtual void get_public_functions(List<MethodInfo> *p_functions) const;
-	virtual void get_public_constants(List<Pair<String, Variant> > *p_constants) const;
+	virtual void get_public_constants(List<Pair<String, Variant>> *p_constants) const;
 
 	virtual void profiling_start();
 	virtual void profiling_stop();

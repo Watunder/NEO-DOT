@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -146,7 +146,6 @@ String GDScriptLanguageProtocol::process_message(const String &p_text) {
 }
 
 String GDScriptLanguageProtocol::format_output(const String &p_text) {
-
 	String header = "Content-Length: ";
 	CharString charstr = p_text.utf8();
 	size_t len = charstr.length();
@@ -169,7 +168,6 @@ void GDScriptLanguageProtocol::_bind_methods() {
 }
 
 Dictionary GDScriptLanguageProtocol::initialize(const Dictionary &p_params) {
-
 	lsp::InitializeResult ret;
 
 	String root_uri = p_params["rootUri"];
@@ -184,7 +182,6 @@ Dictionary GDScriptLanguageProtocol::initialize(const Dictionary &p_params) {
 	if (root_uri.length() && is_same_workspace) {
 		workspace->root_uri = root_uri;
 	} else {
-
 		workspace->root_uri = "file://" + workspace->root;
 
 		Dictionary params;
@@ -211,12 +208,10 @@ Dictionary GDScriptLanguageProtocol::initialize(const Dictionary &p_params) {
 }
 
 void GDScriptLanguageProtocol::initialized(const Variant &p_params) {
-
 	lsp::GodotCapabilities capabilities;
 
 	DocData *doc = EditorHelp::get_doc_data();
 	for (Map<String, DocData::ClassDoc>::Element *E = doc->class_list.front(); E; E = E->next()) {
-
 		lsp::GodotNativeClassInfo gdclass;
 		gdclass.name = E->get().name;
 		gdclass.class_doc = &(E->get());

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -152,7 +152,6 @@ void ARVRServer::add_interface(const Ref<ARVRInterface> &p_interface) {
 	ERR_FAIL_COND(p_interface.is_null());
 
 	for (int i = 0; i < interfaces.size(); i++) {
-
 		if (interfaces[i] == p_interface) {
 			ERR_PRINT("Interface was already added");
 			return;
@@ -168,9 +167,7 @@ void ARVRServer::remove_interface(const Ref<ARVRInterface> &p_interface) {
 
 	int idx = -1;
 	for (int i = 0; i < interfaces.size(); i++) {
-
 		if (interfaces[i] == p_interface) {
-
 			idx = i;
 			break;
 		};
@@ -197,9 +194,7 @@ Ref<ARVRInterface> ARVRServer::get_interface(int p_index) const {
 Ref<ARVRInterface> ARVRServer::find_interface(const String &p_name) const {
 	int idx = -1;
 	for (int i = 0; i < interfaces.size(); i++) {
-
 		if (interfaces[i]->get_name() == p_name) {
-
 			idx = i;
 			break;
 		};
@@ -277,9 +272,7 @@ void ARVRServer::remove_tracker(ARVRPositionalTracker *p_tracker) {
 
 	int idx = -1;
 	for (int i = 0; i < trackers.size(); i++) {
-
 		if (trackers[i] == p_tracker) {
-
 			idx = i;
 			break;
 		};

@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  Basis.cpp                                                            */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "Basis.hpp"
 #include "Defs.hpp"
 #include "Quat.hpp"
@@ -42,8 +72,8 @@ void Basis::invert() {
 		cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1)
 	};
 	real_t det = elements[0][0] * co[0] +
-				 elements[0][1] * co[1] +
-				 elements[0][2] * co[2];
+			elements[0][1] * co[1] +
+			elements[0][2] * co[2];
 
 	ERR_FAIL_COND(det == 0);
 
@@ -97,8 +127,8 @@ Basis Basis::transposed() const {
 
 real_t Basis::determinant() const {
 	return elements[0][0] * (elements[1][1] * elements[2][2] - elements[2][1] * elements[1][2]) -
-		   elements[1][0] * (elements[0][1] * elements[2][2] - elements[2][1] * elements[0][2]) +
-		   elements[2][0] * (elements[0][1] * elements[1][2] - elements[1][1] * elements[0][2]);
+			elements[1][0] * (elements[0][1] * elements[2][2] - elements[2][1] * elements[0][2]) +
+			elements[2][0] * (elements[0][1] * elements[1][2] - elements[1][1] * elements[0][2]);
 }
 
 Vector3 Basis::get_axis(int p_axis) const {
@@ -145,10 +175,7 @@ Vector3 Basis::get_scale() const {
 	// (such that it can be represented by a Quat or Euler angles), we absorb the sign flip into the scaling matrix.
 	// As such, it works in conjuction with get_rotation().
 	real_t det_sign = determinant() > 0 ? 1 : -1;
-	return det_sign * Vector3(
-							  Vector3(elements[0][0], elements[1][0], elements[2][0]).length(),
-							  Vector3(elements[0][1], elements[1][1], elements[2][1]).length(),
-							  Vector3(elements[0][2], elements[1][2], elements[2][2]).length());
+	return det_sign * Vector3(Vector3(elements[0][0], elements[1][0], elements[2][0]).length(), Vector3(elements[0][1], elements[1][1], elements[2][1]).length(), Vector3(elements[0][2], elements[1][2], elements[2][2]).length());
 }
 
 // TODO: implement this directly without using quaternions to make it more efficient
@@ -659,9 +686,7 @@ Basis::operator Quat() const {
 		temp[1] = ((elements[0][2] - elements[2][0]) * s);
 		temp[2] = ((elements[1][0] - elements[0][1]) * s);
 	} else {
-		int i = elements[0][0] < elements[1][1] ?
-						  (elements[1][1] < elements[2][2] ? 2 : 1) :
-						  (elements[0][0] < elements[2][2] ? 2 : 0);
+		int i = elements[0][0] < elements[1][1] ? (elements[1][1] < elements[2][2] ? 2 : 1) : (elements[0][0] < elements[2][2] ? 2 : 0);
 		int j = (i + 1) % 3;
 		int k = (i + 2) % 3;
 

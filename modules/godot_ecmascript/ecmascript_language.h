@@ -1,4 +1,34 @@
-﻿#ifndef ECMASCRIPT_LANGUAGE_H
+/*************************************************************************/
+/*  ecmascript_language.h                                                */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
+#ifndef ECMASCRIPT_LANGUAGE_H
 #define ECMASCRIPT_LANGUAGE_H
 
 #include "core/script_language.h"
@@ -8,7 +38,6 @@
 /*********************** ECMAScriptLanguage ***********************/
 class ECMAScriptBinder;
 class ECMAScriptLanguage : public ScriptLanguage {
-
 	friend class ECMAScriptBinder;
 	friend class ECMAScript;
 	friend class ECMAScriptInstance;
@@ -21,7 +50,7 @@ private:
 	int language_index;
 	HashMap<Thread::ID, ECMAScriptBinder *> thread_binder_map;
 #ifdef TOOLS_ENABLED
-	Set<Ref<ECMAScript> > scripts;
+	Set<Ref<ECMAScript>> scripts;
 #endif
 
 public:
@@ -39,7 +68,7 @@ public:
 	_FORCE_INLINE_ void set_language_index(int value) { language_index = value; }
 
 #ifdef TOOLS_ENABLED
-	_FORCE_INLINE_ Set<Ref<ECMAScript> > &get_scripts() { return scripts; }
+	_FORCE_INLINE_ Set<Ref<ECMAScript>> &get_scripts() { return scripts; }
 #endif
 	/* LANGUAGE FUNCTIONS */
 
@@ -107,7 +136,7 @@ public:
 	/* LOADER FUNCTIONS */
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
 	/* TODO */ virtual void get_public_functions(List<MethodInfo> *p_functions) const {}
-	/* TODO */ virtual void get_public_constants(List<Pair<String, Variant> > *p_constants) const {}
+	/* TODO */ virtual void get_public_constants(List<Pair<String, Variant>> *p_constants) const {}
 
 	/* TODO */ virtual void profiling_start() {}
 	/* TODO */ virtual void profiling_stop() {}

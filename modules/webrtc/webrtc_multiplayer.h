@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #include "webrtc_peer_connection.h"
 
 class WebRTCMultiplayer : public NetworkedMultiplayerPeer {
-
 	GDCLASS(WebRTCMultiplayer, NetworkedMultiplayerPeer);
 
 protected:
@@ -50,10 +49,9 @@ private:
 	};
 
 	class ConnectedPeer : public Reference {
-
 	public:
 		Ref<WebRTCPeerConnection> connection;
-		List<Ref<WebRTCDataChannel> > channels;
+		List<Ref<WebRTCDataChannel>> channels;
 		bool connected;
 
 		ConnectedPeer() {
@@ -72,7 +70,7 @@ private:
 	int next_packet_peer;
 	bool server_compat;
 
-	Map<int, Ref<ConnectedPeer> > peer_map;
+	Map<int, Ref<ConnectedPeer>> peer_map;
 
 	void _peer_to_dict(Ref<ConnectedPeer> p_connected_peer, Dictionary &r_dict);
 	void _find_next_peer();

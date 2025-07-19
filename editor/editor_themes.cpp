@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -106,7 +106,6 @@ static Ref<Texture> flip_icon(Ref<Texture> p_texture, bool p_flip_y = false, boo
 
 #ifdef SVG_ENABLED
 static Ref<ImageTexture> editor_generate_icon(int p_index, bool p_convert_color, float p_scale = EDSCALE, bool p_force_filter = false) {
-
 	Ref<ImageTexture> icon = memnew(ImageTexture);
 	Ref<Image> img = memnew(Image);
 
@@ -133,7 +132,6 @@ static Ref<ImageTexture> editor_generate_icon(int p_index, bool p_convert_color,
 #endif
 
 void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme = true, int p_thumb_size = 32, bool p_only_thumbs = false) {
-
 #ifdef SVG_ENABLED
 	// The default icon theme is designed to be used for a dark theme.
 	// This dictionary stores color codes to convert to other colors
@@ -283,7 +281,6 @@ void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme = 
 }
 
 Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
-
 	Ref<Theme> theme = Ref<Theme>(memnew(Theme));
 
 	const float default_contrast = 0.25;

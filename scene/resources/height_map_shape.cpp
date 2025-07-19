@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@ Vector<Vector3> HeightMapShape::get_debug_mesh_lines() {
 	Vector<Vector3> points;
 
 	if ((map_width != 0) && (map_depth != 0)) {
-
 		// This will be slow for large maps...
 		// also we'll have to figure out how well bullet centers this shape...
 
@@ -77,7 +76,6 @@ Vector<Vector3> HeightMapShape::get_debug_mesh_lines() {
 }
 
 void HeightMapShape::_update_shape() {
-
 	Dictionary d;
 	d["width"] = map_width;
 	d["depth"] = map_depth;
@@ -189,7 +187,6 @@ void HeightMapShape::_bind_methods() {
 
 HeightMapShape::HeightMapShape() :
 		Shape(PhysicsServer::get_singleton()->shape_create(PhysicsServer::SHAPE_HEIGHTMAP)) {
-
 	map_width = 2;
 	map_depth = 2;
 	map_data.resize(map_width * map_depth);

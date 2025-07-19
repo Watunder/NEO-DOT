@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -112,7 +112,7 @@ public:
 	Error save_scene();
 	void save_scene_as(const String &p_scene, bool p_with_preview = true);
 
-	Vector<Ref<Texture> > make_mesh_previews(const Vector<Ref<Mesh> > &p_meshes, Vector<Transform> *p_transforms, int p_preview_size);
+	Vector<Ref<Texture>> make_mesh_previews(const Vector<Ref<Mesh>> &p_meshes, Vector<Transform> *p_transforms, int p_preview_size);
 
 	void set_main_screen_editor(const String &p_name);
 	void set_distraction_free_mode(bool p_enter);
@@ -124,7 +124,6 @@ public:
 };
 
 class EditorPlugin : public Node {
-
 	GDCLASS(EditorPlugin, Node);
 	friend class EditorData;
 
@@ -265,7 +264,6 @@ VARIANT_ENUM_CAST(EditorPlugin::DockSlot);
 typedef EditorPlugin *(*EditorPluginCreateFunc)(EditorNode *);
 
 class EditorPlugins {
-
 	enum {
 		MAX_CREATE_FUNCS = 64
 	};
@@ -291,7 +289,6 @@ public:
 	}
 
 	static void add_create_func(EditorPluginCreateFunc p_func) {
-
 		ERR_FAIL_COND(creation_func_count >= MAX_CREATE_FUNCS);
 		creation_funcs[creation_func_count++] = p_func;
 	}

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -54,7 +54,6 @@ void PluginScript::_bind_methods() {
 }
 
 PluginScriptInstance *PluginScript::_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, Variant::CallError &r_error) {
-
 	r_error.error = Variant::CallError::CALL_OK;
 
 	// Create instance
@@ -82,7 +81,6 @@ PluginScriptInstance *PluginScript::_create_instance(const Variant **p_args, int
 }
 
 Variant PluginScript::_new(const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
-
 	r_error.error = Variant::CallError::CALL_OK;
 
 	if (!_valid) {
@@ -158,7 +156,6 @@ void PluginScript::update_exports() {
 #ifdef TOOLS_ENABLED
 	ASSERT_SCRIPT_VALID();
 	if (placeholders.size()) {
-
 		//update placeholders if any
 		Map<StringName, Variant> propdefvalues;
 		List<PropertyInfo> propinfos;
@@ -274,7 +271,6 @@ Error PluginScript::reload(bool p_keep_state) {
 	// ClassDB name (i.e. `Node2D`) or a resource path (i.e. `res://foo/bar.gd`)
 	StringName *base_name = (StringName *)&manifest.base;
 	if (*base_name) {
-
 		if (ClassDB::class_exists(*base_name)) {
 			_native_parent = *base_name;
 		} else {
@@ -336,8 +332,8 @@ Error PluginScript::reload(bool p_keep_state) {
 #ifdef TOOLS_ENABLED
 /*for (Set<PlaceHolderScriptInstance*>::Element *E=placeholders.front();E;E=E->next()) {
 
-        _update_placeholder(E->get());
-    }*/
+		_update_placeholder(E->get());
+	}*/
 #endif
 
 	FREE_SCRIPT_MANIFEST(manifest);
@@ -408,7 +404,6 @@ ScriptLanguage *PluginScript::get_language() const {
 }
 
 Error PluginScript::load_source_code(const String &p_path) {
-
 	PoolVector<uint8_t> sourcef;
 	Error err;
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);

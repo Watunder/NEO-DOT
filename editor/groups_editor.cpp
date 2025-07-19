@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,10 +29,10 @@
 /*************************************************************************/
 
 #include "groups_editor.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/scene_tree_editor.h"
 #include "editor_node.h"
 #include "editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/label.h"
 #include "scene/resources/packed_scene.h"
@@ -553,7 +553,6 @@ GroupDialog::GroupDialog() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void GroupsEditor::_add_group(const String &p_group) {
-
 	if (!node)
 		return;
 
@@ -581,7 +580,6 @@ void GroupsEditor::_add_group(const String &p_group) {
 }
 
 void GroupsEditor::_remove_group(Object *p_item, int p_column, int p_id) {
-
 	if (!node)
 		return;
 
@@ -606,14 +604,12 @@ void GroupsEditor::_remove_group(Object *p_item, int p_column, int p_id) {
 }
 
 struct _GroupInfoComparator {
-
 	bool operator()(const Node::GroupInfo &p_a, const Node::GroupInfo &p_b) const {
 		return p_a.name.operator String() < p_b.name.operator String();
 	}
 };
 
 void GroupsEditor::update_tree() {
-
 	tree->clear();
 
 	if (!node)
@@ -626,7 +622,6 @@ void GroupsEditor::update_tree() {
 	TreeItem *root = tree->create_item();
 
 	for (List<GroupInfo>::Element *E = groups.front(); E; E = E->next()) {
-
 		Node::GroupInfo gi = E->get();
 		if (!gi.persistent)
 			continue;
@@ -635,11 +630,9 @@ void GroupsEditor::update_tree() {
 		bool can_be_deleted = true;
 
 		while (n) {
-
 			Ref<SceneState> ss = (n == EditorNode::get_singleton()->get_edited_scene()) ? n->get_scene_inherited_state() : n->get_scene_instance_state();
 
 			if (ss.is_valid()) {
-
 				int path = ss->find_node_by_path(n->get_path_to(node));
 				if (path != -1) {
 					if (ss->is_node_in_group(path, gi.name)) {
@@ -666,19 +659,16 @@ void GroupsEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 }
 
 void GroupsEditor::set_current(Node *p_node) {
-
 	node = p_node;
 	update_tree();
 }
 
 void GroupsEditor::_show_group_dialog() {
-
 	group_dialog->edit();
 	group_dialog->set_undo_redo(undo_redo);
 }
 
 void GroupsEditor::_bind_methods() {
-
 	ClassDB::bind_method("_add_group", &GroupsEditor::_add_group);
 	ClassDB::bind_method("_remove_group", &GroupsEditor::_remove_group);
 	ClassDB::bind_method("update_tree", &GroupsEditor::update_tree);
@@ -687,7 +677,6 @@ void GroupsEditor::_bind_methods() {
 }
 
 GroupsEditor::GroupsEditor() {
-
 	node = NULL;
 
 	VBoxContainer *vbc = this;

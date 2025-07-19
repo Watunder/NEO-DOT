@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -81,7 +81,7 @@ void FBXSkeleton::init_skeleton(const ImportState &state) {
 		}
 	}
 
-	Map<int, Ref<FBXBone> > bone_map;
+	Map<int, Ref<FBXBone>> bone_map;
 	// implement fbx cluster skin logic here this is where it goes
 	int bone_count = 0;
 	for (int x = 0; x < skeleton_bone_count; x++) {
@@ -98,7 +98,7 @@ void FBXSkeleton::init_skeleton(const ImportState &state) {
 
 	ERR_FAIL_COND_MSG(skeleton->get_bone_count() != bone_count, "Not all bones got added, is the file corrupted?");
 
-	for (Map<int, Ref<FBXBone> >::Element *bone_element = bone_map.front(); bone_element; bone_element = bone_element->next()) {
+	for (Map<int, Ref<FBXBone>>::Element *bone_element = bone_map.front(); bone_element; bone_element = bone_element->next()) {
 		const Ref<FBXBone> bone = bone_element->value();
 		int bone_index = bone_element->key();
 		print_verbose("working on bone: " + itos(bone_index) + " bone name:" + bone->bone_name);

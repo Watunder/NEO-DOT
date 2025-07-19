@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -61,7 +61,6 @@ protected:
 
 	template <class T>
 	static DirAccess *_create_builtin() {
-
 		return memnew(T);
 	}
 
@@ -125,7 +124,6 @@ public:
 
 	template <class T>
 	static void make_default(AccessType p_access) {
-
 		create_func[p_access] = _create_builtin<T>;
 	}
 
@@ -136,9 +134,7 @@ public:
 };
 
 struct DirAccessRef {
-
 	_FORCE_INLINE_ DirAccess *operator->() {
-
 		return f;
 	}
 
@@ -146,7 +142,8 @@ struct DirAccessRef {
 	DirAccess *f;
 	DirAccessRef(DirAccess *fa) { f = fa; }
 	~DirAccessRef() {
-		if (f) memdelete(f);
+		if (f)
+			memdelete(f);
 	}
 };
 

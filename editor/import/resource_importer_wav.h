@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -99,7 +99,6 @@ public:
 			if (i >= datamax)
 				xm_sample = 0;
 			else {
-
 				xm_sample = CLAMP(in[i] * 32767.0, -32768, 32767);
 				/*
 				if (xm_sample==32767 || xm_sample==-32768)
@@ -121,9 +120,7 @@ public:
 			}
 			mask = 4;
 			while (mask) {
-
 				if (diff >= step) {
-
 					nibble |= mask;
 					diff -= step;
 					vpdiff += step;

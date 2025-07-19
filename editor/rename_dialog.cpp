@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,9 +31,9 @@
 #include "rename_dialog.h"
 
 #include "core/print_string.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor_node.h"
 #include "editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "editor_settings.h"
 #include "editor_themes.h"
 #include "modules/regex/regex.h"
@@ -43,7 +43,6 @@
 #include "scene/gui/tab_container.h"
 
 RenameDialog::RenameDialog(SceneTreeEditor *p_scene_tree_editor, Ref<EditorUndoRedoManager> p_undo_redo) {
-
 	scene_tree_editor = p_scene_tree_editor;
 	undo_redo = p_undo_redo;
 	preview_node = NULL;
@@ -332,7 +331,6 @@ RenameDialog::RenameDialog(SceneTreeEditor *p_scene_tree_editor, Ref<EditorUndoR
 }
 
 void RenameDialog::_bind_methods() {
-
 	ClassDB::bind_method("_features_toggled", &RenameDialog::_features_toggled);
 	ClassDB::bind_method("_update_preview", &RenameDialog::_update_preview);
 	ClassDB::bind_method("_update_preview_int", &RenameDialog::_update_preview_int);
@@ -343,7 +341,6 @@ void RenameDialog::_bind_methods() {
 }
 
 void RenameDialog::_update_substitute() {
-
 	LineEdit *focus_owner_line_edit = Object::cast_to<LineEdit>(get_focus_owner());
 	bool is_main_field = _is_main_field(focus_owner_line_edit);
 
@@ -364,7 +361,6 @@ void RenameDialog::_update_substitute() {
 }
 
 void RenameDialog::_post_popup() {
-
 	EditorSelection *editor_selection = EditorNode::get_singleton()->get_editor_selection();
 	preview_node = NULL;
 
@@ -382,7 +378,6 @@ void RenameDialog::_update_preview_int(int new_value) {
 }
 
 void RenameDialog::_update_preview(String new_text) {
-
 	if (lock_preview_update || preview_node == NULL)
 		return;
 
@@ -392,7 +387,6 @@ void RenameDialog::_update_preview(String new_text) {
 	String new_name = _apply_rename(preview_node, spn_count_start->get_value());
 
 	if (!has_errors) {
-
 		lbl_preview_title->set_text(TTR("Preview:"));
 		lbl_preview->set_text(new_name);
 
@@ -410,7 +404,6 @@ void RenameDialog::_update_preview(String new_text) {
 }
 
 String RenameDialog::_apply_rename(const Node *node, int count) {
-
 	String search = lne_search->get_text();
 	String replace = lne_replace->get_text();
 	String prefix = lne_prefix->get_text();
@@ -425,7 +418,6 @@ String RenameDialog::_apply_rename(const Node *node, int count) {
 	}
 
 	if (cbut_regex->is_pressed()) {
-
 		new_name = _regex(search, new_name, replace);
 	} else {
 		new_name = new_name.replace(search, replace);
@@ -441,7 +433,6 @@ String RenameDialog::_apply_rename(const Node *node, int count) {
 }
 
 String RenameDialog::_substitute(const String &subject, const Node *node, int count) {
-
 	String result = subject.replace("${COUNTER}", vformat("%0" + itos(spn_count_padding->get_value()) + "d", count));
 
 	if (node) {
@@ -471,7 +462,6 @@ String RenameDialog::_substitute(const String &subject, const Node *node, int co
 }
 
 void RenameDialog::_error_handler(void *p_self, const char *p_func, const char *p_file, int p_line, const char *p_error, const char *p_errorexp, ErrorHandlerType p_type) {
-
 	RenameDialog *self = (RenameDialog *)p_self;
 	String source_file(p_file);
 
@@ -493,14 +483,12 @@ void RenameDialog::_error_handler(void *p_self, const char *p_func, const char *
 }
 
 String RenameDialog::_regex(const String &pattern, const String &subject, const String &replacement) {
-
 	RegEx regex(pattern);
 
 	return regex.sub(subject, replacement, true);
 }
 
 String RenameDialog::_postprocess(const String &subject) {
-
 	int style_id = opt_style->get_selected();
 
 	String result = subject;
@@ -547,12 +535,10 @@ String RenameDialog::_postprocess(const String &subject) {
 }
 
 void RenameDialog::_iterate_scene(const Node *node, const Array &selection, int *counter) {
-
 	if (!node)
 		return;
 
 	if (selection.has(node)) {
-
 		String new_name = _apply_rename(node, *counter);
 
 		if (node->get_name() != new_name) {
@@ -578,7 +564,6 @@ void RenameDialog::_iterate_scene(const Node *node, const Array &selection, int 
 }
 
 void RenameDialog::rename() {
-
 	// Editor selection is not ordered via scene tree. Instead iterate
 	// over scene tree until all selected nodes are found in order.
 
@@ -593,12 +578,10 @@ void RenameDialog::rename() {
 	_iterate_scene(root_node, selected_node_list, &global_count);
 
 	if (undo_redo.is_valid() && !to_rename.empty()) {
-
 		undo_redo->create_action(TTR("Batch Rename"));
 
 		// Make sure to iterate reversed so that child nodes will find parents.
 		for (int i = to_rename.size() - 1; i >= 0; --i) {
-
 			Node *n = root_node->get_node(to_rename[i].first);
 			const String &new_name = to_rename[i].second;
 
@@ -617,7 +600,6 @@ void RenameDialog::rename() {
 }
 
 void RenameDialog::reset() {
-
 	lock_preview_update = true;
 
 	lne_prefix->clear();
@@ -644,11 +626,10 @@ void RenameDialog::reset() {
 
 bool RenameDialog::_is_main_field(LineEdit *line_edit) {
 	return line_edit &&
-		   (line_edit == lne_search || line_edit == lne_replace || line_edit == lne_prefix || line_edit == lne_suffix);
+			(line_edit == lne_search || line_edit == lne_replace || line_edit == lne_prefix || line_edit == lne_suffix);
 }
 
 void RenameDialog::_insert_text(String text) {
-
 	LineEdit *focus_owner = Object::cast_to<LineEdit>(get_focus_owner());
 
 	if (_is_main_field(focus_owner)) {

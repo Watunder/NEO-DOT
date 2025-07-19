@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "core/engine.h"
 #include "root_motion_view.h"
+#include "core/engine.h"
 #include "scene/animation/animation_tree.h"
 #include "scene/resources/material.h"
 void RootMotionView::set_animation_path(const NodePath &p_path) {
@@ -77,7 +77,6 @@ bool RootMotionView::get_zero_y() const {
 }
 
 void RootMotionView::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 		immediate_material = SpatialMaterial::get_material_rid_for_2d(false, true, false, false, false);
 		first = true;
@@ -87,7 +86,6 @@ void RootMotionView::_notification(int p_what) {
 		Transform transform;
 
 		if (has_node(path)) {
-
 			Node *node = get_node(path);
 
 			AnimationTree *tree = Object::cast_to<AnimationTree>(node);
@@ -130,7 +128,6 @@ void RootMotionView::_notification(int p_what) {
 
 		for (int i = -cells_in_radius; i < cells_in_radius; i++) {
 			for (int j = -cells_in_radius; j < cells_in_radius; j++) {
-
 				Vector3 from(i * cell_size, 0, j * cell_size);
 				Vector3 from_i((i + 1) * cell_size, 0, j * cell_size);
 				Vector3 from_j(i * cell_size, 0, (j + 1) * cell_size);
@@ -162,7 +159,6 @@ void RootMotionView::_notification(int p_what) {
 }
 
 AABB RootMotionView::get_aabb() const {
-
 	return AABB(Vector3(-radius, 0, -radius), Vector3(radius * 2, 0.001, radius * 2));
 }
 PoolVector<Face3> RootMotionView::get_faces(uint32_t p_usage_flags) const {
@@ -170,7 +166,6 @@ PoolVector<Face3> RootMotionView::get_faces(uint32_t p_usage_flags) const {
 }
 
 void RootMotionView::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_animation_path", "path"), &RootMotionView::set_animation_path);
 	ClassDB::bind_method(D_METHOD("get_animation_path"), &RootMotionView::get_animation_path);
 

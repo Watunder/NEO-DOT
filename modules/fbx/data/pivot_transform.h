@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -56,7 +56,6 @@ enum TransformationComp {
 };
 // Abstract away pivot data so its simpler to handle
 struct PivotTransform : Reference, ModelAbstraction {
-
 	// at the end we want to keep geometric_ everything, post and pre rotation
 	// these are used during animation data processing / keyframe ingestion the rest can be simplified down / out.
 	Quat pre_rotation = Quat();

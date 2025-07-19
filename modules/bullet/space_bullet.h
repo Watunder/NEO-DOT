@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -87,7 +87,6 @@ public:
 };
 
 class SpaceBullet : public RIDBullet {
-
 	friend class AreaBullet;
 	friend void onBulletTickCallback(btDynamicsWorld *world, btScalar timeStep);
 	friend class BulletPhysicsDirectSpaceState;
@@ -171,7 +170,8 @@ public:
 		contactDebugCount = 0;
 	}
 	_FORCE_INLINE_ void add_debug_contact(const Vector3 &p_contact) {
-		if (contactDebugCount < contactDebug.size()) contactDebug.write[contactDebugCount++] = p_contact;
+		if (contactDebugCount < contactDebug.size())
+			contactDebug.write[contactDebugCount++] = p_contact;
 	}
 	_FORCE_INLINE_ Vector<Vector3> get_debug_contacts() { return contactDebug; }
 	_FORCE_INLINE_ int get_debug_contact_count() { return contactDebugCount; }

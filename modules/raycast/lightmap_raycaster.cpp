@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -43,7 +43,6 @@ void LightmapRaycasterEmbree::make_default_raycaster() {
 }
 
 void LightmapRaycasterEmbree::filter_function(const struct RTCFilterFunctionNArguments *p_args) {
-
 	RTCHit *hit = (RTCHit *)p_args->hit;
 
 	unsigned int geomID = hit->geomID;
@@ -123,7 +122,6 @@ uint8_t LightmapRaycasterEmbree::AlphaTextureData::sample(float u, float v) cons
 }
 
 void LightmapRaycasterEmbree::add_mesh(const Vector<Vector3> &p_vertices, const Vector<Vector3> &p_normals, const Vector<Vector2> &p_uv2s, unsigned int p_id) {
-
 	RTCGeometry embree_mesh = rtcNewGeometry(embree_device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
 	rtcSetGeometryVertexAttributeCount(embree_mesh, 2);

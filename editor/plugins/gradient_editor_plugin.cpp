@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,7 +39,6 @@ Size2 GradientEditor::get_minimum_size() const {
 	return Size2(0, 60) * EDSCALE;
 }
 void GradientEditor::_gradient_changed() {
-
 	if (editing)
 		return;
 
@@ -50,7 +49,6 @@ void GradientEditor::_gradient_changed() {
 }
 
 void GradientEditor::_ramp_changed() {
-
 	editing = true;
 	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 	undo_redo->create_action(TTR("Gradient Edited"));
@@ -63,7 +61,6 @@ void GradientEditor::_ramp_changed() {
 }
 
 void GradientEditor::_bind_methods() {
-
 	ClassDB::bind_method("_gradient_changed", &GradientEditor::_gradient_changed);
 	ClassDB::bind_method("_ramp_changed", &GradientEditor::_ramp_changed);
 }
@@ -82,12 +79,10 @@ GradientEditor::GradientEditor() {
 ///////////////////////
 
 bool EditorInspectorPluginGradient::can_handle(Object *p_object) {
-
 	return Object::cast_to<Gradient>(p_object) != NULL;
 }
 
 void EditorInspectorPluginGradient::parse_begin(Object *p_object) {
-
 	Gradient *gradient = Object::cast_to<Gradient>(p_object);
 	Ref<Gradient> g(gradient);
 
@@ -97,7 +92,6 @@ void EditorInspectorPluginGradient::parse_begin(Object *p_object) {
 }
 
 GradientEditorPlugin::GradientEditorPlugin(EditorNode *p_node) {
-
 	Ref<EditorInspectorPluginGradient> plugin;
 	plugin.instance();
 	add_inspector_plugin(plugin);

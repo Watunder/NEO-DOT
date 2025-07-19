@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -43,20 +43,16 @@
 #include "servers/visual_server.h"
 
 void CollisionShape::make_convex_from_brothers() {
-
 	Node *p = get_parent();
 	if (!p)
 		return;
 
 	for (int i = 0; i < p->get_child_count(); i++) {
-
 		Node *n = p->get_child(i);
 		MeshInstance *mi = Object::cast_to<MeshInstance>(n);
 		if (mi) {
-
 			Ref<Mesh> m = mi->get_mesh();
 			if (m.is_valid()) {
-
 				Ref<Shape> s = m->create_convex_shape();
 				set_shape(s);
 			}
@@ -72,9 +68,7 @@ void CollisionShape::_update_in_shape_owner(bool p_xform_only) {
 }
 
 void CollisionShape::_notification(int p_what) {
-
 	switch (p_what) {
-
 		case NOTIFICATION_PARENTED: {
 			parent = Object::cast_to<CollisionObject>(get_parent());
 			if (parent) {
@@ -106,12 +100,10 @@ void CollisionShape::_notification(int p_what) {
 }
 
 void CollisionShape::resource_changed(RES res) {
-
 	update_gizmo();
 }
 
 String CollisionShape::get_configuration_warning() const {
-
 	String warning = Spatial::get_configuration_warning();
 
 	if (!Object::cast_to<CollisionObject>(get_parent())) {
@@ -148,7 +140,6 @@ String CollisionShape::get_configuration_warning() const {
 }
 
 void CollisionShape::_bind_methods() {
-
 	//not sure if this should do anything
 	ClassDB::bind_method(D_METHOD("resource_changed", "resource"), &CollisionShape::resource_changed);
 	ClassDB::bind_method(D_METHOD("set_shape", "shape"), &CollisionShape::set_shape);
@@ -189,12 +180,10 @@ void CollisionShape::set_shape(const Ref<Shape> &p_shape) {
 }
 
 Ref<Shape> CollisionShape::get_shape() const {
-
 	return shape;
 }
 
 void CollisionShape::set_disabled(bool p_disabled) {
-
 	disabled = p_disabled;
 	update_gizmo();
 	if (parent) {
@@ -203,12 +192,10 @@ void CollisionShape::set_disabled(bool p_disabled) {
 }
 
 bool CollisionShape::is_disabled() const {
-
 	return disabled;
 }
 
 CollisionShape::CollisionShape() {
-
 	//indicator = VisualServer::get_singleton()->mesh_create();
 	disabled = false;
 	parent = NULL;

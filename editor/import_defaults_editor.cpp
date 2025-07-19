@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -105,10 +105,10 @@ void ImportDefaultsEditor::_save() {
 }
 
 void ImportDefaultsEditor::_update_importer() {
-	List<Ref<ResourceImporter> > importer_list;
+	List<Ref<ResourceImporter>> importer_list;
 	ResourceFormatImporter::get_singleton()->get_importers(&importer_list);
 	Ref<ResourceImporter> importer;
-	for (List<Ref<ResourceImporter> >::Element *E = importer_list.front(); E; E = E->next()) {
+	for (List<Ref<ResourceImporter>>::Element *E = importer_list.front(); E; E = E->next()) {
 		if (E->get()->get_visible_name() == importers->get_item_text(importers->get_selected())) {
 			importer = E->get();
 			break;
@@ -165,10 +165,10 @@ void ImportDefaultsEditor::clear() {
 	importers->add_item("<" + TTR("Select Importer") + ">");
 	importers->set_item_disabled(0, true);
 
-	List<Ref<ResourceImporter> > importer_list;
+	List<Ref<ResourceImporter>> importer_list;
 	ResourceFormatImporter::get_singleton()->get_importers(&importer_list);
 	Vector<String> names;
-	for (List<Ref<ResourceImporter> >::Element *E = importer_list.front(); E; E = E->next()) {
+	for (List<Ref<ResourceImporter>>::Element *E = importer_list.front(); E; E = E->next()) {
 		String vn = E->get()->get_visible_name();
 		names.push_back(vn);
 	}

@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  editor_tools.cpp                                                     */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "editor_tools.h"
 #include "../ecmascript_language.h"
 #include "core/math/expression.h"
@@ -5,10 +35,10 @@
 #include "editor/filesystem_dock.h"
 
 #define TS_IGNORE "//@ts-ignore\n"
-static Map<String, Set<String> > ts_ignore_errors;
-static Map<String, Set<String> > removed_members;
-static Map<String, List<String> > added_apis;
-typedef Map<String, Vector<const DocData::ConstantDoc *> > ClassEnumerations;
+static Map<String, Set<String>> ts_ignore_errors;
+static Map<String, Set<String>> removed_members;
+static Map<String, List<String>> added_apis;
+typedef Map<String, Vector<const DocData::ConstantDoc *>> ClassEnumerations;
 static Map<String, ClassEnumerations> class_enumerations;
 
 struct ECMAScriptAlphCompare {
@@ -37,8 +67,8 @@ void ECMAScriptPlugin::_bind_methods() {
 void ECMAScriptPlugin::_notification(int p_what) {
 	switch (p_what) {
 		case MainLoop::NOTIFICATION_WM_FOCUS_IN: {
-			Set<Ref<ECMAScript> > &scripts = ECMAScriptLanguage::get_singleton()->get_scripts();
-			for (Set<Ref<ECMAScript> >::Element *E = scripts.front(); E; E = E->next()) {
+			Set<Ref<ECMAScript>> &scripts = ECMAScriptLanguage::get_singleton()->get_scripts();
+			for (Set<Ref<ECMAScript>>::Element *E = scripts.front(); E; E = E->next()) {
 				uint64_t last_time = E->get()->get_last_modified_time();
 				uint64_t time = FileAccess::get_modified_time(E->get()->get_script_path());
 				if (last_time != time) {
@@ -329,10 +359,11 @@ String _export_class(const DocData::ClassDoc &class_doc) {
 	}
 
 	String constants = "";
-	Map<String, Vector<const DocData::ConstantDoc *> > enumerations;
+	Map<String, Vector<const DocData::ConstantDoc *>> enumerations;
 	for (int i = 0; i < class_doc.constants.size(); i++) {
 		const DocData::ConstantDoc &const_doc = class_doc.constants[i];
-		if (ignore_members.has(const_doc.name)) continue;
+		if (ignore_members.has(const_doc.name))
+			continue;
 
 		Dictionary dict;
 		dict["description"] = format_doc_text(const_doc.description, "\t\t ");
@@ -397,7 +428,8 @@ String _export_class(const DocData::ClassDoc &class_doc) {
 	String properties = "";
 	for (int i = 0; i < class_doc.properties.size(); i++) {
 		const DocData::PropertyDoc &prop_doc = class_doc.properties[i];
-		if (ignore_members.has(prop_doc.name)) continue;
+		if (ignore_members.has(prop_doc.name))
+			continue;
 
 		String prop_str = "\n"
 						  "\t\t/** ${description} */\n"
@@ -441,7 +473,8 @@ String _export_class(const DocData::ClassDoc &class_doc) {
 	String signals = "";
 	for (int i = 0; i < class_doc.signals.size(); ++i) {
 		const DocData::MethodDoc &signal = class_doc.signals[i];
-		if (ignore_members.has(signal.name)) continue;
+		if (ignore_members.has(signal.name))
+			continue;
 
 		String signal_str = "\n"
 							"\t\t/** ${description} */\n"
@@ -463,7 +496,8 @@ String _export_class(const DocData::ClassDoc &class_doc) {
 	String methods = "";
 	for (int i = 0; i < method_list.size(); i++) {
 		const DocData::MethodDoc &method_doc = method_list[i];
-		if (ignore_members.has(method_doc.name)) continue;
+		if (ignore_members.has(method_doc.name))
+			continue;
 
 		if (method_doc.name == class_doc.name) {
 			continue;
@@ -615,7 +649,7 @@ void ECMAScriptPlugin::_export_typescript_declare_file(const String &p_path) {
 		}
 		class_doc.name = get_type_name(class_doc.name);
 		if (class_doc.name.begins_with("@")) {
-			Map<String, Vector<const DocData::ConstantDoc *> > enumerations;
+			Map<String, Vector<const DocData::ConstantDoc *>> enumerations;
 			if (class_doc.name == "@GlobalScope" || class_doc.name == "@GDScript") {
 				String const_str = "\n"
 								   "\t/** ${description} */\n"

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,12 +31,10 @@
 #include "shader_types.h"
 
 const Map<StringName, ShaderLanguage::FunctionInfo> &ShaderTypes::get_functions(VS::ShaderMode p_mode) {
-
 	return shader_modes[p_mode].functions;
 }
 
 const Vector<StringName> &ShaderTypes::get_modes(VS::ShaderMode p_mode) {
-
 	return shader_modes[p_mode].modes;
 }
 
@@ -47,7 +45,6 @@ const Set<String> &ShaderTypes::get_types() {
 ShaderTypes *ShaderTypes::singleton = NULL;
 
 static ShaderLanguage::BuiltInInfo constt(ShaderLanguage::DataType p_type) {
-
 	return ShaderLanguage::BuiltInInfo(p_type, true);
 }
 

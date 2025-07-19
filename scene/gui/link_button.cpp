@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -48,13 +48,11 @@ String LinkButton::get_text() const {
 }
 
 void LinkButton::set_underline_mode(UnderlineMode p_underline_mode) {
-
 	underline_mode = p_underline_mode;
 	update();
 }
 
 LinkButton::UnderlineMode LinkButton::get_underline_mode() const {
-
 	return underline_mode;
 }
 
@@ -63,7 +61,6 @@ Size2 LinkButton::get_minimum_size() const {
 }
 
 void LinkButton::_notification(int p_what) {
-
 	switch (p_what) {
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 			xl_text = tr(text);
@@ -71,22 +68,18 @@ void LinkButton::_notification(int p_what) {
 			update();
 		} break;
 		case NOTIFICATION_DRAW: {
-
 			RID ci = get_canvas_item();
 			Size2 size = get_size();
 			Color color;
 			bool do_underline = false;
 
 			switch (get_draw_mode()) {
-
 				case DRAW_NORMAL: {
-
 					color = get_color("font_color");
 					do_underline = underline_mode == UNDERLINE_MODE_ALWAYS;
 				} break;
 				case DRAW_HOVER_PRESSED:
 				case DRAW_PRESSED: {
-
 					if (has_color("font_color_pressed"))
 						color = get_color("font_color_pressed");
 					else
@@ -96,13 +89,11 @@ void LinkButton::_notification(int p_what) {
 
 				} break;
 				case DRAW_HOVER: {
-
 					color = get_color("font_color_hover");
 					do_underline = underline_mode != UNDERLINE_MODE_NEVER;
 
 				} break;
 				case DRAW_DISABLED: {
-
 					color = get_color("font_color_disabled");
 					do_underline = underline_mode == UNDERLINE_MODE_ALWAYS;
 
@@ -110,7 +101,6 @@ void LinkButton::_notification(int p_what) {
 			}
 
 			if (has_focus()) {
-
 				Ref<StyleBox> style = get_stylebox("focus");
 				style->draw(ci, Rect2(Point2(), size));
 			}
@@ -132,7 +122,6 @@ void LinkButton::_notification(int p_what) {
 }
 
 void LinkButton::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &LinkButton::set_text);
 	ClassDB::bind_method(D_METHOD("get_text"), &LinkButton::get_text);
 

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,10 +37,10 @@
 
 bool UPNP::is_common_device(const String &dev) const {
 	return dev.empty() ||
-		   dev.find("InternetGatewayDevice") >= 0 ||
-		   dev.find("WANIPConnection") >= 0 ||
-		   dev.find("WANPPPConnection") >= 0 ||
-		   dev.find("rootdevice") >= 0;
+			dev.find("InternetGatewayDevice") >= 0 ||
+			dev.find("WANIPConnection") >= 0 ||
+			dev.find("WANPPPConnection") >= 0 ||
+			dev.find("rootdevice") >= 0;
 }
 
 int UPNP::discover(int timeout, int ttl, const String &device_filter) {

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -49,7 +49,6 @@ btRayShape::~btRayShape() {
 }
 
 void btRayShape::setLength(btScalar p_length) {
-
 	m_length = p_length;
 	reload_cache();
 }
@@ -60,7 +59,6 @@ void btRayShape::setMargin(btScalar margin) {
 }
 
 void btRayShape::setSlipsOnSlope(bool p_slipsOnSlope) {
-
 	slipsOnSlope = p_slipsOnSlope;
 }
 
@@ -100,7 +98,6 @@ void btRayShape::getPreferredPenetrationDirection(int index, btVector3 &penetrat
 }
 
 void btRayShape::reload_cache() {
-
 	m_cacheScaledLength = m_length * m_localScaling[2];
 
 	m_cacheSupportPoint.setIdentity();

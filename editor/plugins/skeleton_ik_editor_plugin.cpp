@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,7 +33,6 @@
 #include "scene/animation/skeleton_ik.h"
 
 void SkeletonIKEditorPlugin::_play() {
-
 	if (!skeleton_ik)
 		return;
 
@@ -49,7 +48,6 @@ void SkeletonIKEditorPlugin::_play() {
 }
 
 void SkeletonIKEditorPlugin::edit(Object *p_object) {
-
 	if (p_object != skeleton_ik) {
 		if (skeleton_ik) {
 			play_btn->set_pressed(false);
@@ -65,12 +63,10 @@ void SkeletonIKEditorPlugin::edit(Object *p_object) {
 }
 
 bool SkeletonIKEditorPlugin::handles(Object *p_object) const {
-
 	return p_object->is_class("SkeletonIK");
 }
 
 void SkeletonIKEditorPlugin::make_visible(bool p_visible) {
-
 	if (p_visible)
 		play_btn->show();
 	else
@@ -78,12 +74,10 @@ void SkeletonIKEditorPlugin::make_visible(bool p_visible) {
 }
 
 void SkeletonIKEditorPlugin::_bind_methods() {
-
 	ClassDB::bind_method("_play", &SkeletonIKEditorPlugin::_play);
 }
 
 SkeletonIKEditorPlugin::SkeletonIKEditorPlugin(EditorNode *p_node) {
-
 	editor = p_node;
 	play_btn = memnew(Button);
 	play_btn->set_icon(editor->get_gui_base()->get_icon("Play", "EditorIcons"));

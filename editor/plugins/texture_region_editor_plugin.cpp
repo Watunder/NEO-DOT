@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -166,7 +166,6 @@ void TextureRegionEditor::_region_draw() {
 	};
 	Color color = get_color("mono_color", "Editor");
 	for (int i = 0; i < 4; i++) {
-
 		int prev = (i + 3) % 4;
 		int next = (i + 1) % 4;
 
@@ -273,9 +272,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 
 	Ref<InputEventMouseButton> mb = p_input;
 	if (mb.is_valid()) {
-
 		if (mb->get_button_index() == BUTTON_LEFT) {
-
 			if (mb->is_pressed()) {
 				if (node_ninepatch || obj_styleBox.is_valid()) {
 					edited_margin = -1;
@@ -435,7 +432,6 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 			}
 
 		} else if (mb->get_button_index() == BUTTON_RIGHT && mb->is_pressed()) {
-
 			if (drag) {
 				drag = false;
 				if (edited_margin >= 0) {
@@ -462,14 +458,11 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 	Ref<InputEventMouseMotion> mm = p_input;
 
 	if (mm.is_valid()) {
-
 		if (mm->get_button_mask() & BUTTON_MASK_MIDDLE || Input::get_singleton()->is_key_pressed(KEY_SPACE)) {
-
 			Vector2 dragged(mm->get_relative().x / draw_zoom, mm->get_relative().y / draw_zoom);
 			hscroll->set_value(hscroll->get_value() - dragged.x);
 			vscroll->set_value(vscroll->get_value() - dragged.y);
 		} else if (drag) {
-
 			if (edited_margin >= 0) {
 				float new_margin = 0;
 				if (snap_mode != SNAP_GRID) {
@@ -836,7 +829,6 @@ bool TextureRegionEditor::is_stylebox() {
 }
 
 bool TextureRegionEditor::is_atlas_texture() {
-
 	return atlas_tex.is_valid();
 }
 
@@ -890,7 +882,6 @@ void TextureRegionEditor::edit(Object *p_obj) {
 }
 
 void TextureRegionEditor::_changed_callback(Object *p_changed, const char *p_prop) {
-
 	if (!is_visible())
 		return;
 	if (p_prop == StringName("atlas") || p_prop == StringName("texture") || p_prop == StringName("region"))
@@ -1110,7 +1101,6 @@ void TextureRegionEditorPlugin::make_visible(bool p_visible) {
 }
 
 Dictionary TextureRegionEditorPlugin::get_state() const {
-
 	Dictionary state;
 	state["snap_offset"] = region_editor->snap_offset;
 	state["snap_step"] = region_editor->snap_step;
@@ -1120,7 +1110,6 @@ Dictionary TextureRegionEditorPlugin::get_state() const {
 }
 
 void TextureRegionEditorPlugin::set_state(const Dictionary &p_state) {
-
 	Dictionary state = p_state;
 	if (state.has("snap_step")) {
 		Vector2 s = state["snap_step"];

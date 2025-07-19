@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -50,7 +50,6 @@ class Viewport;
 class CollisionObject;
 
 class ViewportTexture : public Texture {
-
 	GDCLASS(ViewportTexture, Texture);
 
 	NodePath path;
@@ -87,7 +86,6 @@ public:
 };
 
 class Viewport : public Node {
-
 	GDCLASS(Viewport, Node);
 
 public:
@@ -224,7 +222,7 @@ private:
 	bool snap_controls_to_pixels;
 
 	bool physics_object_picking;
-	List<Ref<InputEvent> > physics_picking_events;
+	List<Ref<InputEvent>> physics_picking_events;
 	ObjectID physics_object_capture;
 	ObjectID physics_object_over;
 	Transform physics_last_object_transform;
@@ -233,7 +231,6 @@ private:
 	bool physics_has_last_mousepos;
 	Vector2 physics_last_mousepos;
 	struct {
-
 		bool alt;
 		bool control;
 		bool shift;
@@ -414,6 +411,7 @@ private:
 	void _own_world_changed();
 
 	void _update_viewport_path();
+
 protected:
 	void _notification(int p_what);
 	void _process_picking(bool p_ignore_paused);

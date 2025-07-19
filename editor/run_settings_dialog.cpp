@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,27 +31,22 @@
 #include "run_settings_dialog.h"
 
 void RunSettingsDialog::popup_run_settings() {
-
 	popup_centered(Size2(300, 150));
 }
 
 void RunSettingsDialog::set_custom_arguments(const String &p_arguments) {
-
 	arguments->set_text(p_arguments);
 }
 String RunSettingsDialog::get_custom_arguments() const {
-
 	return arguments->get_text();
 }
 
 void RunSettingsDialog::_bind_methods() {
-
 	ClassDB::bind_method("_run_mode_changed", &RunSettingsDialog::_run_mode_changed);
 	//ClassDB::bind_method("_browse_selected_file",&RunSettingsDialog::_browse_selected_file);
 }
 
 void RunSettingsDialog::_run_mode_changed(int idx) {
-
 	if (idx == 0)
 		arguments->set_editable(false);
 	else
@@ -59,18 +54,15 @@ void RunSettingsDialog::_run_mode_changed(int idx) {
 }
 
 int RunSettingsDialog::get_run_mode() const {
-
 	return run_mode->get_selected();
 }
 
 void RunSettingsDialog::set_run_mode(int p_run_mode) {
-
 	run_mode->select(p_run_mode);
 	arguments->set_editable(p_run_mode);
 }
 
 RunSettingsDialog::RunSettingsDialog() {
-
 	/* SNAP DIALOG */
 
 	VBoxContainer *vbc = memnew(VBoxContainer);

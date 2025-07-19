@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "core/os/input.h"
 
 class InputDefault : public Input {
-
 	GDCLASS(InputDefault, Input);
 	_THREAD_SAFE_CLASS_
 
@@ -66,7 +65,6 @@ class InputDefault : public Input {
 	int mouse_from_touch_index;
 
 	struct SpeedTrack {
-
 		uint64_t last_tick;
 		Vector2 speed;
 		Vector2 accum;
@@ -205,7 +203,7 @@ private:
 
 	void _parse_input_event_impl(const Ref<InputEvent> &p_event, bool p_is_emulated);
 
-	List<Ref<InputEvent> > accumulated_events;
+	List<Ref<InputEvent>> accumulated_events;
 	bool use_accumulated_input;
 
 protected:

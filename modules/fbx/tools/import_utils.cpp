@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -85,7 +85,6 @@ Quat ImportUtils::EulerToQuaternion(FBXDocParser::Model::RotOrder mode, const Ve
 }
 
 Vector3 ImportUtils::BasisToEuler(FBXDocParser::Model::RotOrder mode, const Basis &p_rotation) {
-
 	// FBX is using intrinsic euler, we can convert intrinsic to extrinsic (the one used in godot
 	// by simply invert its order: https://www.cs.utexas.edu/~theshark/courses/cs354/lectures/cs354-14.pdf
 	switch (mode) {

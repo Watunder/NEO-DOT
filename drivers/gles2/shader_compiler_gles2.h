@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,8 +40,7 @@
 class ShaderCompilerGLES2 {
 public:
 	struct IdentifierActions {
-
-		Map<StringName, Pair<int *, int> > render_mode_values;
+		Map<StringName, Pair<int *, int>> render_mode_values;
 		Map<StringName, bool *> render_mode_flags;
 		Map<StringName, bool *> usage_flag_pointers;
 		Map<StringName, bool *> write_flag_pointers;
@@ -50,7 +49,6 @@ public:
 	};
 
 	struct GeneratedCode {
-
 		Vector<CharString> custom_defines;
 		Vector<StringName> uniforms;
 		Vector<StringName> texture_uniforms;
@@ -70,7 +68,6 @@ private:
 	ShaderLanguage parser;
 
 	struct DefaultIdentifierActions {
-
 		Map<StringName, String> renames;
 		Map<StringName, String> render_mode_defines;
 		Map<StringName, String> usage_defines;

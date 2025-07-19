@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -155,7 +155,6 @@ Crypto *CryptoMbedTLS::create() {
 }
 
 void CryptoMbedTLS::initialize_crypto() {
-
 #ifdef DEBUG_ENABLED
 	mbedtls_debug_set_threshold(1);
 #endif
@@ -234,7 +233,7 @@ Ref<CryptoKey> CryptoMbedTLS::generate_rsa(int p_bytes) {
 }
 
 Ref<X509Certificate> CryptoMbedTLS::generate_self_signed_certificate(Ref<CryptoKey> p_key, String p_issuer_name, String p_not_before, String p_not_after) {
-	Ref<CryptoKeyMbedTLS> key = static_cast<Ref<CryptoKeyMbedTLS> >(p_key);
+	Ref<CryptoKeyMbedTLS> key = static_cast<Ref<CryptoKeyMbedTLS>>(p_key);
 	ERR_FAIL_COND_V_MSG(key.is_null(), NULL, "Invalid private key argument.");
 	mbedtls_x509write_cert crt;
 	mbedtls_x509write_crt_init(&crt);

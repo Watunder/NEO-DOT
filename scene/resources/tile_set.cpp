@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,7 +33,6 @@
 #include "core/engine.h"
 
 bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
-
 	String n = p_name;
 	int slash = n.find("/");
 	if (slash == -1)
@@ -206,7 +205,6 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 }
 
 bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
-
 	String n = p_name;
 	int slash = n.find("/");
 	if (slash == -1)
@@ -252,14 +250,14 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = p;
 		} else if (what == "occluder_map") {
 			Array p;
-			for (Map<Vector2, Ref<OccluderPolygon2D> >::Element *E = tile_map[id].autotile_data.occluder_map.front(); E; E = E->next()) {
+			for (Map<Vector2, Ref<OccluderPolygon2D>>::Element *E = tile_map[id].autotile_data.occluder_map.front(); E; E = E->next()) {
 				p.push_back(E->key());
 				p.push_back(E->value());
 			}
 			r_ret = p;
 		} else if (what == "navpoly_map") {
 			Array p;
-			for (Map<Vector2, Ref<NavigationPolygon> >::Element *E = tile_map[id].autotile_data.navpoly_map.front(); E; E = E->next()) {
+			for (Map<Vector2, Ref<NavigationPolygon>>::Element *E = tile_map[id].autotile_data.navpoly_map.front(); E; E = E->next()) {
 				p.push_back(E->key());
 				p.push_back(E->value());
 			}
@@ -320,9 +318,7 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 }
 
 void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
-
 	for (Map<int, TileData>::Element *E = tile_map.front(); E; E = E->next()) {
-
 		int id = E->key();
 		String pre = itos(id) + "/";
 		p_list->push_back(PropertyInfo(Variant::STRING, pre + "name", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
@@ -522,7 +518,6 @@ int TileSet::autotile_get_subtile_priority(int p_id, const Vector2 &p_coord) {
 }
 
 const Map<Vector2, int> &TileSet::autotile_get_priority_map(int p_id) const {
-
 	static Map<Vector2, int> dummy;
 	ERR_FAIL_COND_V_MSG(!tile_map.has(p_id), dummy, vformat("The TileSet doesn't have a tile with ID '%d'.", p_id));
 	return tile_map[p_id].autotile_data.priority_map;
@@ -544,7 +539,6 @@ int TileSet::autotile_get_z_index(int p_id, const Vector2 &p_coord) {
 }
 
 const Map<Vector2, int> &TileSet::autotile_get_z_index_map(int p_id) const {
-
 	static Map<Vector2, int> dummy;
 	ERR_FAIL_COND_V_MSG(!tile_map.has(p_id), dummy, vformat("The TileSet doesn't have a tile with ID '%d'.", p_id));
 	return tile_map[p_id].autotile_data.z_index_map;
@@ -569,7 +563,6 @@ uint32_t TileSet::autotile_get_bitmask(int p_id, Vector2 p_coord) {
 }
 
 const Map<Vector2, uint32_t> &TileSet::autotile_get_bitmask_map(int p_id) {
-
 	static Map<Vector2, uint32_t> dummy;
 	static Map<Vector2, uint32_t> dummy_atlas;
 	ERR_FAIL_COND_V_MSG(!tile_map.has(p_id), dummy, vformat("The TileSet doesn't have a tile with ID '%d'.", p_id));
@@ -855,8 +848,8 @@ Ref<NavigationPolygon> TileSet::tile_get_navigation_polygon(int p_id) const {
 	return tile_map[p_id].navigation_polygon;
 }
 
-const Map<Vector2, Ref<OccluderPolygon2D> > &TileSet::autotile_get_light_oclusion_map(int p_id) const {
-	static Map<Vector2, Ref<OccluderPolygon2D> > dummy;
+const Map<Vector2, Ref<OccluderPolygon2D>> &TileSet::autotile_get_light_oclusion_map(int p_id) const {
+	static Map<Vector2, Ref<OccluderPolygon2D>> dummy;
 	ERR_FAIL_COND_V_MSG(!tile_map.has(p_id), dummy, vformat("The TileSet doesn't have a tile with ID '%d'.", p_id));
 	return tile_map[p_id].autotile_data.occluder_map;
 }
@@ -881,8 +874,8 @@ Ref<NavigationPolygon> TileSet::autotile_get_navigation_polygon(int p_id, const 
 	}
 }
 
-const Map<Vector2, Ref<NavigationPolygon> > &TileSet::autotile_get_navigation_map(int p_id) const {
-	static Map<Vector2, Ref<NavigationPolygon> > dummy;
+const Map<Vector2, Ref<NavigationPolygon>> &TileSet::autotile_get_navigation_map(int p_id) const {
+	static Map<Vector2, Ref<NavigationPolygon>> dummy;
 	ERR_FAIL_COND_V_MSG(!tile_map.has(p_id), dummy, vformat("The TileSet doesn't have a tile with ID '%d'.", p_id));
 	return tile_map[p_id].autotile_data.navpoly_map;
 }
@@ -924,7 +917,6 @@ void TileSet::tile_set_z_index(int p_id, int p_z_index) {
 }
 
 void TileSet::_tile_set_shapes(int p_id, const Array &p_shapes) {
-
 	ERR_FAIL_COND(!tile_map.has(p_id));
 	Vector<ShapeData> shapes_data;
 	Transform2D default_transform = tile_get_shape_transform(p_id, 0);
@@ -935,7 +927,8 @@ void TileSet::_tile_set_shapes(int p_id, const Array &p_shapes) {
 
 		if (p_shapes[i].get_type() == Variant::OBJECT) {
 			Ref<Shape2D> shape = p_shapes[i];
-			if (shape.is_null()) continue;
+			if (shape.is_null())
+				continue;
 
 			s.shape = shape;
 			s.shape_transform = default_transform;
@@ -984,7 +977,6 @@ void TileSet::_tile_set_shapes(int p_id, const Array &p_shapes) {
 }
 
 Array TileSet::_tile_get_shapes(int p_id) const {
-
 	ERR_FAIL_COND_V(!tile_map.has(p_id), Array());
 	Array arr;
 
@@ -1003,7 +995,6 @@ Array TileSet::_tile_get_shapes(int p_id) const {
 }
 
 Array TileSet::_get_tiles_ids() const {
-
 	Array arr;
 
 	for (Map<int, TileData>::Element *E = tile_map.front(); E; E = E->next()) {
@@ -1019,7 +1010,7 @@ void TileSet::_decompose_convex_shape(Ref<Shape2D> p_shape) {
 	Ref<ConvexPolygonShape2D> convex = p_shape;
 	if (!convex.is_valid())
 		return;
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(convex->get_points());
+	Vector<Vector<Vector2>> decomp = Geometry::decompose_polygon_in_convex(convex->get_points());
 	if (decomp.size() > 1) {
 		Array sub_shapes;
 		for (int i = 0; i < decomp.size(); i++) {
@@ -1034,20 +1025,16 @@ void TileSet::_decompose_convex_shape(Ref<Shape2D> p_shape) {
 }
 
 void TileSet::get_tile_list(List<int> *p_tiles) const {
-
 	for (Map<int, TileData>::Element *E = tile_map.front(); E; E = E->next()) {
-
 		p_tiles->push_back(E->key());
 	}
 }
 
 bool TileSet::has_tile(int p_id) const {
-
 	return tile_map.has(p_id);
 }
 
 bool TileSet::is_tile_bound(int p_drawn_id, int p_neighbor_id) {
-
 	if (p_drawn_id == p_neighbor_id) {
 		return true;
 	} else if (get_script_instance() != NULL) {
@@ -1069,7 +1056,6 @@ void TileSet::remove_tile(int p_id) {
 }
 
 int TileSet::get_last_unused_tile_id() const {
-
 	if (tile_map.size())
 		return tile_map.back()->key() + 1;
 	else
@@ -1077,9 +1063,7 @@ int TileSet::get_last_unused_tile_id() const {
 }
 
 int TileSet::find_tile_by_name(const String &p_name) const {
-
 	for (Map<int, TileData>::Element *E = tile_map.front(); E; E = E->next()) {
-
 		if (p_name == E->get().name)
 			return E->key();
 	}
@@ -1087,14 +1071,12 @@ int TileSet::find_tile_by_name(const String &p_name) const {
 }
 
 void TileSet::clear() {
-
 	tile_map.clear();
 	_change_notify("");
 	emit_changed();
 }
 
 void TileSet::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("create_tile", "id"), &TileSet::create_tile);
 	ClassDB::bind_method(D_METHOD("autotile_clear_bitmask_map", "id"), &TileSet::autotile_clear_bitmask_map);
 	ClassDB::bind_method(D_METHOD("autotile_set_icon_coordinate", "id", "coord"), &TileSet::autotile_set_icon_coordinate);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -48,7 +48,6 @@ static const GLenum gl_primitive[] = {
 };
 
 void RasterizerCanvasGLES2::_batch_upload_buffers() {
-
 	// noop?
 	if (!bdata.vertices.size())
 		return;
@@ -91,7 +90,6 @@ void RasterizerCanvasGLES2::_batch_upload_buffers() {
 }
 
 void RasterizerCanvasGLES2::_batch_render_lines(const Batch &p_batch, RasterizerStorageGLES2::Material *p_material, bool p_anti_alias) {
-
 	_set_texture_rect_mode(false);
 
 	if (state.canvas_shader.bind()) {
@@ -297,7 +295,6 @@ void RasterizerCanvasGLES2::_batch_render_generic(const Batch &p_batch, Rasteriz
 }
 
 void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip, RasterizerStorageGLES2::Material *p_material) {
-
 	int num_batches = bdata.batches.size();
 
 	for (int batch_num = 0; batch_num < num_batches; batch_num++) {
@@ -323,13 +320,10 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 				RasterizerCanvas::Item::Command *const *commands = batch.item->commands.ptr();
 
 				for (int i = batch.first_command; i < end_command; i++) {
-
 					Item::Command *command = commands[i];
 
 					switch (command->type) {
-
 						case Item::Command::TYPE_LINE: {
-
 							Item::CommandLine *line = static_cast<Item::CommandLine *>(command);
 
 							_set_texture_rect_mode(false);
@@ -390,7 +384,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_RECT: {
-
 							Item::CommandRect *r = static_cast<Item::CommandRect *>(command);
 
 							glDisableVertexAttribArray(VS::ARRAY_COLOR);
@@ -403,7 +396,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 								RasterizerStorageGLES2::Texture *texture = storage->texture_owner.getornull(r->texture);
 
 								if (texture) {
-
 									texture = texture->get_ptr();
 
 									if (next_power_of_2(texture->alloc_width) != (unsigned int)texture->alloc_width && next_power_of_2(texture->alloc_height) != (unsigned int)texture->alloc_height) {
@@ -419,7 +411,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 							// To work it around, we use a simpler draw method which does not flicker, but gives
 							// a non negligible performance hit, so it's opt-in (GH-24466).
 							if (use_nvidia_rect_workaround) {
-
 								// are we using normal maps, if so we want to use light angle
 								bool send_light_angles = false;
 
@@ -571,7 +562,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 									glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 									storage->info.render._2d_draw_call_count++;
 								} else {
-
 									bool untile = false;
 
 									if (can_tile && r->flags & CANVAS_RECT_TILE && !(tex->flags & VS::TEXTURE_FLAG_REPEAT)) {
@@ -629,7 +619,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_NINEPATCH: {
-
 							Item::CommandNinePatch *np = static_cast<Item::CommandNinePatch *>(command);
 
 							_set_texture_rect_mode(false);
@@ -678,7 +667,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 							float buffer[16 * 2 + 16 * 2];
 
 							{
-
 								// first row
 
 								buffer[(0 * 4 * 4) + 0] = np->rect.position.x;
@@ -804,7 +792,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_CIRCLE: {
-
 							Item::CommandCircle *circle = static_cast<Item::CommandCircle *>(command);
 
 							_set_texture_rect_mode(false);
@@ -834,7 +821,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_POLYGON: {
-
 							Item::CommandPolygon *polygon = static_cast<Item::CommandPolygon *>(command);
 
 							_set_texture_rect_mode(false);
@@ -865,7 +851,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 #endif
 						} break;
 						case Item::Command::TYPE_MESH: {
-
 							Item::CommandMesh *mesh = static_cast<Item::CommandMesh *>(command);
 
 							_set_texture_rect_mode(false);
@@ -884,7 +869,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 
 							RasterizerStorageGLES2::Mesh *mesh_data = storage->mesh_owner.getornull(mesh->mesh);
 							if (mesh_data) {
-
 								for (int j = 0; j < mesh_data->surfaces.size(); j++) {
 									RasterizerStorageGLES2::Surface *s = mesh_data->surfaces[j];
 									// materials are ignored in 2D meshes, could be added but many things (ie, lighting mode, reading from screen, etc) would break as they are not meant be set up at this point of drawing
@@ -1010,7 +994,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 									const float *buffer = base_buffer + k * stride;
 
 									{
-
 										glVertexAttrib4fv(INSTANCE_ATTRIB_BASE + 0, &buffer[0]);
 										glVertexAttrib4fv(INSTANCE_ATTRIB_BASE + 1, &buffer[4]);
 										if (multi_mesh->transform_format == VS::MULTIMESH_TRANSFORM_3D) {
@@ -1080,7 +1063,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 								glDisable(GL_LINE_SMOOTH);
 #endif
 							} else {
-
 #ifdef GLES_OVER_GL
 								if (pline->antialiased)
 									glEnable(GL_LINE_SMOOTH);
@@ -1109,7 +1091,6 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_PRIMITIVE: {
-
 							Item::CommandPrimitive *primitive = static_cast<Item::CommandPrimitive *>(command);
 							_set_texture_rect_mode(false);
 
@@ -1157,11 +1138,9 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 						} break;
 
 						case Item::Command::TYPE_PARTICLES: {
-
 						} break;
 
 						case Item::Command::TYPE_CLIP_IGNORE: {
-
 							Item::CommandClipIgnore *ci = static_cast<Item::CommandClipIgnore *>(command);
 							if (p_current_clip) {
 								if (ci->ignore != r_reclip) {
@@ -1224,7 +1203,6 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 }
 
 void RasterizerCanvasGLES2::canvas_render_items_implementation(Item *p_item_list, int p_z, const Color &p_modulate, Light *p_light, const Transform2D &p_base_transform) {
-
 	// parameters are easier to pass around in a structure
 	RenderItemState ris;
 	ris.item_group_z = p_z;
@@ -1248,7 +1226,6 @@ void RasterizerCanvasGLES2::canvas_render_items_implementation(Item *p_item_list
 		}
 	} else {
 		while (p_item_list) {
-
 			Item *ci = p_item_list;
 			_legacy_canvas_render_item(ci, ris);
 			p_item_list = p_item_list->next;
@@ -1267,7 +1244,6 @@ void RasterizerCanvasGLES2::canvas_render_items_implementation(Item *p_item_list
 // to decide whether items are similar enough to join
 // i.e. no state differences between the 2 items.
 bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bool &r_batch_break) {
-
 	// if we set max join items to zero we can effectively prevent any joining, so
 	// none of the other logic needs to run. Good for testing regression bugs, and
 	// could conceivably be faster in some games.
@@ -1321,7 +1297,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 
 		bool use_skeleton = skeleton != NULL;
 		if (r_ris.prev_use_skeleton != use_skeleton) {
-
 			if (!bdata.settings_use_software_skinning)
 				r_ris.rebind_shader = true;
 
@@ -1350,7 +1325,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 	RasterizerStorageGLES2::Material *material_ptr = storage->material_owner.getornull(material);
 
 	if (material != r_ris.canvas_last_material || r_ris.rebind_shader) {
-
 		join = false;
 		RasterizerStorageGLES2::Shader *shader_ptr = NULL;
 
@@ -1400,10 +1374,8 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 	// does the shader contain BUILTINs which should break the batching?
 	bdata.joined_item_batch_flags = 0;
 	if (r_ris.shader_cache) {
-
 		unsigned int and_flags = r_ris.shader_cache->canvas_item.batch_flags & (RasterizerStorageCommon::PREVENT_COLOR_BAKING | RasterizerStorageCommon::PREVENT_VERTEX_BAKING | RasterizerStorageCommon::PREVENT_ITEM_JOINING);
 		if (and_flags) {
-
 			// special case for preventing item joining altogether
 			if (and_flags & RasterizerStorageCommon::PREVENT_ITEM_JOINING) {
 				join = false;
@@ -1412,7 +1384,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 				// save the flags so that they don't need to be recalculated in the 2nd pass
 				bdata.joined_item_batch_flags |= r_ris.shader_cache->canvas_item.batch_flags;
 			} else {
-
 				bool use_larger_fvfs = true;
 
 				if (and_flags == RasterizerStorageCommon::PREVENT_COLOR_BAKING) {
@@ -1467,7 +1438,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 	}
 
 	if ((blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX || blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_PMALPHA) && r_ris.item_group_light && !unshaded) {
-
 		// we cannot join lit items easily.
 		// it is possible, but not if they overlap, because
 		// a + light_blend + b + light_blend IS NOT THE SAME AS
@@ -1493,7 +1463,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 
 				// note that as a cost of batching, the light culling will be less effective
 				if (p_ci->light_mask & light->item_mask && r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max) {
-
 					// Note that with the above test, it is possible to also include a bound check.
 					// Tests so far have indicated better performance without it, but there may be reason to change this at a later stage,
 					// so I leave the line here for reference:
@@ -1520,7 +1489,6 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 			} else {
 				// only do these checks if necessary
 				if (join && (!r_batch_break)) {
-
 					// we still can't join, even if the lights are exactly the same, if there is overlap between the previous and this item
 					if (r_ris.joined_item && light_bitfield) {
 						if ((int)r_ris.joined_item->num_item_refs <= bdata.settings_light_max_join_items) {
@@ -1588,7 +1556,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 	storage->info.render._2d_item_count++;
 
 	if (r_ris.current_clip != p_ci->final_clip_owner) {
-
 		r_ris.current_clip = p_ci->final_clip_owner;
 
 		if (r_ris.current_clip) {
@@ -1649,7 +1616,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 	RasterizerStorageGLES2::Material *material_ptr = storage->material_owner.getornull(material);
 
 	if (material != r_ris.canvas_last_material || r_ris.rebind_shader) {
-
 		RasterizerStorageGLES2::Shader *shader_ptr = NULL;
 
 		if (material_ptr) {
@@ -1677,7 +1643,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 			}
 
 			if (shader_ptr != r_ris.shader_cache) {
-
 				if (shader_ptr->canvas_item.uses_time) {
 					VisualServerRaster::redraw_request();
 				}
@@ -1692,13 +1657,11 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.ptrw();
 
 			for (int i = 0; i < tc; i++) {
-
 				glActiveTexture(GL_TEXTURE0 + i);
 
 				RasterizerStorageGLES2::Texture *t = storage->texture_owner.getornull(textures[i].second);
 
 				if (!t) {
-
 					switch (texture_hints[i]) {
 						case ShaderLanguage::ShaderNode::Uniform::HINT_BLACK_ALBEDO:
 						case ShaderLanguage::ShaderNode::Uniform::HINT_BLACK: {
@@ -1753,9 +1716,7 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 	bool reclip = false;
 
 	if (r_ris.last_blend_mode != blend_mode) {
-
 		switch (blend_mode) {
-
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX: {
 				glBlendEquation(GL_FUNC_ADD);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
@@ -1766,7 +1727,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 
 			} break;
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_ADD: {
-
 				glBlendEquation(GL_FUNC_ADD);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
 					glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
@@ -1776,7 +1736,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 
 			} break;
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_SUB: {
-
 				glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
 					glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
@@ -1816,24 +1775,19 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 	r_ris.rebind_shader = true; // hacked in for now.
 
 	if ((blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX || blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_PMALPHA) && r_ris.item_group_light && !unshaded) {
-
 		Light *light = r_ris.item_group_light;
 		bool light_used = false;
 		VS::CanvasLightMode mode = VS::CANVAS_LIGHT_MODE_ADD;
 		state.uniforms.final_modulate = p_ci->final_modulate; // remove the canvas modulate
 
 		while (light) {
-
 			if (p_ci->light_mask & light->item_mask && r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max && p_ci->global_rect_cache.intersects_transformed(light->xform_cache, light->rect_cache)) {
-
 				//intersects this light
 
 				if (!light_used || mode != light->mode) {
-
 					mode = light->mode;
 
 					switch (mode) {
-
 						case VS::CANVAS_LIGHT_MODE_ADD: {
 							glBlendEquation(GL_FUNC_ADD);
 							glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -1853,7 +1807,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 				}
 
 				if (!light_used) {
-
 					state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_LIGHTING, true);
 					light_used = true;
 				}
@@ -1899,7 +1852,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 		}
 
 		if (light_used) {
-
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_LIGHTING, false);
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_SHADOWS, false);
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::SHADOW_FILTER_NEAREST, false);
@@ -1949,7 +1901,6 @@ void RasterizerCanvasGLES2::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 }
 
 void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderItemState &r_ris) {
-
 	storage->info.render._2d_item_count++;
 
 #if defined(TOOLS_ENABLED) && defined(DEBUG_ENABLED)
@@ -1962,7 +1913,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 	Item *ci = bdata.item_refs[p_bij.first_item_ref].item;
 
 	if (r_ris.current_clip != ci->final_clip_owner) {
-
 		r_ris.current_clip = ci->final_clip_owner;
 
 		if (r_ris.current_clip) {
@@ -2024,7 +1974,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 	RasterizerStorageGLES2::Material *material_ptr = storage->material_owner.getornull(material);
 
 	if (material != r_ris.canvas_last_material || r_ris.rebind_shader) {
-
 		RasterizerStorageGLES2::Shader *shader_ptr = NULL;
 
 		if (material_ptr) {
@@ -2052,7 +2001,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 			}
 
 			if (shader_ptr != r_ris.shader_cache) {
-
 				if (shader_ptr->canvas_item.uses_time) {
 					VisualServerRaster::redraw_request();
 				}
@@ -2067,13 +2015,11 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.ptrw();
 
 			for (int i = 0; i < tc; i++) {
-
 				glActiveTexture(GL_TEXTURE0 + i);
 
 				RasterizerStorageGLES2::Texture *t = storage->texture_owner.getornull(textures[i].second);
 
 				if (!t) {
-
 					switch (texture_hints[i]) {
 						case ShaderLanguage::ShaderNode::Uniform::HINT_BLACK_ALBEDO:
 						case ShaderLanguage::ShaderNode::Uniform::HINT_BLACK: {
@@ -2128,9 +2074,7 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 	bool reclip = false;
 
 	if (r_ris.last_blend_mode != blend_mode) {
-
 		switch (blend_mode) {
-
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX: {
 				glBlendEquation(GL_FUNC_ADD);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
@@ -2141,7 +2085,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 
 			} break;
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_ADD: {
-
 				glBlendEquation(GL_FUNC_ADD);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
 					glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
@@ -2151,7 +2094,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 
 			} break;
 			case RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_SUB: {
-
 				glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
 				if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
 					glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_SRC_ALPHA, GL_ONE);
@@ -2200,7 +2142,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 	r_ris.rebind_shader = true; // hacked in for now.
 
 	if ((blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX || blend_mode == RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_PMALPHA) && r_ris.item_group_light && !unshaded) {
-
 		Light *light = r_ris.item_group_light;
 		bool light_used = false;
 		VS::CanvasLightMode mode = VS::CANVAS_LIGHT_MODE_ADD;
@@ -2211,22 +2152,18 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 		}
 
 		while (light) {
-
 			// use the bounding rect of the joined items, NOT only the bounding rect of the first item.
 			// note this is a cost of batching, the light culling will be less effective
 
 			// note that the r_ris.item_group_z will be out of date because we are using deferred rendering till canvas_render_items_end()
 			// so we have to test z against the stored value in the joined item
 			if (ci->light_mask & light->item_mask && p_bij.z_index >= light->z_min && p_bij.z_index <= light->z_max && p_bij.bounding_rect.intersects_transformed(light->xform_cache, light->rect_cache)) {
-
 				//intersects this light
 
 				if (!light_used || mode != light->mode) {
-
 					mode = light->mode;
 
 					switch (mode) {
-
 						case VS::CANVAS_LIGHT_MODE_ADD: {
 							glBlendEquation(GL_FUNC_ADD);
 							glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -2246,7 +2183,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 				}
 
 				if (!light_used) {
-
 					state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_LIGHTING, true);
 					light_used = true;
 				}
@@ -2305,7 +2241,6 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 		}
 
 		if (light_used) {
-
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_LIGHTING, false);
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_SHADOWS, false);
 			state.canvas_shader.set_conditional(CanvasShaderGLES2::SHADOW_FILTER_NEAREST, false);
@@ -2408,6 +2343,5 @@ void RasterizerCanvasGLES2::initialize() {
 }
 
 RasterizerCanvasGLES2::RasterizerCanvasGLES2() {
-
 	batch_constructor();
 }

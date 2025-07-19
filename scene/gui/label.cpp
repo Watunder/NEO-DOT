@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "core/translation.h"
 
 void Label::set_autowrap(bool p_autowrap) {
-
 	if (autowrap == p_autowrap) {
 		return;
 	}
@@ -48,30 +47,24 @@ void Label::set_autowrap(bool p_autowrap) {
 	}
 }
 bool Label::has_autowrap() const {
-
 	return autowrap;
 }
 
 void Label::set_uppercase(bool p_uppercase) {
-
 	uppercase = p_uppercase;
 	word_cache_dirty = true;
 	update();
 }
 bool Label::is_uppercase() const {
-
 	return uppercase;
 }
 
 int Label::get_line_height() const {
-
 	return get_font("font")->get_height();
 }
 
 void Label::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_TRANSLATION_CHANGED) {
-
 		String new_text = tr(text);
 		if (new_text == xl_text)
 			return; //nothing new
@@ -82,7 +75,6 @@ void Label::_notification(int p_what) {
 	}
 
 	if (p_what == NOTIFICATION_DRAW) {
-
 		if (clip) {
 			VisualServer::get_singleton()->canvas_item_set_clip(get_canvas_item(), true);
 		}
@@ -125,9 +117,7 @@ void Label::_notification(int p_what) {
 		}
 
 		if (lines_visible > 0) {
-
 			switch (valign) {
-
 				case VALIGN_TOP: {
 					//nothing
 				} break;
@@ -165,7 +155,6 @@ void Label::_notification(int p_what) {
 			if (line >= line_to)
 				break;
 			if (line < lines_skipped) {
-
 				while (wc && wc->char_pos >= 0)
 					wc = wc->next;
 				if (wc)
@@ -189,7 +178,6 @@ void Label::_notification(int p_what) {
 			int taken = 0;
 			int spaces = 0;
 			while (to && to->char_pos >= 0) {
-
 				taken += to->pixel_width;
 				if (to->space_count) {
 					spaces += to->space_count;
@@ -202,18 +190,14 @@ void Label::_notification(int p_what) {
 			float x_ofs = 0;
 
 			switch (align) {
-
 				case ALIGN_FILL:
 				case ALIGN_LEFT: {
-
 					x_ofs = style->get_offset().x;
 				} break;
 				case ALIGN_CENTER: {
-
 					x_ofs = int(size.width - (taken + spaces * space_w)) / 2;
 				} break;
 				case ALIGN_RIGHT: {
-
 					x_ofs = int(size.width - style->get_margin(MARGIN_RIGHT) - (taken + spaces * space_w));
 				} break;
 			}
@@ -223,11 +207,9 @@ void Label::_notification(int p_what) {
 			y_ofs += vbegin + line * vsep;
 
 			while (from != to) {
-
 				// draw a word
 				int pos = from->char_pos;
 				if (from->char_pos < 0) {
-
 					ERR_PRINT("BUG");
 					return;
 				}
@@ -235,17 +217,14 @@ void Label::_notification(int p_what) {
 					/* spacing */
 					x_ofs += space_w * from->space_count;
 					if (can_fill && align == ALIGN_FILL && spaces) {
-
 						x_ofs += int((size.width - (taken + space_w * spaces)) / spaces);
 					}
 				}
 
 				if (font_color_shadow.a > 0) {
-
 					int chars_total_shadow = chars_total; //save chars drawn
 					float x_ofs_shadow = x_ofs;
 					for (int i = 0; i < from->word_len; i++) {
-
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
 							CharType c = xl_text[i + pos];
 							CharType n = xl_text[i + pos + 1];
@@ -266,7 +245,6 @@ void Label::_notification(int p_what) {
 					}
 				}
 				for (int i = 0; i < from->word_len; i++) {
-
 					if (visible_chars < 0 || chars_total < visible_chars) {
 						CharType c = xl_text[i + pos];
 						CharType n = xl_text[i + pos + 1];
@@ -288,18 +266,15 @@ void Label::_notification(int p_what) {
 	}
 
 	if (p_what == NOTIFICATION_THEME_CHANGED) {
-
 		word_cache_dirty = true;
 		update();
 	}
 	if (p_what == NOTIFICATION_RESIZED) {
-
 		word_cache_dirty = true;
 	}
 }
 
 Size2 Label::get_minimum_size() const {
-
 	Size2 min_style = get_stylebox("normal")->get_minimum_size();
 
 	// don't want to mutable everything
@@ -318,27 +293,22 @@ Size2 Label::get_minimum_size() const {
 }
 
 int Label::get_longest_line_width() const {
-
 	Ref<Font> font = get_font("font");
 	real_t max_line_width = 0;
 	real_t line_width = 0;
 
 	for (int i = 0; i < xl_text.size(); i++) {
-
 		CharType current = xl_text[i];
 		if (uppercase)
 			current = String::char_uppercase(current);
 
 		if (current < 32) {
-
 			if (current == '\n') {
-
 				if (line_width > max_line_width)
 					max_line_width = line_width;
 				line_width = 0;
 			}
 		} else {
-
 			real_t char_width = font->get_char_size(current, xl_text[i + 1]).width;
 			line_width += char_width;
 		}
@@ -352,7 +322,6 @@ int Label::get_longest_line_width() const {
 }
 
 int Label::get_line_count() const {
-
 	if (!is_inside_tree())
 		return 1;
 	if (word_cache_dirty)
@@ -362,7 +331,6 @@ int Label::get_line_count() const {
 }
 
 int Label::get_visible_line_count() const {
-
 	int line_spacing = get_constant("line_spacing");
 	int font_h = get_font("font")->get_height() + line_spacing;
 	int lines_visible = (get_size().height - get_stylebox("normal")->get_minimum_size().height + line_spacing) / font_h;
@@ -377,9 +345,7 @@ int Label::get_visible_line_count() const {
 }
 
 void Label::regenerate_word_cache() {
-
 	while (word_cache) {
-
 		WordCache *current = word_cache;
 		word_cache = current->next;
 		memdelete(current);
@@ -407,7 +373,6 @@ void Label::regenerate_word_cache() {
 	WordCache *last = NULL;
 
 	for (int i = 0; i <= xl_text.length(); i++) {
-
 		CharType current = i < xl_text.length() ? xl_text[i] : L' '; //always a space at the end, so the algo works
 
 		if (uppercase)
@@ -417,18 +382,17 @@ void Label::regenerate_word_cache() {
 		// if your language is not well supported, consider helping improve
 		// the unicode support in Godot.
 		bool separatable = (current >= 0x2E08 && current <= 0x9FFF) || // CJK scripts and symbols.
-						   (current >= 0xAC00 && current <= 0xD7FF) || // Hangul Syllables and Hangul Jamo Extended-B.
-						   (current >= 0xF900 && current <= 0xFAFF) || // CJK Compatibility Ideographs.
-						   (current >= 0xFE30 && current <= 0xFE4F) || // CJK Compatibility Forms.
-						   (current >= 0xFF65 && current <= 0xFF9F) || // Halfwidth forms of katakana
-						   (current >= 0xFFA0 && current <= 0xFFDC) || // Halfwidth forms of compatibility jamo characters for Hangul
-						   (current >= 0x20000 && current <= 0x2FA1F) || // CJK Unified Ideographs Extension B ~ F and CJK Compatibility Ideographs Supplement.
-						   (current >= 0x30000 && current <= 0x3134F); // CJK Unified Ideographs Extension G.
+				(current >= 0xAC00 && current <= 0xD7FF) || // Hangul Syllables and Hangul Jamo Extended-B.
+				(current >= 0xF900 && current <= 0xFAFF) || // CJK Compatibility Ideographs.
+				(current >= 0xFE30 && current <= 0xFE4F) || // CJK Compatibility Forms.
+				(current >= 0xFF65 && current <= 0xFF9F) || // Halfwidth forms of katakana
+				(current >= 0xFFA0 && current <= 0xFFDC) || // Halfwidth forms of compatibility jamo characters for Hangul
+				(current >= 0x20000 && current <= 0x2FA1F) || // CJK Unified Ideographs Extension B ~ F and CJK Compatibility Ideographs Supplement.
+				(current >= 0x30000 && current <= 0x3134F); // CJK Unified Ideographs Extension G.
 		bool insert_newline = false;
 		real_t char_width = 0;
 
 		if (current < 33) {
-
 			if (current_word_size > 0) {
 				WordCache *wc = memnew(WordCache);
 				if (word_cache) {
@@ -547,31 +511,26 @@ void Label::regenerate_word_cache() {
 }
 
 void Label::set_align(Align p_align) {
-
 	ERR_FAIL_INDEX((int)p_align, 4);
 	align = p_align;
 	update();
 }
 
 Label::Align Label::get_align() const {
-
 	return align;
 }
 
 void Label::set_valign(VAlign p_align) {
-
 	ERR_FAIL_INDEX((int)p_align, 4);
 	valign = p_align;
 	update();
 }
 
 Label::VAlign Label::get_valign() const {
-
 	return valign;
 }
 
 void Label::set_text(const String &p_string) {
-
 	if (text == p_string)
 		return;
 	text = p_string;
@@ -583,24 +542,20 @@ void Label::set_text(const String &p_string) {
 }
 
 void Label::set_clip_text(bool p_clip) {
-
 	clip = p_clip;
 	update();
 	minimum_size_changed();
 }
 
 bool Label::is_clipping_text() const {
-
 	return clip;
 }
 
 String Label::get_text() const {
-
 	return text;
 }
 
 void Label::set_visible_characters(int p_amount) {
-
 	visible_chars = p_amount;
 	if (get_total_character_count() > 0) {
 		percent_visible = (float)p_amount / (float)total_char_cache;
@@ -610,19 +565,15 @@ void Label::set_visible_characters(int p_amount) {
 }
 
 int Label::get_visible_characters() const {
-
 	return visible_chars;
 }
 
 void Label::set_percent_visible(float p_percent) {
-
 	if (p_percent < 0 || p_percent >= 1) {
-
 		visible_chars = -1;
 		percent_visible = 1;
 
 	} else {
-
 		visible_chars = get_total_character_count() * p_percent;
 		percent_visible = p_percent;
 	}
@@ -631,7 +582,6 @@ void Label::set_percent_visible(float p_percent) {
 }
 
 float Label::get_percent_visible() const {
-
 	return percent_visible;
 }
 
@@ -642,23 +592,19 @@ void Label::set_lines_skipped(int p_lines) {
 }
 
 int Label::get_lines_skipped() const {
-
 	return lines_skipped;
 }
 
 void Label::set_max_lines_visible(int p_lines) {
-
 	max_lines_visible = p_lines;
 	update();
 }
 
 int Label::get_max_lines_visible() const {
-
 	return max_lines_visible;
 }
 
 int Label::get_total_character_count() const {
-
 	if (word_cache_dirty)
 		const_cast<Label *>(this)->regenerate_word_cache();
 
@@ -666,7 +612,6 @@ int Label::get_total_character_count() const {
 }
 
 void Label::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_align", "align"), &Label::set_align);
 	ClassDB::bind_method(D_METHOD("get_align"), &Label::get_align);
 	ClassDB::bind_method(D_METHOD("set_valign", "valign"), &Label::set_valign);
@@ -715,7 +660,6 @@ void Label::_bind_methods() {
 }
 
 Label::Label(const String &p_text) {
-
 	align = ALIGN_LEFT;
 	valign = VALIGN_TOP;
 	xl_text = "";
@@ -737,9 +681,7 @@ Label::Label(const String &p_text) {
 }
 
 Label::~Label() {
-
 	while (word_cache) {
-
 		WordCache *current = word_cache;
 		word_cache = current->next;
 		memdelete(current);

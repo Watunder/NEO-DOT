@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +41,6 @@ void Popup::_gui_input(Ref<InputEvent> p_event) {
 }
 
 void Popup::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
 		if (popped_up && !is_visible_in_tree()) {
 			popped_up = false;
@@ -75,7 +74,6 @@ void Popup::_notification(int p_what) {
 }
 
 void Popup::_fix_size() {
-
 	Point2 pos = get_global_position();
 	Size2 size = get_size() * get_scale();
 	Point2 window_size = get_viewport_rect().size - get_viewport_transform().get_origin();
@@ -94,11 +92,9 @@ void Popup::_fix_size() {
 }
 
 void Popup::set_as_minsize() {
-
 	Size2 total_minsize;
 
 	for (int i = 0; i < get_child_count(); i++) {
-
 		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c)
 			continue;
@@ -108,7 +104,6 @@ void Popup::set_as_minsize() {
 		Size2 minsize = c->get_combined_minimum_size();
 
 		for (int j = 0; j < 2; j++) {
-
 			Margin m_beg = Margin(0 + j);
 			Margin m_end = Margin(2 + j);
 
@@ -128,7 +123,6 @@ void Popup::set_as_minsize() {
 }
 
 void Popup::popup_centered_clamped(const Size2 &p_size, float p_fallback_ratio) {
-
 	Size2 popup_size = p_size;
 	Size2 window_size = get_viewport_rect().size;
 
@@ -140,14 +134,12 @@ void Popup::popup_centered_clamped(const Size2 &p_size, float p_fallback_ratio) 
 }
 
 void Popup::popup_centered_minsize(const Size2 &p_minsize) {
-
 	set_custom_minimum_size(p_minsize);
 	_fix_size();
 	popup_centered();
 }
 
 void Popup::popup_centered(const Size2 &p_size) {
-
 	Rect2 rect;
 	Size2 window_size = get_viewport_rect().size;
 	rect.size = p_size == Size2() ? get_size() : p_size;
@@ -157,7 +149,6 @@ void Popup::popup_centered(const Size2 &p_size) {
 }
 
 void Popup::popup_centered_ratio(float p_screen_ratio) {
-
 	Rect2 rect;
 	Size2 window_size = get_viewport_rect().size;
 	rect.size = (window_size * p_screen_ratio).floor();
@@ -167,12 +158,10 @@ void Popup::popup_centered_ratio(float p_screen_ratio) {
 }
 
 void Popup::popup(const Rect2 &p_bounds) {
-
 	_popup(p_bounds);
 }
 
 void Popup::_popup(const Rect2 &p_bounds, const bool p_centered) {
-
 	emit_signal("about_to_show");
 	show_modal(exclusive);
 
@@ -212,17 +201,14 @@ void Popup::_update_region() {
 #endif
 
 void Popup::set_exclusive(bool p_exclusive) {
-
 	exclusive = p_exclusive;
 }
 
 bool Popup::is_exclusive() const {
-
 	return exclusive;
 }
 
 void Popup::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_as_minsize"), &Popup::set_as_minsize);
 	ClassDB::bind_method(D_METHOD("popup_centered", "size"), &Popup::popup_centered, DEFVAL(Size2()));
 	ClassDB::bind_method(D_METHOD("popup_centered_ratio", "ratio"), &Popup::popup_centered_ratio, DEFVAL(0.75));
@@ -246,7 +232,6 @@ void Popup::_bind_methods() {
 }
 
 Popup::Popup() {
-
 	set_as_toplevel(true);
 	exclusive = false;
 	popped_up = false;
@@ -254,7 +239,6 @@ Popup::Popup() {
 }
 
 String Popup::get_configuration_warning() const {
-
 	String warning = Control::get_configuration_warning();
 	if (is_visible_in_tree()) {
 		if (warning != String()) {
@@ -270,7 +254,6 @@ Popup::~Popup() {
 }
 
 Size2 PopupPanel::get_minimum_size() const {
-
 	Ref<StyleBox> p = get_stylebox("panel");
 
 	Size2 ms;
@@ -292,7 +275,6 @@ Size2 PopupPanel::get_minimum_size() const {
 }
 
 void PopupPanel::_update_child_rects() {
-
 	Ref<StyleBox> p = get_stylebox("panel");
 
 	Vector2 cpos(p->get_offset());
@@ -312,15 +294,11 @@ void PopupPanel::_update_child_rects() {
 }
 
 void PopupPanel::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_DRAW) {
-
 		get_stylebox("panel")->draw(get_canvas_item(), Rect2(Point2(), get_size()));
 	} else if (p_what == NOTIFICATION_READY) {
-
 		_update_child_rects();
 	} else if (p_what == NOTIFICATION_RESIZED) {
-
 		_update_child_rects();
 	}
 }

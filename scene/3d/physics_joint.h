@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #include "scene/3d/spatial.h"
 
 class Joint : public Spatial {
-
 	GDCLASS(Joint, Spatial);
 
 	RID ba, bb;
@@ -82,7 +81,6 @@ public:
 ///////////////////////////////////////////
 
 class PinJoint : public Joint {
-
 	GDCLASS(PinJoint, Joint);
 
 public:
@@ -107,7 +105,6 @@ public:
 VARIANT_ENUM_CAST(PinJoint::Param);
 
 class HingeJoint : public Joint {
-
 	GDCLASS(HingeJoint, Joint);
 
 public:
@@ -155,7 +152,6 @@ VARIANT_ENUM_CAST(HingeJoint::Param);
 VARIANT_ENUM_CAST(HingeJoint::Flag);
 
 class SliderJoint : public Joint {
-
 	GDCLASS(SliderJoint, Joint);
 
 public:
@@ -208,7 +204,6 @@ public:
 VARIANT_ENUM_CAST(SliderJoint::Param);
 
 class ConeTwistJoint : public Joint {
-
 	GDCLASS(ConeTwistJoint, Joint);
 
 public:
@@ -243,7 +238,6 @@ public:
 VARIANT_ENUM_CAST(ConeTwistJoint::Param);
 
 class Generic6DOFJoint : public Joint {
-
 	GDCLASS(Generic6DOFJoint, Joint);
 
 public:

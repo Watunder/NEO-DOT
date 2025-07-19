@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,7 +33,6 @@
 #include "servers/physics_server.h"
 
 Vector<Vector3> RayShape::get_debug_mesh_lines() {
-
 	Vector<Vector3> points;
 	points.push_back(Vector3());
 	points.push_back(Vector3(0, 0, get_length()));
@@ -42,7 +41,6 @@ Vector<Vector3> RayShape::get_debug_mesh_lines() {
 }
 
 void RayShape::_update_shape() {
-
 	Dictionary d;
 	d["length"] = length;
 	d["slips_on_slope"] = slips_on_slope;
@@ -51,7 +49,6 @@ void RayShape::_update_shape() {
 }
 
 void RayShape::set_length(float p_length) {
-
 	length = p_length;
 	_update_shape();
 	notify_change_to_owners();
@@ -59,12 +56,10 @@ void RayShape::set_length(float p_length) {
 }
 
 float RayShape::get_length() const {
-
 	return length;
 }
 
 void RayShape::set_slips_on_slope(bool p_active) {
-
 	slips_on_slope = p_active;
 	_update_shape();
 	notify_change_to_owners();
@@ -76,7 +71,6 @@ bool RayShape::get_slips_on_slope() const {
 }
 
 void RayShape::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_length", "length"), &RayShape::set_length);
 	ClassDB::bind_method(D_METHOD("get_length"), &RayShape::get_length);
 
@@ -89,7 +83,6 @@ void RayShape::_bind_methods() {
 
 RayShape::RayShape() :
 		Shape(PhysicsServer::get_singleton()->shape_create(PhysicsServer::SHAPE_RAY)) {
-
 	length = 1.0;
 	slips_on_slope = false;
 

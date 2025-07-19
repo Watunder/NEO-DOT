@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,7 +39,6 @@
 class SyntaxHighlighter;
 
 class TextEdit : public Control {
-
 	GDCLASS(TextEdit, Control);
 
 public:
@@ -48,7 +47,6 @@ public:
 	};
 
 	struct ColorRegion {
-
 		Color color;
 		String begin_key;
 		String end_key;
@@ -66,7 +64,6 @@ public:
 	class Text {
 	public:
 		struct ColorRegionInfo {
-
 			int region;
 			bool end;
 			ColorRegionInfo() {
@@ -168,7 +165,6 @@ private:
 	} cursor;
 
 	struct Selection {
-
 		enum Mode {
 
 			MODE_NONE,
@@ -207,7 +203,6 @@ private:
 	} selection;
 
 	struct Cache {
-
 		Ref<Texture> tab_icon;
 		Ref<Texture> space_icon;
 		Ref<Texture> can_fold_icon;
@@ -256,7 +251,6 @@ private:
 		int info_gutter_width;
 		int minimap_width;
 		Cache() {
-
 			row_height = 0;
 			line_spacing = 0;
 			line_number_w = 0;
@@ -268,10 +262,9 @@ private:
 	} cache;
 
 	Map<int, int> color_region_cache;
-	Map<int, Map<int, HighlighterInfo> > syntax_highlighting_cache;
+	Map<int, Map<int, HighlighterInfo>> syntax_highlighting_cache;
 
 	struct TextOperation {
-
 		enum Type {
 			TYPE_NONE,
 			TYPE_INSERT,

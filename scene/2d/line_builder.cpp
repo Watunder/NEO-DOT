@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -117,7 +117,6 @@ void LineBuilder::clear_output() {
 }
 
 void LineBuilder::build() {
-
 	// Need at least 2 points to draw a line
 	if (points.size() < 2) {
 		clear_output();
@@ -150,9 +149,9 @@ void LineBuilder::build() {
 	_interpolate_color = gradient != NULL;
 	bool retrieve_curve = curve != NULL;
 	bool distance_required = _interpolate_color ||
-							 retrieve_curve ||
-							 texture_mode == Line2D::LINE_TEXTURE_TILE ||
-							 texture_mode == Line2D::LINE_TEXTURE_STRETCH;
+			retrieve_curve ||
+			texture_mode == Line2D::LINE_TEXTURE_TILE ||
+			texture_mode == Line2D::LINE_TEXTURE_STRETCH;
 	if (distance_required) {
 		total_distance = calculate_total_distance(points);
 		//Adjust totalDistance.
@@ -220,7 +219,6 @@ void LineBuilder::build() {
 
 	// For each additional segment
 	for (int i = 1; i < len - 1; ++i) {
-
 		pos1 = points[i];
 		Vector2 pos2 = points[i + 1];
 
@@ -359,7 +357,6 @@ void LineBuilder::build() {
 
 		// Add joint geometry
 		if (current_joint_mode != Line2D::LINE_JOINT_SHARP) {
-
 			/* ________________ cbegin
 			 *               / \
 			 *              /   \
@@ -541,7 +538,6 @@ void LineBuilder::strip_add_tri(Vector2 up, Orientation orientation) {
 }
 
 void LineBuilder::strip_add_arc(Vector2 center, float angle_delta, Orientation orientation) {
-
 	// Take the two last vertices and extrude an arc made of triangles
 	// that all share one of the initial vertices
 
@@ -570,7 +566,6 @@ void LineBuilder::strip_add_arc(Vector2 center, float angle_delta, Orientation o
 }
 
 void LineBuilder::new_arc(Vector2 center, Vector2 vbegin, float angle_delta, Color color, Rect2 uv_rect) {
-
 	// Make a standalone arc that doesn't use existing vertices,
 	// with undistorted UVs from within a square section
 

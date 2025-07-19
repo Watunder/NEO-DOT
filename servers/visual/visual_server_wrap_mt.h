@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,7 +37,6 @@
 #include "servers/visual_server.h"
 
 class VisualServerWrapMT : public VisualServer {
-
 	// the real visual server
 	mutable VisualServer *visual_server;
 
@@ -150,7 +149,7 @@ public:
 
 	FUNCRID(mesh)
 
-	FUNC10(mesh_add_surface, RID, uint32_t, PrimitiveType, const PoolVector<uint8_t> &, int, const PoolVector<uint8_t> &, int, const AABB &, const Vector<PoolVector<uint8_t> > &, const Vector<AABB> &)
+	FUNC10(mesh_add_surface, RID, uint32_t, PrimitiveType, const PoolVector<uint8_t> &, int, const PoolVector<uint8_t> &, int, const AABB &, const Vector<PoolVector<uint8_t>> &, const Vector<AABB> &)
 
 	FUNC2(mesh_set_blend_shape_count, RID, int)
 	FUNC1RC(int, mesh_get_blend_shape_count, RID)
@@ -173,7 +172,7 @@ public:
 	FUNC2RC(PrimitiveType, mesh_surface_get_primitive_type, RID, int)
 
 	FUNC2RC(AABB, mesh_surface_get_aabb, RID, int)
-	FUNC2RC(Vector<PoolVector<uint8_t> >, mesh_surface_get_blend_shapes, RID, int)
+	FUNC2RC(Vector<PoolVector<uint8_t>>, mesh_surface_get_blend_shapes, RID, int)
 	FUNC2RC(Vector<AABB>, mesh_surface_get_skeleton_aabb, RID, int)
 
 	FUNC2(mesh_remove_surface, RID, int)

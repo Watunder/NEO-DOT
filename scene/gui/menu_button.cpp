@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,12 +33,10 @@
 #include "scene/main/viewport.h"
 
 void MenuButton::_unhandled_key_input(Ref<InputEvent> p_event) {
-
 	if (disable_shortcuts)
 		return;
 
 	if (p_event->is_pressed() && !p_event->is_echo() && (Object::cast_to<InputEventKey>(p_event.ptr()) || Object::cast_to<InputEventJoypadButton>(p_event.ptr()) || Object::cast_to<InputEventAction>(*p_event))) {
-
 		if (!get_parent() || !is_visible_in_tree() || is_disabled())
 			return;
 
@@ -50,7 +48,6 @@ void MenuButton::_unhandled_key_input(Ref<InputEvent> p_event) {
 }
 
 void MenuButton::pressed() {
-
 	emit_signal("about_to_show");
 	Size2 size = get_size();
 
@@ -63,39 +60,31 @@ void MenuButton::pressed() {
 }
 
 void MenuButton::_gui_input(Ref<InputEvent> p_event) {
-
 	BaseButton::_gui_input(p_event);
 }
 
 PopupMenu *MenuButton::get_popup() const {
-
 	return popup;
 }
 
 void MenuButton::_set_items(const Array &p_items) {
-
 	popup->set("items", p_items);
 }
 
 Array MenuButton::_get_items() const {
-
 	return popup->get("items");
 }
 
 void MenuButton::set_switch_on_hover(bool p_enabled) {
-
 	switch_on_hover = p_enabled;
 }
 
 bool MenuButton::is_switch_on_hover() {
-
 	return switch_on_hover;
 }
 
 void MenuButton::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
-
 		if (!is_visible_in_tree()) {
 			popup->hide();
 		}
@@ -103,7 +92,6 @@ void MenuButton::_notification(int p_what) {
 }
 
 void MenuButton::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("get_popup"), &MenuButton::get_popup);
 	ClassDB::bind_method(D_METHOD("_unhandled_key_input"), &MenuButton::_unhandled_key_input);
 	ClassDB::bind_method(D_METHOD("_set_items"), &MenuButton::_set_items);
@@ -119,12 +107,10 @@ void MenuButton::_bind_methods() {
 }
 
 void MenuButton::set_disable_shortcuts(bool p_disabled) {
-
 	disable_shortcuts = p_disabled;
 }
 
 MenuButton::MenuButton() {
-
 	switch_on_hover = false;
 	set_flat(true);
 	set_toggle_mode(true);

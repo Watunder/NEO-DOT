@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -201,7 +201,6 @@ int CollisionObjectBullet::get_godot_object_flags() const {
 }
 
 void CollisionObjectBullet::set_transform(const Transform &p_global_transform) {
-
 	set_body_scale(p_global_transform.basis.get_scale_abs());
 
 	btTransform bt_transform;
@@ -345,7 +344,6 @@ void RigidCollisionObjectBullet::shape_changed(int p_shape_index) {
 }
 
 void RigidCollisionObjectBullet::reload_shapes() {
-
 	if (mainShape && mainShape->isCompound()) {
 		// Destroy compound
 		bulletdelete(mainShape);

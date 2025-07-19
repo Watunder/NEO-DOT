@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,13 +31,12 @@
 #include "array_property_edit.h"
 
 #include "core/io/marshalls.h"
-#include "editor_node.h"
 #include "editor/editor_undo_redo_manager.h"
+#include "editor_node.h"
 
 #define ITEMS_PER_PAGE 100
 
 Variant ArrayPropertyEdit::get_array() const {
-
 	Object *o = ObjectDB::get_instance(obj);
 	if (!o)
 		return Array();
@@ -53,12 +52,10 @@ void ArrayPropertyEdit::_notif_change() {
 	_change_notify();
 }
 void ArrayPropertyEdit::_notif_changev(const String &p_v) {
-
 	_change_notify(p_v.utf8().get_data());
 }
 
 void ArrayPropertyEdit::_set_size(int p_size) {
-
 	Variant arr = get_array();
 	arr.call("resize", p_size);
 	Object *o = ObjectDB::get_instance(obj);
@@ -69,7 +66,6 @@ void ArrayPropertyEdit::_set_size(int p_size) {
 }
 
 void ArrayPropertyEdit::_set_value(int p_idx, const Variant &p_value) {
-
 	Variant arr = get_array();
 	arr.set(p_idx, p_value);
 	Object *o = ObjectDB::get_instance(obj);
@@ -80,13 +76,10 @@ void ArrayPropertyEdit::_set_value(int p_idx, const Variant &p_value) {
 }
 
 bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
-
 	String pn = p_name;
 
 	if (pn.begins_with("array/")) {
-
 		if (pn == "array/size") {
-
 			Variant arr = get_array();
 			int size = arr.call("size");
 
@@ -103,7 +96,6 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 					ur->add_undo_method(this, "_set_value", i, arr.get(i));
 				}
 			} else if (newsize > size) {
-
 				Variant init;
 				Variant::CallError ce;
 				Variant::Type new_type = subtype;
@@ -129,7 +121,6 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 		}
 
 	} else if (pn.begins_with("indices")) {
-
 		if (pn.find("_") != -1) {
 			//type
 			int idx = pn.get_slicec('/', 1).get_slicec('_', 0).to_int();
@@ -174,13 +165,11 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 }
 
 bool ArrayPropertyEdit::_get(const StringName &p_name, Variant &r_ret) const {
-
 	Variant arr = get_array();
 	//int size = arr.call("size");
 
 	String pn = p_name;
 	if (pn.begins_with("array/")) {
-
 		if (pn == "array/size") {
 			r_ret = arr.call("size");
 			return true;
@@ -190,7 +179,6 @@ bool ArrayPropertyEdit::_get(const StringName &p_name, Variant &r_ret) const {
 			return true;
 		}
 	} else if (pn.begins_with("indices")) {
-
 		if (pn.find("_") != -1) {
 			//type
 			int idx = pn.get_slicec('/', 1).get_slicec('_', 0).to_int();
@@ -217,7 +205,6 @@ bool ArrayPropertyEdit::_get(const StringName &p_name, Variant &r_ret) const {
 }
 
 void ArrayPropertyEdit::_get_property_list(List<PropertyInfo> *p_list) const {
-
 	Variant arr = get_array();
 	int size = arr.call("size");
 
@@ -231,7 +218,6 @@ void ArrayPropertyEdit::_get_property_list(List<PropertyInfo> *p_list) const {
 	int items = MIN(size - offset, ITEMS_PER_PAGE);
 
 	for (int i = 0; i < items; i++) {
-
 		Variant v = arr.get(i + offset);
 		bool is_typed = arr.get_type() != Variant::ARRAY || subtype != Variant::NIL;
 
@@ -261,7 +247,6 @@ void ArrayPropertyEdit::_get_property_list(List<PropertyInfo> *p_list) const {
 }
 
 void ArrayPropertyEdit::edit(Object *p_obj, const StringName &p_prop, const String &p_hint_string, Variant::Type p_deftype) {
-
 	page = 0;
 	property = p_prop;
 	obj = p_obj->get_instance_id();
@@ -285,7 +270,6 @@ void ArrayPropertyEdit::edit(Object *p_obj, const StringName &p_prop, const Stri
 }
 
 Node *ArrayPropertyEdit::get_node() {
-
 	return Object::cast_to<Node>(ObjectDB::get_instance(obj));
 }
 
@@ -294,7 +278,6 @@ bool ArrayPropertyEdit::_dont_undo_redo() {
 }
 
 void ArrayPropertyEdit::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("_set_size"), &ArrayPropertyEdit::_set_size);
 	ClassDB::bind_method(D_METHOD("_set_value"), &ArrayPropertyEdit::_set_value);
 	ClassDB::bind_method(D_METHOD("_notif_change"), &ArrayPropertyEdit::_notif_change);
@@ -305,7 +288,6 @@ void ArrayPropertyEdit::_bind_methods() {
 ArrayPropertyEdit::ArrayPropertyEdit() {
 	page = 0;
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
-
 		if (i > 0)
 			vtypes += ",";
 		vtypes += Variant::get_type_name(Variant::Type(i));
