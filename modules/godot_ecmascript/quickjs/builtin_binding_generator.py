@@ -1,119 +1,122 @@
 #!/usr/bin/env python
 import json, os
 
-DIR = os.path.abspath( os.path.dirname(__file__) )
+DIR = os.path.abspath(os.path.dirname(__file__))
 OUTPUT_FILE = os.path.join(DIR, "quickjs_builtin_binder.gen.cpp")
-API = json.load(open(os.path.join(DIR, '..', 'builtin_api.gen.json'), 'r'))
+API = json.load(open(os.path.join(DIR, "..", "builtin_api.gen.json"), "r"))
 
 VariantTypes = {
-	"boolean": "Variant::BOOL",
-	"number": "Variant::REAL",
-	"string": "Variant::STRING",
-	"Vector2": "Variant::VECTOR2",
-	"Vector3": "Variant::VECTOR3",
-	"Basis": "Variant::BASIS",
-	"Quat": "Variant::QUAT",
-	"Color": "Variant::COLOR",
-	"Rect2": "Variant::RECT2",
-	"RID": "Variant::_RID",
-	"Transform2D": "Variant::TRANSFORM2D",
-	"Plane": "Variant::PLANE",
-	"AABB": "Variant::AABB",
-	"Transform": "Variant::TRANSFORM",
-	"PoolByteArray": "Variant::POOL_BYTE_ARRAY",
-	"PoolIntArray": "Variant::POOL_INT_ARRAY",
-	"PoolRealArray": "Variant::POOL_REAL_ARRAY",
-	"PoolStringArray": "Variant::POOL_STRING_ARRAY",
-	"PoolVector2Array": "Variant::POOL_VECTOR2_ARRAY",
-	"PoolVector3Array": "Variant::POOL_VECTOR3_ARRAY",
-	"PoolColorArray": "Variant::POOL_COLOR_ARRAY",
+    "boolean": "Variant::BOOL",
+    "number": "Variant::REAL",
+    "string": "Variant::STRING",
+    "Vector2": "Variant::VECTOR2",
+    "Vector3": "Variant::VECTOR3",
+    "Basis": "Variant::BASIS",
+    "Quat": "Variant::QUAT",
+    "Color": "Variant::COLOR",
+    "Rect2": "Variant::RECT2",
+    "RID": "Variant::_RID",
+    "Transform2D": "Variant::TRANSFORM2D",
+    "Plane": "Variant::PLANE",
+    "AABB": "Variant::AABB",
+    "Transform": "Variant::TRANSFORM",
+    "PoolByteArray": "Variant::POOL_BYTE_ARRAY",
+    "PoolIntArray": "Variant::POOL_INT_ARRAY",
+    "PoolRealArray": "Variant::POOL_REAL_ARRAY",
+    "PoolStringArray": "Variant::POOL_STRING_ARRAY",
+    "PoolVector2Array": "Variant::POOL_VECTOR2_ARRAY",
+    "PoolVector3Array": "Variant::POOL_VECTOR3_ARRAY",
+    "PoolColorArray": "Variant::POOL_COLOR_ARRAY",
 }
 
 JSToGodotTemplates = {
-	"number": 'QuickJSBinder::js_to_number(ctx, ${arg})',
-	"string": 'QuickJSBinder::js_to_string(ctx, ${arg})',
-	"boolean": 'QuickJSBinder::js_to_bool(ctx, ${arg})',
-	"Vector2": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getVector2()',
-	"Rect2": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getRect2()',
-	"Color": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getColor()',
-	"RID": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getRID()',
-	"AABB": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getAABB()',
-	"Plane": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPlane()',
-	"Quat": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getQuat()',
-	"Transform2D": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getTransform2D()',
-	"Vector3": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getVector3()',
-	"Basis": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getBasis()',
-	"Transform": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getTransform()',
-	"PoolByteArray": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolByteArray()',
-	"PoolIntArray": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolIntArray()',
-	"PoolRealArray": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolRealArray()',
-	"PoolStringArray": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolStringArray()',
-	"PoolVector2Array": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolVector2Array()',
-	"PoolVector3Array": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolVector3Array()',
-	"PoolColorArray": '*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolColorArray()',
-	"Variant": '(BINDING_DATA_FROM_JS(ctx, ${arg}))->get_value()',
+    "number": "QuickJSBinder::js_to_number(ctx, ${arg})",
+    "string": "QuickJSBinder::js_to_string(ctx, ${arg})",
+    "boolean": "QuickJSBinder::js_to_bool(ctx, ${arg})",
+    "Vector2": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getVector2()",
+    "Rect2": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getRect2()",
+    "Color": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getColor()",
+    "RID": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getRID()",
+    "AABB": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getAABB()",
+    "Plane": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPlane()",
+    "Quat": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getQuat()",
+    "Transform2D": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getTransform2D()",
+    "Vector3": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getVector3()",
+    "Basis": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getBasis()",
+    "Transform": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getTransform()",
+    "PoolByteArray": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolByteArray()",
+    "PoolIntArray": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolIntArray()",
+    "PoolRealArray": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolRealArray()",
+    "PoolStringArray": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolStringArray()",
+    "PoolVector2Array": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolVector2Array()",
+    "PoolVector3Array": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolVector3Array()",
+    "PoolColorArray": "*(BINDING_DATA_FROM_JS(ctx, ${arg}))->getPoolColorArray()",
+    "Variant": "(BINDING_DATA_FROM_JS(ctx, ${arg}))->get_value()",
 }
 
 GodotTypeNames = {
-	"number": "real_t",
-	"string": "String",
-	"boolean": "bool",
-	"Vector2": "Vector2",
-	"Rect2": "Rect2",
-	"Color": "Color",
-	"RID": "RID",
-	"AABB": "AABB",
-	"Plane": "Plane",
-	"Quat": "Quat",
-	"Transform2D": "Transform2D",
-	"Vector3": "Vector3",
-	"Basis": "Basis",
-	"Transform": "Transform",
-	"PoolByteArray": "PoolByteArray",
-	"PoolIntArray": "PoolIntArray",
-	"PoolRealArray": "PoolRealArray",
-	"PoolStringArray": "PoolStringArray",
-	"PoolVector2Array": "PoolVector2Array",
-	"PoolVector3Array": "PoolVector3Array",
-	"PoolColorArray": "PoolColorArray",
-	"Variant": "Variant",
+    "number": "real_t",
+    "string": "String",
+    "boolean": "bool",
+    "Vector2": "Vector2",
+    "Rect2": "Rect2",
+    "Color": "Color",
+    "RID": "RID",
+    "AABB": "AABB",
+    "Plane": "Plane",
+    "Quat": "Quat",
+    "Transform2D": "Transform2D",
+    "Vector3": "Vector3",
+    "Basis": "Basis",
+    "Transform": "Transform",
+    "PoolByteArray": "PoolByteArray",
+    "PoolIntArray": "PoolIntArray",
+    "PoolRealArray": "PoolRealArray",
+    "PoolStringArray": "PoolStringArray",
+    "PoolVector2Array": "PoolVector2Array",
+    "PoolVector3Array": "PoolVector3Array",
+    "PoolColorArray": "PoolColorArray",
+    "Variant": "Variant",
 }
 
 GodotToJSTemplates = {
-	"number": 'QuickJSBinder::to_js_number(ctx, ${arg})',
-	"string": 'QuickJSBinder::to_js_string(ctx, ${arg})',
-	"boolean": 'QuickJSBinder::to_js_bool(ctx, ${arg})',
-	"Vector2": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Rect2": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Color": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"RID": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"AABB": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Plane": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Quat": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Transform2D": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Vector3": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Basis": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Transform": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolByteArray": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolIntArray": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolRealArray": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolStringArray": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolVector2Array": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolVector3Array": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"PoolColorArray": 'QuickJSBuiltinBinder::new_object_from(ctx, ${arg})',
-	"Variant": 'QuickJSBinder::variant_to_var(ctx, ${arg})',
+    "number": "QuickJSBinder::to_js_number(ctx, ${arg})",
+    "string": "QuickJSBinder::to_js_string(ctx, ${arg})",
+    "boolean": "QuickJSBinder::to_js_bool(ctx, ${arg})",
+    "Vector2": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Rect2": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Color": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "RID": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "AABB": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Plane": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Quat": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Transform2D": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Vector3": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Basis": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Transform": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolByteArray": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolIntArray": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolRealArray": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolStringArray": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolVector2Array": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolVector3Array": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "PoolColorArray": "QuickJSBuiltinBinder::new_object_from(ctx, ${arg})",
+    "Variant": "QuickJSBinder::variant_to_var(ctx, ${arg})",
 }
 
+
 def apply_pattern(template, values):
-	for key in values:
-		template = template.replace( '${' + key + '}', values[key])
-	return template
+    for key in values:
+        template = template.replace("${" + key + "}", values[key])
+    return template
 
 
 def generate_constructor(cls):
-	TemplateConstructorName = '${class}_constructor'
-	TemplateConstructorDeclare = 'static JSValue ${class}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv);\n'
-	TemplateConstructor = '''
+    TemplateConstructorName = "${class}_constructor"
+    TemplateConstructorDeclare = (
+        "static JSValue ${class}_constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv);\n"
+    )
+    TemplateConstructor = """
 static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
 	${class} tmp;
 	${initializer}
@@ -124,8 +127,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 	return obj;
 	// return QuickJSBuiltinBinder::create_builtin_value(ctx, ${type}, &tmp);
 }
-'''
-	TemplateSimplePoolArrays = '''
+"""
+    TemplateSimplePoolArrays = """
 	if (argc == 1) {
 #ifdef DEBUG_METHODS_ENABLED
 		ERR_FAIL_COND_V(!JS_IsArray(ctx, argv[0]), (JS_ThrowTypeError(ctx, "Array expected for argument #0 of ${class}(from)")));
@@ -133,8 +136,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 		Variant arr = QuickJSBinder::var_to_variant(ctx, argv[0]);
 		tmp.operator=(arr);
 	}
-	'''
-	TemplatePoolArrays = '''
+	"""
+    TemplatePoolArrays = """
 	if (argc == 1) {
 		if (JS_IsArray(ctx, argv[0])) {
 			Variant arr = QuickJSBinder::var_to_variant(ctx, argv[0]);
@@ -172,9 +175,9 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 #endif
 		}
 	}
-	'''
-	ConstructorInitializers = {
-		"Vector2": '''
+	"""
+    ConstructorInitializers = {
+        "Vector2": """
 	if (argc == 2) {
 		tmp.x = QuickJSBinder::js_to_number(ctx, argv[0]);
 		tmp.y = QuickJSBinder::js_to_number(ctx, argv[1]);
@@ -188,8 +191,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			tmp.y = tmp.x;
 		}
 	}
-''',
-		"Vector3": '''
+""",
+        "Vector3": """
 	if (argc == 1) {
 		if (ECMAScriptGCHandler *bind = BINDING_DATA_FROM_JS(ctx, argv[0])) {
 			if (bind->type == Variant::VECTOR3)
@@ -203,8 +206,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 		tmp.y = QuickJSBinder::js_to_number(ctx, argv[1]);
 		tmp.z = QuickJSBinder::js_to_number(ctx, argv[2]);
 	}
-''',
-		"Color": '''
+""",
+        "Color": """
 	if (argc >= 3) {
 		tmp.r = QuickJSBinder::js_to_number(ctx, argv[0]);
 		tmp.g = QuickJSBinder::js_to_number(ctx, argv[1]);
@@ -221,8 +224,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			}
 		}
 	}
-''',
-		"Rect2": '''
+""",
+        "Rect2": """
 	if (argc == 4) {
 		tmp.position.x = QuickJSBinder::js_to_number(ctx, argv[0]);
 		tmp.position.y = QuickJSBinder::js_to_number(ctx, argv[1]);
@@ -243,8 +246,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 				tmp = *bind->getRect2();
 		}
 	}
-''',
-		"AABB": '''
+""",
+        "AABB": """
 	if (argc == 2) {
 #ifdef DEBUG_METHODS_ENABLED
 		ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, Variant::VECTOR3, argv[0]), (JS_ThrowTypeError(ctx, "Vector3 expected for argument 0 of AABB(position, size)")));
@@ -260,8 +263,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 				tmp = *bind->getAABB();
 		}
 	}
-''',
-		"Plane": '''
+""",
+        "Plane": """
 	if (argc == 4) {
 		tmp.normal.x = QuickJSBinder::js_to_number(ctx, argv[0]);
 		tmp.normal.y = QuickJSBinder::js_to_number(ctx, argv[1]);
@@ -289,8 +292,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 				tmp = *bind->getPlane();
 		}
 	}
-''',
-		"Quat": '''
+""",
+        "Quat": """
 	if (argc == 4) {
 		tmp.x = QuickJSBinder::js_to_number(ctx, argv[0]);
 		tmp.y = QuickJSBinder::js_to_number(ctx, argv[1]);
@@ -313,8 +316,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			}
 		}
 	}
-''',
-		"Transform2D": '''
+""",
+        "Transform2D": """
 	if (argc == 3) {
 #ifdef DEBUG_METHODS_ENABLED
 		ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, Variant::VECTOR2, argv[0]), (JS_ThrowTypeError(ctx, "Vector2 expected for argument 0 of Transform2D(x_axis, y_axis, origin)")));
@@ -343,8 +346,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			}
 		}
 	}
-''',
-		"Basis": '''
+""",
+        "Basis": """
 	if (argc == 3) {
 #ifdef DEBUG_METHODS_ENABLED
 		ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, Variant::VECTOR3, argv[0]), (JS_ThrowTypeError(ctx, "Vector3 expected for argument 0 of Basis(x_axis, y_axis, z_axis)")));
@@ -374,8 +377,8 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			}
 		}
 	}
-''',
-		"Transform": '''
+""",
+        "Transform": """
 	if (argc == 4) {
 #ifdef DEBUG_METHODS_ENABLED
 		ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, Variant::VECTOR3, argv[0]), (JS_ThrowTypeError(ctx, "Vector3 expected for argument 0 of Transform(x_axis, y_axis, z_axis, origin)")));
@@ -410,36 +413,53 @@ static JSValue ${func}(JSContext *ctx, JSValueConst new_target, int argc, JSValu
 			}
 		}
 	}
-''',
-		"PoolByteArray": apply_pattern(TemplatePoolArrays, {"class": "PoolByteArray", "type": "Variant::POOL_BYTE_ARRAY", "element": "uint8_t"}),
-		"PoolIntArray": apply_pattern(TemplatePoolArrays, {"class": "PoolIntArray", "type": "Variant::POOL_INT_ARRAY", "element": "int"}),
-		"PoolRealArray": apply_pattern(TemplatePoolArrays, {"class": "PoolRealArray", "type": "Variant::POOL_REAL_ARRAY", "element": "real_t"}),
-		"PoolVector2Array": apply_pattern(TemplatePoolArrays, {"class": "PoolVector2Array", "type": "Variant::POOL_VECTOR2_ARRAY", "element": "Vector2"}),
-		"PoolVector3Array": apply_pattern(TemplatePoolArrays, {"class": "PoolVector3Array", "type": "Variant::POOL_VECTOR3_ARRAY", "element": "Vector3"}),
-		"PoolColorArray": apply_pattern(TemplatePoolArrays, {"class": "PoolColorArray", "type": "Variant::POOL_COLOR_ARRAY", "element": "Color"}),
-		"PoolStringArray": apply_pattern(TemplateSimplePoolArrays,{"class": "PoolStringArray", "type": "Variant::POOL_STRING_ARRAY", "element": "String"}),
-	}
-	class_name = cls['name']
-	constructor_name = apply_pattern(TemplateConstructorName, {"class": class_name})
-	constructor_declare = apply_pattern(TemplateConstructorDeclare, {"class": class_name})
-	
-	initializer = ''
-	if class_name in ConstructorInitializers:
-		initializer = ConstructorInitializers[class_name]
-	consturctor = apply_pattern(TemplateConstructor, {
-		'class': class_name,
-		'type': VariantTypes[class_name],
-		'func': constructor_name,
-		'initializer': initializer
-	})
-	return constructor_name, constructor_declare, consturctor
+""",
+        "PoolByteArray": apply_pattern(
+            TemplatePoolArrays, {"class": "PoolByteArray", "type": "Variant::POOL_BYTE_ARRAY", "element": "uint8_t"}
+        ),
+        "PoolIntArray": apply_pattern(
+            TemplatePoolArrays, {"class": "PoolIntArray", "type": "Variant::POOL_INT_ARRAY", "element": "int"}
+        ),
+        "PoolRealArray": apply_pattern(
+            TemplatePoolArrays, {"class": "PoolRealArray", "type": "Variant::POOL_REAL_ARRAY", "element": "real_t"}
+        ),
+        "PoolVector2Array": apply_pattern(
+            TemplatePoolArrays,
+            {"class": "PoolVector2Array", "type": "Variant::POOL_VECTOR2_ARRAY", "element": "Vector2"},
+        ),
+        "PoolVector3Array": apply_pattern(
+            TemplatePoolArrays,
+            {"class": "PoolVector3Array", "type": "Variant::POOL_VECTOR3_ARRAY", "element": "Vector3"},
+        ),
+        "PoolColorArray": apply_pattern(
+            TemplatePoolArrays, {"class": "PoolColorArray", "type": "Variant::POOL_COLOR_ARRAY", "element": "Color"}
+        ),
+        "PoolStringArray": apply_pattern(
+            TemplateSimplePoolArrays,
+            {"class": "PoolStringArray", "type": "Variant::POOL_STRING_ARRAY", "element": "String"},
+        ),
+    }
+    class_name = cls["name"]
+    constructor_name = apply_pattern(TemplateConstructorName, {"class": class_name})
+    constructor_declare = apply_pattern(TemplateConstructorDeclare, {"class": class_name})
+
+    initializer = ""
+    if class_name in ConstructorInitializers:
+        initializer = ConstructorInitializers[class_name]
+    consturctor = apply_pattern(
+        TemplateConstructor,
+        {"class": class_name, "type": VariantTypes[class_name], "func": constructor_name, "initializer": initializer},
+    )
+    return constructor_name, constructor_declare, consturctor
+
 
 def generate_property_bindings(cls):
-	class_name = cls['name']
-	TemplateDeclar = 'static void bind_${class}_properties(JSContext *octx);\n'
-	TemplateBind = '\tbind_${class}_properties(ctx);\n'
-	def generate_members(cls):
-		Template = '''
+    class_name = cls["name"]
+    TemplateDeclar = "static void bind_${class}_properties(JSContext *octx);\n"
+    TemplateBind = "\tbind_${class}_properties(ctx);\n"
+
+    def generate_members(cls):
+        Template = """
 	JSCFunctionMagic *getter = [](JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic) -> JSValue {
 		ECMAScriptGCHandler *bind = BINDING_DATA_FROM_JS(ctx, this_val);
 		const ${class} *ptr = bind->get${class}();
@@ -448,7 +468,7 @@ ${getters}
 		}
 		return JS_UNDEFINED;
 	};
-	
+
 	JSCFunctionMagic *setter = [](JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic) -> JSValue {
 		ECMAScriptGCHandler *bind = BINDING_DATA_FROM_JS(ctx, this_val);
 		${class} *ptr = bind->get${class}();\
@@ -459,50 +479,59 @@ ${setters}
 		return JS_DupValue(ctx, argv[0]);
 	};
 ${bindings}
-		'''
-		TemplateGetterItem = '''
+		"""
+        TemplateGetterItem = """
 			case ${index}:
-				return ${value};'''
-		TemplateSetterItem = '''
+				return ${value};"""
+        TemplateSetterItem = """
 			case ${index}:
 #ifdef DEBUG_METHODS_ENABLED
 				ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, ${type}, argv[0]), (JS_ThrowTypeError(ctx, "${type_name} expected for ${class}.${name}")));
 #endif
 				ptr->${native} = ${value};
-				break;'''
-		TemplateItemBinding = '\tbinder->get_builtin_binder().register_property(${type}, "${name}", getter, setter, ${index});\n'
-		getters = ''
-		setters = ''
-		bindings = ''
-		for i in range(len(cls['properties'])):
-			p = cls['properties'][i]
-			type = p['type']
-			name = p['name']
-			native_name = p['native']
-			getters += apply_pattern(TemplateGetterItem, {
-				'index': str(i),
-				'value': apply_pattern(GodotToJSTemplates[type], { 'arg': apply_pattern('ptr->${native}', {'native': native_name}) })
-			})
-			setters += apply_pattern(TemplateSetterItem, {
-				'index': str(i),
-				'name': name,
-				'native': native_name,
-				'type': VariantTypes[type],
-				'type_name': type,
-				'class': class_name,
-				'value': apply_pattern(JSToGodotTemplates[type], {'arg': 'argv[0]'})
-			})
-			bindings += apply_pattern(TemplateItemBinding, {'index': str(i), 'name': name, 'type': VariantTypes[class_name]})
-		return apply_pattern(Template, {
-			'class': class_name,
-			'getters': getters,
-			'setters': setters,
-			'bindings': bindings,
-			'validation': ''
-		})
-	
-	def generate_methods(cls):
-		TemplateMethod = '''
+				break;"""
+        TemplateItemBinding = (
+            '\tbinder->get_builtin_binder().register_property(${type}, "${name}", getter, setter, ${index});\n'
+        )
+        getters = ""
+        setters = ""
+        bindings = ""
+        for i in range(len(cls["properties"])):
+            p = cls["properties"][i]
+            type = p["type"]
+            name = p["name"]
+            native_name = p["native"]
+            getters += apply_pattern(
+                TemplateGetterItem,
+                {
+                    "index": str(i),
+                    "value": apply_pattern(
+                        GodotToJSTemplates[type], {"arg": apply_pattern("ptr->${native}", {"native": native_name})}
+                    ),
+                },
+            )
+            setters += apply_pattern(
+                TemplateSetterItem,
+                {
+                    "index": str(i),
+                    "name": name,
+                    "native": native_name,
+                    "type": VariantTypes[type],
+                    "type_name": type,
+                    "class": class_name,
+                    "value": apply_pattern(JSToGodotTemplates[type], {"arg": "argv[0]"}),
+                },
+            )
+            bindings += apply_pattern(
+                TemplateItemBinding, {"index": str(i), "name": name, "type": VariantTypes[class_name]}
+            )
+        return apply_pattern(
+            Template,
+            {"class": class_name, "getters": getters, "setters": setters, "bindings": bindings, "validation": ""},
+        )
+
+    def generate_methods(cls):
+        TemplateMethod = """
 	binder->get_builtin_binder().register_method(
 		${type},
 		"${name}",
@@ -513,73 +542,86 @@ ${arg_declares}
 			${call}
 			return ${return};
 		},
-		${argc});'''
-		TemplateArgDeclare = '''
+		${argc});"""
+        TemplateArgDeclare = """
 #ifdef DEBUG_METHODS_ENABLED
 			ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, ${type}, argv[${index}]), (JS_ThrowTypeError(ctx, "${type_name} expected for argument ${index} of ${class}.${name}")));
 #endif
 			const ${godot_type} &arg${index} = ${arg};
-'''
-		TemplateReturnValue = '${godot_type} ret = '
-		bindings = ''
-		for m in cls['methods']:
-			args = ''
-			arg_declares = ''
-			for i in range(len(m['arguments'])):
-				arg = m['arguments'][i]
-				arg_type = arg['type']
-				arg_declares += apply_pattern(TemplateArgDeclare, {
-					'index': str(i),
-					'type': VariantTypes[arg_type],
-					'type_name': arg_type,
-					'class': class_name,
-					'name': m['name'],
-					'arg': apply_pattern(JSToGodotTemplates[arg_type], {'arg': 'argv[' + str(i) +']'}),
-					'godot_type': GodotTypeNames[arg_type],
-				})
-				if i > 0: args += ', '
-				args += 'arg' + str(i)
-			CallTemplate = ('' if m['return'] == 'void' else (apply_pattern(TemplateReturnValue, {"godot_type": GodotTypeNames[m['return']]}))) + 'ptr->${native_method}(${args});'
-			call = apply_pattern(CallTemplate, {'native_method': m['native_method'], 'args': args})
-			bindings += apply_pattern(TemplateMethod, {
-				"class": class_name,
-				"type": VariantTypes[class_name],
-				"name": m['name'],
-				"call": call,
-				"arg_declares": arg_declares,
-				"argc": str(len(m['arguments'])),
-				"return": 'JS_UNDEFINED' if m['return'] == 'void' else apply_pattern(GodotToJSTemplates[m['return']], {'arg': 'ret'}),
-			})
-		return bindings
-		
-	def generate_constants(cls):
-		ConstTemplate = '\tbinder->get_builtin_binder().register_constant(${type}, "${name}", ${value});\n'
-		bindings = ''
-		for c in cls['constants']:
-			bindings += apply_pattern(ConstTemplate, {
-				"name": c['name'],
-				"type": VariantTypes[class_name],
-				"value": c['value']
-			})
-		return bindings
-	
-	def genertate_operators(cls):
-		OperatorMap = {
-			'operator+': '+',
-			'operator-': '-',
-			'operator*': '*',
-			'operator/': '/',
-			'operator==': '==',
-			'operator<': '<'
-		}
-		TargetDeclareTemplate = '''
+"""
+        TemplateReturnValue = "${godot_type} ret = "
+        bindings = ""
+        for m in cls["methods"]:
+            args = ""
+            arg_declares = ""
+            for i in range(len(m["arguments"])):
+                arg = m["arguments"][i]
+                arg_type = arg["type"]
+                arg_declares += apply_pattern(
+                    TemplateArgDeclare,
+                    {
+                        "index": str(i),
+                        "type": VariantTypes[arg_type],
+                        "type_name": arg_type,
+                        "class": class_name,
+                        "name": m["name"],
+                        "arg": apply_pattern(JSToGodotTemplates[arg_type], {"arg": "argv[" + str(i) + "]"}),
+                        "godot_type": GodotTypeNames[arg_type],
+                    },
+                )
+                if i > 0:
+                    args += ", "
+                args += "arg" + str(i)
+            CallTemplate = (
+                ""
+                if m["return"] == "void"
+                else (apply_pattern(TemplateReturnValue, {"godot_type": GodotTypeNames[m["return"]]}))
+            ) + "ptr->${native_method}(${args});"
+            call = apply_pattern(CallTemplate, {"native_method": m["native_method"], "args": args})
+            bindings += apply_pattern(
+                TemplateMethod,
+                {
+                    "class": class_name,
+                    "type": VariantTypes[class_name],
+                    "name": m["name"],
+                    "call": call,
+                    "arg_declares": arg_declares,
+                    "argc": str(len(m["arguments"])),
+                    "return": (
+                        "JS_UNDEFINED"
+                        if m["return"] == "void"
+                        else apply_pattern(GodotToJSTemplates[m["return"]], {"arg": "ret"})
+                    ),
+                },
+            )
+        return bindings
+
+    def generate_constants(cls):
+        ConstTemplate = '\tbinder->get_builtin_binder().register_constant(${type}, "${name}", ${value});\n'
+        bindings = ""
+        for c in cls["constants"]:
+            bindings += apply_pattern(
+                ConstTemplate, {"name": c["name"], "type": VariantTypes[class_name], "value": c["value"]}
+            )
+        return bindings
+
+    def genertate_operators(cls):
+        OperatorMap = {
+            "operator+": "+",
+            "operator-": "-",
+            "operator*": "*",
+            "operator/": "/",
+            "operator==": "==",
+            "operator<": "<",
+        }
+        TargetDeclareTemplate = """
 #ifdef DEBUG_METHODS_ENABLED
 			ERR_FAIL_COND_V(!QuickJSBinder::validate_type(ctx, ${type}, argv[1]), (JS_ThrowTypeError(ctx, "${target_class} expected for ${class}.${operator}")));
 #endif
 			ECMAScriptGCHandler *bind1 = BINDING_DATA_FROM_JS(ctx, argv[1]);
 			${target_class} *target = bind1->get${target_class}();\
-'''
-		OperatorTemplate = '''
+"""
+        OperatorTemplate = """
 	JS_SetPropertyStr(octx, base_operators, "${js_op}",
 		JS_NewCFunction(octx, [](JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
 			ECMAScriptGCHandler *bind = BINDING_DATA_FROM_JS(ctx, argv[0]);
@@ -591,52 +633,69 @@ ${target_declare}
 		"${name}",
 		${argc})
 	);
-	'''
-		TemplateReturnValue = '${godot_type} ret = '
-		bindings = '''\
+	"""
+        TemplateReturnValue = "${godot_type} ret = "
+        bindings = """\
 	Vector<JSValue> operators;
 	JSValue base_operators = JS_NewObject(octx);
-'''
-		for o in cls['operators']:
-			op = o['native_method']
-			if op in OperatorMap:
-				argc = len(o['arguments']) + 1
-				js_op = OperatorMap[op]
-				if argc <= 1:
-					if op in ['operator-']:
-						js_op = 'neg'
-					
-				args = ''
-				target_declare = ''
-				if argc > 1:
-					arg_class = o['arguments'][0]['type']
-					target_declare = apply_pattern(TargetDeclareTemplate, {
-						'target_class': arg_class,
-						'type': VariantTypes[arg_class],
-						'class': class_name,
-						'operator': o['native_method'],
-					})
-					args = '*target'
-				CallTemplate = ('' if o['return'] == 'void' else apply_pattern(TemplateReturnValue, {'godot_type': GodotTypeNames[o['return']] })) + 'ptr->${op}(${args});'
-				call = apply_pattern(CallTemplate, {'op': op, 'args': args})
-				bindings += apply_pattern(OperatorTemplate, {
-					'type': VariantTypes[class_name],
-					'class': class_name,
-					'js_op': js_op,
-					'call': call,
-					'name': o['name'],
-					'target_declare': target_declare,
-					"return": 'JS_UNDEFINED' if o['return'] == 'void' else apply_pattern(GodotToJSTemplates[o['return']], {'arg': 'ret'}),
-					'argc': str(argc)
-				})
-		bindings += apply_pattern('''
+"""
+        for o in cls["operators"]:
+            op = o["native_method"]
+            if op in OperatorMap:
+                argc = len(o["arguments"]) + 1
+                js_op = OperatorMap[op]
+                if argc <= 1:
+                    if op in ["operator-"]:
+                        js_op = "neg"
+
+                args = ""
+                target_declare = ""
+                if argc > 1:
+                    arg_class = o["arguments"][0]["type"]
+                    target_declare = apply_pattern(
+                        TargetDeclareTemplate,
+                        {
+                            "target_class": arg_class,
+                            "type": VariantTypes[arg_class],
+                            "class": class_name,
+                            "operator": o["native_method"],
+                        },
+                    )
+                    args = "*target"
+                CallTemplate = (
+                    ""
+                    if o["return"] == "void"
+                    else apply_pattern(TemplateReturnValue, {"godot_type": GodotTypeNames[o["return"]]})
+                ) + "ptr->${op}(${args});"
+                call = apply_pattern(CallTemplate, {"op": op, "args": args})
+                bindings += apply_pattern(
+                    OperatorTemplate,
+                    {
+                        "type": VariantTypes[class_name],
+                        "class": class_name,
+                        "js_op": js_op,
+                        "call": call,
+                        "name": o["name"],
+                        "target_declare": target_declare,
+                        "return": (
+                            "JS_UNDEFINED"
+                            if o["return"] == "void"
+                            else apply_pattern(GodotToJSTemplates[o["return"]], {"arg": "ret"})
+                        ),
+                        "argc": str(argc),
+                    },
+                )
+        bindings += apply_pattern(
+            """
 	operators.push_back(base_operators);
 	binder->get_builtin_binder().get_cross_type_operators(${type}, operators);
 	binder->get_builtin_binder().register_operators(${type}, operators);
-''', {'type': VariantTypes[class_name]})
-		return bindings
-	
-	TemplateBindDefine = '''
+""",
+            {"type": VariantTypes[class_name]},
+        )
+        return bindings
+
+    TemplateBindDefine = """
 static void bind_${class}_properties(JSContext *octx) {
 	QuickJSBinder *binder = QuickJSBinder::get_context_binder(octx);
 ${members}
@@ -644,33 +703,38 @@ ${operators}
 ${constants}
 ${methods}
 }
-'''
-	class_name = cls['name']
-	property_declare = apply_pattern(TemplateDeclar, {"class": class_name})
-	property_defines = apply_pattern(TemplateBindDefine, {
-		"class": class_name,
-		"members": generate_members(cls) if len(cls['properties']) else '',
-		"methods": generate_methods(cls),
-		"constants": generate_constants(cls),
-		"operators": genertate_operators(cls),
-	})
-	property_bind = apply_pattern(TemplateBind, {"class": class_name})
-	return property_declare, property_defines, property_bind
+"""
+    class_name = cls["name"]
+    property_declare = apply_pattern(TemplateDeclar, {"class": class_name})
+    property_defines = apply_pattern(
+        TemplateBindDefine,
+        {
+            "class": class_name,
+            "members": generate_members(cls) if len(cls["properties"]) else "",
+            "methods": generate_methods(cls),
+            "constants": generate_constants(cls),
+            "operators": genertate_operators(cls),
+        },
+    )
+    property_bind = apply_pattern(TemplateBind, {"class": class_name})
+    return property_declare, property_defines, property_bind
 
 
 def generate_class_bind_action(cls, constructor):
-	Template = '\tregister_builtin_class(${type}, "${class}", ${constructor}, ${argc});\n'
-	return apply_pattern(Template, {
-		'class': cls['name'],
-		'constructor': constructor,
-		'type': VariantTypes[cls['name']],
-		'argc': str(cls['constructor_argc'])
-	})
-
+    Template = '\tregister_builtin_class(${type}, "${class}", ${constructor}, ${argc});\n'
+    return apply_pattern(
+        Template,
+        {
+            "class": cls["name"],
+            "constructor": constructor,
+            "type": VariantTypes[cls["name"]],
+            "argc": str(cls["constructor_argc"]),
+        },
+    )
 
 
 def generate_builtin_bindings():
-	Template = '''\
+    Template = """\
 #include "core/variant.h"
 #include "quickjs_binder.h"
 #include "quickjs_builtin_binder.h"
@@ -687,29 +751,33 @@ ${bindings}
 }
 
 ${definitions}
-'''
-	
-	declarations = ''
-	definitions = ''
-	bindings = ''
-	for cls in API:
-		constructor_name, constructor_declare, consturctor = generate_constructor(cls)
-		declarations += constructor_declare
-		definitions += consturctor
-		bindings += generate_class_bind_action(cls, constructor_name)
-		
-		property_declare, property_defines, property_bind= generate_property_bindings(cls)
-		declarations += property_declare
-		definitions += property_defines
-		bindings += property_bind
-	
-	output = apply_pattern(Template, {
-		'declarations': declarations,
-		'bindings': bindings,
-		'definitions': definitions,
-	})
-	file = open(OUTPUT_FILE, 'w')
-	file.write(output)
+"""
+
+    declarations = ""
+    definitions = ""
+    bindings = ""
+    for cls in API:
+        constructor_name, constructor_declare, consturctor = generate_constructor(cls)
+        declarations += constructor_declare
+        definitions += consturctor
+        bindings += generate_class_bind_action(cls, constructor_name)
+
+        property_declare, property_defines, property_bind = generate_property_bindings(cls)
+        declarations += property_declare
+        definitions += property_defines
+        bindings += property_bind
+
+    output = apply_pattern(
+        Template,
+        {
+            "declarations": declarations,
+            "bindings": bindings,
+            "definitions": definitions,
+        },
+    )
+    file = open(OUTPUT_FILE, "w")
+    file.write(output)
+
 
 if __name__ == "__main__":
-	generate_builtin_bindings()
+    generate_builtin_bindings()

@@ -641,7 +641,7 @@ if selected_platform in platform_list:
 
 if env["tools"]:
     SConscript("tests/runtime/SCsub")
-    
+
     SConscript("platform/" + selected_platform + "/SCsub")  # build selected platform
 
     # Microsoft Visual Studio Project Generation
