@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #define PARTICLES_MATERIAL_H
 
 class ParticlesMaterial : public Material {
-
 	GDCLASS(ParticlesMaterial, Material);
 
 public:
@@ -74,7 +73,6 @@ public:
 
 private:
 	union MaterialKey {
-
 		struct {
 			uint32_t texture_mask : 16;
 			uint32_t texture_color : 1;
@@ -103,7 +101,6 @@ private:
 	MaterialKey current_key;
 
 	_FORCE_INLINE_ MaterialKey _compute_key() const {
-
 		MaterialKey mk;
 		mk.key = 0;
 		for (int i = 0; i < PARAM_MAX; i++) {

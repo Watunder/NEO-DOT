@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -61,7 +61,6 @@ static void _compress_pvrtc4(Image *p_img) {
 		PoolVector<uint8_t>::Read r = img->get_data().read();
 
 		for (int i = 0; i <= new_img->get_mipmap_count(); i++) {
-
 			int ofs, size, w, h;
 			img->get_mipmap_offset_size_and_dimensions(i, ofs, size, w, h);
 			Javelin::RgbaBitmap bm(w, h);

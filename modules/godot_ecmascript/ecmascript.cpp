@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  ecmascript.cpp                                                       */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "ecmascript.h"
 #include "core/engine.h"
 #include "core/io/file_access_encrypted.h"
@@ -16,7 +46,6 @@ ECMAScript::~ECMAScript() {
 }
 
 bool ECMAScript::can_instance() const {
-
 #ifdef TOOLS_ENABLED
 	return is_valid() && (is_tool() || ScriptServer::is_scripting_enabled());
 #else
@@ -33,7 +62,6 @@ StringName ECMAScript::get_instance_base_type() const {
 }
 
 ScriptInstance *ECMAScript::instance_create(Object *p_this) {
-
 	ECMAScriptBinder *binder = ECMAScriptLanguage::get_thread_binder(Thread::get_caller_id());
 	ERR_FAIL_NULL_V_MSG(binder, NULL, "Cannot create instance from this thread");
 
@@ -165,7 +193,8 @@ void ECMAScript::_placeholder_erased(PlaceHolderScriptInstance *p_placeholder) {
 #endif
 
 bool ECMAScript::has_method(const StringName &p_method) const {
-	if (!ecma_class) return false;
+	if (!ecma_class)
+		return false;
 	return ecma_class->methods.getptr(p_method) != NULL;
 }
 
@@ -179,12 +208,14 @@ MethodInfo ECMAScript::get_method_info(const StringName &p_method) const {
 }
 
 bool ECMAScript::is_tool() const {
-	if (!ecma_class) return false;
+	if (!ecma_class)
+		return false;
 	return ecma_class->tool;
 }
 
 void ECMAScript::get_script_method_list(List<MethodInfo> *p_list) const {
-	if (!ecma_class) return;
+	if (!ecma_class)
+		return;
 	const StringName *key = ecma_class->methods.next(NULL);
 	while (key) {
 		p_list->push_back(ecma_class->methods.get(*key));
@@ -193,7 +224,8 @@ void ECMAScript::get_script_method_list(List<MethodInfo> *p_list) const {
 }
 
 void ECMAScript::get_script_property_list(List<PropertyInfo> *p_list) const {
-	if (!ecma_class) return;
+	if (!ecma_class)
+		return;
 	for (const StringName *name = ecma_class->properties.next(NULL); name; name = ecma_class->properties.next(name)) {
 		const ECMAProperyInfo &pi = ecma_class->properties.get(*name);
 		p_list->push_back(pi);
@@ -213,9 +245,9 @@ bool ECMAScript::get_property_default_value(const StringName &p_property, Varian
 }
 
 void ECMAScript::update_exports() {
-
 #ifdef TOOLS_ENABLED
-	if (!ecma_class) return;
+	if (!ecma_class)
+		return;
 
 	List<PropertyInfo> props;
 	Map<StringName, Variant> values;
@@ -232,12 +264,14 @@ void ECMAScript::update_exports() {
 }
 
 bool ECMAScript::has_script_signal(const StringName &p_signal) const {
-	if (!ecma_class) return false;
+	if (!ecma_class)
+		return false;
 	return ecma_class->signals.has(p_signal);
 }
 
 void ECMAScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
-	if (!ecma_class) return;
+	if (!ecma_class)
+		return;
 	for (const StringName *name = ecma_class->signals.next(NULL); name; name = ecma_class->signals.next(name)) {
 		r_signals->push_back(ecma_class->signals.get(*name));
 	}
@@ -294,7 +328,8 @@ bool ResourceFormatLoaderECMAScript::handles_type(const String &p_type) const {
 
 String ResourceFormatLoaderECMAScript::get_resource_type(const String &p_path) const {
 	String el = p_path.get_extension().to_lower();
-	if (el == EXT_JSCLASS || el == EXT_JSCLASS_BYTECODE || el == EXT_JSCLASS_ENCRYPTED) return ECMAScript::get_class_static();
+	if (el == EXT_JSCLASS || el == EXT_JSCLASS_BYTECODE || el == EXT_JSCLASS_ENCRYPTED)
+		return ECMAScript::get_class_static();
 	return "";
 }
 
@@ -438,7 +473,8 @@ bool ResourceFormatLoaderECMAScriptModule::handles_type(const String &p_type) co
 
 String ResourceFormatLoaderECMAScriptModule::get_resource_type(const String &p_path) const {
 	String el = p_path.get_extension().to_lower();
-	if (el == EXT_JSMODULE || el == EXT_JSMODULE_BYTECODE || el == EXT_JSMODULE_ENCRYPTED) return ECMAScriptModule::get_class_static();
+	if (el == EXT_JSMODULE || el == EXT_JSMODULE_BYTECODE || el == EXT_JSMODULE_ENCRYPTED)
+		return ECMAScriptModule::get_class_static();
 	return "";
 }
 

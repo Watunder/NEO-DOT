@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,7 +36,6 @@ PacketPeerDTLS *(*PacketPeerDTLS::_create)() = NULL;
 bool PacketPeerDTLS::available = false;
 
 PacketPeerDTLS *PacketPeerDTLS::create() {
-
 	if (_create) {
 		return _create();
 	}
@@ -48,7 +47,6 @@ bool PacketPeerDTLS::is_available() {
 }
 
 void PacketPeerDTLS::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("poll"), &PacketPeerDTLS::poll);
 	ClassDB::bind_method(D_METHOD("connect_to_peer", "packet_peer", "validate_certs", "for_hostname", "valid_certificate"), &PacketPeerDTLS::connect_to_peer, DEFVAL(true), DEFVAL(String()), DEFVAL(Ref<X509Certificate>()));
 	ClassDB::bind_method(D_METHOD("get_status"), &PacketPeerDTLS::get_status);

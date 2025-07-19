@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #include "constraint_2d_sw.h"
 
 class Joint2DSW : public Constraint2DSW {
-
 	real_t max_force;
 	real_t bias;
 	real_t max_bias;
@@ -59,7 +58,6 @@ public:
 };
 
 class PinJoint2DSW : public Joint2DSW {
-
 	union {
 		struct {
 			Body2DSW *A;
@@ -91,7 +89,6 @@ public:
 };
 
 class GrooveJoint2DSW : public Joint2DSW {
-
 	union {
 		struct {
 			Body2DSW *A;
@@ -126,7 +123,6 @@ public:
 };
 
 class DampedSpringJoint2DSW : public Joint2DSW {
-
 	union {
 		struct {
 			Body2DSW *A;

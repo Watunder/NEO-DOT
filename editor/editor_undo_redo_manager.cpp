@@ -1,12 +1,12 @@
 /*************************************************************************/
-/*  editor_undo_redo_manager.cpp                                            */
+/*  editor_undo_redo_manager.cpp                                         */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,13 +30,13 @@
 
 #include "editor_undo_redo_manager.h"
 
-#include "core/resource.h"
-#include "core/os/os.h"
 #include "core/local_vector.h"
+#include "core/os/os.h"
+#include "core/resource.h"
 #include "editor/editor_log.h"
 #include "editor/editor_node.h"
-#include "scene/main/node.h"
 #include "editor/script_editor_debugger.h"
+#include "scene/main/node.h"
 
 EditorUndoRedoManager::History &EditorUndoRedoManager::get_or_create_history(int p_idx) {
 	if (!history_map.has(p_idx)) {
@@ -193,7 +193,6 @@ Variant EditorUndoRedoManager::_add_do_method(const Variant **p_args, int p_argc
 	Variant v[VARIANT_ARG_MAX];
 
 	for (int i = 0; i < MIN(VARIANT_ARG_MAX, p_argcount - 2); ++i) {
-
 		v[i] = *p_args[i + 2];
 	}
 
@@ -230,7 +229,6 @@ Variant EditorUndoRedoManager::_add_undo_method(const Variant **p_args, int p_ar
 	Variant v[VARIANT_ARG_MAX];
 
 	for (int i = 0; i < MIN(VARIANT_ARG_MAX, p_argcount - 2); ++i) {
-
 		v[i] = *p_args[i + 2];
 	}
 
@@ -369,10 +367,10 @@ bool EditorUndoRedoManager::is_history_unsaved(int p_id) {
 }
 
 bool EditorUndoRedoManager::has_undo() {
-    const int *K = NULL;
+	const int *K = NULL;
 
 	bool result = false;
-    while ((K = history_map.next(K))) {
+	while ((K = history_map.next(K))) {
 		if ((*K == GLOBAL_HISTORY || *K == EditorNode::get_editor_data().get_current_edited_scene_history_id()) && !history_map[*K].undo_stack.empty()) {
 			result = true;
 			break;
@@ -382,10 +380,10 @@ bool EditorUndoRedoManager::has_undo() {
 }
 
 bool EditorUndoRedoManager::has_redo() {
-    const int *K = NULL;
+	const int *K = NULL;
 
 	bool result = false;
-    while ((K = history_map.next(K))) {
+	while ((K = history_map.next(K))) {
 		if ((*K == GLOBAL_HISTORY || *K == EditorNode::get_editor_data().get_current_edited_scene_history_id()) && !history_map[*K].redo_stack.empty()) {
 			result = true;
 			break;
@@ -403,11 +401,11 @@ void EditorUndoRedoManager::clear_history(bool p_increase_version, int p_idx) {
 		return;
 	}
 
-    const int *K = NULL;
-    while ((K = history_map.next(K))) {
-        history_map[*K].undo_redo->clear_history(p_increase_version);
+	const int *K = NULL;
+	while ((K = history_map.next(K))) {
+		history_map[*K].undo_redo->clear_history(p_increase_version);
 		set_history_as_saved(*K);
-    }
+	}
 }
 
 String EditorUndoRedoManager::get_current_action_name() {
@@ -488,8 +486,8 @@ void EditorUndoRedoManager::_bind_methods() {
 }
 
 EditorUndoRedoManager::~EditorUndoRedoManager() {
-    const int *K = NULL;
-    while ((K = history_map.next(K))) {
+	const int *K = NULL;
+	while ((K = history_map.next(K))) {
 		discard_history(*K, false);
 	}
 }

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -71,17 +71,14 @@ HGLRC ContextGL_Windows::get_hglrc() {
 }
 
 int ContextGL_Windows::get_window_width() {
-
 	return OS::get_singleton()->get_video_mode().width;
 }
 
 int ContextGL_Windows::get_window_height() {
-
 	return OS::get_singleton()->get_video_mode().height;
 }
 
 bool ContextGL_Windows::should_vsync_via_compositor() {
-
 	if (OS::get_singleton()->is_window_fullscreen() || !OS::get_singleton()->is_vsync_via_compositor_enabled()) {
 		return false;
 	}
@@ -98,7 +95,6 @@ bool ContextGL_Windows::should_vsync_via_compositor() {
 }
 
 void ContextGL_Windows::swap_buffers() {
-
 	if (eglSwapBuffers(mEglDisplay, mEglSurface) != EGL_TRUE) {
 		cleanup();
 
@@ -133,7 +129,6 @@ void ContextGL_Windows::set_use_vsync(bool p_use) {
 }
 
 bool ContextGL_Windows::is_using_vsync() const {
-
 	return use_vsync;
 }
 
@@ -194,7 +189,6 @@ EGLDisplay get_egl_display(EGLint platform_type) {
 }
 
 Error ContextGL_Windows::initialize() {
-
 	EGLint configAttribList[] = {
 		EGL_RED_SIZE, 8,
 		EGL_GREEN_SIZE, 8,
@@ -225,7 +219,6 @@ Error ContextGL_Windows::initialize() {
 	contextAttribs[2] = EGL_NONE;
 
 	try {
-
 		int platform_type = EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE;
 
 		List<String> args = OS::get_singleton()->get_cmdline_args();
@@ -321,7 +314,6 @@ Error ContextGL_Windows::initialize() {
 }
 
 ContextGL_Windows::ContextGL_Windows(HWND hwnd, bool p_opengl_3_context) {
-
 	opengl_3_context = p_opengl_3_context;
 	hWnd = hwnd;
 	use_vsync = false;

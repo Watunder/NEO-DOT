@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,7 +42,6 @@ public:
 	};
 
 	struct Viewport : public RID_Data {
-
 		RID self;
 		RID parent;
 
@@ -78,7 +77,6 @@ public:
 		bool transparent_bg;
 
 		struct CanvasKey {
-
 			int64_t stacking;
 			RID canvas;
 			bool operator<(const CanvasKey &p_canvas) const {
@@ -98,7 +96,6 @@ public:
 		};
 
 		struct CanvasData {
-
 			CanvasBase *canvas;
 			Transform2D transform;
 			int layer;
@@ -131,12 +128,10 @@ public:
 
 	struct ViewportSort {
 		_FORCE_INLINE_ bool operator()(const Viewport *p_left, const Viewport *p_right) const {
-
 			bool left_to_screen = p_left->viewport_to_screen_rect.size != Size2();
 			bool right_to_screen = p_right->viewport_to_screen_rect.size != Size2();
 
 			if (left_to_screen == right_to_screen) {
-
 				return p_left->parent == p_right->self;
 			}
 			return right_to_screen;

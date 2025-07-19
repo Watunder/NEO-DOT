@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -52,7 +52,6 @@ public:
 	};
 
 	struct Input {
-
 		String name;
 	};
 
@@ -63,7 +62,6 @@ public:
 	friend class AnimationTree;
 
 	struct AnimationState {
-
 		Ref<Animation> animation;
 		float time;
 		float delta;
@@ -73,7 +71,6 @@ public:
 	};
 
 	struct State {
-
 		int track_count;
 		HashMap<NodePath, int> track_map;
 		List<AnimationState> animation_states;
@@ -174,7 +171,6 @@ public:
 
 private:
 	struct TrackCache {
-
 		bool root_motion;
 		uint64_t setup_pass;
 		uint64_t process_pass;
@@ -210,19 +206,16 @@ private:
 	};
 
 	struct TrackCacheValue : public TrackCache {
-
 		Variant value;
 		Vector<StringName> subpath;
 		TrackCacheValue() { type = Animation::TYPE_VALUE; }
 	};
 
 	struct TrackCacheMethod : public TrackCache {
-
 		TrackCacheMethod() { type = Animation::TYPE_METHOD; }
 	};
 
 	struct TrackCacheBezier : public TrackCache {
-
 		float value;
 		Vector<StringName> subpath;
 		TrackCacheBezier() {
@@ -232,7 +225,6 @@ private:
 	};
 
 	struct TrackCacheAudio : public TrackCache {
-
 		bool playing;
 		float start;
 		float len;
@@ -246,7 +238,6 @@ private:
 	};
 
 	struct TrackCacheAnimation : public TrackCache {
-
 		bool playing;
 
 		TrackCacheAnimation() {
@@ -286,7 +277,7 @@ private:
 	void _tree_changed();
 	void _update_properties();
 	List<PropertyInfo> properties;
-	HashMap<StringName, HashMap<StringName, StringName> > property_parent_map;
+	HashMap<StringName, HashMap<StringName, StringName>> property_parent_map;
 	HashMap<StringName, Variant> property_map;
 
 	struct Activity {
@@ -294,7 +285,7 @@ private:
 		float activity;
 	};
 
-	HashMap<StringName, Vector<Activity> > input_activity_map;
+	HashMap<StringName, Vector<Activity>> input_activity_map;
 	HashMap<StringName, Vector<Activity> *> input_activity_map_get;
 
 	void _update_properties_for_node(const String &p_base_path, Ref<AnimationNode> node);

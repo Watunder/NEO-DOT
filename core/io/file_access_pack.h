@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -51,7 +51,6 @@ class PackedData {
 
 public:
 	struct PackedFile {
-
 		String pack;
 		uint64_t offset; //if offset is ZERO, the file was ERASED
 		uint64_t size;
@@ -71,7 +70,6 @@ private:
 		uint64_t a;
 		uint64_t b;
 		bool operator<(const PathMD5 &p_md5) const {
-
 			if (p_md5.a == a) {
 				return b < p_md5.b;
 			} else {
@@ -126,7 +124,6 @@ public:
 };
 
 class PackSource {
-
 public:
 	virtual bool try_open_pack(const String &p_path, bool p_replace_files, size_t p_offset) = 0;
 	virtual FileAccess *get_file(const String &p_path, PackedData::PackedFile *p_file) = 0;
@@ -134,14 +131,12 @@ public:
 };
 
 class PackedSourcePCK : public PackSource {
-
 public:
 	virtual bool try_open_pack(const String &p_path, bool p_replace_files, size_t p_offset);
 	virtual FileAccess *get_file(const String &p_path, PackedData::PackedFile *p_file);
 };
 
 class FileAccessPack : public FileAccess {
-
 	PackedData::PackedFile pf;
 
 	mutable size_t pos;
@@ -184,7 +179,6 @@ public:
 };
 
 FileAccess *PackedData::try_open_path(const String &p_path) {
-
 	PathMD5 pmd5(p_path.md5_buffer());
 	Map<PathMD5, PackedFile>::Element *E = files.find(pmd5);
 	if (!E)
@@ -196,12 +190,10 @@ FileAccess *PackedData::try_open_path(const String &p_path) {
 }
 
 bool PackedData::has_path(const String &p_path) {
-
 	return files.has(PathMD5(p_path.md5_buffer()));
 }
 
 bool PackedData::has_directory(const String &p_path) {
-
 	DirAccess *da = try_open_directory(p_path);
 	if (da) {
 		memdelete(da);
@@ -212,7 +204,6 @@ bool PackedData::has_directory(const String &p_path) {
 }
 
 class DirAccessPack : public DirAccess {
-
 	PackedData::PackedDir *current;
 
 	List<String> list_dirs;
@@ -251,7 +242,6 @@ public:
 };
 
 DirAccess *PackedData::try_open_directory(const String &p_path) {
-
 	DirAccess *da = memnew(DirAccessPack());
 	if (da->change_dir(p_path) != OK) {
 		memdelete(da);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -147,7 +147,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const ElementPtr element, const std::str
 	const ElementCollection &Layer = sc->GetCollection("Layer");
 
 	// Store all layers
-	std::vector<std::tuple<int, std::string> > valid_layers;
+	std::vector<std::tuple<int, std::string>> valid_layers;
 
 	// now read the sub mesh information from the geometry (normals, uvs, etc)
 	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
@@ -363,7 +363,6 @@ MeshGeometry::MappingData<T> MeshGeometry::resolve_vertex_data_array(
 		const std::string &ReferenceInformationType,
 		const std::string &dataElementName,
 		const std::string &indexOverride) {
-
 	ERR_FAIL_COND_V_MSG(source == nullptr, MappingData<T>(), "Invalid scope operator preventing memory corruption");
 
 	// UVIndex, MaterialIndex, NormalIndex, etc..

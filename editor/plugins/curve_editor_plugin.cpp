@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -65,7 +65,6 @@ CurveEditor::CurveEditor() {
 }
 
 void CurveEditor::set_curve(Ref<Curve> curve) {
-
 	if (curve == _curve_ref)
 		return;
 
@@ -101,14 +100,11 @@ void CurveEditor::_notification(int p_what) {
 }
 
 void CurveEditor::on_gui_input(const Ref<InputEvent> &p_event) {
-
 	Ref<InputEventMouseButton> mb_ref = p_event;
 	if (mb_ref.is_valid()) {
-
 		const InputEventMouseButton &mb = **mb_ref;
 
 		if (mb.is_pressed() && !_dragging) {
-
 			Vector2 mpos = mb.get_position();
 
 			_selected_tangent = get_tangent_at(mpos);
@@ -134,7 +130,6 @@ void CurveEditor::on_gui_input(const Ref<InputEvent> &p_event) {
 		if (!mb.is_pressed() && _dragging && mb.get_button_index() == BUTTON_LEFT) {
 			_dragging = false;
 			if (_has_undo_data) {
-
 				Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 
 				ur->create_action(_selected_tangent == TANGENT_NONE ? TTR("Modify Curve Point") : TTR("Modify Curve Tangent"));
@@ -151,13 +146,11 @@ void CurveEditor::on_gui_input(const Ref<InputEvent> &p_event) {
 
 	Ref<InputEventMouseMotion> mm_ref = p_event;
 	if (mm_ref.is_valid()) {
-
 		const InputEventMouseMotion &mm = **mm_ref;
 
 		Vector2 mpos = mm.get_position();
 
 		if (_dragging && _curve_ref.is_valid()) {
-
 			if (_selected_point != -1) {
 				Curve &curve = **_curve_ref;
 
@@ -351,9 +344,7 @@ void CurveEditor::open_context_menu(Vector2 pos) {
 
 				_context_menu->add_check_item(TTR("Linear"), CONTEXT_LINEAR);
 
-				bool is_linear = _selected_tangent == TANGENT_LEFT ?
-										   _curve_ref->get_point_left_mode(_selected_point) == Curve::TANGENT_LINEAR :
-										   _curve_ref->get_point_right_mode(_selected_point) == Curve::TANGENT_LINEAR;
+				bool is_linear = _selected_tangent == TANGENT_LEFT ? _curve_ref->get_point_left_mode(_selected_point) == Curve::TANGENT_LINEAR : _curve_ref->get_point_right_mode(_selected_point) == Curve::TANGENT_LINEAR;
 
 				_context_menu->set_item_checked(_context_menu->get_item_index(CONTEXT_LINEAR), is_linear);
 
@@ -474,7 +465,6 @@ void CurveEditor::toggle_linear(TangentIndex tangent) {
 		tangent = _selected_tangent;
 
 	if (tangent == TANGENT_LEFT) {
-
 		bool is_linear = _curve_ref->get_point_left_mode(_selected_point) == Curve::TANGENT_LINEAR;
 
 		Curve::TangentMode prev_mode = _curve_ref->get_point_left_mode(_selected_point);
@@ -484,7 +474,6 @@ void CurveEditor::toggle_linear(TangentIndex tangent) {
 		ur->add_undo_method(*_curve_ref, "set_point_left_mode", _selected_point, prev_mode);
 
 	} else {
-
 		bool is_linear = _curve_ref->get_point_right_mode(_selected_point) == Curve::TANGENT_LINEAR;
 
 		Curve::TangentMode prev_mode = _curve_ref->get_point_right_mode(_selected_point);
@@ -539,7 +528,6 @@ void CurveEditor::update_view_transform() {
 }
 
 Vector2 CurveEditor::get_tangent_view_pos(int i, TangentIndex tangent) const {
-
 	Vector2 dir;
 	if (tangent == TANGENT_LEFT)
 		dir = -Vector2(1, _curve_ref->get_point_left_tangent(i));
@@ -563,7 +551,6 @@ Vector2 CurveEditor::get_world_pos(Vector2 view_pos) const {
 // Uses non-baked points, but takes advantage of ordered iteration to be faster
 template <typename T>
 static void plot_curve_accurate(const Curve &curve, float step, T plot_func) {
-
 	if (curve.get_point_count() <= 1) {
 		// Not enough points to make a curve, so it's just a straight line
 		float y = curve.interpolate(0);
@@ -601,7 +588,6 @@ static void plot_curve_accurate(const Curve &curve, float step, T plot_func) {
 }
 
 struct CanvasItemPlotCurve {
-
 	CanvasItem &ci;
 	Color color1;
 	Color color2;
@@ -686,7 +672,6 @@ void CurveEditor::_draw() {
 	// Draw tangents for current point
 
 	if (_selected_point >= 0) {
-
 		const Color tangent_color = get_color("accent_color", "Editor");
 
 		int i = _selected_point;
@@ -758,12 +743,10 @@ void CurveEditor::_bind_methods() {
 //---------------
 
 bool EditorInspectorPluginCurve::can_handle(Object *p_object) {
-
 	return Object::cast_to<Curve>(p_object) != NULL;
 }
 
 void EditorInspectorPluginCurve::parse_begin(Object *p_object) {
-
 	Curve *curve = Object::cast_to<Curve>(p_object);
 	ERR_FAIL_COND(!curve);
 	Ref<Curve> c(curve);
@@ -789,7 +772,6 @@ bool CurvePreviewGenerator::handles(const String &p_type) const {
 }
 
 Ref<Texture> CurvePreviewGenerator::generate(const Ref<Resource> &p_from, const Size2 &p_size) const {
-
 	Ref<Curve> curve_ref = p_from;
 	ERR_FAIL_COND_V_MSG(curve_ref.is_null(), Ref<Texture>(), "It's not a reference to a valid Resource object.");
 	Curve &curve = **curve_ref;
@@ -817,7 +799,6 @@ Ref<Texture> CurvePreviewGenerator::generate(const Ref<Resource> &p_from, const 
 
 	int prev_y = 0;
 	for (int x = 0; x < im.get_width(); ++x) {
-
 		float t = static_cast<float>(x) / im.get_width();
 		float v = (curve.interpolate_baked(t) - curve.get_min_value()) / range_y;
 		int y = CLAMP(im.get_height() - v * im.get_height(), 0, im.get_height());

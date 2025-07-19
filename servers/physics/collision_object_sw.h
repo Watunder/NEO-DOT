@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -59,7 +59,6 @@ private:
 	uint32_t collision_mask;
 
 	struct Shape {
-
 		Transform xform;
 		Transform xform_inv;
 		BroadPhaseSW::ID bpid;
@@ -92,7 +91,8 @@ protected:
 #endif
 
 		transform = p_transform;
-		if (p_update_shapes) _update_shapes();
+		if (p_update_shapes)
+			_update_shapes();
 	}
 	_FORCE_INLINE_ void _set_inv_transform(const Transform &p_transform) { inv_transform = p_transform; }
 	void _set_static(bool p_static);

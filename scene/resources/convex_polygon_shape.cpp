@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,11 +33,9 @@
 #include "servers/physics_server.h"
 
 Vector<Vector3> ConvexPolygonShape::get_debug_mesh_lines() {
-
 	PoolVector<Vector3> points = get_points();
 
 	if (points.size() > 3) {
-
 		Vector<Vector3> varr = Variant(points);
 		Geometry::MeshData md;
 		Error err = QuickHull::build(varr, md);
@@ -56,25 +54,21 @@ Vector<Vector3> ConvexPolygonShape::get_debug_mesh_lines() {
 }
 
 void ConvexPolygonShape::_update_shape() {
-
 	PhysicsServer::get_singleton()->shape_set_data(get_shape(), points);
 	Shape::_update_shape();
 }
 
 void ConvexPolygonShape::set_points(const PoolVector<Vector3> &p_points) {
-
 	points = p_points;
 	_update_shape();
 	notify_change_to_owners();
 }
 
 PoolVector<Vector3> ConvexPolygonShape::get_points() const {
-
 	return points;
 }
 
 void ConvexPolygonShape::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_points", "points"), &ConvexPolygonShape::set_points);
 	ClassDB::bind_method(D_METHOD("get_points"), &ConvexPolygonShape::get_points);
 

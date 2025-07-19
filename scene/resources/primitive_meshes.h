@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,7 +42,6 @@
 	This class is set apart that it assumes a single surface is always generated for our mesh.
 */
 class PrimitiveMesh : public Mesh {
-
 	GDCLASS(PrimitiveMesh, Mesh);
 
 private:
@@ -130,7 +129,6 @@ public:
 	Similar to test cube but with subdivision support and different texture coordinates
 */
 class CubeMesh : public PrimitiveMesh {
-
 	GDCLASS(CubeMesh, PrimitiveMesh);
 
 private:
@@ -164,7 +162,6 @@ public:
 */
 
 class CylinderMesh : public PrimitiveMesh {
-
 	GDCLASS(CylinderMesh, PrimitiveMesh);
 
 private:
@@ -201,7 +198,6 @@ public:
 	Similar to quadmesh but with tessellation support
 */
 class PlaneMesh : public PrimitiveMesh {
-
 	GDCLASS(PlaneMesh, PrimitiveMesh);
 
 private:
@@ -230,7 +226,6 @@ public:
 	A prism shapen, handy for ramps, triangles, etc.
 */
 class PrismMesh : public PrimitiveMesh {
-
 	GDCLASS(PrismMesh, PrimitiveMesh);
 
 private:
@@ -268,7 +263,6 @@ public:
 */
 
 class QuadMesh : public PrimitiveMesh {
-
 	GDCLASS(QuadMesh, PrimitiveMesh);
 
 private:
@@ -289,7 +283,6 @@ public:
 	A sphere..
 */
 class SphereMesh : public PrimitiveMesh {
-
 	GDCLASS(SphereMesh, PrimitiveMesh);
 
 private:
@@ -327,7 +320,6 @@ public:
 */
 
 class PointMesh : public PrimitiveMesh {
-
 	GDCLASS(PointMesh, PrimitiveMesh)
 
 protected:

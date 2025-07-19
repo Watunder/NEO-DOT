@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,19 +40,16 @@
 class SceneTree;
 
 class ScriptDebuggerRemote : public ScriptDebugger {
-
 	friend class RuntimeNodeSelector;
 
-	RuntimeNodeSelector* runtime_node_selector;
+	RuntimeNodeSelector *runtime_node_selector;
 
 	struct Message {
-
 		String message;
 		Array data;
 	};
 
 	struct ProfileInfoSort {
-
 		bool operator()(ScriptLanguage::ProfilingInfo *A, ScriptLanguage::ProfilingInfo *B) const {
 			return A->total_time < B->total_time;
 		}
@@ -82,7 +79,6 @@ class ScriptDebuggerRemote : public ScriptDebugger {
 	Mutex mutex;
 
 	struct OutputError {
-
 		int hr;
 		int min;
 		int sec;
@@ -148,7 +144,6 @@ class ScriptDebuggerRemote : public ScriptDebugger {
 	void _send_network_bandwidth_usage();
 
 	struct FrameData {
-
 		StringName name;
 		Array data;
 	};
@@ -168,7 +163,6 @@ public:
 	};
 
 	struct ResourceUsage {
-
 		String path;
 		String format;
 		String type;
@@ -239,6 +233,7 @@ class RuntimeNodeSelector : public Object {
 	void _inspect_object(ObjectID p_id);
 
 	void _find_items_at_pos(const Point2 &p_pos, Vector<SelectResult> &r_items);
+
 protected:
 	static void _bind_methods();
 

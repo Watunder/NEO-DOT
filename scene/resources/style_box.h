@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +38,6 @@
 class CanvasItem;
 
 class StyleBox : public Resource {
-
 	GDCLASS(StyleBox, Resource);
 	RES_BASE_EXTENSION("stylebox");
 	OBJ_SAVE_TYPE(StyleBox);
@@ -68,7 +67,6 @@ public:
 };
 
 class StyleBoxEmpty : public StyleBox {
-
 	GDCLASS(StyleBoxEmpty, StyleBox);
 	virtual float get_style_margin(Margin p_margin) const { return 0; }
 
@@ -78,7 +76,6 @@ public:
 };
 
 class StyleBoxTexture : public StyleBox {
-
 	GDCLASS(StyleBoxTexture, StyleBox);
 
 public:
@@ -144,7 +141,6 @@ public:
 VARIANT_ENUM_CAST(StyleBoxTexture::AxisStretchMode)
 
 class StyleBoxFlat : public StyleBox {
-
 	GDCLASS(StyleBoxFlat, StyleBox);
 
 	Color bg_color;
@@ -238,7 +234,6 @@ public:
 
 // just used to draw lines.
 class StyleBoxLine : public StyleBox {
-
 	GDCLASS(StyleBoxLine, StyleBox);
 	Color color;
 	int thickness;

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #include "scene/3d/collision_object.h"
 
 class Area : public CollisionObject {
-
 	GDCLASS(Area, CollisionObject);
 
 public:
@@ -68,7 +67,6 @@ private:
 	void _body_exit_tree(ObjectID p_id);
 
 	struct ShapePair {
-
 		int body_shape;
 		int area_shape;
 		bool operator<(const ShapePair &p_sp) const {
@@ -86,7 +84,6 @@ private:
 	};
 
 	struct BodyState {
-
 		int rc;
 		bool in_tree;
 		VSet<ShapePair> shapes;
@@ -100,7 +97,6 @@ private:
 	void _area_exit_tree(ObjectID p_id);
 
 	struct AreaShapePair {
-
 		int area_shape;
 		int self_shape;
 		bool operator<(const AreaShapePair &p_sp) const {
@@ -118,7 +114,6 @@ private:
 	};
 
 	struct AreaState {
-
 		int rc;
 		bool in_tree;
 		VSet<AreaShapePair> shapes;

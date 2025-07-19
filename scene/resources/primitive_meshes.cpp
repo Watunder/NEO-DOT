@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
   PrimitiveMesh
 */
 void PrimitiveMesh::_update() const {
-
 	Array arr;
 	arr.resize(VS::ARRAY_MAX);
 	_create_mesh_array(arr);
@@ -47,7 +46,6 @@ void PrimitiveMesh::_update() const {
 	int pc = points.size();
 	ERR_FAIL_COND(pc == 0);
 	{
-
 		PoolVector<Vector3>::Read r = points.read();
 		for (int i = 0; i < pc; i++) {
 			if (i == 0)
@@ -61,7 +59,6 @@ void PrimitiveMesh::_update() const {
 		PoolVector<Vector3> normals = arr[VS::ARRAY_NORMAL];
 		PoolVector<int> indices = arr[VS::ARRAY_INDEX];
 		if (normals.size() && indices.size()) {
-
 			{
 				int nc = normals.size();
 				PoolVector<Vector3>::Write w = normals.write();
@@ -95,7 +92,6 @@ void PrimitiveMesh::_update() const {
 }
 
 void PrimitiveMesh::_request_update() {
-
 	if (pending_request)
 		return;
 	_update();
@@ -230,14 +226,12 @@ Array PrimitiveMesh::get_mesh_arrays() const {
 }
 
 void PrimitiveMesh::set_custom_aabb(const AABB &p_custom) {
-
 	custom_aabb = p_custom;
 	VS::get_singleton()->mesh_set_custom_aabb(mesh, custom_aabb);
 	emit_changed();
 }
 
 AABB PrimitiveMesh::get_custom_aabb() const {
-
 	return custom_aabb;
 }
 
@@ -251,7 +245,6 @@ bool PrimitiveMesh::get_flip_faces() const {
 }
 
 PrimitiveMesh::PrimitiveMesh() {
-
 	flip_faces = false;
 	// defaults
 	mesh = VisualServer::get_singleton()->mesh_create();
@@ -1379,7 +1372,6 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 	};
 
 	for (int i = 0; i < 6; i++) {
-
 		int j = indices[i];
 		faces.set(i, quad_faces[j]);
 		normals.set(i, Vector3(0, 0, 1));

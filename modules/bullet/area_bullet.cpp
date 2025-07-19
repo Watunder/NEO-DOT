@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -56,7 +56,6 @@ AreaBullet::AreaBullet() :
 		spOv_angularDump(0.1),
 		spOv_priority(0),
 		isScratched(false) {
-
 	btGhost = bulletnew(btGhostObject);
 	reload_shapes();
 	setupBulletCollisionObject(btGhost);
@@ -102,7 +101,6 @@ void AreaBullet::dispatch_callbacks() {
 }
 
 void AreaBullet::call_event(CollisionObjectBullet *p_otherObject, PhysicsServer::AreaBodyStatus p_status) {
-
 	InOutEventCallback &event = eventsCallbacks[static_cast<int>(p_otherObject->getType())];
 	Object *areaGodoObject = ObjectDB::get_instance(event.event_callback_id);
 

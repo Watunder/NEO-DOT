@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,7 +33,6 @@
 #include <stdio.h>
 
 struct _WinTranslatePair {
-
 	unsigned int keysym;
 	unsigned int keycode;
 };
@@ -239,9 +238,7 @@ VK_OEM_CLEAR (0xFE)
 */
 
 unsigned int KeyMappingWindows::get_keysym(unsigned int p_code) {
-
 	for (int i = 0; _vk_to_keycode[i].keysym != KEY_UNKNOWN; i++) {
-
 		if (_vk_to_keycode[i].keycode == p_code) {
 			//printf("outcode: %x\n",_vk_to_keycode[i].keysym);
 
@@ -254,13 +251,13 @@ unsigned int KeyMappingWindows::get_keysym(unsigned int p_code) {
 
 bool KeyMappingWindows::is_extended_key(unsigned int p_code) {
 	return p_code == VK_INSERT ||
-		   p_code == VK_DELETE ||
-		   p_code == VK_HOME ||
-		   p_code == VK_END ||
-		   p_code == VK_PRIOR ||
-		   p_code == VK_NEXT ||
-		   p_code == VK_LEFT ||
-		   p_code == VK_UP ||
-		   p_code == VK_RIGHT ||
-		   p_code == VK_DOWN;
+			p_code == VK_DELETE ||
+			p_code == VK_HOME ||
+			p_code == VK_END ||
+			p_code == VK_PRIOR ||
+			p_code == VK_NEXT ||
+			p_code == VK_LEFT ||
+			p_code == VK_UP ||
+			p_code == VK_RIGHT ||
+			p_code == VK_DOWN;
 }

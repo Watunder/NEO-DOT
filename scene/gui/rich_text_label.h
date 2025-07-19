@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,6 @@
 #include "scene/gui/scroll_bar.h"
 
 class RichTextLabel : public Control {
-
 	GDCLASS(RichTextLabel, Control);
 
 public:
@@ -84,7 +83,6 @@ private:
 	struct Item;
 
 	struct Line {
-
 		Item *from;
 		Vector<int> offset_caches;
 		Vector<int> height_caches;
@@ -243,12 +241,12 @@ private:
 
 		uint64_t offset_random(int index) {
 			return (_current_rng >> (index % 64)) |
-				   (_current_rng << (64 - (index % 64)));
+					(_current_rng << (64 - (index % 64)));
 		}
 
 		uint64_t offset_previous_random(int index) {
 			return (_previous_rng >> (index % 64)) |
-				   (_previous_rng << (64 - (index % 64)));
+					(_previous_rng << (64 - (index % 64)));
 		}
 	};
 
@@ -330,7 +328,7 @@ private:
 	ItemMeta *meta_hovering;
 	Variant current_meta;
 
-	Vector<Ref<RichTextEffect> > custom_effects;
+	Vector<Ref<RichTextEffect>> custom_effects;
 
 	void _invalidate_current_line(ItemFrame *p_frame);
 	void _validate_line_caches(ItemFrame *p_frame);
@@ -350,7 +348,6 @@ private:
 	};
 
 	struct Selection {
-
 		Item *click;
 		int click_char;
 

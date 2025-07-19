@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +38,6 @@
 static Error fixup_embedded_pck(const String &p_path, int64_t p_embedded_start, int64_t p_embedded_size);
 
 class EditorExportPlatformWindows : public EditorExportPlatformPC {
-
 	void _rcedit_add_data(const Ref<EditorExportPreset> &p_preset, const String &p_path);
 	Error _code_sign(const Ref<EditorExportPreset> &p_preset, const String &p_path);
 
@@ -341,7 +340,6 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 }
 
 void register_windows_exporter() {
-
 	EDITOR_DEF("export/windows/rcedit", "");
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/windows/rcedit", PROPERTY_HINT_GLOBAL_FILE, "*.exe"));
 #ifdef WINDOWS_ENABLED
@@ -376,7 +374,6 @@ void register_windows_exporter() {
 }
 
 static Error fixup_embedded_pck(const String &p_path, int64_t p_embedded_start, int64_t p_embedded_size) {
-
 	// Patch the header of the "pck" section in the PE file so that it corresponds to the embedded data
 
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ_WRITE);
@@ -418,7 +415,6 @@ static Error fixup_embedded_pck(const String &p_path, int64_t p_embedded_start, 
 
 	bool found = false;
 	for (int i = 0; i < num_sections; ++i) {
-
 		int64_t section_header_pos = section_table_pos + i * 40;
 		f->seek(section_header_pos);
 

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -50,7 +50,6 @@ public:
 	};
 
 	struct Node {
-
 		uint16_t plane;
 		uint16_t under;
 		uint16_t over;
@@ -95,7 +94,6 @@ public:
 
 template <class T>
 bool BSP_Tree::_test_convex(const Node *p_nodes, const Plane *p_planes, int p_current, const T &p_convex) const {
-
 	if (p_current == UNDER_LEAF)
 		return true;
 	else if (p_current == OVER_LEAF)
@@ -122,7 +120,6 @@ bool BSP_Tree::_test_convex(const Node *p_nodes, const Plane *p_planes, int p_cu
 
 template <class T>
 bool BSP_Tree::convex_is_inside(const T &p_convex) const {
-
 	int node_count = nodes.size();
 	if (node_count == 0)
 		return false;

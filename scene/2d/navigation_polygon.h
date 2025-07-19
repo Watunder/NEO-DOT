@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "scene/2d/node_2d.h"
 
 class NavigationPolygon : public Resource {
-
 	GDCLASS(NavigationPolygon, Resource);
 
 	PoolVector<Vector2> vertices;
@@ -42,7 +41,7 @@ class NavigationPolygon : public Resource {
 		Vector<int> indices;
 	};
 	Vector<Polygon> polygons;
-	Vector<PoolVector<Vector2> > outlines;
+	Vector<PoolVector<Vector2>> outlines;
 
 	mutable Rect2 item_rect;
 	mutable bool rect_cache_dirty;
@@ -87,7 +86,6 @@ public:
 class Navigation2D;
 
 class NavigationPolygonInstance : public Node2D {
-
 	GDCLASS(NavigationPolygonInstance, Node2D);
 
 	bool enabled;

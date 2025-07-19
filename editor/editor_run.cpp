@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "editor_settings.h"
 
 EditorRun::Status EditorRun::get_status() const {
-
 	return status;
 }
 
@@ -43,7 +42,6 @@ String EditorRun::get_running_scene() const {
 }
 
 Error EditorRun::run(const String &p_scene, const String &p_custom_args, const List<String> &p_breakpoints, const bool &p_skip_breakpoints) {
-
 	List<String> args;
 
 	String resource_path = ProjectSettings::get_singleton()->get_resource_path();
@@ -107,7 +105,6 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	test_size.x = ProjectSettings::get_singleton()->get("display/window/size/test_width");
 	test_size.y = ProjectSettings::get_singleton()->get("display/window/size/test_height");
 	if (test_size.x > 0 && test_size.y > 0) {
-
 		desired_size = test_size;
 	}
 
@@ -161,11 +158,9 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	}
 
 	if (p_breakpoints.size()) {
-
 		args.push_back("--breakpoints");
 		String bpoints;
 		for (const List<String>::Element *E = p_breakpoints.front(); E; E = E->next()) {
-
 			bpoints += E->get().replace(" ", "%20");
 			if (E->next())
 				bpoints += ",";
@@ -193,7 +188,6 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 
 	printf("Running: %ls", exec.c_str());
 	for (List<String>::Element *E = args.front(); E; E = E->next()) {
-
 		printf(" %ls", E->get().c_str());
 	};
 	printf("\n");
@@ -211,9 +205,7 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 }
 
 void EditorRun::stop() {
-
 	if (status != STATUS_STOP && pid != 0) {
-
 		OS::get_singleton()->kill(pid);
 	}
 
@@ -222,27 +214,22 @@ void EditorRun::stop() {
 }
 
 void EditorRun::set_debug_collisions(bool p_debug) {
-
 	debug_collisions = p_debug;
 }
 
 bool EditorRun::get_debug_collisions() const {
-
 	return debug_collisions;
 }
 
 void EditorRun::set_debug_navigation(bool p_debug) {
-
 	debug_navigation = p_debug;
 }
 
 bool EditorRun::get_debug_navigation() const {
-
 	return debug_navigation;
 }
 
 EditorRun::EditorRun() {
-
 	status = STATUS_STOP;
 	running_scene = "";
 	debug_collisions = false;

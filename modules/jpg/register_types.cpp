@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,12 +35,10 @@
 static ImageLoaderJPG *image_loader_jpg = NULL;
 
 void register_jpg_types() {
-
 	image_loader_jpg = memnew(ImageLoaderJPG);
 	ImageLoader::add_image_format_loader(image_loader_jpg);
 }
 
 void unregister_jpg_types() {
-
 	memdelete(image_loader_jpg);
 }

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,41 +31,34 @@
 #include "particles_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "core/io/image_loader.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/2d/cpu_particles_2d.h"
 #include "scene/gui/separator.h"
 #include "scene/resources/particles_material.h"
 
 void Particles2DEditorPlugin::edit(Object *p_object) {
-
 	particles = Object::cast_to<Particles2D>(p_object);
 }
 
 bool Particles2DEditorPlugin::handles(Object *p_object) const {
-
 	return p_object->is_class("Particles2D");
 }
 
 void Particles2DEditorPlugin::make_visible(bool p_visible) {
-
 	if (p_visible) {
-
 		toolbar->show();
 	} else {
-
 		toolbar->hide();
 	}
 }
 
 void Particles2DEditorPlugin::_file_selected(const String &p_file) {
-
 	source_emission_file = p_file;
 	emission_mask->popup_centered_minsize();
 }
 
 void Particles2DEditorPlugin::_menu_callback(int p_idx) {
-
 	switch (p_idx) {
 		case MENU_GENERATE_VISIBILITY_RECT: {
 			float gen_time = particles->get_lifetime();
@@ -76,16 +69,13 @@ void Particles2DEditorPlugin::_menu_callback(int p_idx) {
 			generate_visibility_rect->popup_centered_minsize();
 		} break;
 		case MENU_LOAD_EMISSION_MASK: {
-
 			file->popup_centered_ratio();
 
 		} break;
 		case MENU_CLEAR_EMISSION_MASK: {
-
 			emission_mask->popup_centered_minsize();
 		} break;
 		case MENU_OPTION_CONVERT_TO_CPU_PARTICLES: {
-
 			CPUParticles2D *cpu_particles = memnew(CPUParticles2D);
 			cpu_particles->convert_from_particles(particles);
 			cpu_particles->set_name(particles->get_name());
@@ -104,14 +94,12 @@ void Particles2DEditorPlugin::_menu_callback(int p_idx) {
 
 		} break;
 		case MENU_RESTART: {
-
 			particles->restart();
 		}
 	}
 }
 
 void Particles2DEditorPlugin::_generate_visibility_rect() {
-
 	float time = generate_seconds->get_value();
 
 	float running = 0.0;
@@ -126,7 +114,6 @@ void Particles2DEditorPlugin::_generate_visibility_rect() {
 
 	Rect2 rect;
 	while (running < time) {
-
 		uint64_t ticks = OS::get_singleton()->get_ticks_usec();
 		ep.step("Generating...", int(running), true);
 		OS::get_singleton()->delay_usec(1000);
@@ -151,7 +138,6 @@ void Particles2DEditorPlugin::_generate_visibility_rect() {
 }
 
 void Particles2DEditorPlugin::_generate_emission_mask() {
-
 	Ref<ParticlesMaterial> pm = particles->get_process_material();
 	if (!pm.is_valid()) {
 		EditorNode::get_singleton()->show_warning(TTR("Can only set point into a ParticlesMaterial process material"));
@@ -197,13 +183,10 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 
 		for (int i = 0; i < s.width; i++) {
 			for (int j = 0; j < s.height; j++) {
-
 				uint8_t a = r[(j * s.width + i) * 4 + 3];
 
 				if (a > 128) {
-
 					if (emode == EMISSION_MODE_SOLID) {
-
 						if (capture_colors) {
 							valid_colors.write[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
 							valid_colors.write[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
@@ -213,11 +196,9 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 						valid_positions.write[vpc++] = Point2(i, j);
 
 					} else {
-
 						bool on_border = false;
 						for (int x = i - 1; x <= i + 1; x++) {
 							for (int y = j - 1; y <= j + 1; y++) {
-
 								if (x < 0 || y < 0 || x >= s.width || y >= s.height || r[(y * s.width + x) * 4 + 3] <= 128) {
 									on_border = true;
 									break;
@@ -235,7 +216,6 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 								Vector2 normal;
 								for (int x = i - 2; x <= i + 2; x++) {
 									for (int y = j - 2; y <= j + 2; y++) {
-
 										if (x == i && y == j)
 											continue;
 
@@ -282,7 +262,6 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 		PoolVector<uint8_t>::Write tw = texdata.write();
 		float *twf = (float *)tw.ptr();
 		for (int i = 0; i < vpc; i++) {
-
 			twf[i * 2 + 0] = valid_positions[i].x;
 			twf[i * 2 + 1] = valid_positions[i].y;
 		}
@@ -299,14 +278,12 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 	pm->set_emission_point_count(vpc);
 
 	if (capture_colors) {
-
 		PoolVector<uint8_t> colordata;
 		colordata.resize(w * h * 4); //use RG texture
 
 		{
 			PoolVector<uint8_t>::Write tw = colordata.write();
 			for (int i = 0; i < vpc * 4; i++) {
-
 				tw[i] = valid_colors[i];
 			}
 		}
@@ -347,9 +324,7 @@ void Particles2DEditorPlugin::_generate_emission_mask() {
 }
 
 void Particles2DEditorPlugin::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_ENTER_TREE) {
-
 		menu->get_popup()->connect("id_pressed", this, "_menu_callback");
 		menu->set_icon(menu->get_popup()->get_icon("Particles2D", "EditorIcons"));
 		file->connect("file_selected", this, "_file_selected");
@@ -357,7 +332,6 @@ void Particles2DEditorPlugin::_notification(int p_what) {
 }
 
 void Particles2DEditorPlugin::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("_menu_callback"), &Particles2DEditorPlugin::_menu_callback);
 	ClassDB::bind_method(D_METHOD("_file_selected"), &Particles2DEditorPlugin::_file_selected);
 	ClassDB::bind_method(D_METHOD("_generate_visibility_rect"), &Particles2DEditorPlugin::_generate_visibility_rect);
@@ -365,7 +339,6 @@ void Particles2DEditorPlugin::_bind_methods() {
 }
 
 Particles2DEditorPlugin::Particles2DEditorPlugin(EditorNode *p_node) {
-
 	particles = NULL;
 	editor = p_node;
 	undo_redo = editor->get_undo_redo();

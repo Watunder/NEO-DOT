@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -173,7 +173,8 @@ bool test_add_remove() {
 	for (int i = 0; i < 20000; i++) {
 		int u = Math::rand() % 5;
 		int v = Math::rand() % 4;
-		if (u == v) v = 4;
+		if (u == v)
+			v = 4;
 		if (Math::rand() % 2 == 1) {
 			// Add a (possibly existing) directed edge and confirm connectivity
 			a.connect_points(u, v, false);
@@ -195,7 +196,8 @@ bool test_add_remove() {
 		for (int j = 0; j < 10; j++) {
 			int u = Math::rand() % 5;
 			int v = Math::rand() % 4;
-			if (u == v) v = 4;
+			if (u == v)
+				v = 4;
 			if (Math::rand() % 2 == 1)
 				a.connect_points(u, v, false);
 			else
@@ -239,7 +241,8 @@ bool test_solutions() {
 			int u, v;
 			u = Math::rand() % N;
 			v = Math::rand() % (N - 1);
-			if (u == v) v = N - 1;
+			if (u == v)
+				v = N - 1;
 
 			// Pick a random operation
 			int op = Math::rand();
@@ -253,14 +256,16 @@ bool test_solutions() {
 					// Add edge (u, v); possibly bidirectional
 					a.connect_points(u, v, op % 2);
 					adj[u][v] = true;
-					if (op % 2) adj[v][u] = true;
+					if (op % 2)
+						adj[v][u] = true;
 					break;
 				case 6:
 				case 7:
 					// Remove edge (u, v); possibly bidirectional
 					a.disconnect_points(u, v, op % 2);
 					adj[u][v] = false;
-					if (op % 2) adj[v][u] = false;
+					if (op % 2)
+						adj[v][u] = false;
 					break;
 				case 8:
 					// Remove point u and add it back; clears adjacent edges and changes coordinates
@@ -291,12 +296,14 @@ bool test_solutions() {
 		int count = 0;
 		for (int u = 0; u < N; u++)
 			for (int v = 0; v < N; v++)
-				if (adj[u][v]) count++;
+				if (adj[u][v])
+					count++;
 		printf("Test #%4d: %3d edges, ", test + 1, count);
 		count = 0;
 		for (int u = 0; u < N; u++)
 			for (int v = 0; v < N; v++)
-				if (!Math::is_inf(d[u][v])) count++;
+				if (!Math::is_inf(d[u][v]))
+					count++;
 		printf("%3d/%d pairs of reachable points\n", count - N, N * (N - 1));
 
 		// Check A*'s output
@@ -339,7 +346,8 @@ bool test_solutions() {
 				}
 
 	exit:
-		if (!match) return false;
+		if (!match)
+			return false;
 	}
 	return true;
 }

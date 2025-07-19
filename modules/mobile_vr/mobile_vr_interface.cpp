@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -59,13 +59,19 @@ Vector3 MobileVRInterface::scale_magneto(const Vector3 &p_magnetometer) {
 	};
 
 	// adjust our min and max
-	if (mag_raw.x > mag_next_max.x) mag_next_max.x = mag_raw.x;
-	if (mag_raw.y > mag_next_max.y) mag_next_max.y = mag_raw.y;
-	if (mag_raw.z > mag_next_max.z) mag_next_max.z = mag_raw.z;
+	if (mag_raw.x > mag_next_max.x)
+		mag_next_max.x = mag_raw.x;
+	if (mag_raw.y > mag_next_max.y)
+		mag_next_max.y = mag_raw.y;
+	if (mag_raw.z > mag_next_max.z)
+		mag_next_max.z = mag_raw.z;
 
-	if (mag_raw.x < mag_next_min.x) mag_next_min.x = mag_raw.x;
-	if (mag_raw.y < mag_next_min.y) mag_next_min.y = mag_raw.y;
-	if (mag_raw.z < mag_next_min.z) mag_next_min.z = mag_raw.z;
+	if (mag_raw.x < mag_next_min.x)
+		mag_next_min.x = mag_raw.x;
+	if (mag_raw.y < mag_next_min.y)
+		mag_next_min.y = mag_raw.y;
+	if (mag_raw.z < mag_next_min.z)
+		mag_next_min.z = mag_raw.z;
 
 	// scale our x, y and z
 	if (!(mag_current_max.x - mag_current_min.x)) {

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -46,13 +46,11 @@ size_t MemoryPool::total_memory = 0;
 size_t MemoryPool::max_memory = 0;
 
 void MemoryPool::setup(uint32_t p_max_allocs) {
-
 	allocs = memnew_arr(Alloc, p_max_allocs);
 	alloc_count = p_max_allocs;
 	allocs_used = 0;
 
 	for (uint32_t i = 0; i < alloc_count - 1; i++) {
-
 		allocs[i].free_list = &allocs[i + 1];
 	}
 
@@ -60,7 +58,6 @@ void MemoryPool::setup(uint32_t p_max_allocs) {
 }
 
 void MemoryPool::cleanup() {
-
 	memdelete_arr(allocs);
 
 	ERR_FAIL_COND_MSG(allocs_used > 0, "There are still MemoryPool allocs in use at exit!");

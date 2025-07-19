@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,8 +35,8 @@
 #include "core/os/keyboard.h"
 #include "core/project_settings.h"
 #include "editor/editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_settings.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/3d/sprite_3d.h"
 #include "scene/gui/center_container.h"
 
@@ -44,7 +44,6 @@ void SpriteFramesEditor::_gui_input(Ref<InputEvent> p_event) {
 }
 
 void SpriteFramesEditor::_open_sprite_sheet() {
-
 	file_split_sheet->clear_filters();
 	List<String> extensions;
 	ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
@@ -76,7 +75,6 @@ int SpriteFramesEditor::_sheet_preview_position_to_frame_index(const Point2 &p_p
 }
 
 void SpriteFramesEditor::_sheet_preview_draw() {
-
 	Size2i texture_size = split_sheet_preview->get_texture()->get_size();
 	int h = split_sheet_h->get_value();
 	int v = split_sheet_v->get_value();
@@ -85,7 +83,6 @@ void SpriteFramesEditor::_sheet_preview_draw() {
 	const float a = 0.3;
 	int y_end = v * height;
 	for (int i = 0; i <= h; i++) {
-
 		int x = i * width;
 		split_sheet_preview->draw_line(Point2(x, 0), Point2(x, y_end), Color(1, 1, 1, a));
 		split_sheet_preview->draw_line(Point2(x + 1, 0), Point2(x + 1, y_end), Color(0, 0, 0, a));
@@ -125,7 +122,6 @@ void SpriteFramesEditor::_sheet_preview_draw() {
 	split_sheet_dialog->get_ok()->set_text(vformat(TTR("Add %d Frame(s)"), frames_selected.size()));
 }
 void SpriteFramesEditor::_sheet_preview_input(const Ref<InputEvent> &p_event) {
-
 	Ref<InputEventMouseButton> mb = p_event;
 
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
@@ -164,7 +160,6 @@ void SpriteFramesEditor::_sheet_preview_input(const Ref<InputEvent> &p_event) {
 }
 
 void SpriteFramesEditor::_sheet_add_frames() {
-
 	Size2i texture_size = split_sheet_preview->get_texture()->get_size();
 	int frame_count_x = split_sheet_h->get_value();
 	int frame_count_y = split_sheet_v->get_value();
@@ -207,7 +202,6 @@ void SpriteFramesEditor::_sheet_add_frames() {
 }
 
 void SpriteFramesEditor::_sheet_select_clear_all_frames() {
-
 	bool should_clear = true;
 	for (int i = 0; i < split_sheet_h->get_value() * split_sheet_v->get_value(); i++) {
 		if (!frames_selected.has(i)) {
@@ -223,14 +217,12 @@ void SpriteFramesEditor::_sheet_select_clear_all_frames() {
 }
 
 void SpriteFramesEditor::_sheet_spin_changed(double) {
-
 	frames_selected.clear();
 	last_frame_selected = -1;
 	split_sheet_preview->update();
 }
 
 void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
-
 	Ref<Resource> texture = ResourceLoader::load(p_file);
 	if (!texture.is_valid()) {
 		EditorNode::get_singleton()->show_warning(TTR("Unable to load images"));
@@ -249,7 +241,6 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 }
 
 void SpriteFramesEditor::_notification(int p_what) {
-
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			load->set_icon(get_icon("Load", "EditorIcons"));
@@ -275,13 +266,11 @@ void SpriteFramesEditor::_notification(int p_what) {
 }
 
 void SpriteFramesEditor::_file_load_request(const PoolVector<String> &p_path, int p_at_pos) {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	List<Ref<Texture> > resources;
+	List<Ref<Texture>> resources;
 
 	for (int i = 0; i < p_path.size(); i++) {
-
 		Ref<Texture> resource;
 		resource = ResourceLoader::load(p_path[i]);
 
@@ -307,8 +296,7 @@ void SpriteFramesEditor::_file_load_request(const PoolVector<String> &p_path, in
 
 	int count = 0;
 
-	for (List<Ref<Texture> >::Element *E = resources.front(); E; E = E->next()) {
-
+	for (List<Ref<Texture>>::Element *E = resources.front(); E; E = E->next()) {
 		undo_redo->add_do_method(frames, "add_frame", edited_anim, E->get(), p_at_pos == -1 ? -1 : p_at_pos + count);
 		undo_redo->add_undo_method(frames, "remove_frame", edited_anim, p_at_pos == -1 ? fc : p_at_pos);
 		count++;
@@ -320,7 +308,6 @@ void SpriteFramesEditor::_file_load_request(const PoolVector<String> &p_path, in
 }
 
 void SpriteFramesEditor::_load_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 	loading_scene = false;
 
@@ -336,7 +323,6 @@ void SpriteFramesEditor::_load_pressed() {
 }
 
 void SpriteFramesEditor::_paste_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	Ref<Texture> r = EditorSettings::get_singleton()->get_resource_clipboard();
@@ -371,13 +357,11 @@ void SpriteFramesEditor::_copy_pressed() {
 }
 
 void SpriteFramesEditor::_empty_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	int from = -1;
 
 	if (tree->get_current() >= 0) {
-
 		from = tree->get_current();
 		sel = from;
 
@@ -396,13 +380,11 @@ void SpriteFramesEditor::_empty_pressed() {
 }
 
 void SpriteFramesEditor::_empty2_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	int from = -1;
 
 	if (tree->get_current() >= 0) {
-
 		from = tree->get_current();
 		sel = from;
 
@@ -421,7 +403,6 @@ void SpriteFramesEditor::_empty2_pressed() {
 }
 
 void SpriteFramesEditor::_up_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	if (tree->get_current() < 0)
@@ -445,7 +426,6 @@ void SpriteFramesEditor::_up_pressed() {
 }
 
 void SpriteFramesEditor::_down_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	if (tree->get_current() < 0)
@@ -469,7 +449,6 @@ void SpriteFramesEditor::_down_pressed() {
 }
 
 void SpriteFramesEditor::_delete_pressed() {
-
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
 	if (tree->get_current() < 0)
@@ -489,7 +468,6 @@ void SpriteFramesEditor::_delete_pressed() {
 }
 
 void SpriteFramesEditor::_animation_select() {
-
 	if (updating)
 		return;
 
@@ -506,7 +484,6 @@ void SpriteFramesEditor::_animation_select() {
 }
 
 static void _find_anim_sprites(Node *p_node, List<Node *> *r_nodes, Ref<SpriteFrames> p_sfames) {
-
 	Node *edited = EditorNode::get_singleton()->get_edited_scene();
 	if (!edited)
 		return;
@@ -533,7 +510,6 @@ static void _find_anim_sprites(Node *p_node, List<Node *> *r_nodes, Ref<SpriteFr
 }
 
 void SpriteFramesEditor::_animation_name_edited() {
-
 	if (updating)
 		return;
 
@@ -566,7 +542,6 @@ void SpriteFramesEditor::_animation_name_edited() {
 	undo_redo->add_undo_method(frames, "rename_animation", name, edited_anim);
 
 	for (List<Node *>::Element *E = nodes.front(); E; E = E->next()) {
-
 		String current = E->get()->call("get_animation");
 		undo_redo->add_do_method(E->get(), "set_animation", name);
 		undo_redo->add_undo_method(E->get(), "set_animation", edited_anim);
@@ -581,7 +556,6 @@ void SpriteFramesEditor::_animation_name_edited() {
 }
 
 void SpriteFramesEditor::_animation_add() {
-
 	String name = "New Anim";
 	int counter = 0;
 	while (frames->has_animation(name)) {
@@ -599,7 +573,6 @@ void SpriteFramesEditor::_animation_add() {
 	undo_redo->add_undo_method(this, "_update_library");
 
 	for (List<Node *>::Element *E = nodes.front(); E; E = E->next()) {
-
 		String current = E->get()->call("get_animation");
 		undo_redo->add_do_method(E->get(), "set_animation", name);
 		undo_redo->add_undo_method(E->get(), "set_animation", current);
@@ -612,7 +585,6 @@ void SpriteFramesEditor::_animation_add() {
 }
 
 void SpriteFramesEditor::_animation_remove() {
-
 	if (updating)
 		return;
 
@@ -624,7 +596,6 @@ void SpriteFramesEditor::_animation_remove() {
 }
 
 void SpriteFramesEditor::_animation_remove_confirmed() {
-
 	undo_redo->create_action(TTR("Remove Animation"));
 	undo_redo->add_do_method(frames, "remove_animation", edited_anim);
 	undo_redo->add_undo_method(frames, "add_animation", edited_anim);
@@ -644,7 +615,6 @@ void SpriteFramesEditor::_animation_remove_confirmed() {
 }
 
 void SpriteFramesEditor::_animation_loop_changed() {
-
 	if (updating)
 		return;
 
@@ -657,7 +627,6 @@ void SpriteFramesEditor::_animation_loop_changed() {
 }
 
 void SpriteFramesEditor::_animation_fps_changed(double p_value) {
-
 	if (updating)
 		return;
 
@@ -671,7 +640,6 @@ void SpriteFramesEditor::_animation_fps_changed(double p_value) {
 }
 
 void SpriteFramesEditor::_update_library(bool p_skip_selector) {
-
 	updating = true;
 
 	if (!p_skip_selector) {
@@ -686,7 +654,6 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 		anim_names.sort_custom<StringName::AlphCompare>();
 
 		for (List<StringName>::Element *E = anim_names.front(); E; E = E->next()) {
-
 			String name = E->get();
 
 			TreeItem *it = animations->create_item(anim_root);
@@ -715,12 +682,10 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 		sel = 0;
 
 	for (int i = 0; i < frames->get_frame_count(edited_anim); i++) {
-
 		String name;
 		Ref<Texture> icon;
 
 		if (frames->get_frame(edited_anim, i).is_null()) {
-
 			name = itos(i) + ": " + TTR("(empty)");
 
 		} else {
@@ -747,16 +712,13 @@ void SpriteFramesEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 }
 
 void SpriteFramesEditor::edit(SpriteFrames *p_frames) {
-
 	if (frames == p_frames)
 		return;
 
 	frames = p_frames;
 
 	if (p_frames) {
-
 		if (!p_frames->has_animation(edited_anim)) {
-
 			List<StringName> anim_names;
 			frames->get_animation_list(&anim_names);
 			anim_names.sort_custom<StringName::AlphCompare>();
@@ -769,13 +731,11 @@ void SpriteFramesEditor::edit(SpriteFrames *p_frames) {
 
 		_update_library();
 	} else {
-
 		hide();
 	}
 }
 
 Variant SpriteFramesEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
-
 	if (!frames->has_animation(edited_anim))
 		return false;
 
@@ -795,7 +755,6 @@ Variant SpriteFramesEditor::get_drag_data_fw(const Point2 &p_point, Control *p_f
 }
 
 bool SpriteFramesEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
-
 	Dictionary d = p_data;
 
 	if (!d.has("type"))
@@ -811,13 +770,11 @@ bool SpriteFramesEditor::can_drop_data_fw(const Point2 &p_point, const Variant &
 		Ref<Texture> texture = r;
 
 		if (texture.is_valid()) {
-
 			return true;
 		}
 	}
 
 	if (String(d["type"]) == "files") {
-
 		Vector<String> files = d["files"];
 
 		if (files.size() == 0)
@@ -838,7 +795,6 @@ bool SpriteFramesEditor::can_drop_data_fw(const Point2 &p_point, const Variant &
 }
 
 void SpriteFramesEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
-
 	if (!can_drop_data_fw(p_point, p_data, p_from))
 		return;
 
@@ -884,7 +840,6 @@ void SpriteFramesEditor::drop_data_fw(const Point2 &p_point, const Variant &p_da
 	}
 
 	if (String(d["type"]) == "files") {
-
 		PoolVector<String> files = d["files"];
 
 		if (Input::get_singleton()->is_key_pressed(KEY_CONTROL)) {
@@ -896,7 +851,6 @@ void SpriteFramesEditor::drop_data_fw(const Point2 &p_point, const Variant &p_da
 }
 
 void SpriteFramesEditor::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("_load_pressed"), &SpriteFramesEditor::_load_pressed);
 	ClassDB::bind_method(D_METHOD("_empty_pressed"), &SpriteFramesEditor::_empty_pressed);
 	ClassDB::bind_method(D_METHOD("_empty2_pressed"), &SpriteFramesEditor::_empty2_pressed);
@@ -927,7 +881,6 @@ void SpriteFramesEditor::_bind_methods() {
 }
 
 SpriteFramesEditor::SpriteFramesEditor() {
-
 	VBoxContainer *vbc_animlist = memnew(VBoxContainer);
 	add_child(vbc_animlist);
 	vbc_animlist->set_custom_minimum_size(Size2(150, 0) * EDSCALE);
@@ -1129,7 +1082,6 @@ SpriteFramesEditor::SpriteFramesEditor() {
 }
 
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
-
 	frames_editor->set_undo_redo(get_undo_redo());
 
 	SpriteFrames *s;
@@ -1144,7 +1096,6 @@ void SpriteFramesEditorPlugin::edit(Object *p_object) {
 }
 
 bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
-
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
 	if (animated_sprite && *animated_sprite->get_sprite_frames()) {
 		return true;
@@ -1154,12 +1105,10 @@ bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
 }
 
 void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
-
 	if (p_visible) {
 		button->show();
 		editor->make_bottom_panel_item_visible(frames_editor);
 	} else {
-
 		button->hide();
 		if (frames_editor->is_visible_in_tree())
 			editor->hide_bottom_panel();
@@ -1167,7 +1116,6 @@ void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 }
 
 SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
-
 	editor = p_node;
 	frames_editor = memnew(SpriteFramesEditor);
 	frames_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -55,7 +55,6 @@ FabrikInverseKinematic::ChainItem *FabrikInverseKinematic::ChainItem::add_child(
 
 /// Build a chain that starts from the root to tip
 bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain) {
-
 	ERR_FAIL_COND_V(-1 == p_task->root_bone, false);
 
 	Chain &chain(p_task->chain);
@@ -74,7 +73,6 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 	chain_ids.resize(p_task->skeleton->get_bone_count());
 
 	for (int x = p_task->end_effectors.size() - 1; 0 <= x; --x) {
-
 		const EndEffector *ee(&p_task->end_effectors[x]);
 		ERR_FAIL_COND_V(p_task->root_bone >= ee->tip_bone, false);
 		ERR_FAIL_INDEX_V(ee->tip_bone, p_task->skeleton->get_bone_count(), false);
@@ -83,7 +81,6 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 		// Picks all IDs that composing a single chain in reverse order (except the root)
 		BoneId chain_sub_tip(ee->tip_bone);
 		while (chain_sub_tip > p_task->root_bone) {
-
 			chain_ids.write[sub_chain_size++] = chain_sub_tip;
 			chain_sub_tip = p_task->skeleton->get_bone_parent(chain_sub_tip);
 		}
@@ -94,10 +91,8 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 		// For each chain item id will be created a ChainItem if doesn't exists
 		ChainItem *sub_chain(&chain.chain_root);
 		for (int i = sub_chain_size - 1; 0 <= i; --i) {
-
 			ChainItem *child_ci(sub_chain->find_child(chain_ids[i]));
 			if (!child_ci) {
-
 				child_ci = sub_chain->add_child(chain_ids[i]);
 
 				child_ci->initial_transform = p_task->skeleton->get_bone_global_pose(child_ci->bone);
@@ -149,7 +144,6 @@ void FabrikInverseKinematic::solve_simple(Task *p_task, bool p_solve_magnet, Vec
 }
 
 void FabrikInverseKinematic::solve_simple_backwards(Chain &r_chain, bool p_solve_magnet) {
-
 	if (p_solve_magnet && !r_chain.middle_chain_item) {
 		return;
 	}
@@ -193,7 +187,6 @@ void FabrikInverseKinematic::solve_simple_forwards(Chain &r_chain, bool p_solve_
 		sub_chain_root->current_pos = origin;
 
 		if (!sub_chain_root->children.empty()) {
-
 			ChainItem &child(sub_chain_root->children.write[0]);
 
 			// Is not tip
@@ -212,7 +205,6 @@ void FabrikInverseKinematic::solve_simple_forwards(Chain &r_chain, bool p_solve_
 				sub_chain_root = &child;
 			}
 		} else {
-
 			// Is tip
 			sub_chain_root = NULL;
 		}
@@ -220,7 +212,6 @@ void FabrikInverseKinematic::solve_simple_forwards(Chain &r_chain, bool p_solve_
 }
 
 FabrikInverseKinematic::Task *FabrikInverseKinematic::create_simple_task(Skeleton *p_sk, BoneId root_bone, BoneId tip_bone, const Transform &goal_transform) {
-
 	FabrikInverseKinematic::EndEffector ee;
 	ee.tip_bone = tip_bone;
 
@@ -248,12 +239,10 @@ void FabrikInverseKinematic::set_goal(Task *p_task, const Transform &p_goal) {
 }
 
 void FabrikInverseKinematic::make_goal(Task *p_task, const Transform &p_inverse_transf, real_t blending_delta) {
-
 	if (blending_delta >= 0.99f) {
 		// Update the end_effector (local transform) without blending
 		p_task->end_effectors.write[0].goal_transform = p_inverse_transf * p_task->goal_global_transform;
 	} else {
-
 		// End effector in local transform
 		const Transform end_effector_pose(p_task->skeleton->get_bone_global_pose_no_override(p_task->end_effectors[0].tip_bone));
 
@@ -263,7 +252,6 @@ void FabrikInverseKinematic::make_goal(Task *p_task, const Transform &p_inverse_
 }
 
 void FabrikInverseKinematic::solve(Task *p_task, real_t blending_delta, bool override_tip_basis, bool p_use_magnet, const Vector3 &p_magnet_position) {
-
 	if (blending_delta <= 0.01f) {
 		// Before skipping, make sure we undo the global pose overrides
 		ChainItem *ci(&p_task->chain.chain_root);
@@ -346,11 +334,8 @@ void FabrikInverseKinematic::_update_chain(const Skeleton *p_sk, ChainItem *p_ch
 }
 
 void SkeletonIK::_validate_property(PropertyInfo &property) const {
-
 	if (property.name == "root_bone" || property.name == "tip_bone") {
-
 		if (skeleton) {
-
 			String names("--,");
 			for (int i = 0; i < skeleton->get_bone_count(); i++) {
 				if (i > 0)
@@ -361,7 +346,6 @@ void SkeletonIK::_validate_property(PropertyInfo &property) const {
 			property.hint = PROPERTY_HINT_ENUM;
 			property.hint_string = names;
 		} else {
-
 			property.hint = PROPERTY_HINT_NONE;
 			property.hint_string = "";
 		}
@@ -369,7 +353,6 @@ void SkeletonIK::_validate_property(PropertyInfo &property) const {
 }
 
 void SkeletonIK::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_root_bone", "root_bone"), &SkeletonIK::set_root_bone);
 	ClassDB::bind_method(D_METHOD("get_root_bone"), &SkeletonIK::get_root_bone);
 
@@ -426,7 +409,6 @@ void SkeletonIK::_notification(int p_what) {
 			reload_chain();
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
-
 			if (target_node_override)
 				reload_goal();
 
@@ -558,7 +540,6 @@ void SkeletonIK::stop() {
 }
 
 Transform SkeletonIK::_get_target_transform() {
-
 	if (!target_node_override && !target_node_path_override.is_empty())
 		target_node_override = Object::cast_to<Spatial>(get_node(target_node_path_override));
 
@@ -569,7 +550,6 @@ Transform SkeletonIK::_get_target_transform() {
 }
 
 void SkeletonIK::reload_chain() {
-
 	FabrikInverseKinematic::free_task(task);
 	task = NULL;
 

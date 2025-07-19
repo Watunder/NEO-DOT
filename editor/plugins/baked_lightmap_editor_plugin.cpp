@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -83,7 +83,6 @@ void BakedLightmapEditorPlugin::_bake() {
 }
 
 void BakedLightmapEditorPlugin::edit(Object *p_object) {
-
 	BakedLightmap *s = Object::cast_to<BakedLightmap>(p_object);
 	if (!s)
 		return;
@@ -92,16 +91,13 @@ void BakedLightmapEditorPlugin::edit(Object *p_object) {
 }
 
 bool BakedLightmapEditorPlugin::handles(Object *p_object) const {
-
 	return p_object->is_class("BakedLightmap");
 }
 
 void BakedLightmapEditorPlugin::make_visible(bool p_visible) {
-
 	if (p_visible) {
 		bake->show();
 	} else {
-
 		bake->hide();
 	}
 }
@@ -138,13 +134,11 @@ void BakedLightmapEditorPlugin::bake_func_end() {
 }
 
 void BakedLightmapEditorPlugin::_bind_methods() {
-
 	ClassDB::bind_method("_bake", &BakedLightmapEditorPlugin::_bake);
 	ClassDB::bind_method("_bake_select_file", &BakedLightmapEditorPlugin::_bake_select_file);
 }
 
 BakedLightmapEditorPlugin::BakedLightmapEditorPlugin(EditorNode *p_node) {
-
 	editor = p_node;
 	bake = memnew(ToolButton);
 	bake->set_icon(editor->get_gui_base()->get_icon("Bake", "EditorIcons"));

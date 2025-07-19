@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,7 +42,6 @@
 #include "core/typedefs.h"
 
 class Physics2DDirectSpaceStateSW : public Physics2DDirectSpaceState {
-
 	GDCLASS(Physics2DDirectSpaceStateSW, Physics2DDirectSpaceState);
 
 	int _intersect_point_impl(const Vector2 &p_point, ShapeResult *r_results, int p_result_max, const Set<RID> &p_exclude, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_pick_point, bool p_filter_by_canvas = false, ObjectID p_canvas_instance_id = 0);
@@ -62,7 +61,6 @@ public:
 };
 
 class Space2DSW : public RID_Data {
-
 public:
 	enum ElapsedTime {
 		ELAPSED_TIME_INTEGRATE_FORCES,
@@ -192,7 +190,8 @@ public:
 	void set_debug_contacts(int p_amount) { contact_debug.resize(p_amount); }
 	_FORCE_INLINE_ bool is_debugging_contacts() const { return !contact_debug.empty(); }
 	_FORCE_INLINE_ void add_debug_contact(const Vector2 &p_contact) {
-		if (contact_debug_count < contact_debug.size()) contact_debug.write[contact_debug_count++] = p_contact;
+		if (contact_debug_count < contact_debug.size())
+			contact_debug.write[contact_debug_count++] = p_contact;
 	}
 	_FORCE_INLINE_ Vector<Vector2> get_debug_contacts() { return contact_debug; }
 	_FORCE_INLINE_ int get_debug_contact_count() { return contact_debug_count; }

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,7 +42,6 @@
 
 ConeTwistJointBullet::ConeTwistJointBullet(RigidBodyBullet *rbA, RigidBodyBullet *rbB, const Transform &rbAFrame, const Transform &rbBFrame) :
 		JointBullet() {
-
 	Transform scaled_AFrame(rbAFrame.scaled(rbA->get_body_scale()));
 	scaled_AFrame.basis.rotref_posscale_decomposition(scaled_AFrame.basis);
 
@@ -50,7 +49,6 @@ ConeTwistJointBullet::ConeTwistJointBullet(RigidBodyBullet *rbA, RigidBodyBullet
 	G_TO_B(scaled_AFrame, btFrameA);
 
 	if (rbB) {
-
 		Transform scaled_BFrame(rbBFrame.scaled(rbB->get_body_scale()));
 		scaled_BFrame.basis.rotref_posscale_decomposition(scaled_BFrame.basis);
 

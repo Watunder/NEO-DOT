@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,12 +37,10 @@
 #include "core/version_hash.gen.h"
 
 void Engine::set_iterations_per_second(int p_ips) {
-
 	ERR_FAIL_COND_MSG(p_ips <= 0, "Engine iterations per second must be greater than 0.");
 	ips = p_ips;
 }
 int Engine::get_iterations_per_second() const {
-
 	return ips;
 }
 
@@ -65,27 +63,22 @@ int Engine::get_target_fps() const {
 }
 
 uint64_t Engine::get_frames_drawn() {
-
 	return frames_drawn;
 }
 
 void Engine::set_frame_delay(uint32_t p_msec) {
-
 	_frame_delay = p_msec;
 }
 
 uint32_t Engine::get_frame_delay() const {
-
 	return _frame_delay;
 }
 
 void Engine::set_time_scale(float p_scale) {
-
 	_time_scale = p_scale;
 }
 
 float Engine::get_time_scale() const {
-
 	return freeze_time_scale ? 0 : _time_scale;
 }
 
@@ -94,7 +87,6 @@ void Engine::set_freeze_time_scale(bool p_frozen) {
 }
 
 bool Engine::get_freeze_time_scale() const {
-
 	return freeze_time_scale;
 }
 
@@ -103,7 +95,6 @@ float Engine::get_unfrozen_time_scale() const {
 }
 
 Dictionary Engine::get_version_info() const {
-
 	Dictionary dict;
 	dict["major"] = VERSION_MAJOR;
 	dict["minor"] = VERSION_MINOR;
@@ -200,25 +191,21 @@ String Engine::get_license_text() const {
 }
 
 void Engine::add_singleton(const Singleton &p_singleton) {
-
 	singletons.push_back(p_singleton);
 	singleton_ptrs[p_singleton.name] = p_singleton.ptr;
 }
 
 Object *Engine::get_singleton_object(const String &p_name) const {
-
 	const Map<StringName, Object *>::Element *E = singleton_ptrs.find(p_name);
 	ERR_FAIL_COND_V_MSG(!E, NULL, "Failed to retrieve non-existent singleton '" + p_name + "'.");
 	return E->get();
 };
 
 bool Engine::has_singleton(const String &p_name) const {
-
 	return singleton_ptrs.has(p_name);
 };
 
 void Engine::get_singletons(List<Singleton> *p_singletons) {
-
 	for (List<Singleton>::Element *E = singletons.front(); E; E = E->next())
 		p_singletons->push_back(E->get());
 }
@@ -230,7 +217,6 @@ Engine *Engine::get_singleton() {
 }
 
 Engine::Engine() {
-
 	singleton = this;
 	frames_drawn = 0;
 	ips = 60;

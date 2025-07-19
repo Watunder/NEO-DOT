@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,11 +36,9 @@
 #include "servers/physics_server.h"
 
 void Shape::add_vertices_to_array(PoolVector<Vector3> &array, const Transform &p_xform) {
-
 	Vector<Vector3> toadd = get_debug_mesh_lines();
 
 	if (toadd.size()) {
-
 		int base = array.size();
 		array.resize(base + toadd.size());
 		PoolVector<Vector3>::Write w = array.write();
@@ -60,7 +58,6 @@ void Shape::set_margin(real_t p_margin) {
 }
 
 Ref<ArrayMesh> Shape::get_debug_mesh() {
-
 	if (debug_mesh_cache.is_valid())
 		return debug_mesh_cache;
 
@@ -73,7 +70,6 @@ Ref<ArrayMesh> Shape::get_debug_mesh() {
 		PoolVector<Vector3> array;
 		array.resize(lines.size());
 		{
-
 			PoolVector<Vector3>::Write w = array.write();
 			for (int i = 0; i < lines.size(); i++) {
 				w[i] = lines[i];
@@ -102,7 +98,6 @@ void Shape::_update_shape() {
 }
 
 void Shape::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_margin", "margin"), &Shape::set_margin);
 	ClassDB::bind_method(D_METHOD("get_margin"), &Shape::get_margin);
 
@@ -113,17 +108,14 @@ void Shape::_bind_methods() {
 
 Shape::Shape() :
 		margin(0.04) {
-
 	ERR_PRINT("Constructor must not be called!");
 }
 
 Shape::Shape(RID p_shape) :
 		margin(0.04) {
-
 	shape = p_shape;
 }
 
 Shape::~Shape() {
-
 	PhysicsServer::get_singleton()->free(shape);
 }

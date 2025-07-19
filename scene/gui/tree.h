@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,7 +40,6 @@
 class Tree;
 
 class TreeItem : public Object {
-
 	GDCLASS(TreeItem, Object);
 
 public:
@@ -63,7 +62,6 @@ private:
 	friend class Tree;
 
 	struct Cell {
-
 		TreeCellMode mode;
 
 		Ref<Texture> icon;
@@ -111,7 +109,6 @@ private:
 		Vector<Button> buttons;
 
 		Cell() {
-
 			custom_draw_obj = 0;
 			custom_button = false;
 			mode = TreeItem::CELL_MODE_STRING;
@@ -291,7 +288,6 @@ VARIANT_ENUM_CAST(TreeItem::TreeCellMode);
 VARIANT_ENUM_CAST(TreeItem::TextAlign);
 
 class Tree : public Control {
-
 	GDCLASS(Tree, Control);
 
 public:
@@ -348,7 +344,6 @@ private:
 	int drop_mode_flags;
 
 	struct ColumnInfo {
-
 		int min_width;
 		bool expand;
 		String title;
@@ -398,7 +393,6 @@ private:
 	void propagate_set_columns(TreeItem *p_item);
 
 	struct Cache {
-
 		Ref<Font> font;
 		Ref<Font> tb_font;
 		Ref<StyleBox> bg;

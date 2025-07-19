@@ -51,11 +51,11 @@ BVH_ABB _logic_abb_merge(const BVH_ABB &a, const BVH_ABB &b) {
 	including commercial applications, and to alter it and redistribute it
 	freely, subject to the following restrictions:
 	  1. The origin of this software must not be misrepresented; you must not
-	     claim that you wrote the original software. If you use this software
-	     in a product, an acknowledgment in the product documentation would be
-	     appreciated but is not required.
+		 claim that you wrote the original software. If you use this software
+		 in a product, an acknowledgment in the product documentation would be
+		 appreciated but is not required.
 	  2. Altered source versions must be plainly marked as such, and must not
-	     be misrepresented as being the original software.
+		 be misrepresented as being the original software.
 	  3. This notice may not be removed or altered from any source distribution.
 */
 //--------------------------------------------------------------------------------------------------
@@ -73,9 +73,9 @@ int32_t _logic_balance(int32_t iA, uint32_t p_tree_id) {
 		return iA;
 
 	/*      A
-	      /   \
-	     B     C
-	    / \   / \
+		  /   \
+		 B     C
+		/ \   / \
 	   D   E F   G
 	*/
 
@@ -193,7 +193,6 @@ int32_t _logic_balance(int32_t iA, uint32_t p_tree_id) {
 
 // either choose an existing node to add item to, or create a new node and return this
 uint32_t _logic_choose_item_add_node(uint32_t p_node_id, const BVH_ABB &p_aabb) {
-
 	while (true) {
 		BVH_ASSERT(p_node_id != BVHCommon::INVALID);
 		TNode &tnode = _nodes[p_node_id];

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -88,7 +88,6 @@ public:
 };
 
 class EditorHelp : public VBoxContainer {
-
 	GDCLASS(EditorHelp, VBoxContainer);
 
 	enum Page {
@@ -108,14 +107,14 @@ class EditorHelp : public VBoxContainer {
 
 	String edited_class;
 
-	Vector<Pair<String, int> > section_line;
+	Vector<Pair<String, int>> section_line;
 	Map<String, int> method_line;
 	Map<String, int> signal_line;
 	Map<String, int> property_line;
 	Map<String, int> theme_property_line;
 	Map<String, int> constant_line;
 	Map<String, int> enum_line;
-	Map<String, Map<String, int> > enum_values_line;
+	Map<String, Map<String, int>> enum_values_line;
 	int description_line;
 
 	RichTextLabel *class_desc;
@@ -175,7 +174,7 @@ public:
 	void go_to_help(const String &p_help);
 	void go_to_class(const String &p_class, int p_scroll = 0);
 
-	Vector<Pair<String, int> > get_sections();
+	Vector<Pair<String, int>> get_sections();
 	void scroll_to_section(int p_section_index);
 
 	void popup_search();
@@ -193,7 +192,6 @@ public:
 };
 
 class EditorHelpBit : public PopupPanel {
-
 	GDCLASS(EditorHelpBit, PopupPanel);
 
 	RichTextLabel *rich_text;

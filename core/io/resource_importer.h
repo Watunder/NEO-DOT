@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,7 +36,6 @@
 class ResourceImporter;
 
 class ResourceFormatImporter : public ResourceFormatLoader {
-
 	struct PathAndType {
 		String path;
 		String type;
@@ -54,7 +53,7 @@ class ResourceFormatImporter : public ResourceFormatLoader {
 		bool operator()(const Ref<ResourceImporter> &p_a, const Ref<ResourceImporter> &p_b) const;
 	};
 
-	Vector<Ref<ResourceImporter> > importers;
+	Vector<Ref<ResourceImporter>> importers;
 
 public:
 	static ResourceFormatImporter *get_singleton() { return singleton; }
@@ -83,8 +82,8 @@ public:
 	void remove_importer(const Ref<ResourceImporter> &p_importer) { importers.erase(p_importer); }
 	Ref<ResourceImporter> get_importer_by_name(const String &p_name) const;
 	Ref<ResourceImporter> get_importer_by_extension(const String &p_extension) const;
-	void get_importers_for_extension(const String &p_extension, List<Ref<ResourceImporter> > *r_importers);
-	void get_importers(List<Ref<ResourceImporter> > *r_importers);
+	void get_importers_for_extension(const String &p_extension, List<Ref<ResourceImporter>> *r_importers);
+	void get_importers(List<Ref<ResourceImporter>> *r_importers);
 
 	bool are_import_settings_valid(const String &p_path) const;
 	String get_import_settings_hash() const;
@@ -94,7 +93,6 @@ public:
 };
 
 class ResourceImporter : public Reference {
-
 	GDCLASS(ResourceImporter, Reference);
 
 public:
@@ -126,7 +124,7 @@ public:
 
 	virtual Error import(const String &p_source_file, const String &p_save_path, const Map<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files = NULL, Variant *r_metadata = NULL) = 0;
 
-	virtual Error import_group_file(const String &p_group_file, const Map<String, Map<StringName, Variant> > &p_source_file_options, const Map<String, String> &p_base_paths) { return ERR_UNAVAILABLE; }
+	virtual Error import_group_file(const String &p_group_file, const Map<String, Map<StringName, Variant>> &p_source_file_options, const Map<String, String> &p_base_paths) { return ERR_UNAVAILABLE; }
 	virtual bool are_import_settings_valid(const String &p_path) const { return true; }
 	virtual String get_import_settings_string() const { return String(); }
 };

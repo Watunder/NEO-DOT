@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,8 +31,8 @@
 #include "multi_node_edit.h"
 
 #include "core/math/math_fieldwise.h"
-#include "editor_node.h"
 #include "editor/editor_undo_redo_manager.h"
+#include "editor_node.h"
 
 bool MultiNodeEdit::_set(const StringName &p_name, const Variant &p_value) {
 	return _set_impl(p_name, p_value, "");
@@ -58,7 +58,6 @@ bool MultiNodeEdit::_set_impl(const StringName &p_name, const Variant &p_value, 
 
 	ur->create_action(TTR("MultiNode Set") + " " + String(name), UndoRedo::MERGE_ENDS);
 	for (const List<NodePath>::Element *E = nodes.front(); E; E = E->next()) {
-
 		if (!es->has_node(E->get()))
 			continue;
 
@@ -104,7 +103,6 @@ bool MultiNodeEdit::_get(const StringName &p_name, Variant &r_ret) const {
 	}
 
 	for (const List<NodePath>::Element *E = nodes.front(); E; E = E->next()) {
-
 		if (!es->has_node(E->get()))
 			continue;
 
@@ -133,7 +131,6 @@ void MultiNodeEdit::_get_property_list(List<PropertyInfo> *p_list) const {
 	List<PLData *> data_list;
 
 	for (const List<NodePath>::Element *E = nodes.front(); E; E = E->next()) {
-
 		if (!es->has_node(E->get()))
 			continue;
 
@@ -145,7 +142,6 @@ void MultiNodeEdit::_get_property_list(List<PropertyInfo> *p_list) const {
 		n->get_property_list(&plist, true);
 
 		for (List<PropertyInfo>::Element *F = plist.front(); F; F = F->next()) {
-
 			if (F->get().name == "script")
 				continue; //added later manually, since this is intercepted before being set (check Variant Object::get() )
 			if (!usage.has(F->get().name)) {
@@ -165,7 +161,6 @@ void MultiNodeEdit::_get_property_list(List<PropertyInfo> *p_list) const {
 	}
 
 	for (List<PLData *>::Element *E = data_list.front(); E; E = E->next()) {
-
 		if (nc == E->get()->uses) {
 			p_list->push_back(E->get()->info);
 		}

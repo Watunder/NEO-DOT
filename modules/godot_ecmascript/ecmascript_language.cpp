@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  ecmascript_language.cpp                                              */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "ecmascript_language.h"
 #include "core/class_db.h"
 #include "core/os/file_access.h"
@@ -26,7 +56,6 @@ Error ECMAScriptLanguage::execute_file(const String &p_path) {
 }
 
 void ECMAScriptLanguage::get_reserved_words(List<String> *p_words) const {
-
 	static const char *_reserved_words[] = {
 		"null",
 		"false",
@@ -143,7 +172,6 @@ void ECMAScriptLanguage::get_reserved_words(List<String> *p_words) const {
 	const char **w = _reserved_words;
 
 	while (*w) {
-
 		p_words->push_back(*w);
 		w++;
 	}
@@ -151,22 +179,21 @@ void ECMAScriptLanguage::get_reserved_words(List<String> *p_words) const {
 
 bool ECMAScriptLanguage::is_control_flow_keyword(String p_keyword) const {
 	return p_keyword == "if" ||
-		   p_keyword == "else" ||
-		   p_keyword == "return" ||
-		   p_keyword == "do" ||
-		   p_keyword == "while" ||
-		   p_keyword == "for" ||
-		   p_keyword == "break" ||
-		   p_keyword == "continue" ||
-		   p_keyword == "switch" ||
-		   p_keyword == "case" ||
-		   p_keyword == "default" ||
-		   p_keyword == "throw" ||
-		   p_keyword == "try" ||
-		   p_keyword == "catch" ||
-		   p_keyword == "finally";
+			p_keyword == "else" ||
+			p_keyword == "return" ||
+			p_keyword == "do" ||
+			p_keyword == "while" ||
+			p_keyword == "for" ||
+			p_keyword == "break" ||
+			p_keyword == "continue" ||
+			p_keyword == "switch" ||
+			p_keyword == "case" ||
+			p_keyword == "default" ||
+			p_keyword == "throw" ||
+			p_keyword == "try" ||
+			p_keyword == "catch" ||
+			p_keyword == "finally";
 }
-
 
 void ECMAScriptLanguage::get_comment_delimiters(List<String> *p_delimiters) const {
 	p_delimiters->push_back("//"); // single-line comment
@@ -180,7 +207,6 @@ void ECMAScriptLanguage::get_string_delimiters(List<String> *p_delimiters) const
 }
 
 Ref<Script> ECMAScriptLanguage::get_template(const String &p_class_name, const String &p_base_class_name) const {
-
 	String script_template = "export default class %CLASS% extends " GODOT_OBJECT_NAME ".%BASE% {\n"
 							 "    \n"
 							 "    // Declare member variables here. Examples:\n"
@@ -234,7 +260,7 @@ Script *ECMAScriptLanguage::create_script() const {
 
 void ECMAScriptLanguage::reload_all_scripts() {
 #ifdef TOOLS_ENABLED
-	for (Set<Ref<ECMAScript> >::Element *E = scripts.front(); E; E = E->next()) {
+	for (Set<Ref<ECMAScript>>::Element *E = scripts.front(); E; E = E->next()) {
 		reload_script(E->get(), true);
 	}
 #endif
@@ -315,14 +341,14 @@ String ECMAScriptLanguage::globalize_relative_path(const String &p_relative, con
 				break;
 			}
 		}
-		if (!base_dir.ends_with("/")) base_dir += "/";
+		if (!base_dir.ends_with("/"))
+			base_dir += "/";
 		file = base_dir + file_path;
 	}
 	return file;
 }
 
 ECMAScriptLanguage::ECMAScriptLanguage() {
-
 	ERR_FAIL_COND(singleton);
 	singleton = this;
 	main_binder = memnew(QuickJSBinder);

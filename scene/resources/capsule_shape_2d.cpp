@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "servers/visual_server.h"
 
 Vector<Vector2> CapsuleShape2D::_get_points() const {
-
 	Vector<Vector2> points;
 	for (int i = 0; i < 24; i++) {
 		Vector2 ofs = Vector2(0, (i > 6 && i <= 18) ? -get_height() * 0.5 : get_height() * 0.5);
@@ -48,29 +47,24 @@ Vector<Vector2> CapsuleShape2D::_get_points() const {
 }
 
 bool CapsuleShape2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
-
 	return Geometry::is_point_in_polygon(p_point, _get_points());
 }
 
 void CapsuleShape2D::_update_shape() {
-
 	Physics2DServer::get_singleton()->shape_set_data(get_rid(), Vector2(radius, height));
 	emit_changed();
 }
 
 void CapsuleShape2D::set_radius(real_t p_radius) {
-
 	radius = p_radius;
 	_update_shape();
 }
 
 real_t CapsuleShape2D::get_radius() const {
-
 	return radius;
 }
 
 void CapsuleShape2D::set_height(real_t p_height) {
-
 	height = p_height;
 	if (height < 0)
 		height = 0;
@@ -79,12 +73,10 @@ void CapsuleShape2D::set_height(real_t p_height) {
 }
 
 real_t CapsuleShape2D::get_height() const {
-
 	return height;
 }
 
 void CapsuleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
-
 	Vector<Vector2> points = _get_points();
 	Vector<Color> col;
 	col.push_back(p_color);
@@ -97,7 +89,6 @@ void CapsuleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 }
 
 Rect2 CapsuleShape2D::get_rect() const {
-
 	Vector2 he = Point2(get_radius(), get_radius() + get_height() * 0.5);
 	Rect2 rect;
 	rect.position = -he;
@@ -106,7 +97,6 @@ Rect2 CapsuleShape2D::get_rect() const {
 }
 
 void CapsuleShape2D::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_radius", "radius"), &CapsuleShape2D::set_radius);
 	ClassDB::bind_method(D_METHOD("get_radius"), &CapsuleShape2D::get_radius);
 
@@ -119,7 +109,6 @@ void CapsuleShape2D::_bind_methods() {
 
 CapsuleShape2D::CapsuleShape2D() :
 		Shape2D(Physics2DServer::get_singleton()->capsule_shape_create()) {
-
 	radius = 10;
 	height = 20;
 	_update_shape();

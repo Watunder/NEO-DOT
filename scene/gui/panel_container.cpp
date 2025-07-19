@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,7 +31,6 @@
 #include "panel_container.h"
 
 Size2 PanelContainer::get_minimum_size() const {
-
 	Ref<StyleBox> style;
 
 	if (has_stylebox("panel"))
@@ -41,7 +40,6 @@ Size2 PanelContainer::get_minimum_size() const {
 
 	Size2 ms;
 	for (int i = 0; i < get_child_count(); i++) {
-
 		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c || !c->is_visible_in_tree())
 			continue;
@@ -59,9 +57,7 @@ Size2 PanelContainer::get_minimum_size() const {
 }
 
 void PanelContainer::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_DRAW) {
-
 		RID ci = get_canvas_item();
 		Ref<StyleBox> style;
 
@@ -74,7 +70,6 @@ void PanelContainer::_notification(int p_what) {
 	}
 
 	if (p_what == NOTIFICATION_SORT_CHILDREN) {
-
 		Ref<StyleBox> style;
 
 		if (has_stylebox("panel"))
@@ -90,7 +85,6 @@ void PanelContainer::_notification(int p_what) {
 		}
 
 		for (int i = 0; i < get_child_count(); i++) {
-
 			Control *c = Object::cast_to<Control>(get_child(i));
 			if (!c || !c->is_visible_in_tree())
 				continue;

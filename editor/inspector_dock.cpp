@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -85,7 +85,6 @@ void InspectorDock::_menu_option(int p_option) {
 				current->get_property_list(&props);
 				Map<RES, RES> duplicates;
 				for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
-
 					if (!(E->get().usage & PROPERTY_USAGE_STORAGE))
 						continue;
 
@@ -93,10 +92,8 @@ void InspectorDock::_menu_option(int p_option) {
 					if (v.is_ref()) {
 						REF ref = v;
 						if (ref.is_valid()) {
-
 							RES res = ref;
 							if (res.is_valid()) {
-
 								if (!duplicates.has(res)) {
 									duplicates[res] = res->duplicate();
 								}
@@ -218,7 +215,6 @@ void InspectorDock::_prepare_history() {
 	Ref<Texture> base_icon = get_icon("Object", "EditorIcons");
 	Set<ObjectID> already;
 	for (int i = editor_history->get_history_len() - 1; i >= history_to; i--) {
-
 		ObjectID id = editor_history->get_history_obj(i);
 		Object *obj = ObjectDB::get_instance(id);
 		if (!obj || already.has(id)) {
@@ -387,7 +383,6 @@ void InspectorDock::clear() {
 }
 
 void InspectorDock::update(Object *p_object) {
-
 	EditorHistory *editor_history = EditorNode::get_singleton()->get_editor_history();
 	backward_button->set_disabled(editor_history->is_at_beginning());
 	forward_button->set_disabled(editor_history->is_at_end());
@@ -453,12 +448,10 @@ void InspectorDock::update(Object *p_object) {
 	p_object->get_method_list(&methods);
 
 	if (!methods.empty()) {
-
 		bool found = false;
 		List<MethodInfo>::Element *I = methods.front();
 		int i = 0;
 		while (I) {
-
 			if (I->get().flags & METHOD_FLAG_EDITOR) {
 				if (!found) {
 					p->add_separator();
@@ -480,13 +473,10 @@ void InspectorDock::update_keying() {
 	bool valid = false;
 
 	if (AnimationPlayerEditor::singleton->get_track_editor()->has_keying()) {
-
 		EditorHistory *editor_history = EditorNode::get_singleton()->get_editor_history();
 		if (editor_history->get_path_size() >= 1) {
-
 			Object *obj = ObjectDB::get_instance(editor_history->get_path_object(0));
 			if (Object::cast_to<Node>(obj)) {
-
 				valid = true;
 			}
 		}

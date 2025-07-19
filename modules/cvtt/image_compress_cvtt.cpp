@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -138,7 +138,6 @@ static void _digest_job_queue(void *p_job_queue) {
 }
 
 void image_compress_cvtt(Image *p_image, float p_lossy_quality, Image::CompressSource p_source) {
-
 	if (p_image->get_format() >= Image::FORMAT_BPTC_RGBA)
 		return; //do not compress, already compressed
 
@@ -224,7 +223,6 @@ void image_compress_cvtt(Image *p_image, float p_lossy_quality, Image::CompressS
 	PoolVector<CVTTCompressionRowTask> tasks;
 
 	for (int i = 0; i <= mm_count; i++) {
-
 		int bw = w % 4 != 0 ? w + (4 - w % 4) : w;
 		int bh = h % 4 != 0 ? h + (4 - h % 4) : h;
 
@@ -283,7 +281,6 @@ void image_compress_cvtt(Image *p_image, float p_lossy_quality, Image::CompressS
 }
 
 void image_decompress_cvtt(Image *p_image) {
-
 	Image::Format target_format;
 	bool is_signed = false;
 	bool is_hdr = false;
@@ -321,7 +318,6 @@ void image_decompress_cvtt(Image *p_image) {
 	int dst_ofs = 0;
 
 	for (int i = 0; i <= mm_count; i++) {
-
 		int src_ofs = p_image->get_mipmap_offset(i);
 
 		const uint8_t *in_bytes = &rb[src_ofs];

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,6 @@
 #include "servers/visual_server.h"
 
 Size2 CheckButton::get_icon_size() const {
-
 	Ref<Texture> on = Control::get_icon(is_disabled() ? "on_disabled" : "on");
 	Ref<Texture> off = Control::get_icon(is_disabled() ? "off_disabled" : "off");
 	Size2 tex_size = Size2(0, 0);
@@ -47,7 +46,6 @@ Size2 CheckButton::get_icon_size() const {
 }
 
 Size2 CheckButton::get_minimum_size() const {
-
 	Size2 minsize = Button::get_minimum_size();
 	Size2 tex_size = get_icon_size();
 	minsize.width += tex_size.width;
@@ -60,12 +58,9 @@ Size2 CheckButton::get_minimum_size() const {
 }
 
 void CheckButton::_notification(int p_what) {
-
 	if (p_what == NOTIFICATION_THEME_CHANGED) {
-
 		_set_internal_margin(MARGIN_RIGHT, get_icon_size().width);
 	} else if (p_what == NOTIFICATION_DRAW) {
-
 		RID ci = get_canvas_item();
 
 		Ref<Texture> on = Control::get_icon(is_disabled() ? "on_disabled" : "on");
@@ -86,7 +81,6 @@ void CheckButton::_notification(int p_what) {
 }
 
 CheckButton::CheckButton() {
-
 	set_toggle_mode(true);
 	set_text_align(ALIGN_LEFT);
 

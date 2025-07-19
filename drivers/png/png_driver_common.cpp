@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -124,7 +124,6 @@ Error png_to_image(const uint8_t *p_source, size_t p_size, bool p_force_linear, 
 }
 
 Error image_to_png(const Ref<Image> &p_image, PoolVector<uint8_t> &p_buffer) {
-
 	Ref<Image> source_image = p_image->duplicate();
 
 	if (source_image->is_compressed())
@@ -182,7 +181,6 @@ Error image_to_png(const Ref<Image> &p_image, PoolVector<uint8_t> &p_buffer) {
 		ERR_FAIL_COND_V_MSG(check_error(png_img), FAILED, png_img.message);
 	}
 	if (!success) {
-
 		// buffer was big enough, must be some other error
 		ERR_FAIL_COND_V(compressed_size <= png_size_estimate, FAILED);
 

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -152,11 +152,11 @@ public:
 
 	//! Test limit
 	/*!
-    - free means upper < lower,
-    - locked means upper == lower
-    - limited means upper > lower
-    - limitIndex: first 3 are linear, next 3 are angular
-    */
+	- free means upper < lower,
+	- locked means upper == lower
+	- limited means upper > lower
+	- limitIndex: first 3 are linear, next 3 are angular
+	*/
 	inline bool isLimited(int limitIndex) {
 		return (m_upperLimit[limitIndex] >= m_lowerLimit[limitIndex]);
 	}
@@ -248,16 +248,16 @@ public:
 
 	//! Gets the global transform of the offset for body A
 	/*!
-    \sa Generic6DOFJointSW.getFrameOffsetA, Generic6DOFJointSW.getFrameOffsetB, Generic6DOFJointSW.calculateAngleInfo.
-    */
+	\sa Generic6DOFJointSW.getFrameOffsetA, Generic6DOFJointSW.getFrameOffsetB, Generic6DOFJointSW.calculateAngleInfo.
+	*/
 	const Transform &getCalculatedTransformA() const {
 		return m_calculatedTransformA;
 	}
 
 	//! Gets the global transform of the offset for body B
 	/*!
-    \sa Generic6DOFJointSW.getFrameOffsetA, Generic6DOFJointSW.getFrameOffsetB, Generic6DOFJointSW.calculateAngleInfo.
-    */
+	\sa Generic6DOFJointSW.getFrameOffsetA, Generic6DOFJointSW.getFrameOffsetB, Generic6DOFJointSW.calculateAngleInfo.
+	*/
 	const Transform &getCalculatedTransformB() const {
 		return m_calculatedTransformB;
 	}
@@ -344,11 +344,11 @@ public:
 
 	//! Test limit
 	/*!
-    - free means upper < lower,
-    - locked means upper == lower
-    - limited means upper > lower
-    - limitIndex: first 3 are linear, next 3 are angular
-    */
+	- free means upper < lower,
+	- locked means upper == lower
+	- limited means upper > lower
+	- limitIndex: first 3 are linear, next 3 are angular
+	*/
 	bool isLimited(int limitIndex) {
 		if (limitIndex < 3) {
 			return m_linearLimits.isLimited(limitIndex);

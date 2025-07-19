@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +41,6 @@
 #include <math.h>
 
 class Math {
-
 	static RandomPCG default_rand;
 
 public:
@@ -157,7 +156,7 @@ public:
 		} ieee754;
 		ieee754.f = p_val;
 		return ((unsigned)(ieee754.u >> 32) & 0x7fffffff) == 0x7ff00000 &&
-			   ((unsigned)ieee754.u == 0);
+				((unsigned)ieee754.u == 0);
 #else
 		return isinf(p_val);
 #endif
@@ -331,7 +330,6 @@ public:
 	}
 
 	static _ALWAYS_INLINE_ float absf(float g) {
-
 		union {
 			float f;
 			uint32_t i;
@@ -343,7 +341,6 @@ public:
 	}
 
 	static _ALWAYS_INLINE_ double absd(double g) {
-
 		union {
 			double d;
 			uint64_t i;
@@ -355,7 +352,6 @@ public:
 
 	//this function should be as fast as possible and rounding mode should not matter
 	static _ALWAYS_INLINE_ int fast_ftoi(float a) {
-
 		static int b;
 
 #if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0603) || WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP // windows 8 phone?
@@ -410,7 +406,6 @@ public:
 	}
 
 	static _ALWAYS_INLINE_ float halfptr_to_float(const uint16_t *h) {
-
 		union {
 			uint32_t u32;
 			float f32;
@@ -425,7 +420,6 @@ public:
 	}
 
 	static _ALWAYS_INLINE_ uint16_t make_half_float(float f) {
-
 		union {
 			float fv;
 			uint32_t ui;
@@ -452,11 +446,10 @@ public:
 				mantissa = 0;
 			}
 			hf = (((uint16_t)sign) << 15) | (uint16_t)((0x1F << 10)) |
-				 (uint16_t)(mantissa >> 13);
+					(uint16_t)(mantissa >> 13);
 		}
 		// check if exponent is <= -15
 		else if (exp <= 0x38000000) {
-
 			/*// store a denorm half-float value or zero
 		exp = (0x38000000 - exp) >> 23;
 		mantissa >>= (14 + exp);
@@ -466,8 +459,8 @@ public:
 			hf = 0; //denormals do not work for 3D, convert to zero
 		} else {
 			hf = (((uint16_t)sign) << 15) |
-				 (uint16_t)((exp - 0x38000000) >> 13) |
-				 (uint16_t)(mantissa >> 13);
+					(uint16_t)((exp - 0x38000000) >> 13) |
+					(uint16_t)(mantissa >> 13);
 		}
 
 		return hf;

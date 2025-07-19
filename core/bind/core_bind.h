@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -408,7 +408,6 @@ VARIANT_ENUM_CAST(_OS::ScreenOrientation);
 VARIANT_ENUM_CAST(_OS::HandleType);
 
 class _Geometry : public Object {
-
 	GDCLASS(_Geometry, Object);
 
 	static _Geometry *singleton;
@@ -489,7 +488,6 @@ VARIANT_ENUM_CAST(_Geometry::PolyJoinType);
 VARIANT_ENUM_CAST(_Geometry::PolyEndType);
 
 class _File : public Reference {
-
 	GDCLASS(_File, Reference);
 	FileAccess *f;
 	bool eswap;
@@ -592,7 +590,6 @@ VARIANT_ENUM_CAST(_File::ModeFlags);
 VARIANT_ENUM_CAST(_File::CompressionMode);
 
 class _Directory : public Reference {
-
 	GDCLASS(_Directory, Reference);
 	DirAccess *d;
 
@@ -636,7 +633,6 @@ private:
 };
 
 class _Marshalls : public Object {
-
 	GDCLASS(_Marshalls, Object);
 
 	static _Marshalls *singleton;
@@ -661,7 +657,6 @@ public:
 };
 
 class _Mutex : public Reference {
-
 	GDCLASS(_Mutex, Reference);
 	Mutex mutex;
 
@@ -674,7 +669,6 @@ public:
 };
 
 class _Semaphore : public Reference {
-
 	GDCLASS(_Semaphore, Reference);
 	Semaphore semaphore;
 
@@ -686,7 +680,6 @@ public:
 };
 
 class _Thread : public Reference {
-
 	GDCLASS(_Thread, Reference);
 
 protected:
@@ -720,7 +713,6 @@ public:
 VARIANT_ENUM_CAST(_Thread::Priority);
 
 class _ClassDB : public Object {
-
 	GDCLASS(_ClassDB, Object);
 
 protected:

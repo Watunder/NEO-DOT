@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -43,7 +43,6 @@ bool DynamicFontData::CacheID::operator<(CacheID right) const {
 }
 
 Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_cache_id) {
-
 	if (size_cache.has(p_cache_id)) {
 		return Ref<DynamicFontAtSize>(size_cache[p_cache_id]);
 	}
@@ -62,13 +61,11 @@ Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_cach
 }
 
 void DynamicFontData::set_font_ptr(const uint8_t *p_font_mem, int p_font_mem_size) {
-
 	font_mem = p_font_mem;
 	font_mem_size = p_font_mem_size;
 }
 
 void DynamicFontData::set_font_path(const String &p_path) {
-
 	font_path = p_path;
 }
 
@@ -77,7 +74,6 @@ String DynamicFontData::get_font_path() const {
 }
 
 void DynamicFontData::set_force_autohinter(bool p_force) {
-
 	force_autohinter = p_force;
 }
 
@@ -100,7 +96,6 @@ void DynamicFontData::_bind_methods() {
 }
 
 DynamicFontData::DynamicFontData() {
-
 	antialiased = true;
 	force_autohinter = false;
 	hinting = DynamicFontData::HINTING_NORMAL;
@@ -114,7 +109,6 @@ DynamicFontData::~DynamicFontData() {
 ////////////////////
 
 Error DynamicFontAtSize::_load() {
-
 	int error = FT_Init_FreeType(&library);
 
 	ERR_FAIL_COND_V_MSG(error != 0, ERR_CANT_CREATE, "Error initializing FreeType.");
@@ -157,12 +151,10 @@ Error DynamicFontAtSize::_load() {
 	//error = FT_New_Face( library, src_path.utf8().get_data(),0,&face );
 
 	if (error == FT_Err_Unknown_File_Format) {
-
 		FT_Done_FreeType(library);
 		ERR_FAIL_V_MSG(ERR_FILE_CANT_OPEN, "Unknown font format.");
 
 	} else if (error) {
-
 		FT_Done_FreeType(library);
 		ERR_FAIL_V_MSG(ERR_FILE_CANT_OPEN, "Error loading font.");
 	}
@@ -200,28 +192,23 @@ Error DynamicFontAtSize::_load() {
 float DynamicFontAtSize::font_oversampling = 1.0;
 
 float DynamicFontAtSize::get_height() const {
-
 	return ascent + descent;
 }
 
 float DynamicFontAtSize::get_ascent() const {
-
 	return ascent;
 }
 float DynamicFontAtSize::get_descent() const {
-
 	return descent;
 }
 
-const Pair<const DynamicFontAtSize::Character *, DynamicFontAtSize *> DynamicFontAtSize::_find_char_with_font(CharType p_char, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks) const {
+const Pair<const DynamicFontAtSize::Character *, DynamicFontAtSize *> DynamicFontAtSize::_find_char_with_font(CharType p_char, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks) const {
 	const Character *chr = char_map.getptr(p_char);
 	ERR_FAIL_COND_V(!chr, (Pair<const Character *, DynamicFontAtSize *>(NULL, NULL)));
 
 	if (!chr->found) {
-
 		//not found, try in fallbacks
 		for (int i = 0; i < p_fallbacks.size(); i++) {
-
 			DynamicFontAtSize *fb = const_cast<DynamicFontAtSize *>(p_fallbacks[i].ptr());
 			if (!fb->valid)
 				continue;
@@ -245,8 +232,7 @@ const Pair<const DynamicFontAtSize::Character *, DynamicFontAtSize *> DynamicFon
 	return Pair<const Character *, DynamicFontAtSize *>(chr, const_cast<DynamicFontAtSize *>(this));
 }
 
-Size2 DynamicFontAtSize::get_char_size(CharType p_char, CharType p_next, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks) const {
-
+Size2 DynamicFontAtSize::get_char_size(CharType p_char, CharType p_next, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks) const {
 	if (!valid)
 		return Size2(1, 1);
 	const_cast<DynamicFontAtSize *>(this)->_update_char(p_char);
@@ -284,7 +270,6 @@ String DynamicFontAtSize::get_available_chars() const {
 }
 
 void DynamicFontAtSize::set_texture_flags(uint32_t p_flags) {
-
 	texture_flags = p_flags;
 	for (int i = 0; i < textures.size(); i++) {
 		Ref<ImageTexture> &tex = textures.write[i].texture;
@@ -293,8 +278,7 @@ void DynamicFontAtSize::set_texture_flags(uint32_t p_flags) {
 	}
 }
 
-float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize> > &p_fallbacks, bool p_advance_only, bool p_outline) const {
-
+float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only, bool p_outline) const {
 	if (!valid)
 		return 0;
 
@@ -364,7 +348,6 @@ DynamicFontAtSize::TexturePosition DynamicFontAtSize::_find_texture_pos_for_glyp
 	int mh = p_height;
 
 	for (int i = 0; i < textures.size(); i++) {
-
 		const CharTexture &ct = textures[i];
 
 		if (ct.texture->get_format() != p_image_format)
@@ -377,11 +360,9 @@ DynamicFontAtSize::TexturePosition DynamicFontAtSize::_find_texture_pos_for_glyp
 		ret.x = 0;
 
 		for (int j = 0; j < ct.texture_size - mw; j++) {
-
 			int max_y = 0;
 
 			for (int k = j; k < j + mw; k++) {
-
 				int y = ct.offsets[k];
 				if (y > max_y)
 					max_y = y;
@@ -476,7 +457,6 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 
 		for (int i = 0; i < h; i++) {
 			for (int j = 0; j < w; j++) {
-
 				int ofs = ((i + tex_pos.y + rect_margin) * tex.texture_size + j + tex_pos.x + rect_margin) * color_size;
 				ERR_FAIL_COND_V(ofs >= tex.imgdata.size(), Character::not_found());
 				switch (bitmap.pixel_mode) {
@@ -508,7 +488,6 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 
 	//blit to image and texture
 	{
-
 		Ref<Image> img = memnew(Image(tex.texture_size, tex.texture_size, 0, require_format, tex.imgdata));
 
 		if (tex.texture.is_null()) {
@@ -571,7 +550,6 @@ cleanup_stroker:
 }
 
 void DynamicFontAtSize::_update_char(CharType p_char) {
-
 	if (char_map.has(p_char))
 		return;
 
@@ -630,7 +608,6 @@ void DynamicFontAtSize::update_oversampling() {
 }
 
 DynamicFontAtSize::DynamicFontAtSize() {
-
 	valid = false;
 	rect_margin = 1;
 	ascent = 1;
@@ -642,7 +619,6 @@ DynamicFontAtSize::DynamicFontAtSize() {
 }
 
 DynamicFontAtSize::~DynamicFontAtSize() {
-
 	if (valid) {
 		FT_Done_FreeType(library);
 	}
@@ -653,7 +629,6 @@ DynamicFontAtSize::~DynamicFontAtSize() {
 /////////////////////////
 
 void DynamicFont::_reload_cache() {
-
 	ERR_FAIL_COND(cache_id.size < 1);
 	if (!data.is_valid()) {
 		data_at_size.unref();
@@ -684,7 +659,6 @@ void DynamicFont::_reload_cache() {
 }
 
 void DynamicFont::set_font_data(const Ref<DynamicFontData> &p_data) {
-
 	data = p_data;
 	_reload_cache();
 
@@ -693,12 +667,10 @@ void DynamicFont::set_font_data(const Ref<DynamicFontData> &p_data) {
 }
 
 Ref<DynamicFontData> DynamicFont::get_font_data() const {
-
 	return data;
 }
 
 void DynamicFont::set_size(int p_size) {
-
 	if (cache_id.size == p_size)
 		return;
 	cache_id.size = p_size;
@@ -707,7 +679,6 @@ void DynamicFont::set_size(int p_size) {
 }
 
 int DynamicFont::get_size() const {
-
 	return cache_id.size;
 }
 
@@ -736,12 +707,10 @@ Color DynamicFont::get_outline_color() const {
 }
 
 bool DynamicFont::get_use_mipmaps() const {
-
 	return cache_id.mipmaps;
 }
 
 void DynamicFont::set_use_mipmaps(bool p_enable) {
-
 	if (cache_id.mipmaps == p_enable)
 		return;
 	cache_id.mipmaps = p_enable;
@@ -750,12 +719,10 @@ void DynamicFont::set_use_mipmaps(bool p_enable) {
 }
 
 bool DynamicFont::get_use_filter() const {
-
 	return cache_id.filter;
 }
 
 void DynamicFont::set_use_filter(bool p_enable) {
-
 	if (cache_id.filter == p_enable)
 		return;
 	cache_id.filter = p_enable;
@@ -764,31 +731,26 @@ void DynamicFont::set_use_filter(bool p_enable) {
 }
 
 bool DynamicFontData::is_antialiased() const {
-
 	return antialiased;
 }
 
 void DynamicFontData::set_antialiased(bool p_antialiased) {
-
 	if (antialiased == p_antialiased)
 		return;
 	antialiased = p_antialiased;
 }
 
 DynamicFontData::Hinting DynamicFontData::get_hinting() const {
-
 	return hinting;
 }
 
 void DynamicFontData::set_hinting(Hinting p_hinting) {
-
 	if (hinting == p_hinting)
 		return;
 	hinting = p_hinting;
 }
 
 int DynamicFont::get_spacing(int p_type) const {
-
 	if (p_type == SPACING_TOP) {
 		return spacing_top;
 	} else if (p_type == SPACING_BOTTOM) {
@@ -803,7 +765,6 @@ int DynamicFont::get_spacing(int p_type) const {
 }
 
 void DynamicFont::set_spacing(int p_type, int p_value) {
-
 	if (p_type == SPACING_TOP) {
 		spacing_top = p_value;
 	} else if (p_type == SPACING_BOTTOM) {
@@ -819,7 +780,6 @@ void DynamicFont::set_spacing(int p_type, int p_value) {
 }
 
 float DynamicFont::get_height() const {
-
 	if (!data_at_size.is_valid())
 		return 1;
 
@@ -827,7 +787,6 @@ float DynamicFont::get_height() const {
 }
 
 float DynamicFont::get_ascent() const {
-
 	if (!data_at_size.is_valid())
 		return 1;
 
@@ -835,7 +794,6 @@ float DynamicFont::get_ascent() const {
 }
 
 float DynamicFont::get_descent() const {
-
 	if (!data_at_size.is_valid())
 		return 1;
 
@@ -843,7 +801,6 @@ float DynamicFont::get_descent() const {
 }
 
 Size2 DynamicFont::get_char_size(CharType p_char, CharType p_next) const {
-
 	if (!data_at_size.is_valid())
 		return Size2(1, 1);
 
@@ -857,7 +814,6 @@ Size2 DynamicFont::get_char_size(CharType p_char, CharType p_next) const {
 }
 
 String DynamicFont::get_available_chars() const {
-
 	if (!data_at_size.is_valid())
 		return "";
 
@@ -876,7 +832,6 @@ String DynamicFont::get_available_chars() const {
 }
 
 bool DynamicFont::is_distance_field_hint() const {
-
 	return false;
 }
 
@@ -885,7 +840,6 @@ bool DynamicFont::has_outline() const {
 }
 
 float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, bool p_outline) const {
-
 	if (!data_at_size.is_valid())
 		return 0;
 
@@ -905,7 +859,6 @@ float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_
 }
 
 void DynamicFont::set_fallback(int p_idx, const Ref<DynamicFontData> &p_data) {
-
 	ERR_FAIL_COND(p_data.is_null());
 	ERR_FAIL_INDEX(p_idx, fallbacks.size());
 	fallbacks.write[p_idx] = p_data;
@@ -913,7 +866,6 @@ void DynamicFont::set_fallback(int p_idx, const Ref<DynamicFontData> &p_data) {
 }
 
 void DynamicFont::add_fallback(const Ref<DynamicFontData> &p_data) {
-
 	ERR_FAIL_COND(p_data.is_null());
 	fallbacks.push_back(p_data);
 	fallback_data_at_size.push_back(fallbacks.write[fallbacks.size() - 1]->_get_dynamic_font_at_size(cache_id)); //const..
@@ -929,13 +881,11 @@ int DynamicFont::get_fallback_count() const {
 	return fallbacks.size();
 }
 Ref<DynamicFontData> DynamicFont::get_fallback(int p_idx) const {
-
 	ERR_FAIL_INDEX_V(p_idx, fallbacks.size(), Ref<DynamicFontData>());
 
 	return fallbacks[p_idx];
 }
 void DynamicFont::remove_fallback(int p_idx) {
-
 	ERR_FAIL_INDEX(p_idx, fallbacks.size());
 	fallbacks.remove(p_idx);
 	fallback_data_at_size.remove(p_idx);
@@ -944,7 +894,6 @@ void DynamicFont::remove_fallback(int p_idx) {
 }
 
 bool DynamicFont::_set(const StringName &p_name, const Variant &p_value) {
-
 	String str = p_name;
 	if (str.begins_with("fallback/")) {
 		int idx = str.get_slicec('/', 1).to_int();
@@ -970,7 +919,6 @@ bool DynamicFont::_set(const StringName &p_name, const Variant &p_value) {
 }
 
 bool DynamicFont::_get(const StringName &p_name, Variant &r_ret) const {
-
 	String str = p_name;
 	if (str.begins_with("fallback/")) {
 		int idx = str.get_slicec('/', 1).to_int();
@@ -987,7 +935,6 @@ bool DynamicFont::_get(const StringName &p_name, Variant &r_ret) const {
 	return false;
 }
 void DynamicFont::_get_property_list(List<PropertyInfo> *p_list) const {
-
 	for (int i = 0; i < fallbacks.size(); i++) {
 		p_list->push_back(PropertyInfo(Variant::OBJECT, "fallback/" + itos(i), PROPERTY_HINT_RESOURCE_TYPE, "DynamicFontData"));
 	}
@@ -996,7 +943,6 @@ void DynamicFont::_get_property_list(List<PropertyInfo> *p_list) const {
 }
 
 void DynamicFont::_bind_methods() {
-
 	ClassDB::bind_method(D_METHOD("set_font_data", "data"), &DynamicFont::set_font_data);
 	ClassDB::bind_method(D_METHOD("get_font_data"), &DynamicFont::get_font_data);
 
@@ -1050,7 +996,6 @@ SelfList<DynamicFont>::List *DynamicFont::dynamic_fonts = NULL;
 
 DynamicFont::DynamicFont() :
 		font_list(this) {
-
 	cache_id.size = 16;
 	outline_cache_id.size = 16;
 	spacing_top = 0;
@@ -1079,14 +1024,12 @@ void DynamicFont::finish_dynamic_fonts() {
 }
 
 void DynamicFont::update_oversampling() {
-
-	Vector<Ref<DynamicFont> > changed;
+	Vector<Ref<DynamicFont>> changed;
 
 	dynamic_font_mutex.lock();
 
 	SelfList<DynamicFont> *E = dynamic_fonts->first();
 	while (E) {
-
 		if (E->self()->data_at_size.is_valid()) {
 			E->self()->data_at_size->update_oversampling();
 
@@ -1120,7 +1063,6 @@ void DynamicFont::update_oversampling() {
 /////////////////////////
 
 RES ResourceFormatLoaderDynamicFont::load(const String &p_path, const String &p_original_path, Error *r_error) {
-
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
@@ -1135,18 +1077,15 @@ RES ResourceFormatLoaderDynamicFont::load(const String &p_path, const String &p_
 }
 
 void ResourceFormatLoaderDynamicFont::get_recognized_extensions(List<String> *p_extensions) const {
-
 	p_extensions->push_back("ttf");
 	p_extensions->push_back("otf");
 }
 
 bool ResourceFormatLoaderDynamicFont::handles_type(const String &p_type) const {
-
 	return (p_type == "DynamicFontData");
 }
 
 String ResourceFormatLoaderDynamicFont::get_resource_type(const String &p_path) const {
-
 	String el = p_path.get_extension().to_lower();
 	if (el == "ttf" || el == "otf")
 		return "DynamicFontData";

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -267,7 +267,6 @@ public:
 };
 
 class InputEventKey : public InputEventWithModifiers {
-
 	GDCLASS(InputEventKey, InputEventWithModifiers);
 
 	bool pressed; /// otherwise release
@@ -306,7 +305,6 @@ public:
 };
 
 class InputEventMouse : public InputEventWithModifiers {
-
 	GDCLASS(InputEventMouse, InputEventWithModifiers);
 
 	int button_mask;
@@ -331,7 +329,6 @@ public:
 };
 
 class InputEventMouseButton : public InputEventMouse {
-
 	GDCLASS(InputEventMouseButton, InputEventMouse);
 
 	float factor;
@@ -365,7 +362,6 @@ public:
 };
 
 class InputEventMouseMotion : public InputEventMouse {
-
 	GDCLASS(InputEventMouseMotion, InputEventMouse);
 
 	Vector2 tilt;
@@ -398,7 +394,6 @@ public:
 };
 
 class InputEventJoypadMotion : public InputEvent {
-
 	GDCLASS(InputEventJoypadMotion, InputEvent);
 	int axis; ///< Joypad axis
 	float axis_value; ///< -1 to 1
@@ -477,7 +472,6 @@ public:
 };
 
 class InputEventScreenDrag : public InputEvent {
-
 	GDCLASS(InputEventScreenDrag, InputEvent);
 	int index;
 	Vector2 pos;
@@ -507,7 +501,6 @@ public:
 };
 
 class InputEventAction : public InputEvent {
-
 	GDCLASS(InputEventAction, InputEvent);
 
 	StringName action;
@@ -539,7 +532,6 @@ public:
 };
 
 class InputEventGesture : public InputEventWithModifiers {
-
 	GDCLASS(InputEventGesture, InputEventWithModifiers);
 
 	Vector2 pos;
@@ -553,7 +545,6 @@ public:
 };
 
 class InputEventMagnifyGesture : public InputEventGesture {
-
 	GDCLASS(InputEventMagnifyGesture, InputEventGesture);
 	real_t factor;
 
@@ -571,7 +562,6 @@ public:
 };
 
 class InputEventPanGesture : public InputEventGesture {
-
 	GDCLASS(InputEventPanGesture, InputEventGesture);
 	Vector2 delta;
 

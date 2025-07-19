@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -143,7 +143,6 @@ struct BVH_ABB {
 		Vector3 ofs = min + half_extents;
 
 		for (unsigned int i = 0; i < p_num_planes; i++) {
-
 			const Plane &p = p_hull.planes[p_plane_ids[i]];
 			Vector3 point(
 					(p.normal.x > 0) ? -half_extents.x : half_extents.x,
@@ -198,20 +197,26 @@ struct BVH_ABB {
 	}
 
 	bool intersects_point(const Vector3 &p_pt) const {
-		if (_vector3_any_lessthan(-p_pt, neg_max)) return false;
-		if (_vector3_any_lessthan(p_pt, min)) return false;
+		if (_vector3_any_lessthan(-p_pt, neg_max))
+			return false;
+		if (_vector3_any_lessthan(p_pt, min))
+			return false;
 		return true;
 	}
 
 	bool intersects(const BVH_ABB &p_o) const {
-		if (_vector3_any_morethan(p_o.min, -neg_max)) return false;
-		if (_vector3_any_morethan(min, -p_o.neg_max)) return false;
+		if (_vector3_any_morethan(p_o.min, -neg_max))
+			return false;
+		if (_vector3_any_morethan(min, -p_o.neg_max))
+			return false;
 		return true;
 	}
 
 	bool is_other_within(const BVH_ABB &p_o) const {
-		if (_vector3_any_lessthan(p_o.neg_max, neg_max)) return false;
-		if (_vector3_any_lessthan(p_o.min, min)) return false;
+		if (_vector3_any_lessthan(p_o.neg_max, neg_max))
+			return false;
+		if (_vector3_any_lessthan(p_o.min, min))
+			return false;
 		return true;
 	}
 
@@ -235,16 +240,22 @@ struct BVH_ABB {
 	}
 
 	bool _vector3_any_morethan(const Vector3 &p_a, const Vector3 &p_b) const {
-		if (p_a.x > p_b.x) return true;
-		if (p_a.y > p_b.y) return true;
-		if (p_a.z > p_b.z) return true;
+		if (p_a.x > p_b.x)
+			return true;
+		if (p_a.y > p_b.y)
+			return true;
+		if (p_a.z > p_b.z)
+			return true;
 		return false;
 	}
 
 	bool _vector3_any_lessthan(const Vector3 &p_a, const Vector3 &p_b) const {
-		if (p_a.x < p_b.x) return true;
-		if (p_a.y < p_b.y) return true;
-		if (p_a.z < p_b.z) return true;
+		if (p_a.x < p_b.x)
+			return true;
+		if (p_a.y < p_b.y)
+			return true;
+		if (p_a.z < p_b.z)
+			return true;
 		return false;
 	}
 };

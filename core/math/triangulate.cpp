@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,7 +31,6 @@
 #include "triangulate.h"
 
 real_t Triangulate::get_area(const Vector<Vector2> &contour) {
-
 	int n = contour.size();
 	const Vector2 *c = &contour[0];
 
@@ -44,8 +43,8 @@ real_t Triangulate::get_area(const Vector<Vector2> &contour) {
 }
 
 /*
-     is_inside_triangle decides if a point P is Inside of the triangle
-     defined by A, B, C.
+	 is_inside_triangle decides if a point P is Inside of the triangle
+	 defined by A, B, C.
    */
 
 bool Triangulate::is_inside_triangle(real_t Ax, real_t Ay,
@@ -103,13 +102,16 @@ bool Triangulate::snip(const Vector<Vector2> &p_contour, int u, int v, int w, in
 	// To avoid that we allow zero-area triangles if all else failed.
 	float threshold = relaxed ? -CMP_EPSILON : CMP_EPSILON;
 
-	if (threshold > (((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax)))) return false;
+	if (threshold > (((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax))))
+		return false;
 
 	for (p = 0; p < n; p++) {
-		if ((p == u) || (p == v) || (p == w)) continue;
+		if ((p == u) || (p == v) || (p == w))
+			continue;
 		Px = contour[V[p]].x;
 		Py = contour[V[p]].y;
-		if (is_inside_triangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py, relaxed)) return false;
+		if (is_inside_triangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py, relaxed))
+			return false;
 	}
 
 	return true;
@@ -119,7 +121,8 @@ bool Triangulate::triangulate(const Vector<Vector2> &contour, Vector<int> &resul
 	/* allocate and initialize list of Vertices in polygon */
 
 	int n = contour.size();
-	if (n < 3) return false;
+	if (n < 3)
+		return false;
 
 	Vector<int> V;
 	V.resize(n);
@@ -161,11 +164,14 @@ bool Triangulate::triangulate(const Vector<Vector2> &contour, Vector<int> &resul
 
 		/* three consecutive vertices in current polygon, <u,v,w> */
 		int u = v;
-		if (nv <= u) u = 0; /* previous */
+		if (nv <= u)
+			u = 0; /* previous */
 		v = u + 1;
-		if (nv <= v) v = 0; /* new v    */
+		if (nv <= v)
+			v = 0; /* new v    */
 		int w = v + 1;
-		if (nv <= w) w = 0; /* next     */
+		if (nv <= w)
+			w = 0; /* next     */
 
 		if (snip(contour, u, v, w, nv, V, relaxed)) {
 			int a, b, c, s, t;

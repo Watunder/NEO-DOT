@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,7 +40,6 @@
 #include "core/ustring.h"
 
 struct MemoryPool {
-
 	//avoid accessing these directly, must be public for template access
 
 	static PoolAllocator *memory_pool;
@@ -48,7 +47,6 @@ struct MemoryPool {
 	static size_t *pool_size;
 
 	struct Alloc {
-
 		SafeRefCount refcount;
 		SafeNumeric<uint32_t> lock;
 		void *mem;
@@ -80,11 +78,9 @@ struct MemoryPool {
 
 template <class T>
 class PoolVector {
-
 	MemoryPool::Alloc *alloc;
 
 	void _copy_on_write() {
-
 		if (!alloc)
 			return;
 
@@ -126,7 +122,6 @@ class PoolVector {
 		MemoryPool::alloc_mutex.unlock();
 
 		if (MemoryPool::memory_pool) {
-
 		} else {
 			alloc->mem = memalloc(alloc->size);
 		}
@@ -170,7 +165,6 @@ class PoolVector {
 				//if none, create
 				//if some resize
 			} else {
-
 				memfree(old_alloc->mem);
 				old_alloc->mem = NULL;
 				old_alloc->size = 0;
@@ -185,7 +179,6 @@ class PoolVector {
 	}
 
 	void _reference(const PoolVector &p_pool_vector) {
-
 		if (alloc == p_pool_vector.alloc)
 			return;
 
@@ -201,7 +194,6 @@ class PoolVector {
 	}
 
 	void _unreference() {
-
 		if (!alloc)
 			return;
 
@@ -222,7 +214,6 @@ class PoolVector {
 			w._ref(alloc);
 
 			for (int i = 0; i < cur_elements; i++) {
-
 				w[i].~T();
 			}
 		}
@@ -238,7 +229,6 @@ class PoolVector {
 			//if none, create
 			//if some resize
 		} else {
-
 			memfree(alloc->mem);
 			alloc->mem = NULL;
 			alloc->size = 0;
@@ -275,7 +265,6 @@ public:
 		}
 
 		_FORCE_INLINE_ void _unref() {
-
 			if (alloc) {
 				if (alloc->lock.decrement() == 0) {
 					if (MemoryPool::memory_pool) {
@@ -342,7 +331,6 @@ public:
 	};
 
 	Read read() const {
-
 		Read r;
 		if (alloc) {
 			r._ref(alloc);
@@ -350,7 +338,6 @@ public:
 		return r;
 	}
 	Write write() {
-
 		Write w;
 		if (alloc) {
 			_copy_on_write(); //make sure there is only one being accessed
@@ -361,24 +348,20 @@ public:
 
 	template <class MC>
 	void fill_with(const MC &p_mc) {
-
 		int c = p_mc.size();
 		resize(c);
 		Write w = write();
 		int idx = 0;
 		for (const typename MC::Element *E = p_mc.front(); E; E = E->next()) {
-
 			w[idx++] = E->get();
 		}
 	}
 
 	void remove(int p_index) {
-
 		int s = size();
 		ERR_FAIL_INDEX(p_index, s);
 		Write w = write();
 		for (int i = p_index; i < s - 1; i++) {
-
 			w[i] = w[i + 1];
 		};
 		w = Write();
@@ -404,7 +387,6 @@ public:
 	}
 
 	PoolVector<T> subarray(int p_from, int p_to) {
-
 		if (p_from < 0) {
 			p_from = size() + p_from;
 		}
@@ -428,7 +410,6 @@ public:
 	}
 
 	Error insert(int p_pos, const T &p_val) {
-
 		int s = size();
 		ERR_FAIL_INDEX_V(p_pos, s + 1, ERR_INVALID_PARAMETER);
 		resize(s + 1);
@@ -472,25 +453,21 @@ public:
 
 template <class T>
 int PoolVector<T>::size() const {
-
 	return alloc ? alloc->size / sizeof(T) : 0;
 }
 
 template <class T>
 bool PoolVector<T>::empty() const {
-
 	return alloc ? alloc->size == 0 : true;
 }
 
 template <class T>
 T PoolVector<T>::get(int p_index) const {
-
 	return operator[](p_index);
 }
 
 template <class T>
 void PoolVector<T>::set(int p_index, const T &p_val) {
-
 	ERR_FAIL_INDEX(p_index, size());
 
 	Write w = write();
@@ -499,14 +476,12 @@ void PoolVector<T>::set(int p_index, const T &p_val) {
 
 template <class T>
 void PoolVector<T>::push_back(const T &p_val) {
-
 	resize(size() + 1);
 	set(size() - 1, p_val);
 }
 
 template <class T>
 T PoolVector<T>::operator[](int p_index) const {
-
 	CRASH_BAD_INDEX(p_index, size());
 
 	Read r = read();
@@ -515,11 +490,9 @@ T PoolVector<T>::operator[](int p_index) const {
 
 template <class T>
 Error PoolVector<T>::resize(int p_size) {
-
 	ERR_FAIL_COND_V_MSG(p_size < 0, ERR_INVALID_PARAMETER, "Size of PoolVector cannot be negative.");
 
 	if (alloc == NULL) {
-
 		if (p_size == 0)
 			return OK; //nothing to do here
 
@@ -543,7 +516,6 @@ Error PoolVector<T>::resize(int p_size) {
 		MemoryPool::alloc_mutex.unlock();
 
 	} else {
-
 		ERR_FAIL_COND_V_MSG(alloc->lock.get() > 0, ERR_LOCKED, "Can't resize PoolVector if locked."); //can't resize if locked!
 	}
 
@@ -572,13 +544,11 @@ Error PoolVector<T>::resize(int p_size) {
 	int cur_elements = alloc->size / sizeof(T);
 
 	if (p_size > cur_elements) {
-
 		if (MemoryPool::memory_pool) {
 			//resize memory pool
 			//if none, create
 			//if some resize
 		} else {
-
 			if (alloc->size == 0) {
 				alloc->mem = memalloc(new_size);
 			} else {
@@ -591,16 +561,13 @@ Error PoolVector<T>::resize(int p_size) {
 		Write w = write();
 
 		for (int i = cur_elements; i < p_size; i++) {
-
 			memnew_placement(&w[i], T);
 		}
 
 	} else {
-
 		{
 			Write w = write();
 			for (int i = p_size; i < cur_elements; i++) {
-
 				w[i].~T();
 			}
 		}
@@ -610,7 +577,6 @@ Error PoolVector<T>::resize(int p_size) {
 			//if none, create
 			//if some resize
 		} else {
-
 			if (new_size == 0) {
 				memfree(alloc->mem);
 				alloc->mem = NULL;

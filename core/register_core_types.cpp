@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -98,7 +98,6 @@ extern void register_variant_methods();
 extern void unregister_variant_methods();
 
 void register_core_types() {
-
 	MemoryPool::setup();
 
 	StringName::setup();
@@ -234,7 +233,6 @@ void register_core_settings() {
 }
 
 void register_core_singletons() {
-
 	ClassDB::register_class<ProjectSettings>();
 	ClassDB::register_virtual_class<IP>();
 	ClassDB::register_class<_Geometry>();
@@ -266,7 +264,6 @@ void register_core_singletons() {
 }
 
 void unregister_core_types() {
-
 	memdelete(_resource_loader);
 	memdelete(_resource_saver);
 	memdelete(_os);
