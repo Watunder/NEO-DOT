@@ -11,8 +11,8 @@ header = """\
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-present Godot Engine contributors (cf. AUTHORS.md).*/
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -65,7 +65,7 @@ text += "\n"
 # In a second pass, we skip all consecutive comment lines starting with "/*",
 # then we can append the rest (step 2).
 
-fileread = open(fname.strip(), "r")
+fileread = open(fname.strip(), "r", encoding="utf-8")
 line = fileread.readline()
 header_done = False
 
@@ -90,6 +90,6 @@ while line != "":  # Dump everything until EOF
 fileread.close()
 
 # Write
-filewrite = open(fname.strip(), "w")
+filewrite = open(fname.strip(), "w", encoding="utf-8")
 filewrite.write(text)
 filewrite.close()
