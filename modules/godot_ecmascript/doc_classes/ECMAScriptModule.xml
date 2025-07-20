@@ -10,9 +10,9 @@
 	</tutorials>
 	<methods>
 		<method name="get_bytecode" qualifiers="const">
-			<return type="PackedByteArray" />
+			<return type="PoolByteArray" />
 			<description>
-				Returns the bytecode of the ECMAScript module as a PackedByteArray.
+				Returns the bytecode of the ECMAScript module as a [PoolByteArray].
 			</description>
 		</method>
 		<method name="get_source_code" qualifiers="const">
@@ -23,9 +23,9 @@
 		</method>
 		<method name="set_bytecode">
 			<return type="void" />
-			<param index="0" name="bytecode" type="PackedByteArray" />
+			<param index="0" name="bytecode" type="PoolByteArray" />
 			<description>
-				Sets the bytecode of the ECMAScript module using a PackedByteArray.
+				Sets the bytecode of the ECMAScript module using a [PoolByteArray].
 			</description>
 		</method>
 		<method name="set_source_code">

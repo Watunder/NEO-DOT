@@ -43,7 +43,7 @@
 		mi.Mesh = mesh;
 		AddChild(mi);
 		[/csharp]
-		[/codeblocks]
+		[/codeblock]
 		See also [ArrayMesh], [ImmediateMesh] and [SurfaceTool] for procedural geometry generation.
 		[b]Note:[/b] Godot uses clockwise [url=https://learnopengl.com/Advanced-OpenGL/Face-culling]winding order[/url] for front faces of triangle primitive modes.
 	</description>
