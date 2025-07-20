@@ -1,0 +1,41 @@
+name: 📊 Static Checks
+on:
+  workflow_call:
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-static
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: Static Checks (clang-format, black format, file format, documentation checks)
+    runs-on: "ubuntu-22.04"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Azure repositories are flaky, remove them.
+          sudo rm -f /etc/apt/sources.list.d/{azure,microsoft}*
+          sudo apt-get update
+          sudo apt-get install -qq dos2unix python3-pip moreutils
+          sudo update-alternatives --remove-all clang-format || true
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-13 100
+          sudo pip3 install black==24.8.0 pygments
+
+      - name: File formatting checks (file_format.sh)
+        run: |
+          bash ./misc/scripts/file_format.sh
+
+      - name: Python style checks via black (black_format.sh)
+        run: |
+          bash ./misc/scripts/black_format.sh
+
+      - name: Documentation checks
+        run: |
+          python doc/tools/makerst.py --dry-run doc/classes modules
+
+      - name: Style checks via clang-format (clang_format.sh)
+        run: |
+          bash ./misc/scripts/clang_format.sh
