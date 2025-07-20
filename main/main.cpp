@@ -1496,9 +1496,11 @@ bool Main::start() {
 	}
 
 	MainLoop *main_loop = NULL;
+#ifdef TOOLS_ENABLED
 	if (editor) {
 		main_loop = editor_main("editor", args);
 	};
+#endif
 
 	if (test != "") {
 #ifdef TOOLS_ENABLED
