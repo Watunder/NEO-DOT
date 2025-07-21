@@ -6,7 +6,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  push-checks:
+    uses: ./.github/workflows/push_checks.yml
+
   static-checks:
+    needs: push-checks
+    if: |
+      github.event_name == 'pull_request' ||
+      needs.push-checks.outputs.has-open-pr == 'false'
     name: 📊 Static
     uses: ./.github/workflows/static_checks.yml
 
