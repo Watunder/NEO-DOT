@@ -11,13 +11,13 @@ env:
   SCONS_CACHE_MSVC_CONFIG: true
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-windows
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-windows_builds
   cancel-in-progress: true
 
 jobs:
   build-windows:
     # Windows with latest image
-    runs-on: "windows-latest"
+    runs-on: windows-latest
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -27,7 +27,7 @@ jobs:
             cache-name: windows-editor
             target: release_debug
             tools: true
-            bin: "./bin/godot.windows.opt.tools.64.exe"
+            bin: './bin/godot.windows.opt.tools.64.exe'
 
           - name: Template (target=release, tools=no)
             cache-name: windows-template

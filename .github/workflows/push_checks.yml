@@ -1,0 +1,29 @@
+name: Push Checks
+on:
+  workflow_call:
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-push_checks
+  cancel-in-progress: true
+
+jobs:
+  push-checks:
+    name: Push Checks
+    runs-on: ubuntu-22.04
+    outputs:
+      has-open-pr: ${{ steps.check-prs.outputs.has-open-pr }}
+    steps:
+      - name: Check for open PRs for the push
+        id: check-prs
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+            });
+
+            core.setOutput('has-open-pr', prs.length == 0 ? 'false' : 'true');
