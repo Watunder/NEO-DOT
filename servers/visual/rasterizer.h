@@ -1121,7 +1121,7 @@ public:
 
 	virtual void reset_canvas() = 0;
 
-	virtual void draw_window_margins(int *p_margins, RID *p_margin_textures) = 0;
+	virtual void draw_window_margins(int *p_margins, RID *p_margin_textures, RID p_custom_title_bar_texture) = 0;
 
 	virtual ~RasterizerCanvas() {}
 };

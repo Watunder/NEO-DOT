@@ -98,6 +98,7 @@ private:
 		Group() { changed = false; };
 	};
 
+	Viewport *custom_title_bar_viewport;
 	Viewport *root;
 
 	uint64_t tree_version;
@@ -123,6 +124,8 @@ private:
 	StringName node_added_name;
 	StringName node_removed_name;
 	StringName node_renamed_name;
+
+	bool last_custom_title_bar_visible;
 
 	bool use_font_oversampling;
 	int64_t current_frame;
@@ -276,6 +279,7 @@ public:
 		GROUP_CALL_MULTILEVEL = 8,
 	};
 
+	_FORCE_INLINE_ Viewport *get_custom_title_bar_viewport() const { return custom_title_bar_viewport; }
 	_FORCE_INLINE_ Viewport *get_root() const { return root; }
 
 	void call_group_flags(uint32_t p_call_flags, const StringName &p_group, const StringName &p_function, VARIANT_ARG_LIST);

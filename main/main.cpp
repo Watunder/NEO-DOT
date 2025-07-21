@@ -1051,6 +1051,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		video_mode.borderless = GLOBAL_GET("display/window/borderless/enabled");
 		video_mode.borderless_resizable = GLOBAL_GET("display/window/borderless/resizable");
 		video_mode.borderless_shadow = GLOBAL_GET("display/window/borderless/shadow");
+		video_mode.custom_title_bar_enabled = GLOBAL_GET("display/window/custom_title_bar/enabled");
+		video_mode.custom_title_bar_height = GLOBAL_GET("display/window/custom_title_bar/height");
 	}
 
 	if (!force_lowdpi) {

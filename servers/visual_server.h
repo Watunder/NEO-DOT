@@ -986,6 +986,10 @@ public:
 	};
 	virtual void canvas_occluder_polygon_set_cull_mode(RID p_occluder_polygon, CanvasOccluderPolygonCullMode p_mode) = 0;
 
+	/* CUSTOM TITLE BAR */
+
+	virtual void custom_title_bar_set_image(RID p_texture) = 0;
+
 	/* BLACK BARS */
 
 	virtual void black_bars_set_margins(int p_left, int p_top, int p_right, int p_bottom) = 0;
