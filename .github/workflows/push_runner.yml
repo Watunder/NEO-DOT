@@ -1,0 +1,30 @@
+name: 🔗 GHA for the push (v0.0.1)
+run-name: |
+  ${{
+    (github.ref == 'refs/heads/master' && format('🚀 Production | {0}', github.event.head_commit.message))
+    || format('🧪 Testing | {0}', github.event.head_commit.message)
+  }}
+
+on: [push]
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-push_runner
+  cancel-in-progress: true
+
+jobs:
+  push-checks:
+    name: 📄 Push
+    uses: ./.github/workflows/push_checks.yml
+
+  static-checks:
+    needs: push-checks
+    name: 📊 Static
+    if: |
+      github.ref == 'refs/heads/master' ||
+      needs.push-checks.outputs.has-open-pr == 'false'
+    uses: ./.github/workflows/static_checks.yml
+
+  windows-build:
+    name: 🏁 Windows
+    needs: static-checks
+    uses: ./.github/workflows/windows_builds.yml

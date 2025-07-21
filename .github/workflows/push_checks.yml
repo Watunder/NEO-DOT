@@ -1,4 +1,4 @@
-name: Push Checks
+name: 📄 Push Checks
 on:
   workflow_call:
 
@@ -8,12 +8,12 @@ concurrency:
 
 jobs:
   push-checks:
-    name: Push Checks
+    name: Push Checks (has-open-pr)
     runs-on: ubuntu-22.04
     outputs:
       has-open-pr: ${{ steps.check-prs.outputs.has-open-pr }}
     steps:
-      - name: Check for open PRs for the push
+      - name: Check for open PRs
         id: check-prs
         uses: actions/github-script@v6
         with:
@@ -26,4 +26,4 @@ jobs:
               head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
             });
 
-            core.setOutput('has-open-pr', prs.length == 0 ? 'false' : 'true');
+            core.setOutput('has-open-pr', prs.length > 0 ? 'true' : 'false');
