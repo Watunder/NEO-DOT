@@ -1,0 +1,22 @@
+name: 🔗 GHA for the PR (v0.0.1)
+run-name: |
+  ${{
+    (github.event.pull_request.draft && format('📝 Draft PR | {0}', github.event.pull_request.title))
+    || format('🔁 Open PR | {0}', github.event.pull_request.title)
+  }}
+
+on: [pull_request]
+
+concurrency:
+  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-pr_runner
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: 📊 Static
+    uses: ./.github/workflows/static_checks.yml
+
+  windows-build:
+    name: 🏁 Windows
+    needs: static-checks
+    uses: ./.github/workflows/windows_builds.yml
