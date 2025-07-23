@@ -308,6 +308,11 @@ void OS_Windows::_drag_event(float p_x, float p_y, int idx) {
 	curr->get() = Vector2(p_x, p_y);
 };
 
+static void set_menu_item_state(HMENU menu, MENUITEMINFO *menuItemInfo, UINT item, bool enabled) {
+	menuItemInfo->fState = enabled ? MF_ENABLED : MF_DISABLED;
+	SetMenuItemInfo(menu, item, false, menuItemInfo);
+}
+
 LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (drop_events) {
 		if (user_proc) {
@@ -1323,6 +1328,32 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			}
 		} break;
 
+		case WM_NCRBUTTONUP: {
+			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && wParam == HTCAPTION) {
+				POINT mouse_pos = {
+					GET_X_LPARAM(lParam),
+					GET_Y_LPARAM(lParam),
+				};
+
+				MENUITEMINFO menu_item_info = {
+					sizeof(menu_item_info),
+					MIIM_STATE
+				};
+
+				set_menu_item_state(system_menu, &menu_item_info, SC_RESTORE, maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MOVE, !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_SIZE, video_mode.borderless_resizable && !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MAXIMIZE, video_mode.borderless_resizable && !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MINIMIZE, true);
+				set_menu_item_state(system_menu, &menu_item_info, SC_CLOSE, true);
+
+				int system_command = TrackPopupMenuEx(system_menu, TPM_RETURNCMD, mouse_pos.x, mouse_pos.y, hWnd, NULL);
+				if (system_command != 0) {
+					PostMessage(hWnd, WM_SYSCOMMAND, system_command, 0);
+				}
+			}
+		} break;
+
 		case WM_DPICHANGED: {
 			int dpi = HIWORD(wParam);
 			scale = (float)dpi / USER_DEFAULT_SCREEN_DPI;
@@ -1660,6 +1691,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		}
 	};
 
+	system_menu = GetSystemMenu(hWnd, false);
 	system_theme = memnew(SystemTheme(hWnd));
 
 	if (video_mode.borderless_shadow) {

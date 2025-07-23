@@ -326,6 +326,7 @@ class OS_Windows : public OS {
 	Size2 min_size;
 	Size2 max_size;
 
+	HMENU system_menu;
 	SystemTheme *system_theme;
 	Map<int, Rect2> custom_title_bar_client_rects;
 
