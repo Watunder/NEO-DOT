@@ -46,7 +46,6 @@
 #include "scene/gui/panel.h"
 #include "scene/gui/panel_container.h"
 #include "scene/gui/popup_menu.h"
-#include "scene/gui/tree.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/timer.h"
 #include "scene/resources/mesh.h"
@@ -2134,28 +2133,11 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 					can_tooltip = false;
 			}
 
-			bool is_tooltip_shown = false;
-
-			if (gui.tooltip_popup) {
-				if (can_tooltip && gui.tooltip_control) {
-					String tooltip = _gui_get_tooltip(over, gui.tooltip_control->get_global_transform().xform_inv(mpos));
-
-					if (tooltip.length() == 0) {
-						_gui_cancel_tooltip();
-					} else if (gui.tooltip_label) {
-						if (tooltip == gui.tooltip_label->get_text()) {
-							is_tooltip_shown = true;
-						} else {
-							_gui_cancel_tooltip();
-						}
-					} else if (tooltip == String(gui.tooltip_popup->call("get_tooltip_text"))) {
-						is_tooltip_shown = true;
-					}
-				} else
-					_gui_cancel_tooltip();
+			if (gui.tooltip_popup || gui.tooltip_label) {
+				_gui_cancel_tooltip();
 			}
 
-			if (can_tooltip && !is_tooltip_shown) {
+			if (can_tooltip) {
 				gui.tooltip_control = over;
 				gui.tooltip_pos = mpos;
 				gui.tooltip_timer = gui.tooltip_delay;
