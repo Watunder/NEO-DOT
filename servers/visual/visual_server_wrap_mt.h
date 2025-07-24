@@ -569,6 +569,10 @@ public:
 
 	FUNC2(canvas_occluder_polygon_set_cull_mode, RID, CanvasOccluderPolygonCullMode)
 
+	/* CUSTOM TITLE BAR */
+
+	FUNC1(custom_title_bar_set_image, RID)
+
 	/* BLACK BARS */
 
 	FUNC4(black_bars_set_margins, int, int, int, int)

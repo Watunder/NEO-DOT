@@ -426,8 +426,14 @@ void SceneTree::input_event(const Ref<InputEvent> &p_event) {
 
 void SceneTree::init() {
 	ERR_FAIL_COND(!root);
-	initialized = true;
 	root->_set_tree(this);
+
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled) {
+		ERR_FAIL_COND(!custom_title_bar_viewport);
+		custom_title_bar_viewport->_set_tree(this);
+	}
+
+	initialized = true;
 	MainLoop::init();
 }
 
@@ -492,9 +498,11 @@ bool SceneTree::idle(float p_time) {
 	_notify_group_pause("idle_process", Node::NOTIFICATION_PROCESS);
 
 	Size2 win_size = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	bool custom_title_bar_visible = OS::get_singleton()->is_custom_title_bar_visible();
 
-	if (win_size != last_screen_size) {
+	if (win_size != last_screen_size || custom_title_bar_visible != last_custom_title_bar_visible) {
 		last_screen_size = win_size;
+		last_custom_title_bar_visible = custom_title_bar_visible;
 		_update_root_rect();
 		emit_signal("screen_resized");
 	}
@@ -577,6 +585,13 @@ void SceneTree::finish() {
 	initialized = false;
 
 	MainLoop::finish();
+
+	if (custom_title_bar_viewport) {
+		custom_title_bar_viewport->_set_tree(NULL);
+		custom_title_bar_viewport->_propagate_after_exit_tree();
+		memdelete(custom_title_bar_viewport); //delete custom_title_bar_viewport
+		custom_title_bar_viewport = NULL;
+	}
 
 	if (root) {
 		root->_set_tree(NULL);
@@ -1063,10 +1078,32 @@ int SceneTree::get_node_count() const {
 }
 
 void SceneTree::_update_root_rect() {
+	Vector2 fix_offset;
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled) {
+		if (OS::get_singleton()->is_custom_title_bar_visible()) {
+			fix_offset.y += OS::get_singleton()->get_video_mode().custom_title_bar_height * OS::get_singleton()->get_screen_scale();
+
+			if (custom_title_bar_viewport) {
+				Size2 custom_title_bar_size = Size2(last_screen_size.width, fix_offset.y);
+
+				custom_title_bar_viewport->set_size(custom_title_bar_size);
+				custom_title_bar_viewport->set_attach_to_screen_rect(Rect2(Point2(), custom_title_bar_size));
+				custom_title_bar_viewport->update_canvas_items();
+
+				custom_title_bar_viewport->set_update_mode(Viewport::UPDATE_ALWAYS);
+			}
+		} else if (custom_title_bar_viewport) {
+			custom_title_bar_viewport->set_update_mode(Viewport::UPDATE_DISABLED);
+		}
+	}
+
 	if (stretch_mode == STRETCH_MODE_DISABLED) {
+		Size2 screen_size = last_screen_size;
+		screen_size -= fix_offset;
+
 		_update_font_oversampling(1.0);
-		root->set_size((last_screen_size / stretch_shrink).floor());
-		root->set_attach_to_screen_rect(Rect2(Point2(), last_screen_size));
+		root->set_size((screen_size / stretch_shrink).floor());
+		root->set_attach_to_screen_rect(Rect2(fix_offset, screen_size));
 		root->set_size_override_stretch(false);
 		root->set_size_override(false, Size2());
 		root->update_canvas_items();
@@ -1075,6 +1112,7 @@ void SceneTree::_update_root_rect() {
 
 	//actual screen video mode
 	Size2 video_mode = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	video_mode -= fix_offset;
 	Size2 desired_res = stretch_min;
 
 	Size2 viewport_size;
@@ -1139,6 +1177,7 @@ void SceneTree::_update_root_rect() {
 	} else {
 		VisualServer::get_singleton()->black_bars_set_margins(0, 0, 0, 0);
 	}
+	margin += fix_offset;
 
 	switch (stretch_mode) {
 		case STRETCH_MODE_DISABLED: {
@@ -1706,6 +1745,7 @@ bool SceneTree::is_refusing_new_network_connections() const {
 }
 
 void SceneTree::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_custom_title_bar_viewport"), &SceneTree::get_custom_title_bar_viewport);
 	ClassDB::bind_method(D_METHOD("get_root"), &SceneTree::get_root);
 	ClassDB::bind_method(D_METHOD("has_group", "name"), &SceneTree::has_group);
 
@@ -1802,6 +1842,7 @@ void SceneTree::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "edited_scene_root", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "set_edited_scene_root", "get_edited_scene_root");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_scene", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "set_current_scene", "get_current_scene");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "network_peer", PROPERTY_HINT_RESOURCE_TYPE, "NetworkedMultiplayerPeer", 0), "set_network_peer", "get_network_peer");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "custom_title_bar_viewport", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "", "get_custom_title_bar_viewport");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "root", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "", "get_root");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "multiplayer", PROPERTY_HINT_RESOURCE_TYPE, "MultiplayerAPI", 0), "set_multiplayer", "get_multiplayer");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "multiplayer_poll"), "set_multiplayer_poll_enabled", "is_multiplayer_poll_enabled");
@@ -1926,6 +1967,7 @@ SceneTree::SceneTree() {
 	physics_process_time = 1;
 	idle_process_time = 1;
 
+	custom_title_bar_viewport = NULL;
 	root = NULL;
 	input_handled = false;
 	pause = false;
@@ -1941,6 +1983,14 @@ SceneTree::SceneTree() {
 	node_count = 0;
 
 	//create with mainloop
+
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled) {
+		custom_title_bar_viewport = memnew(Viewport);
+		custom_title_bar_viewport->set_name("custom_title_bar_viewport");
+		custom_title_bar_viewport->set_handle_input_locally(false);
+		if (!custom_title_bar_viewport->get_world().is_valid())
+			custom_title_bar_viewport->set_world(Ref<World>(memnew(World)));
+	}
 
 	root = memnew(Viewport);
 	root->set_name("root");
@@ -2015,6 +2065,7 @@ SceneTree::SceneTree() {
 	stretch_shrink = 1;
 
 	last_screen_size = Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height);
+	last_custom_title_bar_visible = OS::get_singleton()->is_custom_title_bar_visible();
 	_update_root_rect();
 
 	if (ScriptDebugger::get_singleton()) {
@@ -2040,6 +2091,12 @@ SceneTree::SceneTree() {
 }
 
 SceneTree::~SceneTree() {
+	if (custom_title_bar_viewport) {
+		custom_title_bar_viewport->_set_tree(NULL);
+		custom_title_bar_viewport->_propagate_after_exit_tree();
+		memdelete(custom_title_bar_viewport);
+	}
+
 	if (root) {
 		root->_set_tree(NULL);
 		root->_propagate_after_exit_tree();

@@ -42,6 +42,12 @@
 
 int VisualServerRaster::changes = 0;
 
+/* CUSTOM TITLE BAR */
+
+void VisualServerRaster::custom_title_bar_set_image(RID p_texture) {
+	custom_title_bar_image = p_texture;
+}
+
 /* BLACK BARS */
 
 void VisualServerRaster::black_bars_set_margins(int p_left, int p_top, int p_right, int p_bottom) {
@@ -59,7 +65,7 @@ void VisualServerRaster::black_bars_set_images(RID p_left, RID p_top, RID p_righ
 }
 
 void VisualServerRaster::_draw_margins() {
-	VSG::canvas_render->draw_window_margins(black_margin, black_image);
+	VSG::canvas_render->draw_window_margins(black_margin, black_image, custom_title_bar_image);
 };
 
 /* FREE */
@@ -98,10 +104,10 @@ void VisualServerRaster::draw(bool p_swap_buffers, double frame_step) {
 	VSG::rasterizer->begin_frame(frame_step);
 
 	VSG::scene->update_dirty_instances(); //update scene stuff
-
+	_draw_margins();
 	VSG::viewport->draw_viewports();
 	VSG::scene->render_probes();
-	_draw_margins();
+
 	VSG::rasterizer->end_frame(p_swap_buffers);
 
 	while (frame_drawn_callbacks.front()) {

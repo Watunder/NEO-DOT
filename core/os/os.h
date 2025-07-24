@@ -107,8 +107,10 @@ public:
 		bool use_vsync;
 		bool vsync_via_compositor;
 		bool layered;
+		bool custom_title_bar_enabled;
+		int custom_title_bar_height;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless = false, bool p_borderless_shadow = false, bool p_borderless_resizable = false, bool p_maximized = false, bool p_always_on_top = false, bool p_keep_aspect_ratio = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless = false, bool p_borderless_shadow = false, bool p_borderless_resizable = false, bool p_maximized = false, bool p_always_on_top = false, bool p_keep_aspect_ratio = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false, bool p_custom_title_bar_enabled = false, bool p_custom_title_bar_height = 32) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
@@ -122,6 +124,8 @@ public:
 			use_vsync = p_use_vsync;
 			vsync_via_compositor = p_vsync_via_compositor;
 			layered = false;
+			custom_title_bar_enabled = p_custom_title_bar_enabled;
+			custom_title_bar_height = p_custom_title_bar_height;
 		}
 	};
 
@@ -186,6 +190,11 @@ public:
 	virtual void set_video_mode(const VideoMode &p_video_mode, int p_screen = 0) = 0;
 	virtual VideoMode get_video_mode(int p_screen = 0) const = 0;
 	virtual void get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen = 0) const = 0;
+
+	virtual void insert_custom_title_bar_client_rect(int p_idx, const Rect2 &p_rect) = 0;
+	virtual void erase_custom_title_bar_client_rect(int p_idx) = 0;
+	virtual void set_custom_title_bar_visible(bool p_enabled) = 0;
+	virtual bool is_custom_title_bar_visible() const = 0;
 
 	enum VideoDriver {
 		VIDEO_DRIVER_GLES3,

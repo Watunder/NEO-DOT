@@ -308,6 +308,11 @@ void OS_Windows::_drag_event(float p_x, float p_y, int idx) {
 	curr->get() = Vector2(p_x, p_y);
 };
 
+static void set_menu_item_state(HMENU menu, MENUITEMINFO *menuItemInfo, UINT item, bool enabled) {
+	menuItemInfo->fState = enabled ? MF_ENABLED : MF_DISABLED;
+	SetMenuItemInfo(menu, item, false, menuItemInfo);
+}
+
 LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (drop_events) {
 		if (user_proc) {
@@ -1015,6 +1020,10 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					(rect.bottom - rect.top) - crect.bottom,
 				};
 
+				if (video_mode.custom_title_bar_enabled && custom_title_bar_visible) {
+					viewport_offset.y += video_mode.custom_title_bar_height * scale;
+				}
+
 				float aspect_ratio = get_window_aspect_ratio();
 
 				RECT *r = reinterpret_cast<RECT *>(lParam);
@@ -1043,6 +1052,11 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				int window_w = LOWORD(lParam);
 				int window_h = HIWORD(lParam);
 				if (window_w > 0 && window_h > 0 && !preserve_window_size) {
+					if (maximized && video_mode.borderless) {
+						if (video_mode.custom_title_bar_enabled && !custom_title_bar_visible) {
+							window_h -= video_mode.custom_title_bar_height * scale;
+						}
+					}
 					video_mode.width = window_w;
 					video_mode.height = window_h;
 				} else {
@@ -1280,7 +1294,63 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					}
 				}
 
+				if (video_mode.custom_title_bar_enabled && custom_title_bar_visible) {
+					for (Map<int, Rect2>::Element *E = custom_title_bar_client_rects.front(); E; E = E->next()) {
+						if (E->get().has_point(Point2(mouse_pos.x, mouse_pos.y))) {
+							return HTCLIENT;
+						}
+					}
+
+					bool hit_cation = (mouse_pos.y < video_mode.custom_title_bar_height * scale);
+
+					if (hit_cation) {
+						return HTCAPTION;
+					}
+				}
+
 				return HTCLIENT;
+			}
+		} break;
+
+		case WM_NCMOUSEMOVE: {
+			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && wParam == HTCAPTION) {
+				POINT mouse_pos = {
+					GET_X_LPARAM(lParam),
+					GET_Y_LPARAM(lParam),
+				};
+				ScreenToClient(hWnd, &mouse_pos);
+			}
+		} break;
+
+		case WM_NCLBUTTONDBLCLK: {
+			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && !video_mode.borderless_resizable) {
+				return 0;
+			}
+		} break;
+
+		case WM_NCRBUTTONUP: {
+			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && wParam == HTCAPTION) {
+				POINT mouse_pos = {
+					GET_X_LPARAM(lParam),
+					GET_Y_LPARAM(lParam),
+				};
+
+				MENUITEMINFO menu_item_info = {
+					sizeof(menu_item_info),
+					MIIM_STATE
+				};
+
+				set_menu_item_state(system_menu, &menu_item_info, SC_RESTORE, maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MOVE, !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_SIZE, video_mode.borderless_resizable && !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MAXIMIZE, video_mode.borderless_resizable && !maximized);
+				set_menu_item_state(system_menu, &menu_item_info, SC_MINIMIZE, true);
+				set_menu_item_state(system_menu, &menu_item_info, SC_CLOSE, true);
+
+				int system_command = TrackPopupMenuEx(system_menu, TPM_RETURNCMD, mouse_pos.x, mouse_pos.y, hWnd, NULL);
+				if (system_command != 0) {
+					PostMessage(hWnd, WM_SYSCOMMAND, system_command, 0);
+				}
 			}
 		} break;
 
@@ -1465,6 +1535,10 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 
 	video_mode = p_desired;
 	set_window_aspect_ratio(video_mode.get_aspect());
+	if (video_mode.custom_title_bar_enabled) {
+		custom_title_bar_visible = true;
+		video_mode.height += video_mode.custom_title_bar_height * scale;
+	}
 	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
 	RECT WindowRect;
 
@@ -1508,6 +1582,8 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 
 	pre_fs_valid = true;
 	if (video_mode.fullscreen) {
+		custom_title_bar_visible = false;
+
 		/* this returns DPI unaware size, commenting
 		DEVMODE current;
 		memset(&current, 0, sizeof(current));
@@ -1614,6 +1690,8 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 			return ERR_UNAVAILABLE;
 		}
 	};
+
+	system_menu = GetSystemMenu(hWnd, false);
 
 	if (video_mode.borderless_shadow) {
 		_set_window_shadow(true);
@@ -2001,6 +2079,39 @@ void OS_Windows::set_window_mouse_passthrough(const PoolVector2Array &p_region) 
 	_update_window_mouse_passthrough();
 }
 
+void OS_Windows::insert_custom_title_bar_client_rect(int p_idx, const Rect2 &p_rect) {
+	custom_title_bar_client_rects.insert(p_idx, p_rect);
+}
+
+void OS_Windows::erase_custom_title_bar_client_rect(int p_idx) {
+	custom_title_bar_client_rects.erase(p_idx);
+}
+
+void OS_Windows::set_custom_title_bar_visible(bool p_enabled) {
+	if (custom_title_bar_visible == p_enabled)
+		return;
+
+	if (!video_mode.custom_title_bar_enabled)
+		return;
+
+	if (video_mode.fullscreen)
+		return;
+
+	custom_title_bar_visible = p_enabled;
+
+	if (!custom_title_bar_visible)
+		video_mode.height -= video_mode.custom_title_bar_height * scale;
+
+	set_window_size(Size2(video_mode.width, video_mode.height));
+}
+
+bool OS_Windows::is_custom_title_bar_visible() const {
+	if (!video_mode.custom_title_bar_enabled)
+		return false;
+
+	return custom_title_bar_visible;
+}
+
 void OS_Windows::_update_window_mouse_passthrough() {
 	if (mpath.size() == 0) {
 		SetWindowRgn(hWnd, NULL, TRUE);
@@ -2206,6 +2317,10 @@ void OS_Windows::set_window_size(const Size2 p_size) {
 	int w = p_size.width;
 	int h = p_size.height;
 
+	if (video_mode.custom_title_bar_enabled && custom_title_bar_visible) {
+		h += video_mode.custom_title_bar_height * scale;
+	}
+
 	video_mode.width = w;
 	video_mode.height = h;
 
@@ -2239,6 +2354,8 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 		set_window_per_pixel_transparency_enabled(false);
 
 	if (p_enabled) {
+		set_custom_title_bar_visible(false);
+
 		was_maximized = maximized;
 
 		if (pre_fs_valid) {
@@ -2281,6 +2398,8 @@ void OS_Windows::set_window_fullscreen(bool p_enabled) {
 		MoveWindow(hWnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
 		pre_fs_valid = true;
+
+		set_custom_title_bar_visible(true);
 	}
 }
 bool OS_Windows::is_window_fullscreen() const {
@@ -3785,6 +3904,7 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	was_maximized = false;
 	window_focused = true;
 	console_visible = IsWindowVisible(GetConsoleWindow());
+	custom_title_bar_visible = false;
 
 	//Note: Wacom WinTab driver API for pen input, for devices incompatible with Windows Ink.
 	HMODULE wintab_lib = LoadLibraryW(L"wintab32.dll");

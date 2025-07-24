@@ -1025,7 +1025,7 @@ void RasterizerCanvasBaseGLES3::draw_lens_distortion_rect(const Rect2 &p_rect, f
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 }
 
-void RasterizerCanvasBaseGLES3::draw_window_margins(int *black_margin, RID *black_image) {
+void RasterizerCanvasBaseGLES3::draw_window_margins(int *black_margin, RID *black_image, RID custom_title_bar_image) {
 	Vector2 window_size = OS::get_singleton()->get_window_size();
 	int window_h = window_size.height;
 	int window_w = window_size.width;
@@ -1034,43 +1034,59 @@ void RasterizerCanvasBaseGLES3::draw_window_margins(int *black_margin, RID *blac
 	glViewport(0, 0, window_size.width, window_size.height);
 	canvas_begin();
 
+	Vector2 fix_offset;
+	if (OS::get_singleton()->get_video_mode().custom_title_bar_enabled && OS::get_singleton()->is_custom_title_bar_visible()) {
+		fix_offset.y += OS::get_singleton()->get_video_mode().custom_title_bar_height * OS::get_singleton()->get_screen_scale();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, storage->resources.white_tex);
+
+		draw_generic_textured_rect(Rect2(0, 0, black_margin[MARGIN_LEFT] + window_w + black_margin[MARGIN_RIGHT], fix_offset.y), Rect2(0, 0, 1, 1));
+
+		if (custom_title_bar_image.is_valid()) {
+			_bind_canvas_texture(custom_title_bar_image, RID(), true);
+
+			draw_generic_textured_rect(Rect2(0, 0, black_margin[MARGIN_LEFT] + window_w + black_margin[MARGIN_RIGHT], fix_offset.y), Rect2(0, 0, 1, 1));
+		}
+	}
+
 	if (black_image[MARGIN_LEFT].is_valid()) {
 		_bind_canvas_texture(black_image[MARGIN_LEFT], RID(), true);
 		Size2 sz(storage->texture_get_width(black_image[MARGIN_LEFT]), storage->texture_get_height(black_image[MARGIN_LEFT]));
 
-		draw_generic_textured_rect(Rect2(0, 0, black_margin[MARGIN_LEFT], window_h),
+		draw_generic_textured_rect(Rect2(0, fix_offset.y, black_margin[MARGIN_LEFT], window_h),
 				Rect2(0, 0, (float)black_margin[MARGIN_LEFT] / sz.x, (float)(window_h) / sz.y));
 	} else if (black_margin[MARGIN_LEFT]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, storage->resources.black_tex);
 
-		draw_generic_textured_rect(Rect2(0, 0, black_margin[MARGIN_LEFT], window_h), Rect2(0, 0, 1, 1));
+		draw_generic_textured_rect(Rect2(0, fix_offset.y, black_margin[MARGIN_LEFT], window_h), Rect2(0, 0, 1, 1));
 	}
 
 	if (black_image[MARGIN_RIGHT].is_valid()) {
 		_bind_canvas_texture(black_image[MARGIN_RIGHT], RID(), true);
 		Size2 sz(storage->texture_get_width(black_image[MARGIN_RIGHT]), storage->texture_get_height(black_image[MARGIN_RIGHT]));
-		draw_generic_textured_rect(Rect2(window_w - black_margin[MARGIN_RIGHT], 0, black_margin[MARGIN_RIGHT], window_h),
+		draw_generic_textured_rect(Rect2(window_w - black_margin[MARGIN_RIGHT], fix_offset.y, black_margin[MARGIN_RIGHT], window_h),
 				Rect2(0, 0, (float)black_margin[MARGIN_RIGHT] / sz.x, (float)window_h / sz.y));
 	} else if (black_margin[MARGIN_RIGHT]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, storage->resources.black_tex);
 
-		draw_generic_textured_rect(Rect2(window_w - black_margin[MARGIN_RIGHT], 0, black_margin[MARGIN_RIGHT], window_h), Rect2(0, 0, 1, 1));
+		draw_generic_textured_rect(Rect2(window_w - black_margin[MARGIN_RIGHT], fix_offset.y, black_margin[MARGIN_RIGHT], window_h), Rect2(0, 0, 1, 1));
 	}
 
 	if (black_image[MARGIN_TOP].is_valid()) {
 		_bind_canvas_texture(black_image[MARGIN_TOP], RID(), true);
 
 		Size2 sz(storage->texture_get_width(black_image[MARGIN_TOP]), storage->texture_get_height(black_image[MARGIN_TOP]));
-		draw_generic_textured_rect(Rect2(0, 0, window_w, black_margin[MARGIN_TOP]),
+		draw_generic_textured_rect(Rect2(0, fix_offset.y, window_w, black_margin[MARGIN_TOP]),
 				Rect2(0, 0, (float)window_w / sz.x, (float)black_margin[MARGIN_TOP] / sz.y));
 
 	} else if (black_margin[MARGIN_TOP]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, storage->resources.black_tex);
 
-		draw_generic_textured_rect(Rect2(0, 0, window_w, black_margin[MARGIN_TOP]), Rect2(0, 0, 1, 1));
+		draw_generic_textured_rect(Rect2(0, fix_offset.y, window_w, black_margin[MARGIN_TOP]), Rect2(0, 0, 1, 1));
 	}
 
 	if (black_image[MARGIN_BOTTOM].is_valid()) {

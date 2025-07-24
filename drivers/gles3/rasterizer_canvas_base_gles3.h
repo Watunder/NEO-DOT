@@ -154,7 +154,7 @@ public:
 	void initialize();
 	void finalize();
 
-	virtual void draw_window_margins(int *black_margin, RID *black_image);
+	virtual void draw_window_margins(int *black_margin, RID *black_image, RID custom_title_bar_image);
 
 	RasterizerCanvasBaseGLES3();
 };

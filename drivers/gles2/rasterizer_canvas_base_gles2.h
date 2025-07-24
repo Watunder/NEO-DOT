@@ -128,7 +128,7 @@ public:
 	void _copy_texscreen(const Rect2 &p_rect);
 	void _copy_screen(const Rect2 &p_rect);
 
-	virtual void draw_window_margins(int *black_margin, RID *black_image);
+	virtual void draw_window_margins(int *black_margin, RID *black_image, RID custom_title_bar_image);
 	void draw_generic_textured_rect(const Rect2 &p_rect, const Rect2 &p_src);
 	void draw_lens_distortion_rect(const Rect2 &p_rect, float p_k1, float p_k2, const Vector2 &p_eye_center, float p_oversample);
 

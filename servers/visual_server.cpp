@@ -1854,6 +1854,8 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("canvas_occluder_polygon_set_shape_as_lines", "occluder_polygon", "shape"), &VisualServer::canvas_occluder_polygon_set_shape_as_lines);
 	ClassDB::bind_method(D_METHOD("canvas_occluder_polygon_set_cull_mode", "occluder_polygon", "mode"), &VisualServer::canvas_occluder_polygon_set_cull_mode);
 
+	ClassDB::bind_method(D_METHOD("custom_title_bar_set_image", "image"), &VisualServer::custom_title_bar_set_image);
+
 	ClassDB::bind_method(D_METHOD("black_bars_set_margins", "left", "top", "right", "bottom"), &VisualServer::black_bars_set_margins);
 	ClassDB::bind_method(D_METHOD("black_bars_set_images", "left", "top", "right", "bottom"), &VisualServer::black_bars_set_images);
 

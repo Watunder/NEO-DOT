@@ -467,6 +467,22 @@ Array _OS::get_fullscreen_mode_list(int p_screen) const {
 	return vmarr;
 }
 
+void _OS::insert_custom_title_bar_client_rect(int p_idx, const Rect2 &p_rect) {
+	OS::get_singleton()->insert_custom_title_bar_client_rect(p_idx, p_rect);
+}
+
+void _OS::erase_custom_title_bar_client_rect(int p_idx) {
+	OS::get_singleton()->erase_custom_title_bar_client_rect(p_idx);
+}
+
+void _OS::set_custom_title_bar_visible(bool p_enabled) {
+	OS::get_singleton()->set_custom_title_bar_visible(p_enabled);
+}
+
+bool _OS::is_custom_title_bar_visible() const {
+	return OS::get_singleton()->is_custom_title_bar_visible();
+}
+
 void _OS::set_low_processor_usage_mode(bool p_enabled) {
 	OS::get_singleton()->set_low_processor_usage_mode(p_enabled);
 }
@@ -1202,6 +1218,11 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_video_driver_count"), &_OS::get_video_driver_count);
 	ClassDB::bind_method(D_METHOD("get_video_driver_name", "driver"), &_OS::get_video_driver_name);
 	ClassDB::bind_method(D_METHOD("get_current_video_driver"), &_OS::get_current_video_driver);
+
+	ClassDB::bind_method(D_METHOD("insert_custom_title_bar_client_rect", "idx", "rect"), &_OS::insert_custom_title_bar_client_rect);
+	ClassDB::bind_method(D_METHOD("erase_custom_title_bar_client_rect", "idx"), &_OS::erase_custom_title_bar_client_rect);
+	ClassDB::bind_method(D_METHOD("set_custom_title_bar_visible", "enabled"), &_OS::set_custom_title_bar_visible);
+	ClassDB::bind_method(D_METHOD("is_custom_title_bar_visible"), &_OS::is_custom_title_bar_visible);
 
 	ClassDB::bind_method(D_METHOD("get_audio_driver_count"), &_OS::get_audio_driver_count);
 	ClassDB::bind_method(D_METHOD("get_audio_driver_name", "driver"), &_OS::get_audio_driver_name);

@@ -56,6 +56,8 @@ class VisualServerRaster : public VisualServer {
 	static int changes;
 	RID test_cube;
 
+	RID custom_title_bar_image;
+
 	int black_margin[4];
 	RID black_image[4];
 
@@ -664,6 +666,10 @@ public:
 	BIND2(canvas_occluder_polygon_set_shape_as_lines, RID, const PoolVector<Vector2> &)
 
 	BIND2(canvas_occluder_polygon_set_cull_mode, RID, CanvasOccluderPolygonCullMode)
+
+	/* CUSTOM TITLE BAR */
+
+	virtual void custom_title_bar_set_image(RID p_texture);
 
 	/* BLACK BARS */
 

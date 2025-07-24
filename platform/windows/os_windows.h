@@ -325,6 +325,9 @@ class OS_Windows : public OS {
 	Size2 min_size;
 	Size2 max_size;
 
+	HMENU system_menu;
+	Map<int, Rect2> custom_title_bar_client_rects;
+
 	Size2 window_rect;
 	VideoMode video_mode;
 	bool preserve_window_size = false;
@@ -413,6 +416,7 @@ protected:
 	bool window_focused;
 	bool console_visible;
 	bool was_maximized;
+	bool custom_title_bar_visible;
 
 	float scale;
 
@@ -435,6 +439,11 @@ public:
 	virtual void set_video_mode(const VideoMode &p_video_mode, int p_screen = 0);
 	virtual VideoMode get_video_mode(int p_screen = 0) const;
 	virtual void get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen = 0) const;
+
+	virtual void insert_custom_title_bar_client_rect(int p_idx, const Rect2 &p_rect);
+	virtual void erase_custom_title_bar_client_rect(int p_idx);
+	virtual void set_custom_title_bar_visible(bool p_enabled);
+	virtual bool is_custom_title_bar_visible() const;
 
 	virtual int get_tablet_driver_count() const;
 	virtual String get_tablet_driver_name(int p_driver) const;
