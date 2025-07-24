@@ -13,7 +13,6 @@ common_win = [
     "key_mapping_windows.cpp",
     "joypad_windows.cpp",
     "power_windows.cpp",
-    "system_theme_windows.cpp",
     "windows_terminal_logger.cpp",
 ]
 

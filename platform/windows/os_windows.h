@@ -49,7 +49,6 @@
 #include "servers/audio_server.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/visual_server.h"
-#include "system_theme_windows.h"
 #ifdef XAUDIO2_ENABLED
 #include "drivers/xaudio2/audio_driver_xaudio2.h"
 #endif
@@ -327,7 +326,6 @@ class OS_Windows : public OS {
 	Size2 max_size;
 
 	HMENU system_menu;
-	SystemTheme *system_theme;
 	Map<int, Rect2> custom_title_bar_client_rects;
 
 	Size2 window_rect;

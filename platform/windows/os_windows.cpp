@@ -1692,7 +1692,6 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	};
 
 	system_menu = GetSystemMenu(hWnd, false);
-	system_theme = memnew(SystemTheme(hWnd));
 
 	if (video_mode.borderless_shadow) {
 		_set_window_shadow(true);
@@ -1948,8 +1947,6 @@ void OS_Windows::set_main_loop(MainLoop *p_main_loop) {
 }
 
 void OS_Windows::finalize() {
-	memdelete(system_theme);
-
 #ifdef WINMIDI_ENABLED
 	driver_midi.close();
 #endif

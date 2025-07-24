@@ -260,7 +260,6 @@ def configure_msvc(env, manual_msvc_config):
         "bcrypt",
         "Avrt",
         "dwmapi",
-        "uxtheme",
     ]
 
     if env["use_angle"]:
