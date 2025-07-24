@@ -93,8 +93,6 @@ private:
 	Control *label_reference;
 	Control *bottom_editor;
 
-	mutable String tooltip_text;
-
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -157,8 +155,6 @@ public:
 	void set_object_and_property(Object *p_object, const StringName &p_property);
 	virtual Control *make_custom_tooltip(const String &p_text) const;
 
-	String get_tooltip_text() const;
-
 	void set_draw_top_bg(bool p_draw) { draw_top_bg = p_draw; }
 
 	bool can_revert_to_default() const { return can_revert; }
@@ -200,17 +196,13 @@ class EditorInspectorCategory : public Control {
 	Ref<Texture> icon;
 	String label;
 	Color bg_color;
-	mutable String tooltip_text;
 
 protected:
 	void _notification(int p_what);
-	static void _bind_methods();
 
 public:
 	virtual Size2 get_minimum_size() const;
 	virtual Control *make_custom_tooltip(const String &p_text) const;
-
-	String get_tooltip_text() const;
 
 	EditorInspectorCategory();
 };
