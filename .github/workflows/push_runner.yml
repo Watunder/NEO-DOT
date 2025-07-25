@@ -19,9 +19,7 @@ jobs:
   static-checks:
     needs: push-checks
     name: 📊 Static
-    if: |
-      github.ref == 'refs/heads/master' ||
-      needs.push-checks.outputs.has-open-pr == 'false'
+    if: ${{ github.ref == 'refs/heads/master' || needs.push-checks.outputs.has-open-pr == 'false' }}
     uses: ./.github/workflows/static_checks.yml
 
   windows-build:

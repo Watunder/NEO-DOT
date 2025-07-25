@@ -1,4 +1,4 @@
-name: 📄 Push Checks
+name: 📄 Push Checks (v0.0.1)
 on:
   workflow_call:
 
@@ -19,11 +19,42 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
-            });
+            const MAX_ATTEMPTS = 5;
+            const INITIAL_DELAY = 2000;
+            const BACKOFF_FACTOR = 2;
+            let hasPR = false;
 
-            core.setOutput('has-open-pr', prs.length > 0 ? 'true' : 'false');
+            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+              try {
+                const cacheBuster = Date.now();
+                const { data: prs } = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+                  headers: { 'If-None-Match': '' },
+                  query: { _: cacheBuster }
+                });
+
+                if (prs.length > 0) {
+                  hasPR = true;
+                  console.log(`🔵 Found open PRs on attempt ${attempt}`);
+                  break;
+                }
+              } catch (error) {
+                if (error.status === 404) {
+                  console.log(`🟡 Repo not found, assuming no PR`);
+                } else {
+                  console.log(`🟠 Attempt ${attempt} failed: ${error.message}`);
+                }
+              }
+
+              if (!hasPR && attempt < MAX_ATTEMPTS) {
+                const waitTime = INITIAL_DELAY * Math.pow(BACKOFF_FACTOR, attempt - 1);
+                console.log(`🟣 No PR found, waiting ${waitTime}ms before retry...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+              }
+            }
+
+            core.setOutput('has-open-pr', hasPR ? 'true' : 'false');
+            console.log(`🟢 Final result: has-open-pr=${hasPR}`);
