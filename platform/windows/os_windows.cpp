@@ -1312,16 +1312,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			}
 		} break;
 
-		case WM_NCMOUSEMOVE: {
-			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && wParam == HTCAPTION) {
-				POINT mouse_pos = {
-					GET_X_LPARAM(lParam),
-					GET_Y_LPARAM(lParam),
-				};
-				ScreenToClient(hWnd, &mouse_pos);
-			}
-		} break;
-
 		case WM_NCLBUTTONDBLCLK: {
 			if (video_mode.custom_title_bar_enabled && custom_title_bar_visible && !video_mode.borderless_resizable) {
 				return 0;
