@@ -623,6 +623,9 @@ void SceneTree::quit(int p_exit_code) {
 void SceneTree::_notification(int p_notification) {
 	switch (p_notification) {
 		case NOTIFICATION_WM_QUIT_REQUEST: {
+			if (custom_title_bar_viewport) {
+				get_custom_title_bar_viewport()->propagate_notification(p_notification);
+			}
 			get_root()->propagate_notification(p_notification);
 
 			if (accept_quit) {
@@ -632,6 +635,9 @@ void SceneTree::_notification(int p_notification) {
 		} break;
 
 		case NOTIFICATION_WM_GO_BACK_REQUEST: {
+			if (custom_title_bar_viewport) {
+				get_custom_title_bar_viewport()->propagate_notification(p_notification);
+			}
 			get_root()->propagate_notification(p_notification);
 
 			if (quit_on_go_back) {
@@ -646,11 +652,17 @@ void SceneTree::_notification(int p_notification) {
 				id->ensure_touch_mouse_raised();
 			}
 
+			if (custom_title_bar_viewport) {
+				get_custom_title_bar_viewport()->propagate_notification(p_notification);
+			}
 			get_root()->propagate_notification(p_notification);
 		} break;
 
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 			if (!Engine::get_singleton()->is_editor_hint()) {
+				if (custom_title_bar_viewport) {
+					get_custom_title_bar_viewport()->propagate_notification(p_notification);
+				}
 				get_root()->propagate_notification(p_notification);
 			}
 		} break;
@@ -658,6 +670,9 @@ void SceneTree::_notification(int p_notification) {
 		case NOTIFICATION_WM_UNFOCUS_REQUEST: {
 			notify_group_flags(GROUP_CALL_REALTIME | GROUP_CALL_MULTILEVEL, "input", NOTIFICATION_WM_UNFOCUS_REQUEST);
 
+			if (custom_title_bar_viewport) {
+				get_custom_title_bar_viewport()->propagate_notification(p_notification);
+			}
 			get_root()->propagate_notification(p_notification);
 
 		} break;
@@ -671,6 +686,9 @@ void SceneTree::_notification(int p_notification) {
 		case NOTIFICATION_CRASH:
 		case NOTIFICATION_APP_RESUMED:
 		case NOTIFICATION_APP_PAUSED: {
+			if (custom_title_bar_viewport) {
+				get_custom_title_bar_viewport()->propagate_notification(p_notification);
+			}
 			get_root()->propagate_notification(p_notification);
 		} break;
 
@@ -859,6 +877,8 @@ void SceneTree::set_pause(bool p_enabled) {
 	Engine::get_singleton()->set_freeze_time_scale(p_enabled);
 	PhysicsServer::get_singleton()->set_active(!p_enabled);
 	Physics2DServer::get_singleton()->set_active(!p_enabled);
+	if (get_custom_title_bar_viewport())
+		get_custom_title_bar_viewport()->propagate_notification(p_enabled ? Node::NOTIFICATION_PAUSED : Node::NOTIFICATION_UNPAUSED);
 	if (get_root())
 		get_root()->propagate_notification(p_enabled ? Node::NOTIFICATION_PAUSED : Node::NOTIFICATION_UNPAUSED);
 }
