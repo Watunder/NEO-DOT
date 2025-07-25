@@ -1,4 +1,4 @@
-name: 📄 Push Checks
+name: 📄 Push Checks (v0.0.1)
 on:
   workflow_call:
 
