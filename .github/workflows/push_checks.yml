@@ -1,6 +1,9 @@
 name: 📄 Push Checks (v0.0.1)
 on:
   workflow_call:
+    outputs:
+      has-open-pr:
+        value: ${{ jobs.push-checks.outputs.has-open-pr }}
 
 concurrency:
   group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-push_checks
