@@ -1,10 +1,9 @@
 name: 🔗 GHA for the push (v0.0.1)
 run-name: |
   ${{
-    github.ref == 'refs/heads/master' 
-    && '🚀 Production | ' 
-    || '🧪 Testing | '
-  }}${{ github.event.head_commit.message }}
+    (github.ref == 'refs/heads/master' && format('🚀 Production | {0}', github.event.head_commit.message))
+    || format('🧪 Testing | {0}', github.event.head_commit.message)
+  }}
 
 on: [push]
 
