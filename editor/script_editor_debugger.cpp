@@ -555,6 +555,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 			tabs->set_current_tab(0);
 		}
 		profiler->set_enabled(false);
+		EditorNode::get_singleton()->make_bottom_panel_item_visible(this);
 		_clear_remote_objects();
 
 	} else if (p_msg == "debug_exit") {
