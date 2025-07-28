@@ -409,12 +409,8 @@ void Viewport::_notification(int p_what) {
 
 			if (gui.mouse_over) {
 				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_EXIT);
+				gui.mouse_over = NULL;
 			}
-
-			// Unlike on loss of focus (NOTIFICATION_WM_WINDOW_FOCUS_OUT), do not
-			// drop the gui mouseover here, as a scrollbar may be dragged while the
-			// mouse is outside the window (without the window having lost focus).
-			// See bug #39634
 		} break;
 		case SceneTree::NOTIFICATION_WM_FOCUS_OUT: {
 			_drop_physics_mouseover();
@@ -1959,31 +1955,6 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				_propagate_viewport_notification(this,NOTIFICATION_DRAG_END);
 				gui.drag_data=Variant(); //always clear
 			}*/
-
-			// In case the mouse was released after for example dragging a scrollbar,
-			// check whether the current control is different from the stored one. If
-			// it is different, rather than wait for it to be updated the next time the
-			// mouse is moved, notify the control so that it can e.g. drop the highlight.
-			// This code is duplicated from the mm.is_valid()-case further below.
-			if (gui.mouse_focus) {
-				over = gui.mouse_focus;
-			} else {
-				over = _gui_find_control(mpos);
-			}
-
-			if (gui.mouse_focus_mask == 0 && over != gui.mouse_over) {
-				if (gui.mouse_over) {
-					_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_EXIT);
-				}
-
-				_gui_cancel_tooltip();
-
-				if (over) {
-					_gui_call_notification(over, Control::NOTIFICATION_MOUSE_ENTER);
-				}
-			}
-
-			gui.mouse_over = over;
 
 			set_input_as_handled();
 		}
