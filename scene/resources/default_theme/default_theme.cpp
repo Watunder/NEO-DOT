@@ -705,6 +705,20 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_stylebox("cursor", "ItemList", focus);
 	theme->set_stylebox("cursor_unfocused", "ItemList", focus);
 
+	// VirtualScrollList
+	theme->set_stylebox("bg", "VirtualScrollList", make_stylebox(tree_bg_png, 4, 4, 4, 5));
+	theme->set_stylebox("bg_focus", "VirtualScrollList", focus);
+	theme->set_constant("hseparation", "VirtualScrollList", 4);
+	theme->set_constant("vseparation", "VirtualScrollList", 2);
+	theme->set_font("font", "VirtualScrollList", default_font);
+	theme->set_color("font_color", "VirtualScrollList", control_font_color_lower);
+	theme->set_color("font_color_selected", "VirtualScrollList", control_font_color_pressed);
+	theme->set_color("guide_color", "VirtualScrollList", Color(0, 0, 0, 0.1));
+	theme->set_stylebox("selected", "VirtualScrollList", item_selected_oof);
+	theme->set_stylebox("selected_focus", "VirtualScrollList", item_selected);
+	theme->set_stylebox("cursor", "VirtualScrollList", focus);
+	theme->set_stylebox("cursor_unfocused", "VirtualScrollList", focus);
+
 	// TabContainer
 
 	Ref<StyleBoxTexture> tc_sb = sb_expand(make_stylebox(tab_container_bg_png, 4, 4, 4, 4, 4, 4, 4, 4), 3, 3, 3, 3);
