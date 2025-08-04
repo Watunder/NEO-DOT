@@ -290,7 +290,7 @@ Object *EditorProperty::get_edited_object() {
 	return object;
 }
 
-StringName EditorProperty::get_edited_property() {
+StringName EditorProperty::get_edited_property() const {
 	return property;
 }
 
@@ -429,7 +429,7 @@ bool EditorPropertyRevert::is_node_property_different(Node *p_node, const Varian
 	return bool(Variant::evaluate(Variant::OP_NOT_EQUAL, p_current, p_orig));
 }
 
-bool EditorPropertyRevert::can_property_revert(Object *p_object, const StringName &p_property) {
+bool EditorPropertyRevert::can_property_revert(Object *p_object, const StringName &p_property, const Variant *p_custom_current_value) {
 	bool has_revert = false;
 
 	Node *node = Object::cast_to<Node>(p_object);
@@ -438,7 +438,7 @@ bool EditorPropertyRevert::can_property_revert(Object *p_object, const StringNam
 		//check for difference including instantiation
 		Variant vorig;
 		if (EditorPropertyRevert::get_instanced_node_original_property(node, p_property, vorig)) {
-			Variant v = p_object->get(p_property);
+			Variant v = p_custom_current_value ? *p_custom_current_value : p_object->get(p_property);
 
 			if (EditorPropertyRevert::is_node_property_different(node, v, vorig)) {
 				has_revert = true;
@@ -478,7 +478,8 @@ void EditorProperty::update_reload_status() {
 	if (property == StringName())
 		return; //no property, so nothing to do
 
-	bool has_reload = EditorPropertyRevert::can_property_revert(object, property);
+	Variant current = object->get(property);
+	bool has_reload = EditorPropertyRevert::can_property_revert(object, property, &current) && !is_read_only();
 
 	if (has_reload != can_revert) {
 		can_revert = has_reload;

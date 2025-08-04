@@ -43,7 +43,7 @@ public:
 	static bool get_instanced_node_original_property(Node *p_node, const StringName &p_prop, Variant &value);
 	static bool is_node_property_different(Node *p_node, const Variant &p_current, const Variant &p_orig);
 
-	static bool can_property_revert(Object *p_object, const StringName &p_property);
+	static bool can_property_revert(Object *p_object, const StringName &p_property, const Variant *p_custom_current_value = NULL);
 };
 
 class EditorProperty : public Container {
@@ -111,7 +111,7 @@ public:
 	bool is_read_only() const;
 
 	Object *get_edited_object();
-	StringName get_edited_property();
+	StringName get_edited_property() const;
 
 	virtual void update_property();
 	void update_reload_status();

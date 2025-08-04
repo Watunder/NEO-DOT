@@ -1955,12 +1955,34 @@ void EditorPropertyNodePath::_node_assign() {
 }
 
 void EditorPropertyNodePath::_node_clear() {
-	emit_changed(get_edited_property(), NodePath());
+	emit_changed(get_edited_property(), Variant());
 	update_property();
 }
 
 void EditorPropertyNodePath::update_property() {
-	NodePath p = get_edited_object()->get(get_edited_property());
+	Node *base_node = NULL;
+	if (base_hint != NodePath()) {
+		if (get_tree()->get_root()->has_node(base_hint)) {
+			base_node = get_tree()->get_root()->get_node(base_hint);
+		}
+	} else {
+		base_node = Object::cast_to<Node>(get_edited_object());
+	}
+
+	NodePath p;
+	Variant v = get_edited_object()->get(get_edited_property());
+	Node *n = Object::cast_to<Node>(v);
+	if (n) {
+		if (n->is_inside_tree()) {
+			if (base_node) {
+				p = base_node->get_path_to(n);
+			} else {
+				p = get_tree()->get_edited_scene_root()->get_path_to(n);
+			}
+		}
+	} else {
+		p = NodePath(v);
+	}
 
 	assign->set_tooltip(p);
 	if (p == NodePath()) {
@@ -1970,15 +1992,6 @@ void EditorPropertyNodePath::update_property() {
 		return;
 	}
 	assign->set_flat(true);
-
-	Node *base_node = NULL;
-	if (base_hint != NodePath()) {
-		if (get_tree()->get_root()->has_node(base_hint)) {
-			base_node = get_tree()->get_root()->get_node(base_hint);
-		}
-	} else {
-		base_node = Object::cast_to<Node>(get_edited_object());
-	}
 
 	if (!base_node || !base_node->has_node(p)) {
 		assign->set_icon(Ref<Texture>());
@@ -3308,24 +3321,32 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 			add_property_editor(p_path, editor);
 		} break;
 		case Variant::OBJECT: {
-			EditorPropertyResource *editor = memnew(EditorPropertyResource);
-			editor->setup(p_hint == PROPERTY_HINT_RESOURCE_TYPE ? p_hint_text : "Resource");
+			if (p_hint == PROPERTY_HINT_NODE_TYPE) {
+				EditorPropertyNodePath *editor = memnew(EditorPropertyNodePath);
+				Vector<String> types = p_hint_text.split(",", false);
+				Vector<StringName> sn = Variant(types); //convert via variant
+				editor->setup(NodePath(), sn, false);
 
-			if (p_hint == PROPERTY_HINT_RESOURCE_TYPE) {
-				String open_in_new = EDITOR_GET("interface/inspector/resources_to_open_in_new_inspector");
-				for (int i = 0; i < open_in_new.get_slice_count(","); i++) {
-					String type = open_in_new.get_slicec(',', i).strip_edges();
-					for (int j = 0; j < p_hint_text.get_slice_count(","); j++) {
-						String inherits = p_hint_text.get_slicec(',', j);
-						if (ClassDB::is_parent_class(inherits, type)) {
-							editor->set_use_sub_inspector(false);
+				add_property_editor(p_path, editor);
+			} else {
+				EditorPropertyResource *editor = memnew(EditorPropertyResource);
+				editor->setup(p_hint == PROPERTY_HINT_RESOURCE_TYPE ? p_hint_text : "Resource");
+
+				if (p_hint == PROPERTY_HINT_RESOURCE_TYPE) {
+					String open_in_new = EDITOR_GET("interface/inspector/resources_to_open_in_new_inspector");
+					for (int i = 0; i < open_in_new.get_slice_count(","); i++) {
+						String type = open_in_new.get_slicec(',', i).strip_edges();
+						for (int j = 0; j < p_hint_text.get_slice_count(","); j++) {
+							String inherits = p_hint_text.get_slicec(',', j);
+							if (ClassDB::is_parent_class(inherits, type)) {
+								editor->set_use_sub_inspector(false);
+							}
 						}
 					}
 				}
+
+				add_property_editor(p_path, editor);
 			}
-
-			add_property_editor(p_path, editor);
-
 		} break;
 		case Variant::DICTIONARY: {
 			EditorPropertyDictionary *editor = memnew(EditorPropertyDictionary);

@@ -4580,7 +4580,14 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 						if (constant.get_type() == Variant::OBJECT) {
 							GDScriptNativeClass *native_class = Object::cast_to<GDScriptNativeClass>(constant);
 
-							if (native_class && ClassDB::is_parent_class(native_class->get_name(), "Resource")) {
+							if (native_class && ClassDB::is_parent_class(native_class->get_name(), "Node")) {
+								current_export.type = Variant::OBJECT;
+								current_export.hint = PROPERTY_HINT_NODE_TYPE;
+
+								current_export.hint_string = native_class->get_name();
+								current_export.class_name = native_class->get_name();
+
+							} else if (native_class && ClassDB::is_parent_class(native_class->get_name(), "Resource")) {
 								current_export.type = Variant::OBJECT;
 								current_export.hint = PROPERTY_HINT_RESOURCE_TYPE;
 								current_export.usage |= PROPERTY_USAGE_SCRIPT_VARIABLE;
@@ -4590,7 +4597,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 
 							} else {
 								current_export = PropertyInfo();
-								_set_error("The export hint isn't a resource type.");
+								_set_error("The export hint isn't a node or a resource type.");
 							}
 						} else if (constant.get_type() == Variant::DICTIONARY) {
 							// Enumeration
