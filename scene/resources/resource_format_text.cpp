@@ -209,6 +209,15 @@ Ref<PackedScene> ResourceInteractiveLoaderText::_parse_node_tag(VariantParser::R
 				type = SceneState::TYPE_INSTANCED; //no type? assume this was instanced
 			}
 
+			Set<StringName> path_properties;
+
+			if (next_tag.fields.has("node_paths")) {
+				Vector<String> paths = next_tag.fields["node_paths"];
+				for (int i = 0; i < paths.size(); i++) {
+					path_properties.insert(paths[i]);
+				}
+			}
+
 			if (next_tag.fields.has("instance")) {
 				instance = packed_scene->get_state()->add_value(next_tag.fields["instance"]);
 
@@ -269,9 +278,10 @@ Ref<PackedScene> ResourceInteractiveLoaderText::_parse_node_tag(VariantParser::R
 				}
 
 				if (assign != String()) {
-					int nameidx = packed_scene->get_state()->add_name(assign);
+					StringName assign_name = assign;
+					int nameidx = packed_scene->get_state()->add_name(assign_name);
 					int valueidx = packed_scene->get_state()->add_value(value);
-					packed_scene->get_state()->add_node_property(node_id, nameidx, valueidx);
+					packed_scene->get_state()->add_node_property(node_id, nameidx, valueidx, path_properties.has(assign_name));
 					//it's assignment
 				} else if (next_tag.name != String()) {
 					break;
@@ -1597,6 +1607,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			Ref<PackedScene> instance = state->get_node_instance(i);
 			String instance_placeholder = state->get_node_instance_placeholder(i);
 			Vector<StringName> groups = state->get_node_groups(i);
+			Vector<String> deferred_node_paths = state->get_node_deferred_nodepath_properties(i);
 
 			String header = "[node";
 			header += " name=\"" + String(name).c_escape() + "\"";
@@ -1611,6 +1622,9 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			}
 			if (index >= 0) {
 				header += " index=\"" + itos(index) + "\"";
+			}
+			if (deferred_node_paths.size()) {
+				header += " node_paths=" + Variant(deferred_node_paths).get_construct_string();
 			}
 
 			if (groups.size()) {
