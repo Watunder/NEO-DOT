@@ -2087,7 +2087,7 @@ void EditorPropertyResource::_file_selected(const String &p_path) {
 		bool any_type_matches = false;
 		const Vector<String> split_property_types = property_types.split(",");
 		for (int i = 0; i < split_property_types.size(); ++i) {
-			if (res->is_class(split_property_types[i])) {
+			if (res->is_class(split_property_types[i]) || EditorNode::get_singleton()->get_object_custom_type_name(res.ptr()) == split_property_types[i]) {
 				any_type_matches = true;
 				break;
 			}
