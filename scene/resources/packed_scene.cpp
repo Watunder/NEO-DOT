@@ -82,6 +82,8 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 
 	Map<Ref<Resource>, Ref<Resource>> resources_local_to_scene;
 
+	Vector<DeferredNodePathProperties> deferred_node_paths;
+
 	for (int i = 0; i < nc; i++) {
 		const NodeData &n = nd[i];
 
@@ -189,8 +191,24 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 
 				for (int j = 0; j < nprop_count; j++) {
 					bool valid;
-					ERR_FAIL_INDEX_V(nprops[j].name, sname_count, NULL);
+
 					ERR_FAIL_INDEX_V(nprops[j].value, prop_count, NULL);
+
+					if (nprops[j].name & FLAG_PATH_PROPERTY_IS_NODE) {
+						uint32_t name_idx = nprops[j].name & (FLAG_PATH_PROPERTY_IS_NODE - 1);
+						ERR_FAIL_UNSIGNED_INDEX_V(name_idx, (uint32_t)sname_count, nullptr);
+
+						// Do an actual deferred sed of the property path.
+						DeferredNodePathProperties dnp;
+						dnp.path = props[nprops[j].value];
+						dnp.base = node;
+						dnp.property = snames[name_idx];
+						deferred_node_paths.push_back(dnp);
+
+						continue;
+					}
+
+					ERR_FAIL_INDEX_V(nprops[j].name, sname_count, NULL);
 
 					if (snames[nprops[j].name] == CoreStringNames::get_singleton()->_script) {
 						//work around to avoid old script variables from disappearing, should be the proper fix to:
@@ -291,6 +309,12 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 			NodePath n2 = ret_nodes[0]->get_path_to(node);
 			node_path_cache[n2] = i;
 		}
+	}
+
+	for (uint32_t i = 0; i < deferred_node_paths.size(); i++) {
+		const DeferredNodePathProperties &dnp = deferred_node_paths[i];
+		Node *other = dnp.base->get_node_or_null(dnp.path);
+		dnp.base->set(dnp.property, other);
 	}
 
 	for (Map<Ref<Resource>, Ref<Resource>>::Element *E = resources_local_to_scene.front(); E; E = E->next()) {
@@ -475,6 +499,20 @@ Error SceneState::_parse_node(Node *p_owner, Node *p_node, int p_parent_idx, Map
 
 		String name = E->get().name;
 		Variant value = p_node->get(E->get().name);
+		bool use_deferred_node_path_bit = false;
+
+		if (E->get().type == Variant::OBJECT && E->get().hint == PROPERTY_HINT_NODE_TYPE) {
+			if (value.get_type() == Variant::OBJECT) {
+				if (Node *n = Object::cast_to<Node>(value)) {
+					value = p_node->get_path_to(n);
+				}
+				use_deferred_node_path_bit = true;
+			}
+			if (value.get_type() != Variant::NODE_PATH) {
+				continue; //was never set, ignore.
+			}
+			use_deferred_node_path_bit = true;
+		}
 
 		bool isdefault = false;
 		Variant default_value = ClassDB::class_get_default_property_value(type, name);
@@ -547,6 +585,9 @@ Error SceneState::_parse_node(Node *p_owner, Node *p_node, int p_parent_idx, Map
 		NodeData::Property prop;
 		prop.name = _nm_get_string(name, name_map);
 		prop.value = _vm_get_variant(value, variant_map);
+		if (use_deferred_node_path_bit) {
+			prop.name |= FLAG_PATH_PROPERTY_IS_NODE;
+		}
 		nd.properties.push_back(prop);
 	}
 
@@ -962,7 +1003,7 @@ Variant SceneState::get_property_value(int p_node, const StringName &p_property,
 
 		const NodeData::Property *p = nodes[p_node].properties.ptr();
 		for (int i = 0; i < pc; i++) {
-			if (p_property == namep[p[i].name]) {
+			if (p_property == namep[p[i].name & FLAG_PROP_NAME_MASK]) {
 				found = true;
 				return variants[p[i].value];
 			}
@@ -1345,13 +1386,25 @@ int SceneState::get_node_property_count(int p_idx) const {
 StringName SceneState::get_node_property_name(int p_idx, int p_prop) const {
 	ERR_FAIL_INDEX_V(p_idx, nodes.size(), StringName());
 	ERR_FAIL_INDEX_V(p_prop, nodes[p_idx].properties.size(), StringName());
-	return names[nodes[p_idx].properties[p_prop].name];
+	return names[nodes[p_idx].properties[p_prop].name & FLAG_PROP_NAME_MASK];
 }
 Variant SceneState::get_node_property_value(int p_idx, int p_prop) const {
 	ERR_FAIL_INDEX_V(p_idx, nodes.size(), Variant());
 	ERR_FAIL_INDEX_V(p_prop, nodes[p_idx].properties.size(), Variant());
 
 	return variants[nodes[p_idx].properties[p_prop].value];
+}
+
+Vector<String> SceneState::get_node_deferred_nodepath_properties(int p_idx) const {
+	Vector<String> ret;
+	ERR_FAIL_INDEX_V(p_idx, nodes.size(), ret);
+	for (int i = 0; i < nodes[p_idx].properties.size(); i++) {
+		uint32_t idx = nodes[p_idx].properties[i].name;
+		if (idx & FLAG_PATH_PROPERTY_IS_NODE) {
+			ret.push_back(names[idx & FLAG_PROP_NAME_MASK]);
+		}
+	}
+	return ret;
 }
 
 NodePath SceneState::get_node_owner_path(int p_idx) const {
@@ -1487,13 +1540,16 @@ int SceneState::add_node(int p_parent, int p_owner, int p_type, int p_name, int 
 
 	return nodes.size() - 1;
 }
-void SceneState::add_node_property(int p_node, int p_name, int p_value) {
+void SceneState::add_node_property(int p_node, int p_name, int p_value, bool p_deferred_node_path) {
 	ERR_FAIL_INDEX(p_node, nodes.size());
 	ERR_FAIL_INDEX(p_name, names.size());
 	ERR_FAIL_INDEX(p_value, variants.size());
 
 	NodeData::Property prop;
 	prop.name = p_name;
+	if (p_deferred_node_path) {
+		prop.name |= FLAG_PATH_PROPERTY_IS_NODE;
+	}
 	prop.value = p_value;
 	nodes.write[p_node].properties.push_back(prop);
 }

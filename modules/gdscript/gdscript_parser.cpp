@@ -4578,19 +4578,36 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 						Variant constant = static_cast<ConstantNode *>(subexpr)->value;
 
 						if (constant.get_type() == Variant::OBJECT) {
-							GDScriptNativeClass *native_class = Object::cast_to<GDScriptNativeClass>(constant);
+							Ref<GDScript> gds = Object::cast_to<GDScript>(constant);
+							Ref<GDScriptNativeClass> native_class;
+							StringName class_name;
 
-							if (native_class && ClassDB::is_parent_class(native_class->get_name(), "Resource")) {
+							if (gds.is_valid()) {
+								native_class = gds->get_native();
+								class_name = gds->get_script_class_name();
+							} else {
+								native_class = Ref<GDScriptNativeClass>(Object::cast_to<GDScriptNativeClass>(constant));
+								class_name = native_class->get_name();
+							}
+
+							if (native_class.is_valid() && ClassDB::is_parent_class(native_class->get_name(), "Node")) {
+								current_export.type = Variant::OBJECT;
+								current_export.hint = PROPERTY_HINT_NODE_TYPE;
+
+								current_export.hint_string = native_class->get_name();
+								current_export.class_name = class_name;
+
+							} else if (native_class.is_valid() && ClassDB::is_parent_class(native_class->get_name(), "Resource")) {
 								current_export.type = Variant::OBJECT;
 								current_export.hint = PROPERTY_HINT_RESOURCE_TYPE;
 								current_export.usage |= PROPERTY_USAGE_SCRIPT_VARIABLE;
 
 								current_export.hint_string = native_class->get_name();
-								current_export.class_name = native_class->get_name();
+								current_export.class_name = class_name;
 
 							} else {
 								current_export = PropertyInfo();
-								_set_error("The export hint isn't a resource type.");
+								_set_error("The export hint isn't a node or a resource type.");
 							}
 						} else if (constant.get_type() == Variant::DICTIONARY) {
 							// Enumeration
@@ -5947,8 +5964,17 @@ GDScriptParser::DataType GDScriptParser::_type_from_property(const PropertyInfo 
 	ret.has_type = true;
 	ret.builtin_type = p_property.type;
 	if (p_property.type == Variant::OBJECT) {
-		ret.kind = DataType::NATIVE;
-		ret.native_type = p_property.class_name == StringName() ? "Object" : p_property.class_name;
+		if (ScriptServer::is_global_class(p_property.class_name)) {
+			ret.kind = DataType::SCRIPT;
+			ret.native_type = ScriptServer::get_global_class_native_base(p_property.class_name);
+			Ref<Script> scr = ResourceLoader::load(ScriptServer::get_global_class_path(p_property.class_name));
+			if (scr.is_valid()) {
+				ret.script_type = scr;
+			}
+		} else {
+			ret.kind = DataType::NATIVE;
+			ret.native_type = p_property.class_name == StringName() ? "Object" : p_property.class_name;
+		}
 	} else {
 		ret.kind = DataType::BUILTIN;
 	}

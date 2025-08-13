@@ -75,6 +75,12 @@ class SceneState : public Reference {
 		PackState() { node = -1; }
 	};
 
+	struct DeferredNodePathProperties {
+		Node *base = NULL;
+		StringName property;
+		NodePath path;
+	};
+
 	Vector<NodeData> nodes;
 
 	struct ConnectionData {
@@ -111,6 +117,8 @@ public:
 		FLAG_ID_IS_PATH = (1 << 30),
 		TYPE_INSTANCED = 0x7FFFFFFF,
 		FLAG_INSTANCE_IS_PLACEHOLDER = (1 << 30),
+		FLAG_PATH_PROPERTY_IS_NODE = (1 << 30),
+		FLAG_PROP_NAME_MASK = FLAG_PATH_PROPERTY_IS_NODE - 1,
 		FLAG_MASK = (1 << 24) - 1,
 	};
 
@@ -156,6 +164,7 @@ public:
 	int get_node_property_count(int p_idx) const;
 	StringName get_node_property_name(int p_idx, int p_prop) const;
 	Variant get_node_property_value(int p_idx, int p_prop) const;
+	Vector<String> get_node_deferred_nodepath_properties(int p_idx) const;
 
 	int get_connection_count() const;
 	NodePath get_connection_source(int p_idx) const;
@@ -176,7 +185,7 @@ public:
 	int add_value(const Variant &p_value);
 	int add_node_path(const NodePath &p_path);
 	int add_node(int p_parent, int p_owner, int p_type, int p_name, int p_instance, int p_index);
-	void add_node_property(int p_node, int p_name, int p_value);
+	void add_node_property(int p_node, int p_name, int p_value, bool p_deferred_node_path = false);
 	void add_node_group(int p_node, int p_group);
 	void set_base_scene(int p_idx);
 	void add_connection(int p_from, int p_to, int p_signal, int p_method, int p_flags, const Vector<int> &p_binds);
