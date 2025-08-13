@@ -23,10 +23,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=release_debug, tools=yes)
+          - name: Editor (target=release_debug, tools=yes vsproj=yes)
             cache-name: windows-editor
             target: release_debug
             tools: true
+            sconsflags: vsproj=yes
             bin: './bin/godot.windows.opt.tools.64.exe'
 
           - name: Template (target=release, tools=no)
@@ -52,7 +53,7 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          sconsflags: ${{ env.SCONSFLAGS }}
+          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: windows
           target: ${{ matrix.target }}
           tools: ${{ matrix.tools }}
