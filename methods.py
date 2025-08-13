@@ -625,11 +625,19 @@ def detect_visual_c_compiler_version(tools_env):
 
 
 def find_visual_c_batch_file(env):
-    from SCons.Tool.MSCommon.vc import get_default_version, get_host_target, find_batch_file
+    from SCons.Tool.MSCommon.vc import get_host_target, find_batch_file
 
-    version = get_default_version(env)
-    (host_platform, target_platform, _) = get_host_target(env)
-    return find_batch_file(env, version, host_platform, target_platform)[0]
+    # find_batch_file arguments changed in SCons 4.6.0.
+    from SCons import __version__ as scons_raw_version
+
+    scons_ver = env._get_major_minor_revision(scons_raw_version)
+
+    if scons_ver >= (4, 6, 0):
+        (host_platform, target_platform, _) = get_host_target(env, env["MSVC_VERSION"])
+        return find_batch_file(env["MSVC_VERSION"], host_platform, target_platform, env["ENV"]["VCINSTALLDIR"])[0]
+    else:
+        (host_platform, target_platform, _) = get_host_target(env)
+        return find_batch_file(env, env["MSVC_VERSION"], host_platform, target_platform)[0]
 
 
 def generate_cpp_hint_file(filename):
