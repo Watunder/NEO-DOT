@@ -1,6 +1,12 @@
 name: 🏁 Windows Builds
 on:
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      libgodot-build:
+        description: If libgodot is to be built.
+        default: false
+        type: boolean
 
 # Global Settings
 # SCONS_CACHE for windows must be set in the build environment
@@ -23,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=release_debug, tools=yes vsproj=yes)
+          - name: Editor (target=release_debug, tools=yes, vsproj=yes)
             cache-name: windows-editor
             target: release_debug
             tools: true
@@ -72,3 +78,18 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
+
+      - name: Compilation (libgodot)
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        uses: ./.github/actions/libgodot-build
+        with:
+          bin: ${{ matrix.bin }}
+          target: release
+          platform: windows
+
+      - name: Upload artifact (libgodot)
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: windows-libgodot
+          path: "modules/gdnative/binding/bin/*"

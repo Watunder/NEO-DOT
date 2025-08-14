@@ -1,0 +1,23 @@
+name: Build libgodot
+description: Build libgodot with the provided options.
+inputs:
+  bin:
+    description: Path to the Godot binary.
+    required: true
+  target:
+    description: The scons target (debug/release).
+    default: "debug"
+  platform:
+    description: The libgodot platform to build.
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Generate api.json
+      shell: sh
+      run: ${{ inputs.bin }} --no-window --audio-driver Dummy --gdnative-generate-json-api ./bin/api.json
+      continue-on-error: true
+
+    - name: Scons Build
+      shell: sh
+      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=${{ inputs.target }} --jobs=2
