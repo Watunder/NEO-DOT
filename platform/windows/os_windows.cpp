@@ -44,6 +44,7 @@
 #include "lang_table.h"
 #include "main/main.h"
 #include "servers/audio_server.h"
+#include "servers/visual/visual_server_headless.h"
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "windows_terminal_logger.h"
@@ -1722,81 +1723,86 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	last_pressure_update = 0;
 	last_tilt = Vector2();
 
+	if (!is_no_window_mode_enabled()) {
 #if defined(OPENGL_ENABLED)
 
-	bool gles3_context = true;
-	if (p_video_driver == VIDEO_DRIVER_GLES2) {
-		gles3_context = false;
-	}
-
-	bool editor = Engine::get_singleton()->is_editor_hint();
-	bool gl_initialization_error = false;
-
-	gl_context = NULL;
-	while (!gl_context) {
-		gl_context = memnew(ContextGL_Windows(hWnd, gles3_context));
-
-		if (gl_context->initialize() != OK) {
-			memdelete(gl_context);
-			gl_context = NULL;
-
-			if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
-				if (p_video_driver == VIDEO_DRIVER_GLES2) {
-					gl_initialization_error = true;
-					break;
-				}
-
-				p_video_driver = VIDEO_DRIVER_GLES2;
-				gles3_context = false;
-			} else {
-				gl_initialization_error = true;
-				break;
-			}
+		bool gles3_context = true;
+		if (p_video_driver == VIDEO_DRIVER_GLES2) {
+			gles3_context = false;
 		}
-	}
 
-	while (true) {
-		if (gles3_context) {
-			if (RasterizerGLES3::is_viable() == OK) {
-				RasterizerGLES3::register_config();
-				RasterizerGLES3::make_current();
-				break;
-			} else {
+		bool editor = Engine::get_singleton()->is_editor_hint();
+		bool gl_initialization_error = false;
+
+		gl_context = NULL;
+		while (!gl_context) {
+			gl_context = memnew(ContextGL_Windows(hWnd, gles3_context));
+
+			if (gl_context->initialize() != OK) {
+				memdelete(gl_context);
+				gl_context = NULL;
+
 				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
+					if (p_video_driver == VIDEO_DRIVER_GLES2) {
+						gl_initialization_error = true;
+						break;
+					}
+
 					p_video_driver = VIDEO_DRIVER_GLES2;
 					gles3_context = false;
-					continue;
 				} else {
 					gl_initialization_error = true;
 					break;
 				}
 			}
-		} else {
-			if (RasterizerGLES2::is_viable() == OK) {
-				RasterizerGLES2::register_config();
-				RasterizerGLES2::make_current();
-				break;
+		}
+
+		while (true) {
+			if (gles3_context) {
+				if (RasterizerGLES3::is_viable() == OK) {
+					RasterizerGLES3::register_config();
+					RasterizerGLES3::make_current();
+					break;
+				} else {
+					if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
+						p_video_driver = VIDEO_DRIVER_GLES2;
+						gles3_context = false;
+						continue;
+					} else {
+						gl_initialization_error = true;
+						break;
+					}
+				}
 			} else {
-				gl_initialization_error = true;
-				break;
+				if (RasterizerGLES2::is_viable() == OK) {
+					RasterizerGLES2::register_config();
+					RasterizerGLES2::make_current();
+					break;
+				} else {
+					gl_initialization_error = true;
+					break;
+				}
 			}
 		}
-	}
 
-	if (gl_initialization_error) {
-		OS::get_singleton()->alert("Your video card driver does not support any of the supported OpenGL versions.\n"
-								   "Please update your drivers or if you have a very old or integrated GPU, upgrade it.",
-				"Unable to initialize Video driver");
-		return ERR_UNAVAILABLE;
-	}
+		if (gl_initialization_error) {
+			OS::get_singleton()->alert("Your video card driver does not support any of the supported OpenGL versions.\n"
+									   "Please update your drivers or if you have a very old or integrated GPU, upgrade it.",
+					"Unable to initialize Video driver");
+			return ERR_UNAVAILABLE;
+		}
 
-	video_driver_index = p_video_driver;
+		video_driver_index = p_video_driver;
 
-	gl_context->set_use_vsync(video_mode.use_vsync);
-	set_vsync_via_compositor(video_mode.vsync_via_compositor);
+		gl_context->set_use_vsync(video_mode.use_vsync);
+		set_vsync_via_compositor(video_mode.vsync_via_compositor);
 #endif
 
-	visual_server = memnew(VisualServerRaster);
+		visual_server = memnew(VisualServerRaster);
+	} else {
+		visual_server = memnew(VisualServerHeadless);
+	}
+
 	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
 		visual_server = memnew(VisualServerWrapMT(visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 	}
