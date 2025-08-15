@@ -4,9 +4,6 @@ inputs:
   bin:
     description: Path to the Godot binary.
     required: true
-  target:
-    description: The scons target (debug/release).
-    default: "debug"
   platform:
     description: The libgodot platform to build.
     required: false
@@ -18,6 +15,10 @@ runs:
       run: ${{ inputs.bin }} --no-window --audio-driver Dummy --gdnative-generate-json-api ./bin/api.json
       continue-on-error: true
 
-    - name: Scons Build
+    - name: Scons Build (debug)
       shell: sh
-      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=${{ inputs.target }} --jobs=2
+      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=debug --jobs=2
+
+    - name: Scons Build (release)
+      shell: sh
+      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=release --jobs=2
