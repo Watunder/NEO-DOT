@@ -84,12 +84,23 @@ jobs:
         uses: ./.github/actions/libgodot-build
         with:
           bin: ${{ matrix.bin }}
-          target: release
           platform: windows
+
+      - name: Prepare artifact (libgodot)
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        shell: sh
+        run: |
+          mkdir -p "${{ runner.temp }}/libgodot/godot-headers"
+          mkdir -p "${{ runner.temp }}/libgodot/godot-cpp/include"
+          mkdir -p "${{ runner.temp }}/libgodot/godot-cpp/bin"
+
+          cp -r modules/gdnative/include/** "${{ runner.temp }}/libgodot/godot-headers/"
+          cp -r modules/gdnative/binding/include/** "${{ runner.temp }}/libgodot/godot-cpp/include/"
+          cp -r modules/gdnative/binding/bin/** "${{ runner.temp }}/libgodot/godot-cpp/bin/"
 
       - name: Upload artifact (libgodot)
         if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
         uses: ./.github/actions/upload-artifact
         with:
           name: windows-libgodot
-          path: "modules/gdnative/binding/bin/*"
+          path: "${{ runner.temp }}/libgodot/**"
