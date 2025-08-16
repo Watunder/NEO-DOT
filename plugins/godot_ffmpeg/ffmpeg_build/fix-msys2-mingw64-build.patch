@@ -1,0 +1,25 @@
+diff --git a/libavcodec/mf_utils.h b/libavcodec/mf_utils.h
+index d514723c..a711fc6a 100644
+--- a/libavcodec/mf_utils.h
++++ b/libavcodec/mf_utils.h
+@@ -29,6 +29,7 @@
+ // mf*.h headers below indirectly include strmif.h.)
+ #include <icodecapi.h>
+ #else
++#include <wchar.h>
+ #include <dshow.h>
+ // Older versions of mingw-w64 need codecapi.h explicitly included, while newer
+ // ones include it implicitly from dshow.h (via uuids.h).
+diff --git a/libavutil/wchar_filename.h b/libavutil/wchar_filename.h
+index 142d50e7..def95713 100644
+--- a/libavutil/wchar_filename.h
++++ b/libavutil/wchar_filename.h
+@@ -19,7 +19,7 @@
+ #ifndef AVUTIL_WCHAR_FILENAME_H
+ #define AVUTIL_WCHAR_FILENAME_H
+ 
+-#ifdef _WIN32
++#ifdef _WIN32 || defined(__CYGWIN__)
+ #include <windows.h>
+ #include "mem.h"
+ 
