@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import shutil
+import subprocess
+import multiprocessing
+
+process_num = str(multiprocessing.cpu_count())
+
+# Try to detect the host platform automatically.
+# This is used if no `platform` argument is passed
+if sys.platform == "win32" or sys.platform == "msys":
+    target_platform = "windows"
+else:
+    raise ValueError("Could not detect platform automatically, please specify with " "platform=<platform>")
+
+opts = Variables([], ARGUMENTS)
+opts.Add(EnumVariable("platform", "Target platform", target_platform, allowed_values=("windows"), ignorecase=2))
+opts.Add(EnumVariable("arch", "Target platform arch", "x86_64", allowed_values=("x86_64"), ignorecase=2))
+
+env = Environment(ENV=os.environ)
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
+
+ffmpeg_build_prefix = f"../ffmpeg_build/{env["platform"]}/{env["arch"]}"
+ffmpeg_build_args = [
+    f"--arch={env["arch"]}",
+    f"--prefix={ffmpeg_build_prefix}",
+    "--enable-shared",
+    "--disable-postproc",
+    "--disable-avfilter",
+    "--disable-programs",
+    "--disable-ffmpeg",
+    "--disable-ffplay",
+    "--disable-ffprobe",
+    "--disable-doc",
+    "--disable-htmlpages",
+    "--disable-manpages",
+    "--disable-podpages",
+    "--disable-txtpages",
+    "--extra-ldflags=-static",
+    "--extra-cflags=-fPIC",
+    "--extra-ldflags=-fpic",
+]
+
+os.chdir("../ffmpeg")
+
+print("wait for configuring...")
+subprocess.check_call(["sh", "./configure"] + ffmpeg_build_args)
+
+print("wait for patching...")
+os.system("patch -p1 -N < ../ffmpeg_build/fix-msys2-mingw64-build.patch")
+
+if os.system(f"make -j {process_num}") == 0 and os.system(f"make -j {process_num} install") == 0:
+    os.makedirs("../bin/", exist_ok=True)
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avcodec-58.dll", "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avformat-58.dll", "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avutil-56.dll", "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "swresample-3.dll", "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "swscale-5.dll", "../bin/")
