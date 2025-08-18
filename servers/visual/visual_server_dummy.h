@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  visual_server_headless.h                                             */
+/*  visual_server_dummy.h                                                */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,12 +28,12 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef VISUAL_SERVER_HEADLESS_H
-#define VISUAL_SERVER_HEADLESS_H
+#ifndef VISUAL_SERVER_DUMMY_H
+#define VISUAL_SERVER_DUMMY_H
 
 #include "servers/visual_server.h"
 
-class VisualServerHeadless : public VisualServer {
+class VisualServerDummy : public VisualServer {
 public:
 	// TEXTURE API
 	struct DummyTexture : public RID_Data {
