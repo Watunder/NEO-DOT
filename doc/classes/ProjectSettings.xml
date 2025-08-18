@@ -1163,7 +1163,7 @@
 			Lower-end override for [member rendering/quality/directional_shadow/size] on mobile devices, due to performance concerns or driver support.
 		</member>
 		<member name="rendering/quality/driver/driver_name" type="String" setter="" getter="" default="&quot;GLES3&quot;">
-			The video driver to use ("GLES2" or "GLES3").
+			The video driver to use ("GLES2", "GLES3", "Dummy").
 			[b]Note:[/b] The backend in use can be overridden at runtime via the [code]--video-driver[/code] command line argument, or by the [member rendering/quality/driver/fallback_to_gles2] option if the target system does not support GLES3 and falls back to GLES2. In such cases, this property is not updated, so use [method OS.get_current_video_driver] to query it at run-time.
 		</member>
 		<member name="rendering/quality/driver/fallback_to_gles2" type="bool" setter="" getter="" default="false">

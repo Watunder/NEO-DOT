@@ -63,6 +63,7 @@ class OS {
 	bool _use_vsync;
 	bool _vsync_via_compositor;
 	float _aspect_ratio;
+	bool _allow_headless;
 
 	char *last_error;
 
@@ -109,8 +110,9 @@ public:
 		bool layered;
 		bool custom_title_bar_enabled;
 		int custom_title_bar_height;
+		bool headless;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless = false, bool p_borderless_shadow = false, bool p_borderless_resizable = false, bool p_maximized = false, bool p_always_on_top = false, bool p_keep_aspect_ratio = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false, bool p_custom_title_bar_enabled = false, bool p_custom_title_bar_height = 32) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless = false, bool p_borderless_shadow = false, bool p_borderless_resizable = false, bool p_maximized = false, bool p_always_on_top = false, bool p_keep_aspect_ratio = false, bool p_use_vsync = false, bool p_vsync_via_compositor = false, bool p_custom_title_bar_enabled = false, int p_custom_title_bar_height = 32) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
@@ -126,6 +128,7 @@ public:
 			layered = false;
 			custom_title_bar_enabled = p_custom_title_bar_enabled;
 			custom_title_bar_height = p_custom_title_bar_height;
+			headless = false;
 		}
 	};
 
@@ -199,6 +202,7 @@ public:
 	enum VideoDriver {
 		VIDEO_DRIVER_GLES3,
 		VIDEO_DRIVER_GLES2,
+		VIDEO_DRIVER_DUMMY,
 		VIDEO_DRIVER_MAX,
 	};
 
@@ -581,6 +585,7 @@ public:
 
 	void set_has_server_feature_callback(HasServerFeatureCallback p_callback);
 
+	bool is_headless_allowed() const { return _allow_headless; }
 	bool is_layered_allowed() const { return _allow_layered; }
 	bool is_hidpi_allowed() const { return _allow_hidpi; }
 

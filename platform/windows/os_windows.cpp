@@ -44,7 +44,7 @@
 #include "lang_table.h"
 #include "main/main.h"
 #include "servers/audio_server.h"
-#include "servers/visual/visual_server_headless.h"
+#include "servers/visual/visual_server_dummy.h"
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "windows_terminal_logger.h"
@@ -1723,9 +1723,11 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	last_pressure_update = 0;
 	last_tilt = Vector2();
 
-	if (!is_no_window_mode_enabled()) {
+	if (p_video_driver == VIDEO_DRIVER_DUMMY) {
+		video_driver_index = p_video_driver;
+		visual_server = memnew(VisualServerDummy);
+	} else {
 #if defined(OPENGL_ENABLED)
-
 		bool gles3_context = true;
 		if (p_video_driver == VIDEO_DRIVER_GLES2) {
 			gles3_context = false;
@@ -1797,10 +1799,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		gl_context->set_use_vsync(video_mode.use_vsync);
 		set_vsync_via_compositor(video_mode.vsync_via_compositor);
 #endif
-
 		visual_server = memnew(VisualServerRaster);
-	} else {
-		visual_server = memnew(VisualServerHeadless);
 	}
 
 	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
@@ -2343,6 +2342,10 @@ void OS_Windows::set_window_size(const Size2 p_size) {
 	}
 }
 void OS_Windows::set_window_fullscreen(bool p_enabled) {
+	if (is_no_window_mode_enabled()) {
+		return;
+	}
+
 	if (video_mode.fullscreen == p_enabled)
 		return;
 
@@ -2481,6 +2484,10 @@ bool OS_Windows::is_window_focused() const {
 }
 
 void OS_Windows::set_console_visible(bool p_enabled) {
+	if (is_no_window_mode_enabled()) {
+		return;
+	}
+
 	if (console_visible == p_enabled)
 		return;
 	ShowWindow(GetConsoleWindow(), p_enabled ? SW_SHOW : SW_HIDE);
@@ -3365,6 +3372,10 @@ void OS_Windows::enable_for_stealing_focus(ProcessID pid) {
 }
 
 void OS_Windows::move_window_to_foreground() {
+	if (is_no_window_mode_enabled()) {
+		return;
+	}
+
 	SetForegroundWindow(hWnd);
 }
 

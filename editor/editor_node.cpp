@@ -500,7 +500,7 @@ void EditorNode::_notification(int p_what) {
 
 			_update_debug_options();
 
-			// Save the project after opening to mark it as last modified, except in headless mode.
+			// Save the project after opening to mark it as last modified, except in no window mode.
 			if (OS::get_singleton()->can_draw() && !OS::get_singleton()->is_no_window_mode_enabled()) {
 				ProjectSettings::get_singleton()->save();
 			}

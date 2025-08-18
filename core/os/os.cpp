@@ -680,11 +680,13 @@ void OS::center_window() {
 }
 
 int OS::get_video_driver_count() const {
-	return 2;
+	return OS::VideoDriver::VIDEO_DRIVER_MAX;
 }
 
 const char *OS::get_video_driver_name(int p_driver) const {
 	switch (p_driver) {
+		case VIDEO_DRIVER_DUMMY:
+			return "Dummy";
 		case VIDEO_DRIVER_GLES2:
 			return "GLES2";
 		case VIDEO_DRIVER_GLES3:
@@ -793,6 +795,8 @@ OS::OS() {
 
 	_allow_hidpi = false;
 	_allow_layered = false;
+	_allow_headless = false;
+
 	_stack_bottom = (void *)(&stack_bottom);
 
 	_logger = NULL;
