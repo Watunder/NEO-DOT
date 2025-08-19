@@ -181,6 +181,7 @@ List<ClassAPI> generate_c_api_classes() {
 		global_constants_api.is_singleton = true;
 		global_constants_api.singleton_name = L"GlobalConstants";
 		global_constants_api.is_instanciable = false;
+		global_constants_api.is_reference = false;
 		const int constants_count = GlobalConstants::get_global_constant_count();
 		for (int i = 0; i < constants_count; ++i) {
 			ConstantAPI constant_api;
