@@ -27,6 +27,7 @@ ffmpeg_build_prefix = f"../ffmpeg_build/{env["platform"]}/{env["arch"]}"
 ffmpeg_build_args = [
     f"--arch={env["arch"]}",
     f"--prefix={ffmpeg_build_prefix}",
+    "--toolchain=msvc",
     "--enable-shared",
     "--disable-postproc",
     "--disable-avfilter",
@@ -39,18 +40,15 @@ ffmpeg_build_args = [
     "--disable-manpages",
     "--disable-podpages",
     "--disable-txtpages",
-    "--extra-ldflags=-static",
-    "--extra-cflags=-fPIC",
-    "--extra-ldflags=-fpic",
+    "--disable-avdevice",
+    "--disable-network",
 ]
 
 os.chdir("../ffmpeg")
 
 print("wait for configuring...")
 subprocess.check_call(["sh", "./configure"] + ffmpeg_build_args)
-
-print("wait for patching...")
-os.system("patch -p1 -N < ../ffmpeg_build/fix-msys2-mingw64-build.patch")
+subprocess.check_call(["rm", "-f", "test.obj"])
 
 if os.system(f"make -j {process_num}") == 0 and os.system(f"make -j {process_num} install") == 0:
     os.makedirs("../bin/", exist_ok=True)
