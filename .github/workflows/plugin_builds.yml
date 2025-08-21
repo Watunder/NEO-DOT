@@ -1,0 +1,119 @@
+name: ⚙️ Plugin Builds
+on:
+  workflow_dispatch:
+    inputs:
+      windows-builds-id:
+        description: The id of the workflow run.
+        type: number
+        required: true
+      libcriware-build:
+        description: If libcriware is to be built.
+        default: false
+        type: boolean
+      libeffekseer-build:
+        description: If libeffekseer is to be built.
+        default: false
+        type: boolean
+      libffmpeg-build:
+        description: If libffmpeg is to be built.
+        default: false
+        type: boolean
+      libsqlite-build:
+        description: If libsqlite is to be built.
+        default: false
+        type: boolean
+
+jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      excludes: ${{ steps.check-inputs.outputs.excludes }}
+    steps:
+      - name: Check for inputs
+        id: check-inputs
+        shell: bash
+        run: |
+          excludes=()
+          [ "${{ inputs.libcriware-build }}" == "false" ] && excludes+=("godot_criware")
+          [ "${{ inputs.libeffekseer-build }}" == "false" ] && excludes+=("godot_effekseer")
+          [ "${{ inputs.libffmpeg-build }}" == "false" ] && excludes+=("godot_ffmpeg")
+          [ "${{ inputs.libsqlite-build }}" == "false" ] && excludes+=("godot_sqlite")
+          echo "excludes=[$(printf '"%s",' "${excludes[@]}" | sed 's/,$//')]" >> "$GITHUB_OUTPUT"
+
+  windows-build:
+    runs-on: windows-latest
+    needs: define-matrix
+    name: ${{ matrix.plugin }}
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [godot_criware, godot_effekseer, godot_ffmpeg, godot_sqlite]
+        include:
+          - godot_effekseer:
+              submodule: [effekseer]
+          - godot_ffmpeg:
+              msys2: true
+              submodule: [ffmpeg]
+        exclude: ${{ fromJSON(needs.define-matrix.outputs.excludes) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup python and scons
+        uses: ./.github/actions/godot-deps
+
+      - name: Setup MSVC problem matcher
+        uses: ammaraskar/msvc-problem-matcher@master
+
+      - name: Setup MSYS2
+        if: ${{ matrix.msys2 }}
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          msystem: UCRT64
+          path-type: inherit
+
+      - name: Download artifact (libgodot)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.windows-builds-id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: windows-libgodot
+          path: "${{ runner.temp }}/libgodot/"
+
+      - name: Copy artifact (libgodot)
+        shell: sh
+        run: |
+          cp -r "${{ runner.temp }}/libgodot/godot-cpp/include/gen/" modules/gdnative/binding/include/
+          cp -r "${{ runner.temp }}/libgodot/godot-cpp/bin/" modules/gdnative/binding/
+          cp "${{ runner.temp }}/libgodot/godot-headers/gdnative_api_struct.gen.h" modules/gdnative/include/
+
+      - name: Update submodule
+        if: ${{ matrix.submodule && matrix.submodule != "" }}
+        shell: sh
+        run: |
+          cd plugins/${{ matrix.plugin }}
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --depth 1 ${{ matrix.submodule }}
+
+      - name: Compilation
+        if: ${{ !matrix.msys2 && matrix.plugin != "godot_ffmpeg"}}
+        shell: sh
+        run: scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
+
+      - name: Compilation (godot_ffmpeg)
+        if: ${{ matrix.msys2 && matrix.plugin == "godot_ffmpeg"}}
+        shell: msys2 {0}
+        run: |
+          pacman -S diffutils make nasm pkg-config
+          scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
+
+      - name: Prepare artifact
+        run: |
+          Remove-Item plugins/${{ matrix.plugin }}/bin/* -Include *.exp,*.lib -Force
+
+      - name: Upload artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: windows-${{ matrix.plugin }}
+          path: plugins/${{ matrix.plugin }}/bin
