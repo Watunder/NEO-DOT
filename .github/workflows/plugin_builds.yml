@@ -25,20 +25,22 @@ on:
 
 jobs:
   define-matrix:
+    if: ${{ inputs.libcriware-build || inputs.libeffekseer-build || inputs.libffmpeg-build || inputs.libsqlite-build }}
     runs-on: ubuntu-latest
     outputs:
-      excludes: ${{ steps.check-inputs.outputs.excludes }}
+      matrix: ${{ steps.check-inputs.outputs.matrix }}
     steps:
       - name: Check for inputs
         id: check-inputs
         shell: bash
         run: |
-          excludes=()
-          [ "${{ inputs.libcriware-build }}" == "false" ] && excludes+=("godot_criware")
-          [ "${{ inputs.libeffekseer-build }}" == "false" ] && excludes+=("godot_effekseer")
-          [ "${{ inputs.libffmpeg-build }}" == "false" ] && excludes+=("godot_ffmpeg")
-          [ "${{ inputs.libsqlite-build }}" == "false" ] && excludes+=("godot_sqlite")
-          echo "excludes=[$(printf '"%s",' "${excludes[@]}" | sed 's/,$//')]" >> "$GITHUB_OUTPUT"
+          MATRIX_INCLUDE=()
+          [ "${{ inputs.libcriware-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_criware\"}")
+          [ "${{ inputs.libeffekseer-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_effekseer\",\"submodule\":\"effekseer\"}")
+          [ "${{ inputs.libffmpeg-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_ffmpeg\",\"submodule\":\"ffmpeg\",\"msys2\":true}")
+          [ "${{ inputs.libsqlite-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_sqlite\"}")
+          MATRIX_JSON="{\"include\": [$(IFS=,; echo "${MATRIX_INCLUDE[*]}")]}"
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
 
   windows-build:
     runs-on: windows-latest
@@ -46,15 +48,7 @@ jobs:
     name: ${{ matrix.plugin }}
     strategy:
       fail-fast: false
-      matrix:
-        plugin: [godot_criware, godot_effekseer, godot_ffmpeg, godot_sqlite]
-        include:
-          - godot_effekseer:
-              submodule: [effekseer]
-          - godot_ffmpeg:
-              msys2: true
-              submodule: [ffmpeg]
-        exclude: ${{ fromJSON(needs.define-matrix.outputs.excludes) }}
+      matrix: ${{ fromJSON(needs.define-matrix.outputs.matrix) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -89,7 +83,7 @@ jobs:
           cp "${{ runner.temp }}/libgodot/godot-headers/gdnative_api_struct.gen.h" modules/gdnative/include/
 
       - name: Update submodule
-        if: ${{ matrix.submodule && matrix.submodule != "" }}
+        if: ${{ matrix.submodule && matrix.submodule != '' }}
         shell: sh
         run: |
           cd plugins/${{ matrix.plugin }}
@@ -97,15 +91,15 @@ jobs:
           git submodule update --init --depth 1 ${{ matrix.submodule }}
 
       - name: Compilation
-        if: ${{ !matrix.msys2 && matrix.plugin != "godot_ffmpeg"}}
+        if: ${{ !matrix.msys2 && matrix.plugin != 'godot_ffmpeg' }}
         shell: sh
         run: scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
 
       - name: Compilation (godot_ffmpeg)
-        if: ${{ matrix.msys2 && matrix.plugin == "godot_ffmpeg"}}
+        if: ${{ matrix.msys2 && matrix.plugin == 'godot_ffmpeg' }}
         shell: msys2 {0}
         run: |
-          pacman -S diffutils make nasm pkg-config
+          pacman -Syu --noconfirm diffutils make nasm pkg-config
           scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
 
       - name: Prepare artifact
