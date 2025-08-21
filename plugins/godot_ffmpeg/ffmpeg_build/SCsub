@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+Import("env")
+
+import os
+import shutil
+import subprocess
+
+ffmpeg_build_prefix = f"../ffmpeg_build/{env["platform"]}/{env["TARGET_ARCH"]}"
+ffmpeg_build_args = [
+    f"--arch={env["TARGET_ARCH"]}",
+    f"--prefix={ffmpeg_build_prefix}",
+    "--enable-shared",
+    "--disable-postproc",
+    "--disable-avfilter",
+    "--disable-programs",
+    "--disable-ffmpeg",
+    "--disable-ffplay",
+    "--disable-ffprobe",
+    "--disable-doc",
+    "--disable-htmlpages",
+    "--disable-manpages",
+    "--disable-podpages",
+    "--disable-txtpages",
+    "--disable-avdevice",
+    "--disable-network",
+]
+
+if env["platform"] == "windows":
+    ffmpeg_build_args.append("--toolchain=msvc")
+
+os.chdir("../ffmpeg")
+
+print("wait for configuring...")
+subprocess.check_call(["sh", "./configure"] + ffmpeg_build_args)
+if env["platform"] == "windows":
+    subprocess.check_call(["rm", "-f", "test.obj"])
+
+if (
+    subprocess.check_call(f"make -j {env.GetOption("num_jobs")}") == 0
+    and subprocess.check_call(f"make -j {env.GetOption("num_jobs")} install") == 0
+):
+    os.makedirs("../bin/", exist_ok=True)
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avcodec-58" + env["SHLIBSUFFIX"], "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avformat-58" + env["SHLIBSUFFIX"], "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "avutil-56" + env["SHLIBSUFFIX"], "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "swresample-3" + env["SHLIBSUFFIX"], "../bin/")
+    shutil.copy2(ffmpeg_build_prefix + "/bin/" + "swscale-5" + env["SHLIBSUFFIX"], "../bin/")

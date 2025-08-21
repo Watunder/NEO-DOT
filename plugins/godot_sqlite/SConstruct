@@ -66,14 +66,12 @@ def add_sources(sources, dir, extension):
             sources.append(dir + "/" + f)
 
 
-#################
-# OPTIONS#########
-#################
-
 # Try to detect the host platform automatically.
 # This is used if no `platform` argument is passed
 if sys.platform.startswith("linux"):
     host_platform = "linux"
+elif sys.platform.startswith("freebsd"):
+    host_platform = "freebsd"
 elif sys.platform == "darwin":
     host_platform = "osx"
 elif sys.platform == "win32" or sys.platform == "msys":
@@ -81,7 +79,6 @@ elif sys.platform == "win32" or sys.platform == "msys":
 else:
     raise ValueError("Could not detect platform automatically, please specify with " "platform=<platform>")
 
-# Gets the standard flags CC, CCX, etc.
 env = Environment(ENV=os.environ)
 
 is64 = sys.maxsize > 2**32
@@ -94,24 +91,24 @@ if (
     is64 = True
 
 opts = Variables([], ARGUMENTS)
-# Define our options
 opts.Add(
     EnumVariable(
         "platform",
         "Target platform",
         host_platform,
-        allowed_values=("linux", "osx", "windows", "ios", "javascript"),
+        allowed_values=("linux", "freebsd", "osx", "windows", "android", "ios", "javascript"),
         ignorecase=2,
     )
 )
 opts.Add(EnumVariable("bits", "Target platform bits", "64" if is64 else "32", ("32", "64")))
-opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux", False))
+opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux or FreeBSD", False))
 opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
 # Must be the same setting as used for cpp_bindings
 opts.Add(EnumVariable("target", "Compilation target", "debug", allowed_values=("debug", "release"), ignorecase=2))
+opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["armv7", "arm64v8", "x86", "x86_64"]))
 opts.Add("macos_deployment_target", "macOS deployment target", "default")
 opts.Add("macos_sdk_path", "macOS SDK path", "")
-opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "universal", ["universal", "x86_64", "arm64"]))
+opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "x86_64", ["x86_64", "arm64"]))
 opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["armv7", "arm64", "x86_64"]))
 opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
 opts.Add(
@@ -119,29 +116,34 @@ opts.Add(
     "Path to iPhone toolchain",
     "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain",
 )
+opts.Add(
+    "android_api_level",
+    "Target Android API level",
+    "18" if ARGUMENTS.get("android_arch", "armv7") in ["armv7", "x86"] else "21",
+)
+opts.Add(
+    "ANDROID_NDK_ROOT",
+    "Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.",
+    os.environ.get("ANDROID_NDK_ROOT", None),
+)
+opts.Add(
+    "godot_headers_path",
+    "Path to your godot-headers",
+    "../../modules/gdnative/include/",
+)
+opts.Add(
+    "godot_cpp_path",
+    "Path to your godot-cpp",
+    "../../modules/gdnative/binding/",
+)
 
-# Local dependency paths, adapt them to your setup
-godot_headers_path = "../../modules/gdnative/include/"
-cpp_bindings_path = "../../modules/gdnative/binding/"
-
-
-# Updates the environment with the option variables.
 opts.Update(env)
-# Generates help for the -h scons option.
 Help(opts.GenerateHelpText(env))
-
-# For the reference:
-# - CCFLAGS are compilation flags shared between C and C++
-# - CFLAGS are for C-specific compilation flags
-# - CXXFLAGS are for C++-specific compilation flags
-# - CPPFLAGS are for pre-processor flags
-# - CPPDEFINES are for pre-processor defines
-# - LINKFLAGS are for linking flags
 
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
 # all the required tools
-if host_platform == "windows":
+if host_platform == "windows" and env["platform"] != "android":
     if env["bits"] == "64":
         env = Environment(TARGET_ARCH="amd64")
     elif env["bits"] == "32":
@@ -149,23 +151,25 @@ if host_platform == "windows":
 
     opts.Update(env)
 
-###################
-####FLAGS##########
-###################
+if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
+    # MSVC
+    env.Append(CCFLAGS=["/std:c++17"])
+    env.Append(CCFLAGS=["/utf-8"])
+else:
+    env.Append(CCFLAGS=["-std=c++17"])
+    env.Append(CCFLAGS=["-utf-8"])
 
-if env["platform"] == "linux":
-
+if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
-        env["CC"] = "clang"
         env["CXX"] = "clang++"
 
-    env.Append(CCFLAGS=["-fPIC"])
-    env.Append(CXXFLAGS=["-std=c++17"])
+    env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
+    env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
+
     if env["target"] == "debug":
-        env.Append(CCFLAGS=["-g3", "-Og"])
+        env.Append(CCFLAGS=["-Og", "-g"])
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
-        env.Append(LINKFLAGS=["-s"])
 
     if env["bits"] == "64":
         env.Append(CCFLAGS=["-m64"])
@@ -174,25 +178,14 @@ if env["platform"] == "linux":
         env.Append(CCFLAGS=["-m32"])
         env.Append(LINKFLAGS=["-m32"])
 
-    target_path = "libsqlite.linux-" + env["bits"] + ".so"
-
 elif env["platform"] == "osx":
-
     # Use Clang on macOS by default
-    env["CC"] = "clang"
     env["CXX"] = "clang++"
 
     if env["bits"] == "32":
         raise ValueError("Only 64-bit builds are supported for the macOS target.")
 
-    if env["macos_arch"] == "universal":
-        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
-        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
-    else:
-        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
-        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
-
-    env.Append(CXXFLAGS=["-std=c++17"])
+    env.Append(CCFLAGS=["-arch", env["macos_arch"]])
 
     if env["macos_deployment_target"] != "default":
         env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
@@ -204,6 +197,8 @@ elif env["platform"] == "osx":
 
     env.Append(
         LINKFLAGS=[
+            "-arch",
+            env["macos_arch"],
             "-framework",
             "Cocoa",
             "-Wl,-undefined,dynamic_lookup",
@@ -211,15 +206,11 @@ elif env["platform"] == "osx":
     )
 
     if env["target"] == "debug":
-        env.Append(CCFLAGS=["-Og", "g"])
+        env.Append(CCFLAGS=["-Og", "-g"])
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-    target_path = "libsqlite.osx.dylib"
-
 elif env["platform"] == "ios":
-    env["target_path"] += env["ios_arch"] + "/"
-
     if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
@@ -242,7 +233,6 @@ elif env["platform"] == "ios":
     env["RANLIB"] = compiler_path + "ranlib"
 
     env.Append(CCFLAGS=["-arch", env["ios_arch"], "-isysroot", sdk_path])
-    env.Append(CXXFLAGS=["-std=c++17"])
     env.Append(
         LINKFLAGS=[
             "-arch",
@@ -261,10 +251,7 @@ elif env["platform"] == "ios":
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-    target_path = "libsqlite.ios-" + env["ios_arch"] + ".dylib"
-
 elif env["platform"] == "windows":
-
     if host_platform == "windows" and not env["use_mingw"]:
         # MSVC
         env.Append(LINKFLAGS=["/WX"])
@@ -273,16 +260,14 @@ elif env["platform"] == "windows":
         elif env["target"] == "release":
             env.Append(CCFLAGS=["/O2", "/EHsc", "/DNDEBUG", "/MD"])
 
-    elif host_platform == "linux" or host_platform == "osx":
+    elif host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx":
         # Cross-compilation using MinGW
         if env["bits"] == "64":
-            env["CC"] = "x86_64-w64-mingw32-gcc"
             env["CXX"] = "x86_64-w64-mingw32-g++"
             env["AR"] = "x86_64-w64-mingw32-ar"
             env["RANLIB"] = "x86_64-w64-mingw32-ranlib"
             env["LINK"] = "x86_64-w64-mingw32-g++"
         elif env["bits"] == "32":
-            env["CC"] = "i686-w64-mingw32-gcc"
             env["CXX"] = "i686-w64-mingw32-g++"
             env["AR"] = "i686-w64-mingw32-ar"
             env["RANLIB"] = "i686-w64-mingw32-ranlib"
@@ -297,9 +282,9 @@ elif env["platform"] == "windows":
         env["SPAWN"] = mySpawn
 
     # Native or cross-compilation using MinGW
-    if host_platform == "linux" or host_platform == "osx" or env["use_mingw"]:
+    if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
+        # These options are for a release build even using target=debug
         env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
-        env.Append(CXXFLAGS=["-std=c++17"])
         env.Append(
             LINKFLAGS=[
                 "--static",
@@ -309,7 +294,89 @@ elif env["platform"] == "windows":
             ]
         )
 
-    target_path = "libsqlite.win" + env["bits"] + ".dll"
+elif env["platform"] == "android":
+    if host_platform == "windows":
+        # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
+        env = Environment(ENV=os.environ, tools=["mingw"])
+        opts.Update(env)
+        # env = env.Clone(tools=['mingw'])
+
+        env["SPAWN"] = mySpawn
+
+    # Verify NDK root
+    if not "ANDROID_NDK_ROOT" in env:
+        raise ValueError(
+            "To build for Android, ANDROID_NDK_ROOT must be defined. Please set ANDROID_NDK_ROOT to the root folder of your Android NDK installation."
+        )
+
+    # Validate API level
+    api_level = int(env["android_api_level"])
+    if env["android_arch"] in ["x86_64", "arm64v8"] and api_level < 21:
+        print("WARN: 64-bit Android architectures require an API level of at least 21; setting android_api_level=21")
+        env["android_api_level"] = "21"
+        api_level = 21
+
+    # Setup toolchain
+    toolchain = env["ANDROID_NDK_ROOT"] + "/toolchains/llvm/prebuilt/"
+    if host_platform == "windows":
+        toolchain += "windows"
+        import platform as pltfm
+
+        if pltfm.machine().endswith("64"):
+            toolchain += "-x86_64"
+    elif host_platform == "linux":
+        toolchain += "linux-x86_64"
+    elif host_platform == "osx":
+        toolchain += "darwin-x86_64"
+    env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
+
+    # Get architecture info
+    arch_info_table = {
+        "armv7": {
+            "march": "armv7-a",
+            "target": "armv7a-linux-androideabi",
+            "tool_path": "arm-linux-androideabi",
+            "compiler_path": "armv7a-linux-androideabi",
+            "ccflags": ["-mfpu=neon"],
+        },
+        "arm64v8": {
+            "march": "armv8-a",
+            "target": "aarch64-linux-android",
+            "tool_path": "aarch64-linux-android",
+            "compiler_path": "aarch64-linux-android",
+            "ccflags": [],
+        },
+        "x86": {
+            "march": "i686",
+            "target": "i686-linux-android",
+            "tool_path": "i686-linux-android",
+            "compiler_path": "i686-linux-android",
+            "ccflags": ["-mstackrealign"],
+        },
+        "x86_64": {
+            "march": "x86-64",
+            "target": "x86_64-linux-android",
+            "tool_path": "x86_64-linux-android",
+            "compiler_path": "x86_64-linux-android",
+            "ccflags": [],
+        },
+    }
+    arch_info = arch_info_table[env["android_arch"]]
+
+    # Setup tools
+    env["CC"] = toolchain + "/bin/clang"
+    env["CXX"] = toolchain + "/bin/clang++"
+    env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
+
+    env.Append(
+        CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
+    )  # , '-fPIE', '-fno-addrsig', '-Oz'])
+    env.Append(CCFLAGS=arch_info["ccflags"])
+
+    if env["target"] == "debug":
+        env.Append(CCFLAGS=["-Og", "-g"])
+    elif env["target"] == "release":
+        env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "javascript":
     env["ENV"] = os.environ
@@ -338,53 +405,46 @@ elif env["platform"] == "javascript":
     env["LIBSUFFIXES"] = ["$LIBSUFFIX"]
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
-    env["STATIC_AND_SHARED_OBJECTS_ARE_THE_SAME"] = 1
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-O0", "-g"])
     elif env["target"] == "release":
         env.Append(CCFLAGS=["-O3"])
 
-    target_path = "libsqlite.wasm" + "32" + ".wasm"
+# Sources to compile
+sources = []
 
-#####################
-# ADD SOURCES#########
-#####################
+add_sources(sources, "src", "cpp")
+add_sources(sources, "src/vfs/", "cpp")
+sources.append("src/sqlite/sqlite3.c")
+
+
+arch_suffix = env["bits"]
+if env["platform"] == "android":
+    arch_suffix = env["android_arch"]
+if env["platform"] == "ios":
+    arch_suffix = env["ios_arch"]
+if env["platform"] == "javascript":
+    arch_suffix = "wasm"
+
+# Local dependency paths, adapt them to your setup
 env.Append(
     CPPPATH=[
         ".",
-        godot_headers_path,
-        cpp_bindings_path + "include/",
-        cpp_bindings_path + "include/core/",
-        cpp_bindings_path + "include/gen/",
+        env["godot_headers_path"],
+        env["godot_cpp_path"] + "include/",
+        env["godot_cpp_path"] + "include/core/",
+        env["godot_cpp_path"] + "include/gen/",
+        "src/",
     ]
 )
 
-arch_suffix = env["bits"]
-if env["platform"] == "ios":
-    arch_suffix = env["ios_arch"]
-elif env["platform"] == "javascript":
-    arch_suffix = "wasm"
-elif env["platform"] == "osx":
-    if env["macos_arch"] != "universal":
-        arch_suffix = env["macos_arch"]
+env.Append(LIBPATH=[env["godot_cpp_path"] + "bin/"])
 
-cpp_bindings_libname = "libgodot-cpp.{}.{}.{}".format(env["platform"], env["target"], arch_suffix)
+env.Append(LIBS=["libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"])])
 
-if env["platform"] != "javascript":
-    env.Append(LIBS=[cpp_bindings_libname])
-    env.Append(LIBPATH=[cpp_bindings_path + "bin/"])
-
-# tweak this if you want to use different folders, or more folders, to store your source code in.
-env.Append(CPPPATH=["src/"])
-sources = [Glob("src/*.cpp"), Glob("src/vfs/*.cpp"), "src/sqlite/sqlite3.c"]
-if env["platform"] == "javascript":
-    sources.append(cpp_bindings_path + "bin/" + cpp_bindings_libname + ".a")
-
-###############
-# BUILD LIB#####
-###############
-
-# determine to link as shared or static library
-library = env.SharedLibrary("bin/" + target_path, source=sources)
+library = env.SharedLibrary(
+    "bin/" + "libsqlite.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"]),
+    source=sources,
+)
 Default(library)

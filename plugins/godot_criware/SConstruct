@@ -70,58 +70,16 @@ def add_sources(sources, dir, extension):
 # This is used if no `platform` argument is passed
 if sys.platform.startswith("linux"):
     host_platform = "linux"
+elif sys.platform.startswith("freebsd"):
+    host_platform = "freebsd"
 elif sys.platform == "darwin":
-    host_platform = "macos"
+    host_platform = "osx"
 elif sys.platform == "win32" or sys.platform == "msys":
     host_platform = "windows"
 else:
     raise ValueError("Could not detect platform automatically, please specify with " "platform=<platform>")
 
-opts = Variables([], ARGUMENTS)
-opts.Add(
-    EnumVariable(
-        "platform",
-        "Target platform",
-        host_platform,
-        allowed_values=("linux", "macos", "windows", "android", "ios", "html5"),
-        ignorecase=2,
-    )
-)
-opts.Add(EnumVariable("bits", "Target platform bits", "default", ("default", "32", "64")))
-opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux", False))
-opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
-# Must be the same setting as used for cpp_bindings
-opts.Add(EnumVariable("target", "Compilation target", "debug", allowed_values=("debug", "release"), ignorecase=2))
-opts.Add(PathVariable("custom_api_file", "Path to a custom JSON API file", None, PathVariable.PathIsFile))
-opts.Add(BoolVariable("generate_bindings", "Generate GDNative API bindings", False))
-opts.Add(
-    EnumVariable("android_arch", "Target Android architecture", "armeabi-v7a", ["armeabi-v7a", "arm64-v8a", "x86_64"])
-)
-opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["arm64", "x86_64"]))
-opts.Add(
-    "XCODEPATH",
-    "Path to Xcode toolchain",
-    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain",
-)
-opts.Add(
-    "android_api_level",
-    "Target Android API level",
-    "19" if ARGUMENTS.get("android_arch", "armeabi-v7a") in ["armeabi-v7a", "x86"] else "21",
-)
-opts.Add(
-    "ANDROID_NDK_ROOT",
-    "Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.",
-    os.environ.get("ANDROID_NDK_ROOT", None),
-)
-opts.Add(
-    "EMSDK",
-    "Path to your Android NDK installation. By default, uses EMSDK from your defined environment variables.",
-    os.environ.get("EMSDK", None),
-)
-
 env = Environment(ENV=os.environ)
-opts.Update(env)
-Help(opts.GenerateHelpText(env))
 
 is64 = sys.maxsize > 2**32
 if (
@@ -132,8 +90,55 @@ if (
 ):
     is64 = True
 
-if env["bits"] == "default":
-    env["bits"] = "64" if is64 else "32"
+opts = Variables([], ARGUMENTS)
+opts.Add(
+    EnumVariable(
+        "platform",
+        "Target platform",
+        host_platform,
+        allowed_values=("linux", "freebsd", "osx", "windows", "android", "ios", "javascript"),
+        ignorecase=2,
+    )
+)
+opts.Add(EnumVariable("bits", "Target platform bits", "64" if is64 else "32", ("32", "64")))
+opts.Add(BoolVariable("use_llvm", "Use the LLVM compiler - only effective when targeting Linux or FreeBSD", False))
+opts.Add(BoolVariable("use_mingw", "Use the MinGW compiler instead of MSVC - only effective on Windows", False))
+# Must be the same setting as used for cpp_bindings
+opts.Add(EnumVariable("target", "Compilation target", "debug", allowed_values=("debug", "release"), ignorecase=2))
+opts.Add(EnumVariable("android_arch", "Target Android architecture", "armv7", ["armv7", "arm64v8", "x86", "x86_64"]))
+opts.Add("macos_deployment_target", "macOS deployment target", "default")
+opts.Add("macos_sdk_path", "macOS SDK path", "")
+opts.Add(EnumVariable("macos_arch", "Target macOS architecture", "x86_64", ["x86_64", "arm64"]))
+opts.Add(EnumVariable("ios_arch", "Target iOS architecture", "arm64", ["armv7", "arm64", "x86_64"]))
+opts.Add(BoolVariable("ios_simulator", "Target iOS Simulator", False))
+opts.Add(
+    "IPHONEPATH",
+    "Path to iPhone toolchain",
+    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain",
+)
+opts.Add(
+    "android_api_level",
+    "Target Android API level",
+    "18" if ARGUMENTS.get("android_arch", "armv7") in ["armv7", "x86"] else "21",
+)
+opts.Add(
+    "ANDROID_NDK_ROOT",
+    "Path to your Android NDK installation. By default, uses ANDROID_NDK_ROOT from your defined environment variables.",
+    os.environ.get("ANDROID_NDK_ROOT", None),
+)
+opts.Add(
+    "godot_headers_path",
+    "Path to your godot-headers",
+    "../../modules/gdnative/include/",
+)
+opts.Add(
+    "godot_cpp_path",
+    "Path to your godot-cpp",
+    "../../modules/gdnative/binding/",
+)
+
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
 
 # This makes sure to keep the session environment variables on Windows.
 # This way, you can run SCons in a Visual Studio 2017 prompt and it will find
@@ -146,26 +151,25 @@ if host_platform == "windows" and env["platform"] != "android":
 
     opts.Update(env)
 
-if env["platform"] == "linux":
+if host_platform == "windows" and env["platform"] == "windows" and not env["use_mingw"]:
+    # MSVC
+    env.Append(CCFLAGS=["/std:c++17"])
+    env.Append(CCFLAGS=["/utf-8"])
+else:
+    env.Append(CCFLAGS=["-std=c++17"])
+    env.Append(CCFLAGS=["-utf-8"])
+
+if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
         env["CXX"] = "clang++"
 
-    env.Append(
-        CCFLAGS=[
-            "-fPIC",
-            "-std=c++14",
-            "-Wwrite-strings",
-            "-fvisibility=hidden",
-            "-ffunction-sections",
-            "-fdata-sections",
-        ]
-    )
-    env.Append(LINKFLAGS=["-Wl,--gc-sections,-R,'$$ORIGIN'"])
+    env.Append(CCFLAGS=["-fPIC", "-Wwrite-strings"])
+    env.Append(LINKFLAGS=["-Wl,-R,'$$ORIGIN'"])
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
     elif env["target"] == "release":
-        env.Append(CCFLAGS=["-Ofast"])
+        env.Append(CCFLAGS=["-O3"])
 
     if env["bits"] == "64":
         env.Append(CCFLAGS=["-m64"])
@@ -174,65 +178,43 @@ if env["platform"] == "linux":
         env.Append(CCFLAGS=["-m32"])
         env.Append(LINKFLAGS=["-m32"])
 
-    target_path = "libadx2le." + env["TARGET_ARCH"] + ".so"
+elif env["platform"] == "osx":
+    # Use Clang on macOS by default
+    env["CXX"] = "clang++"
 
-elif env["platform"] == "macos":
     if env["bits"] == "32":
         raise ValueError("Only 64-bit builds are supported for the macOS target.")
 
-    try:
-        sdk_path = decode_utf8(subprocess.check_output(["xcrun", "--sdk", "macosx", "--show-sdk-path"]).strip())
-    except (subprocess.CalledProcessError, OSError):
-        raise ValueError("Failed to find SDK path while running xcrun --sdk ? --show-sdk-path.".format())
+    env.Append(CCFLAGS=["-arch", env["macos_arch"]])
 
-    compiler_path = env["XCODEPATH"] + "/usr/bin/"
-    env["ENV"]["PATH"] = env["XCODEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
+    if env["macos_deployment_target"] != "default":
+        env.Append(CCFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
+        env.Append(LINKFLAGS=["-mmacosx-version-min=" + env["macos_deployment_target"]])
 
-    env["CC"] = compiler_path + "clang"
-    env["CXX"] = compiler_path + "clang++"
-    env["AR"] = compiler_path + "ar"
-    env["RANLIB"] = compiler_path + "ranlib"
+    if env["macos_sdk_path"]:
+        env.Append(CCFLAGS=["-isysroot", env["macos_sdk_path"]])
+        env.Append(LINKFLAGS=["-isysroot", env["macos_sdk_path"]])
 
-    env.Append(
-        CCFLAGS=[
-            "-std=c++14",
-            "-arch",
-            "x86_64",
-            "-arch",
-            "arm64",
-            "-fvisibility=hidden",
-            "-ffunction-sections",
-            "-fdata-sections",
-            "-mmacosx-version-min=10.10",
-            "-isysroot",
-            sdk_path,
-        ]
-    )
     env.Append(
         LINKFLAGS=[
             "-arch",
-            "x86_64",
-            "-arch",
-            "arm64",
+            env["macos_arch"],
             "-framework",
             "Cocoa",
-            "-Wl,-undefined,dynamic_lookup,-dead_strip",
-            "-isysroot",
-            sdk_path,
+            "-Wl,-undefined,dynamic_lookup",
         ]
     )
 
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
     elif env["target"] == "release":
-        env.Append(CCFLAGS=["-Ofast"])
-
-    target_path = "libadx2le.macos.dylib"
+        env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "ios":
-    if env["ios_arch"] == "x86_64":
+    if env["ios_simulator"]:
         sdk_name = "iphonesimulator"
         env.Append(CCFLAGS=["-mios-simulator-version-min=10.0"])
+        env["LIBSUFFIX"] = ".simulator" + env["LIBSUFFIX"]
     else:
         sdk_name = "iphoneos"
         env.Append(CCFLAGS=["-miphoneos-version-min=10.0"])
@@ -242,31 +224,22 @@ elif env["platform"] == "ios":
     except (subprocess.CalledProcessError, OSError):
         raise ValueError("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
 
-    compiler_path = env["XCODEPATH"] + "/usr/bin/"
-    env["ENV"]["PATH"] = env["XCODEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
+    compiler_path = env["IPHONEPATH"] + "/usr/bin/"
+    env["ENV"]["PATH"] = env["IPHONEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
 
     env["CC"] = compiler_path + "clang"
     env["CXX"] = compiler_path + "clang++"
     env["AR"] = compiler_path + "ar"
     env["RANLIB"] = compiler_path + "ranlib"
 
-    env.Append(
-        CCFLAGS=[
-            "-std=c++14",
-            "-fvisibility=hidden",
-            "-ffunction-sections",
-            "-fdata-sections",
-            "-arch",
-            env["ios_arch"],
-            "-isysroot",
-            sdk_path,
-        ]
-    )
+    env.Append(CCFLAGS=["-arch", env["ios_arch"], "-isysroot", sdk_path])
     env.Append(
         LINKFLAGS=[
             "-arch",
             env["ios_arch"],
-            "-Wl,-undefined,dynamic_lookup,-dead_strip",
+            "-framework",
+            "Cocoa",
+            "-Wl,-undefined,dynamic_lookup",
             "-isysroot",
             sdk_path,
             "-F" + sdk_path,
@@ -276,23 +249,59 @@ elif env["platform"] == "ios":
     if env["target"] == "debug":
         env.Append(CCFLAGS=["-Og", "-g"])
     elif env["target"] == "release":
-        env.Append(CCFLAGS=["-Ofast"])
-
-    target_path = "libadx2le.ios." + env["ios_arch"] + ".dylib"
+        env.Append(CCFLAGS=["-O3"])
 
 elif env["platform"] == "windows":
-    # MSVC
-    env.Append(LINKFLAGS=["/WX"])
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["/std:c++17", "/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])
-    elif env["target"] == "release":
-        env.Append(CCFLAGS=["/std:c++17", "/O2", "/EHsc", "/DNDEBUG", "/MD"])
+    if host_platform == "windows" and not env["use_mingw"]:
+        # MSVC
+        env.Append(LINKFLAGS=["/WX"])
+        if env["target"] == "debug":
+            env.Append(CCFLAGS=["/Z7", "/Od", "/EHsc", "/D_DEBUG", "/MDd"])
+        elif env["target"] == "release":
+            env.Append(CCFLAGS=["/O2", "/EHsc", "/DNDEBUG", "/MD"])
 
-    target_path = "libadx2le.win" + env["bits"] + ".dll"
+    elif host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx":
+        # Cross-compilation using MinGW
+        if env["bits"] == "64":
+            env["CXX"] = "x86_64-w64-mingw32-g++"
+            env["AR"] = "x86_64-w64-mingw32-ar"
+            env["RANLIB"] = "x86_64-w64-mingw32-ranlib"
+            env["LINK"] = "x86_64-w64-mingw32-g++"
+        elif env["bits"] == "32":
+            env["CXX"] = "i686-w64-mingw32-g++"
+            env["AR"] = "i686-w64-mingw32-ar"
+            env["RANLIB"] = "i686-w64-mingw32-ranlib"
+            env["LINK"] = "i686-w64-mingw32-g++"
+
+    elif host_platform == "windows" and env["use_mingw"]:
+        # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
+        env = Environment(ENV=os.environ, tools=["mingw"])
+        opts.Update(env)
+        # env = env.Clone(tools=['mingw'])
+
+        env["SPAWN"] = mySpawn
+
+    # Native or cross-compilation using MinGW
+    if host_platform == "linux" or host_platform == "freebsd" or host_platform == "osx" or env["use_mingw"]:
+        # These options are for a release build even using target=debug
+        env.Append(CCFLAGS=["-O3", "-Wwrite-strings"])
+        env.Append(
+            LINKFLAGS=[
+                "--static",
+                "-Wl,--no-undefined",
+                "-static-libgcc",
+                "-static-libstdc++",
+            ]
+        )
 
 elif env["platform"] == "android":
     if host_platform == "windows":
-        raise ValueError("Not supported that build by windows host platform.")
+        # Don't Clone the environment. Because otherwise, SCons will pick up msvc stuff.
+        env = Environment(ENV=os.environ, tools=["mingw"])
+        opts.Update(env)
+        # env = env.Clone(tools=['mingw'])
+
+        env["SPAWN"] = mySpawn
 
     # Verify NDK root
     if not "ANDROID_NDK_ROOT" in env:
@@ -317,26 +326,24 @@ elif env["platform"] == "android":
             toolchain += "-x86_64"
     elif host_platform == "linux":
         toolchain += "linux-x86_64"
-    elif host_platform == "macos":
+    elif host_platform == "osx":
         toolchain += "darwin-x86_64"
-    env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we"ll put it here anyways
+    env.PrependENVPath("PATH", toolchain + "/bin")  # This does nothing half of the time, but we'll put it here anyways
 
     # Get architecture info
     arch_info_table = {
-        "armeabi-v7a": {
+        "armv7": {
             "march": "armv7-a",
             "target": "armv7a-linux-androideabi",
             "tool_path": "arm-linux-androideabi",
             "compiler_path": "armv7a-linux-androideabi",
-            "sysroot_path": "arch-arm",
             "ccflags": ["-mfpu=neon"],
         },
-        "arm64-v8a": {
+        "arm64v8": {
             "march": "armv8-a",
             "target": "aarch64-linux-android",
             "tool_path": "aarch64-linux-android",
             "compiler_path": "aarch64-linux-android",
-            "sysroot_path": "arch-arm64",
             "ccflags": [],
         },
         "x86": {
@@ -344,7 +351,6 @@ elif env["platform"] == "android":
             "target": "i686-linux-android",
             "tool_path": "i686-linux-android",
             "compiler_path": "i686-linux-android",
-            "sysroot_path": "arch-x86",
             "ccflags": ["-mstackrealign"],
         },
         "x86_64": {
@@ -352,12 +358,10 @@ elif env["platform"] == "android":
             "target": "x86_64-linux-android",
             "tool_path": "x86_64-linux-android",
             "compiler_path": "x86_64-linux-android",
-            "sysroot_path": "arch-x86_64",
             "ccflags": [],
         },
     }
     arch_info = arch_info_table[env["android_arch"]]
-    target_path = "libadx2le.android." + env["android_arch"] + ".so"
 
     # Setup tools
     env["CC"] = toolchain + "/bin/clang"
@@ -365,52 +369,23 @@ elif env["platform"] == "android":
     env["AR"] = toolchain + "/bin/" + arch_info["tool_path"] + "-ar"
 
     env.Append(
-        CCFLAGS=[
-            "--target=" + arch_info["target"] + env["android_api_level"],
-            "-march=" + arch_info["march"],
-            "-fPIC",
-            "-fvisibility=hidden",
-            "-ffunction-sections",
-            "-fdata-sections",
-        ]
-    )  # , "-fPIE", "-fno-addrsig", "-Oz"])
+        CCFLAGS=["--target=" + arch_info["target"] + env["android_api_level"], "-march=" + arch_info["march"], "-fPIC"]
+    )  # , '-fPIE', '-fno-addrsig', '-Oz'])
     env.Append(CCFLAGS=arch_info["ccflags"])
-    env.Append(
-        LINKFLAGS=[
-            "-Wl,--gc-sections",
-            "--target=" + arch_info["target"] + env["android_api_level"],
-            "-march=" + arch_info["march"],
-        ]
-    )
 
-elif env["platform"] == "html5":
-    if host_platform == "windows":
-        raise ValueError("Not supported that build by windows host platform.")
+    if env["target"] == "debug":
+        env.Append(CCFLAGS=["-Og", "-g"])
+    elif env["target"] == "release":
+        env.Append(CCFLAGS=["-O3"])
 
-    # Verify NDK root
-    if not "EMSDK" in env:
-        raise ValueError(
-            "To build for HTML5, EMSDK must be defined. Please set EMSDK to the root folder of your Emscripten SDK installation."
-        )
-
-    target_path = "libadx2le.wasm" + "32" + ".wasm"
-
-    # Setup tools
+elif env["platform"] == "javascript":
     env["ENV"] = os.environ
     env["CC"] = "emcc"
     env["CXX"] = "em++"
     env["AR"] = "emar"
     env["RANLIB"] = "emranlib"
-
-    if env["target"] == "debug":
-        env.Append(CCFLAGS=["-O0", "-std=c++14", "-fno-exceptions", "-fvisibility=hidden", "-s", "SIDE_MODULE=1"])
-    else:
-        env.Append(
-            CCFLAGS=["-O3", "-std=c++14", "-fno-exceptions", "-fvisibility=hidden", "-DNDEBUG", "-s", "SIDE_MODULE=1"]
-        )
-
-    env.Append(LINKFLAGS=["-O3", "-s", "SIDE_MODULE=1", "--llvm-lto 1"])
-
+    env.Append(CPPFLAGS=["-s", "SIDE_MODULE=1"])
+    env.Append(LINKFLAGS=["-s", "SIDE_MODULE=1"])
     env["SHOBJSUFFIX"] = ".bc"
     env["SHLIBSUFFIX"] = ".wasm"
     # Use TempFileMunge since some AR invocations are too long for cmd.exe.
@@ -425,21 +400,20 @@ elif env["platform"] == "html5":
     # Program() output consists of multiple files, so specify suffixes manually at builder.
     env["PROGSUFFIX"] = ""
     env["LIBPREFIX"] = "lib"
-    env["LIBSUFFIX"] = ".bc"
+    env["LIBSUFFIX"] = ".a"
     env["LIBPREFIXES"] = ["$LIBPREFIX"]
     env["LIBSUFFIXES"] = ["$LIBSUFFIX"]
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
     env.Replace(SHLINKFLAGS="$LINKFLAGS")
 
-
-# Generate bindings?
-json_api_file = ""
+    if env["target"] == "debug":
+        env.Append(CCFLAGS=["-O0", "-g"])
+    elif env["target"] == "release":
+        env.Append(CCFLAGS=["-O3"])
 
 # Sources to compile
 sources = []
 
-
-## adx2le godot plugin
 add_sources(sources, "src/adx2le", "cpp")
 
 
@@ -448,47 +422,63 @@ if env["platform"] == "android":
     arch_suffix = env["android_arch"]
 if env["platform"] == "ios":
     arch_suffix = env["ios_arch"]
+if env["platform"] == "javascript":
+    arch_suffix = "wasm"
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "../../modules/gdnative/include/"
-godot_cpp_path = "../../modules/gdnative/binding/"
-
-
 if env["platform"] == "windows":
     cri_headers_path = "criware/adx2le/pc/include"
-    cri_libs_path = "criware/adx2le/pc/libs/x64"
-    cri_libs_files = ["cri_ware_pcx64_le_import.lib"]
+    cri_libs_path = [
+        "criware/adx2le/pc/libs/x64",
+    ]
+    cri_libs_files = [
+        "cri_ware_pcx64_le_import.lib",
+    ]
 elif env["platform"] == "macos":
     cri_headers_path = "criware/adx2le/macosx/include"
-    cri_libs_path = "criware/adx2le/macosx/libs"
-    cri_libs_files = ["libcri_ware_macosx_LE.a"]
+    cri_libs_path = [
+        "criware/adx2le/macosx/libs",
+    ]
+    cri_libs_files = [
+        "libcri_ware_macosx_LE.a",
+    ]
 elif env["platform"] == "ios":
     cri_headers_path = "criware/adx2le/ios/include"
-    cri_libs_path = "criware/adx2le/ios/libs"
-    cri_libs_files = ["libcri_ware_ios_LE.a"]
+    cri_libs_path = [
+        "criware/adx2le/ios/libs",
+    ]
+    cri_libs_files = [
+        "libcri_ware_ios_LE.a",
+    ]
 elif env["platform"] == "android":
     cri_headers_path = "criware/adx2le/android/include"
-    cri_libs_path = "criware/adx2le/android/libs/" + env["android_arch"]
-    cri_libs_files = ["libcri_ware_android_LE.so"]
-
+    cri_libs_path = [
+        "criware/adx2le/android/libs/" + env["android_arch"],
+    ]
+    cri_libs_files = [
+        "libcri_ware_android_LE.so",
+    ]
 
 env.Append(
     CPPPATH=[
         ".",
-        godot_headers_path,
-        godot_cpp_path + "include/",
-        godot_cpp_path + "include/core/",
-        godot_cpp_path + "include/gen/",
+        env["godot_headers_path"],
+        env["godot_cpp_path"] + "include/",
+        env["godot_cpp_path"] + "include/core/",
+        env["godot_cpp_path"] + "include/gen/",
         cri_headers_path,
     ]
 )
 
-env.Append(LIBPATH=[godot_cpp_path + "bin/"])
+env.Append(LIBPATH=[env["godot_cpp_path"] + "bin/"] + cri_libs_path)
 
-env.Append(LIBS=["libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"])])
+env.Append(
+    LIBS=["libgodot-cpp.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["LIBSUFFIX"])]
+    + cri_libs_files
+)
 
-env.Append(LIBPATH=[cri_libs_path])
-env.Append(LIBS=[] + cri_libs_files)
-
-library = env.SharedLibrary("bin/" + target_path, source=sources)
+library = env.SharedLibrary(
+    "bin/" + "libcriware.{}.{}.{}{}".format(env["platform"], env["target"], arch_suffix, env["SHLIBSUFFIX"]),
+    source=sources,
+)
 Default(library)
