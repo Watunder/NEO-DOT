@@ -1,1 +1,2 @@
-ffmpeg_build/windows
+ffmpeg_build/**
+!ffmpeg_build/SCsub
