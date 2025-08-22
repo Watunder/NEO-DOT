@@ -157,20 +157,17 @@ RasterizerScene *RasterizerGLES2::get_scene() {
 
 Error RasterizerGLES2::is_viable() {
 #ifdef GLAD_ENABLED
-	if (!gladLoadGL()) {
+	int version = gladLoaderLoadGL();
+
+	if (!version) {
 		ERR_PRINT("Error initializing GLAD");
 		return ERR_UNAVAILABLE;
 	}
 
-// GLVersion seems to be used for both GL and GL ES, so we need different version checks for them
-#ifdef OPENGL_ENABLED // OpenGL 2.1 Profile required
-	if (GLVersion.major < 2 || (GLVersion.major == 2 && GLVersion.minor < 1)) {
-#else // OpenGL ES 2.0
-	if (GLVersion.major < 2) {
-#endif
-		return ERR_UNAVAILABLE;
-	}
+	int major = GLAD_VERSION_MAJOR(version);
+	int minor = GLAD_VERSION_MINOR(version);
 
+	ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_2_1, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
 #ifdef GLES_OVER_GL
 	//Test GL_ARB_framebuffer_object extension
 	if (!GLAD_GL_ARB_framebuffer_object) {

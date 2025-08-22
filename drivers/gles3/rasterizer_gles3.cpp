@@ -132,20 +132,17 @@ typedef void (*DebugMessageCallbackARB)(DEBUGPROCARB callback, const void *userP
 
 Error RasterizerGLES3::is_viable() {
 #ifdef GLAD_ENABLED
-	if (!gladLoadGL()) {
+	int version = gladLoaderLoadGL();
+
+	if (!version) {
 		ERR_PRINT("Error initializing GLAD");
 		return ERR_UNAVAILABLE;
 	}
 
-// GLVersion seems to be used for both GL and GL ES, so we need different version checks for them
-#ifdef OPENGL_ENABLED // OpenGL 3.3 Core Profile required
-	if (GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 3)) {
-#else // OpenGL ES 3.0
-	if (GLVersion.major < 3) {
-#endif
-		return ERR_UNAVAILABLE;
-	}
+	int major = GLAD_VERSION_MAJOR(version);
+	int minor = GLAD_VERSION_MINOR(version);
 
+	ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_3_3, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
 #endif // GLAD_ENABLED
 	return OK;
 }

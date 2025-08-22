@@ -17,7 +17,7 @@ common_win = [
 ]
 
 if env["use_angle"]:
-    common_win.append("context_gl_windows_angle.cpp")
+    pass
 else:
     common_win.append("context_gl_windows.cpp")
 

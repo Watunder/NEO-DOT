@@ -31,17 +31,13 @@
 #ifndef SHADER_GLES3_H
 #define SHADER_GLES3_H
 
+// This must come first to avoid windows.h mess
+#include "platform_config.h"
+
 #include "core/hash_map.h"
 #include "core/map.h"
 #include "core/math/camera_matrix.h"
 #include "core/variant.h"
-
-#include "platform_config.h"
-#ifndef GLES3_INCLUDE_H
-#include <GLES3/gl3.h>
-#else
-#include GLES3_INCLUDE_H
-#endif
 
 #include <stdio.h>
 

@@ -263,11 +263,7 @@ def configure_msvc(env, manual_msvc_config):
     ]
 
     if env["use_angle"]:
-        LIBS += ["libEGL.dll", "libGLESv2.dll"]
-        angle_include_dir = "#thirdparty/angle/include"
-        env.Prepend(CPPPATH=[angle_include_dir])
-        env.Append(LIBPATH=["#thirdparty/angle/out/Release"])
-        env.Append(CPPDEFINES=["GL_GLEXT_PROTOTYPES", "EGL_EGLEXT_PROTOTYPES", "ANGLE_ENABLED"])
+        pass
     else:
         LIBS.append("opengl32")
 

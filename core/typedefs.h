@@ -37,8 +37,6 @@
  * Basic definitions and simple functions to be used everywhere.
  */
 
-#include "platform_config.h"
-
 #ifndef _STR
 #define _STR(m_x) #m_x
 #define _MKSTR(m_x) _STR(m_x)
