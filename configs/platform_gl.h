@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  platform_config.h                                                    */
+/*  platform_gl.h                                                        */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,14 +28,23 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include <malloc.h>
-//#else
-//#include <alloca.h>
-//#endif
+#ifndef PLATFORM_GL_H
+#define PLATFORM_GL_H
+
+#ifdef EGL_ENABLED
 #ifdef ANGLE_ENABLED
-#define GLES3_INCLUDE_H <GLES3/gl3.h>
-#define GLES2_INCLUDE_H <GLES3/gl3.h>
+#include "thirdparty/angle/EGL/egl.h"
+#include "thirdparty/angle/EGL/eglext.h"
 #else
-#define GLES3_INCLUDE_H "thirdparty/glad/glad/glad.h"
-#define GLES2_INCLUDE_H "thirdparty/glad/glad/glad.h"
+#include "thirdparty/glad/glad/egl.h"
 #endif
+#endif
+
+#include "thirdparty/glad/glad/gl.h"
+
+#if defined(GLES_OVER_GL) && !defined(GL_VERSION_4_1)
+#undef glClearDepthf
+#define glClearDepthf glad_glClearDepth
+#endif
+
+#endif // PLATFORM_GL_H

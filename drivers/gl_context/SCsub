@@ -5,22 +5,32 @@ Import("env")
 thirdparty_obj = []
 
 if env["platform"] in ["windows"] and env["use_angle"]:
-    # ANGLE on windows desktop
-    thirdparty_dir = "#thirdparty/angle/include"
-    env.Prepend(CPPPATH=[thirdparty_dir])
-    env.Append(LIBPATH=["#thirdparty/angle/out/Release"])
-elif env["platform"] in ["haiku", "osx", "windows", "x11"]:
+    thirdparty_angle_dir = "#thirdparty/angle/"
+
+    env.Append(CPPDEFINES=["ANGLE_ENABLED"])
+    env.Append(CPPDEFINES=["EGL_ENABLED"])
+
+    env.Append(CPPDEFINES=["GLAD_GLES2", "GLAD_GLES2_USE_SYSTEM_EGL"])
+    env.Append(CPPDEFINES=["EGL_EGLEXT_PROTOTYPES"])
+
+    env.Prepend(CPPPATH=[thirdparty_angle_dir])
+
+
+if env["platform"] in ["haiku", "osx", "windows", "x11"]:
     # Thirdparty source files
-    thirdparty_dir = "#thirdparty/glad/"
-    thirdparty_sources = [
-        "glad.c",
-    ]
-    thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
+    thirdparty_glad_dir = "#thirdparty/glad/"
+    thirdparty_glad_sources = ["gl.c"]
 
-    env.Prepend(CPPPATH=[thirdparty_dir])
+    if env["platform"] != "windows":
+        thirdparty_glad_sources += ["egl.c"]
+        env.Append(CPPDEFINES=["EGL_ENABLED"])
 
-    env.Append(CPPDEFINES=["GLAD_ENABLED"])
-    env.Append(CPPDEFINES=["GLES_OVER_GL"])
+    if not env["use_angle"]:
+        env.Append(CPPDEFINES=["GLES_OVER_GL"])
+
+    thirdparty_sources = [thirdparty_glad_dir + file for file in thirdparty_glad_sources]
+
+    env.Prepend(CPPPATH=[thirdparty_glad_dir])
 
     env_thirdparty = env.Clone()
     env_thirdparty.disable_warnings()

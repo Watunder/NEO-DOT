@@ -40,10 +40,6 @@
 #include "servers/visual/visual_server_raster.h"
 
 #ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-#endif
-
-#ifndef GLES_OVER_GL
 #ifdef IPHONE_ENABLED
 #include <OpenGLES/ES2/glext.h>
 //void *glResolveMultisampleFramebufferAPPLE;
@@ -164,7 +160,7 @@ void RasterizerSceneGLES2::shadow_atlas_set_size(RID p_atlas, int p_size) {
 
 		glDepthMask(GL_TRUE);
 
-		glClearDepth(0.0f);
+		glClearDepthf(0.0f);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -3139,7 +3135,7 @@ void RasterizerSceneGLES2::render_scene(const Transform &p_cam_transform, const 
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);
-	glClearDepth(1.0f);
+	glClearDepthf(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -3578,7 +3574,7 @@ void RasterizerSceneGLES2::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 	}
 
 	glEnable(GL_SCISSOR_TEST);
-	glClearDepth(1.0f);
+	glClearDepthf(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	if (storage->config.use_rgba_3d_shadows) {
 		glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -3633,7 +3629,7 @@ void RasterizerSceneGLES2::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 
 			glEnable(GL_SCISSOR_TEST);
 
-			glClearDepth(1.0f);
+			glClearDepthf(1.0f);
 
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_SCISSOR_TEST);

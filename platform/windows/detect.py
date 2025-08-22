@@ -72,7 +72,7 @@ def get_opts():
         BoolVariable("use_thinlto", "Use ThinLTO", False),
         BoolVariable("use_static_cpp", "Link MinGW/MSVC C++ runtime libraries statically", True),
         BoolVariable("use_asan", "Use address sanitizer (ASAN)", False),
-        BoolVariable("use_angle", "Build using ANGLE instead of native GL", False),
+        BoolVariable("use_angle", "Build using ANGLE instead of native GL (Experimental)", False),
     ]
 
 
@@ -263,11 +263,8 @@ def configure_msvc(env, manual_msvc_config):
     ]
 
     if env["use_angle"]:
+        env.Append(LIBPATH=["#bin/"])
         LIBS += ["libEGL.dll", "libGLESv2.dll"]
-        angle_include_dir = "#thirdparty/angle/include"
-        env.Prepend(CPPPATH=[angle_include_dir])
-        env.Append(LIBPATH=["#thirdparty/angle/out/Release"])
-        env.Append(CPPDEFINES=["GL_GLEXT_PROTOTYPES", "EGL_EGLEXT_PROTOTYPES", "ANGLE_ENABLED"])
     else:
         LIBS.append("opengl32")
 

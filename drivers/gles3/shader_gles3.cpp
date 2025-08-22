@@ -194,7 +194,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	Vector<const char *> strings;
 #ifdef GLES_OVER_GL
 	strings.push_back("#version 330\n");
-	strings.push_back("#define GLES_OVER_GL\n");
+	strings.push_back("#define USE_GLES_OVER_GL\n");
 #else
 	strings.push_back("#version 300 es\n");
 #endif
