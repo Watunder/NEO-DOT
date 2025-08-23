@@ -87,14 +87,10 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 #define _DEPTH_COMPONENT24_OES 0x81A6
 
 #ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
 
 // enable extensions manually for android and ios
-#ifndef UWP_ENABLED
-#ifndef WINDOWS_ENABLED
+#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED)
 #include <dlfcn.h> // needed to load extensions
-
-#endif // !WINDOWS_ENABLED
 #endif
 
 #ifdef IPHONE_ENABLED
@@ -4918,7 +4914,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 				glClearColor(1.0, 0.0, 1.0, 0.0);
 				glClear(GL_COLOR_BUFFER_BIT);
 				if (used_depth) {
-					glClearDepth(1.0);
+					glClearDepthf(1.0);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 			}

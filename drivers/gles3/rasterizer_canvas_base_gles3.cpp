@@ -36,10 +36,6 @@
 #include "rasterizer_scene_gles3.h"
 #include "servers/visual/visual_server_raster.h"
 
-#ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-#endif
-
 static _FORCE_INLINE_ void store_transform2d(const Transform2D &p_mtx, float *p_array) {
 	p_array[0] = p_mtx.elements[0][0];
 	p_array[1] = p_mtx.elements[0][1];
@@ -829,7 +825,7 @@ void RasterizerCanvasBaseGLES3::canvas_light_shadow_buffer_update(RID p_buffer, 
 	state.canvas_shadow_shader.bind();
 
 	glViewport(0, 0, cls->size, cls->height);
-	glClearDepth(1.0f);
+	glClearDepthf(1.0f);
 	glClearColor(1, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

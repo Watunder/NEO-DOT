@@ -132,8 +132,11 @@ typedef void (*DebugMessageCallbackARB)(DEBUGPROCARB callback, const void *userP
 
 Error RasterizerGLES3::is_viable() {
 #ifdef GLAD_ENABLED
+#ifdef ANGLE_ENABLED
+	int version = gladLoaderLoadGLES2();
+#else
 	int version = gladLoaderLoadGL();
-
+#endif
 	if (!version) {
 		ERR_PRINT("Error initializing GLAD");
 		return ERR_UNAVAILABLE;
@@ -142,7 +145,7 @@ Error RasterizerGLES3::is_viable() {
 	int major = GLAD_VERSION_MAJOR(version);
 	int minor = GLAD_VERSION_MINOR(version);
 
-	ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_3_3, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
+	//ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_3_3, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
 #endif // GLAD_ENABLED
 	return OK;
 }

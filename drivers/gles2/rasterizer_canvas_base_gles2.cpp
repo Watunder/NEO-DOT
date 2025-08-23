@@ -36,10 +36,6 @@
 #include "rasterizer_scene_gles2.h"
 #include "servers/visual/visual_server_raster.h"
 
-#ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-#endif
-
 RID RasterizerCanvasBaseGLES2::light_internal_create() {
 	return RID();
 }
@@ -791,7 +787,7 @@ void RasterizerCanvasBaseGLES2::canvas_light_shadow_buffer_update(RID p_buffer, 
 	state.canvas_shadow_shader.bind();
 
 	glViewport(0, 0, cls->size, cls->height);
-	glClearDepth(1.0f);
+	glClearDepthf(1.0f);
 	glClearColor(1, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

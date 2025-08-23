@@ -9,6 +9,7 @@
  *
  * APIs:
  *  - gl:compatibility=3.3
+ *  - gles2=3.0
  *
  * Options:
  *  - ALIAS = False
@@ -19,10 +20,10 @@
  *  - ON_DEMAND = False
  *
  * Commandline:
- *    --api='gl:compatibility=3.3' --extensions='GL_ARB_debug_output,GL_ARB_framebuffer_object,GL_EXT_framebuffer_blit,GL_EXT_framebuffer_multisample,GL_EXT_framebuffer_object' c --loader
+ *    --merge --api='gl:compatibility=3.3,gles2=3.0' --extensions='GL_ARB_debug_output,GL_ARB_framebuffer_object,GL_EXT_framebuffer_blit,GL_EXT_framebuffer_multisample,GL_EXT_framebuffer_object' c --loader
  *
  * Online:
- *    http://gen.glad.sh/#api=gl%3Acompatibility%3D3.3&extensions=GL_ARB_debug_output%2CGL_ARB_framebuffer_object%2CGL_EXT_framebuffer_blit%2CGL_EXT_framebuffer_multisample%2CGL_EXT_framebuffer_object&generator=c&options=LOADER
+ *    http://gen.glad.sh/#api=gl%3Acompatibility%3D3.3%2Cgles2%3D3.0&extensions=GL_ARB_debug_output%2CGL_ARB_framebuffer_object%2CGL_EXT_framebuffer_blit%2CGL_EXT_framebuffer_multisample%2CGL_EXT_framebuffer_object&generator=c&options=MERGE%2CLOADER
  *
  */
 
@@ -49,6 +50,18 @@
   #error OpenGL (gl3ext.h) header already included (API: gl), remove previous include!
 #endif
 #define __gl3ext_h_ 1
+#ifdef __gl2_h_
+  #error OpenGL ES 2 header already included (API: gles2), remove previous include!
+#endif
+#define __gl2_h_ 1
+#ifdef __gles2_gl2_h_
+  #error OpenGL ES 2 header already included (API: gles2), remove previous include!
+#endif
+#define __gles2_gl2_h_ 1
+#ifdef __gles2_gl3_h_
+  #error OpenGL ES 3 header already included (API: gles2), remove previous include!
+#endif
+#define __gles2_gl3_h_ 1
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -1506,6 +1519,51 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_ZERO 0
 #define GL_ZOOM_X 0x0D16
 #define GL_ZOOM_Y 0x0D17
+#define GL_ANY_SAMPLES_PASSED_CONSERVATIVE 0x8D6A
+#define GL_COMPRESSED_R11_EAC 0x9270
+#define GL_COMPRESSED_RG11_EAC 0x9272
+#define GL_COMPRESSED_RGB8_ETC2 0x9274
+#define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9276
+#define GL_COMPRESSED_RGBA8_ETC2_EAC 0x9278
+#define GL_COMPRESSED_SIGNED_R11_EAC 0x9271
+#define GL_COMPRESSED_SIGNED_RG11_EAC 0x9273
+#define GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC 0x9279
+#define GL_COMPRESSED_SRGB8_ETC2 0x9275
+#define GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9277
+#define GL_COPY_READ_BUFFER_BINDING 0x8F36
+#define GL_COPY_WRITE_BUFFER_BINDING 0x8F37
+#define GL_FIXED 0x140C
+#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS 0x8CD9
+#define GL_HIGH_FLOAT 0x8DF2
+#define GL_HIGH_INT 0x8DF5
+#define GL_IMPLEMENTATION_COLOR_READ_FORMAT 0x8B9B
+#define GL_IMPLEMENTATION_COLOR_READ_TYPE 0x8B9A
+#define GL_LOW_FLOAT 0x8DF0
+#define GL_LOW_INT 0x8DF3
+#define GL_MAX_ELEMENT_INDEX 0x8D6B
+#define GL_MAX_FRAGMENT_UNIFORM_VECTORS 0x8DFD
+#define GL_MAX_VARYING_VECTORS 0x8DFC
+#define GL_MAX_VERTEX_UNIFORM_VECTORS 0x8DFB
+#define GL_MEDIUM_FLOAT 0x8DF1
+#define GL_MEDIUM_INT 0x8DF4
+#define GL_NUM_PROGRAM_BINARY_FORMATS 0x87FE
+#define GL_NUM_SAMPLE_COUNTS 0x9380
+#define GL_NUM_SHADER_BINARY_FORMATS 0x8DF9
+#define GL_PRIMITIVE_RESTART_FIXED_INDEX 0x8D69
+#define GL_PROGRAM_BINARY_FORMATS 0x87FF
+#define GL_PROGRAM_BINARY_LENGTH 0x8741
+#define GL_PROGRAM_BINARY_RETRIEVABLE_HINT 0x8257
+#define GL_RGB565 0x8D62
+#define GL_SHADER_BINARY_FORMATS 0x8DF8
+#define GL_SHADER_COMPILER 0x8DFA
+#define GL_TEXTURE_IMMUTABLE_FORMAT 0x912F
+#define GL_TEXTURE_IMMUTABLE_LEVELS 0x82DF
+#define GL_TRANSFORM_FEEDBACK 0x8E22
+#define GL_TRANSFORM_FEEDBACK_ACTIVE 0x8E24
+#define GL_TRANSFORM_FEEDBACK_BINDING 0x8E25
+#define GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE 0x8E24
+#define GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED 0x8E23
+#define GL_TRANSFORM_FEEDBACK_PAUSED 0x8E23
 
 
 #include <KHR/khrplatform.h>
@@ -1597,6 +1655,10 @@ GLAD_API_CALL int GLAD_GL_VERSION_3_1;
 GLAD_API_CALL int GLAD_GL_VERSION_3_2;
 #define GL_VERSION_3_3 1
 GLAD_API_CALL int GLAD_GL_VERSION_3_3;
+#define GL_ES_VERSION_2_0 1
+GLAD_API_CALL int GLAD_GL_ES_VERSION_2_0;
+#define GL_ES_VERSION_3_0 1
+GLAD_API_CALL int GLAD_GL_ES_VERSION_3_0;
 #define GL_ARB_debug_output 1
 GLAD_API_CALL int GLAD_GL_ARB_debug_output;
 #define GL_ARB_framebuffer_object 1
@@ -2356,6 +2418,25 @@ typedef void (GLAD_API_PTR *PFNGLWINDOWPOS3IPROC)(GLint x, GLint y, GLint z);
 typedef void (GLAD_API_PTR *PFNGLWINDOWPOS3IVPROC)(const GLint * v);
 typedef void (GLAD_API_PTR *PFNGLWINDOWPOS3SPROC)(GLshort x, GLshort y, GLshort z);
 typedef void (GLAD_API_PTR *PFNGLWINDOWPOS3SVPROC)(const GLshort * v);
+typedef void (GLAD_API_PTR *PFNGLBINDTRANSFORMFEEDBACKPROC)(GLenum target, GLuint id);
+typedef void (GLAD_API_PTR *PFNGLCLEARDEPTHFPROC)(GLfloat d);
+typedef void (GLAD_API_PTR *PFNGLDELETETRANSFORMFEEDBACKSPROC)(GLsizei n, const GLuint * ids);
+typedef void (GLAD_API_PTR *PFNGLDEPTHRANGEFPROC)(GLfloat n, GLfloat f);
+typedef void (GLAD_API_PTR *PFNGLGENTRANSFORMFEEDBACKSPROC)(GLsizei n, GLuint * ids);
+typedef void (GLAD_API_PTR *PFNGLGETINTERNALFORMATIVPROC)(GLenum target, GLenum internalformat, GLenum pname, GLsizei count, GLint * params);
+typedef void (GLAD_API_PTR *PFNGLGETPROGRAMBINARYPROC)(GLuint program, GLsizei bufSize, GLsizei * length, GLenum * binaryFormat, void * binary);
+typedef void (GLAD_API_PTR *PFNGLGETSHADERPRECISIONFORMATPROC)(GLenum shadertype, GLenum precisiontype, GLint * range, GLint * precision);
+typedef void (GLAD_API_PTR *PFNGLINVALIDATEFRAMEBUFFERPROC)(GLenum target, GLsizei numAttachments, const GLenum * attachments);
+typedef void (GLAD_API_PTR *PFNGLINVALIDATESUBFRAMEBUFFERPROC)(GLenum target, GLsizei numAttachments, const GLenum * attachments, GLint x, GLint y, GLsizei width, GLsizei height);
+typedef GLboolean (GLAD_API_PTR *PFNGLISTRANSFORMFEEDBACKPROC)(GLuint id);
+typedef void (GLAD_API_PTR *PFNGLPAUSETRANSFORMFEEDBACKPROC)(void);
+typedef void (GLAD_API_PTR *PFNGLPROGRAMBINARYPROC)(GLuint program, GLenum binaryFormat, const void * binary, GLsizei length);
+typedef void (GLAD_API_PTR *PFNGLPROGRAMPARAMETERIPROC)(GLuint program, GLenum pname, GLint value);
+typedef void (GLAD_API_PTR *PFNGLRELEASESHADERCOMPILERPROC)(void);
+typedef void (GLAD_API_PTR *PFNGLRESUMETRANSFORMFEEDBACKPROC)(void);
+typedef void (GLAD_API_PTR *PFNGLSHADERBINARYPROC)(GLsizei count, const GLuint * shaders, GLenum binaryFormat, const void * binary, GLsizei length);
+typedef void (GLAD_API_PTR *PFNGLTEXSTORAGE2DPROC)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (GLAD_API_PTR *PFNGLTEXSTORAGE3DPROC)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
 
 GLAD_API_CALL PFNGLACCUMPROC glad_glAccum;
 #define glAccum glad_glAccum
@@ -3851,6 +3932,44 @@ GLAD_API_CALL PFNGLWINDOWPOS3SPROC glad_glWindowPos3s;
 #define glWindowPos3s glad_glWindowPos3s
 GLAD_API_CALL PFNGLWINDOWPOS3SVPROC glad_glWindowPos3sv;
 #define glWindowPos3sv glad_glWindowPos3sv
+GLAD_API_CALL PFNGLBINDTRANSFORMFEEDBACKPROC glad_glBindTransformFeedback;
+#define glBindTransformFeedback glad_glBindTransformFeedback
+GLAD_API_CALL PFNGLCLEARDEPTHFPROC glad_glClearDepthf;
+#define glClearDepthf glad_glClearDepthf
+GLAD_API_CALL PFNGLDELETETRANSFORMFEEDBACKSPROC glad_glDeleteTransformFeedbacks;
+#define glDeleteTransformFeedbacks glad_glDeleteTransformFeedbacks
+GLAD_API_CALL PFNGLDEPTHRANGEFPROC glad_glDepthRangef;
+#define glDepthRangef glad_glDepthRangef
+GLAD_API_CALL PFNGLGENTRANSFORMFEEDBACKSPROC glad_glGenTransformFeedbacks;
+#define glGenTransformFeedbacks glad_glGenTransformFeedbacks
+GLAD_API_CALL PFNGLGETINTERNALFORMATIVPROC glad_glGetInternalformativ;
+#define glGetInternalformativ glad_glGetInternalformativ
+GLAD_API_CALL PFNGLGETPROGRAMBINARYPROC glad_glGetProgramBinary;
+#define glGetProgramBinary glad_glGetProgramBinary
+GLAD_API_CALL PFNGLGETSHADERPRECISIONFORMATPROC glad_glGetShaderPrecisionFormat;
+#define glGetShaderPrecisionFormat glad_glGetShaderPrecisionFormat
+GLAD_API_CALL PFNGLINVALIDATEFRAMEBUFFERPROC glad_glInvalidateFramebuffer;
+#define glInvalidateFramebuffer glad_glInvalidateFramebuffer
+GLAD_API_CALL PFNGLINVALIDATESUBFRAMEBUFFERPROC glad_glInvalidateSubFramebuffer;
+#define glInvalidateSubFramebuffer glad_glInvalidateSubFramebuffer
+GLAD_API_CALL PFNGLISTRANSFORMFEEDBACKPROC glad_glIsTransformFeedback;
+#define glIsTransformFeedback glad_glIsTransformFeedback
+GLAD_API_CALL PFNGLPAUSETRANSFORMFEEDBACKPROC glad_glPauseTransformFeedback;
+#define glPauseTransformFeedback glad_glPauseTransformFeedback
+GLAD_API_CALL PFNGLPROGRAMBINARYPROC glad_glProgramBinary;
+#define glProgramBinary glad_glProgramBinary
+GLAD_API_CALL PFNGLPROGRAMPARAMETERIPROC glad_glProgramParameteri;
+#define glProgramParameteri glad_glProgramParameteri
+GLAD_API_CALL PFNGLRELEASESHADERCOMPILERPROC glad_glReleaseShaderCompiler;
+#define glReleaseShaderCompiler glad_glReleaseShaderCompiler
+GLAD_API_CALL PFNGLRESUMETRANSFORMFEEDBACKPROC glad_glResumeTransformFeedback;
+#define glResumeTransformFeedback glad_glResumeTransformFeedback
+GLAD_API_CALL PFNGLSHADERBINARYPROC glad_glShaderBinary;
+#define glShaderBinary glad_glShaderBinary
+GLAD_API_CALL PFNGLTEXSTORAGE2DPROC glad_glTexStorage2D;
+#define glTexStorage2D glad_glTexStorage2D
+GLAD_API_CALL PFNGLTEXSTORAGE3DPROC glad_glTexStorage3D;
+#define glTexStorage3D glad_glTexStorage3D
 
 
 
@@ -3859,6 +3978,9 @@ GLAD_API_CALL PFNGLWINDOWPOS3SVPROC glad_glWindowPos3sv;
 GLAD_API_CALL int gladLoadGLUserPtr( GLADuserptrloadfunc load, void *userptr);
 GLAD_API_CALL int gladLoadGL( GLADloadfunc load);
 
+GLAD_API_CALL int gladLoadGLES2UserPtr( GLADuserptrloadfunc load, void *userptr);
+GLAD_API_CALL int gladLoadGLES2( GLADloadfunc load);
+
 
 #ifdef GLAD_GL
 
@@ -3866,6 +3988,13 @@ GLAD_API_CALL int gladLoaderLoadGL(void);
 GLAD_API_CALL void gladLoaderUnloadGL(void);
 
 #endif
+#ifdef GLAD_GLES2
+
+GLAD_API_CALL int gladLoaderLoadGLES2(void);
+GLAD_API_CALL void gladLoaderUnloadGLES2(void);
+
+#endif /* GLAD_GLES2 */
+
 
 #ifdef __cplusplus
 }

@@ -32,6 +32,7 @@
 #define OS_WINDOWS_H
 
 #ifdef ANGLE_ENABLED
+#include "context_gl_windows_angle.h"
 #else
 #include "context_gl_windows.h"
 #endif

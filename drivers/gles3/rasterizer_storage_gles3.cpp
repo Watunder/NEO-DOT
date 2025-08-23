@@ -103,10 +103,6 @@
 
 #define _GL_TEXTURE_EXTERNAL_OES 0x8D65
 
-#ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-#endif
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 
@@ -7121,7 +7117,7 @@ void RasterizerStorageGLES3::_render_target_allocate(RenderTarget *rt) {
 				glViewport(0, 0, rt->effects.mip_maps[i].sizes[j].width, rt->effects.mip_maps[i].sizes[j].height);
 				glClearBufferfv(GL_COLOR, 0, zero);
 				if (used_depth) {
-					glClearDepth(1.0);
+					glClearDepthf(1.0);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 			}

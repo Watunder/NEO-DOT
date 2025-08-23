@@ -37,10 +37,6 @@
 #include "servers/camera/camera_feed.h"
 #include "servers/visual/visual_server_raster.h"
 
-#ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-#endif
-
 static const GLenum _cube_side_enum[6] = {
 
 	GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -151,7 +147,7 @@ void RasterizerSceneGLES3::shadow_atlas_set_size(RID p_atlas, int p_size) {
 				GL_TEXTURE_2D, shadow_atlas->depth, 0);
 
 		glViewport(0, 0, shadow_atlas->size, shadow_atlas->size);
-		glClearDepth(0.0f);
+		glClearDepthf(0.0f);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -4037,7 +4033,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 		glViewport(0, 0, storage->frame.current_rt->width, storage->frame.current_rt->height);
 
 		glColorMask(0, 0, 0, 0);
-		glClearDepth(1.0f);
+		glClearDepthf(1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		render_list.clear();
@@ -4155,7 +4151,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 	}
 
 	if (!fb_cleared) {
-		glClearDepth(1.0f);
+		glClearDepthf(1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -4668,7 +4664,7 @@ void RasterizerSceneGLES3::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 	}
 
 	glEnable(GL_SCISSOR_TEST);
-	glClearDepth(1.0f);
+	glClearDepthf(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_SCISSOR_TEST);
 
@@ -4722,7 +4718,7 @@ void RasterizerSceneGLES3::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 			glViewport(local_x, local_y, local_width, local_height);
 			glScissor(local_x, local_y, local_width, local_height);
 			glEnable(GL_SCISSOR_TEST);
-			glClearDepth(1.0f);
+			glClearDepthf(1.0f);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_SCISSOR_TEST);
 			//glDisable(GL_DEPTH_TEST);

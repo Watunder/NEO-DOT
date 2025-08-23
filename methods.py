@@ -690,6 +690,7 @@ def generate_vs_project(env, num_jobs):
                 'cmd /V /C set "plat=$(PlatformTarget)"',
                 '(if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64"))',
                 'set "tools=%s"' % env["tools"],
+                'set "use_angle=%s"' % env["use_angle"],
                 '(if "$(Configuration)"=="release" (set "tools=no"))',
                 'call "' + batch_file + '" !plat!',
             ]
@@ -704,6 +705,7 @@ def generate_vs_project(env, num_jobs):
                 "target=$(Configuration)",
                 "progress=no",
                 "tools=!tools!",
+                "use_angle=!use_angle!",
                 "-j%s" % num_jobs,
             ]
 

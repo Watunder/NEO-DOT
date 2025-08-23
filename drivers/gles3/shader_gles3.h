@@ -31,8 +31,7 @@
 #ifndef SHADER_GLES3_H
 #define SHADER_GLES3_H
 
-// This must come first to avoid windows.h mess
-#include "platform_config.h"
+#include "platform_gl.h"
 
 #include "core/hash_map.h"
 #include "core/map.h"

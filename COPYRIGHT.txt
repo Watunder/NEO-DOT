@@ -117,6 +117,12 @@ Copyright: 2007, Starbreeze Studios
  2014-present, Godot Engine contributors.
 License: Expat and Zlib
 
+Files: thirdparty/angle/
+Comment: ANGLE
+Copyright: 2018, The ANGLE Project Authors.
+ 2007-2020 The Khronos Group Inc.
+License: BSD-3-clause
+
 Files: ./thirdparty/bullet/
 Comment: Bullet Continuous Collision Detection and Physics Library
 Copyright: 2003-2013, Erwin Coumans

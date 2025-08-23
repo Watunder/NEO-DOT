@@ -71,15 +71,6 @@
 #define CAN_DEBUG
 #endif
 
-#if !defined(GLES_OVER_GL) && defined(CAN_DEBUG)
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <GLES2/gl2platform.h>
-
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#endif
-
 #if defined(MINGW_ENABLED) || defined(_MSC_VER)
 #define strcpy strcpy_s
 #endif
@@ -157,8 +148,11 @@ RasterizerScene *RasterizerGLES2::get_scene() {
 
 Error RasterizerGLES2::is_viable() {
 #ifdef GLAD_ENABLED
+#ifdef ANGLE_ENABLED
+	int version = gladLoaderLoadGLES2();
+#else
 	int version = gladLoaderLoadGL();
-
+#endif
 	if (!version) {
 		ERR_PRINT("Error initializing GLAD");
 		return ERR_UNAVAILABLE;
@@ -167,7 +161,7 @@ Error RasterizerGLES2::is_viable() {
 	int major = GLAD_VERSION_MAJOR(version);
 	int minor = GLAD_VERSION_MINOR(version);
 
-	ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_2_1, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
+	//ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_2_1, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
 #ifdef GLES_OVER_GL
 	//Test GL_ARB_framebuffer_object extension
 	if (!GLAD_GL_ARB_framebuffer_object) {
@@ -237,19 +231,19 @@ void RasterizerGLES2::initialize() {
 		*/
 	}
 #else
-	if (OS::get_singleton()->is_stdout_verbose()) {
-		DebugMessageCallbackARB callback = (DebugMessageCallbackARB)eglGetProcAddress("glDebugMessageCallback");
-		if (!callback) {
-			callback = (DebugMessageCallbackARB)eglGetProcAddress("glDebugMessageCallbackKHR");
-		}
+	// if (OS::get_singleton()->is_stdout_verbose()) {
+	// 	DebugMessageCallbackARB callback = (DebugMessageCallbackARB)eglGetProcAddress("glDebugMessageCallback");
+	// 	if (!callback) {
+	// 		callback = (DebugMessageCallbackARB)eglGetProcAddress("glDebugMessageCallbackKHR");
+	// 	}
 
-		if (callback) {
-			print_line("godot: ENABLING GL DEBUG");
-			glEnable(_EXT_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-			callback(_gl_debug_print, NULL);
-			glEnable(_EXT_DEBUG_OUTPUT);
-		}
-	}
+	// 	if (callback) {
+	// 		print_line("godot: ENABLING GL DEBUG");
+	// 		glEnable(_EXT_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	// 		callback(_gl_debug_print, NULL);
+	// 		glEnable(_EXT_DEBUG_OUTPUT);
+	// 	}
+	// }
 #endif // GLES_OVER_GL
 #endif // CAN_DEBUG
 
