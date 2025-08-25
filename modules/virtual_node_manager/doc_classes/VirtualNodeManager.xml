@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="VirtualNodeManager" inherits="Object" version="3.3">
+	<brief_description>
+		Manager for nodes.
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="node_add_child">
+			<return type="void" />
+			<argument index="0" name="node" type="Node" />
+			<argument index="1" name="child" type="Node" />
+			<description>
+			</description>
+		</method>
+		<method name="node_queue_free">
+			<return type="void" />
+			<argument index="0" name="node" type="Node" />
+			<description>
+			</description>
+		</method>
+		<method name="node_notification">
+			<return type="void" />
+			<argument index="0" name="node" type="Node" />
+			<argument index="1" name="what" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="node_set_property">
+			<return type="void" />
+			<argument index="0" name="node" type="Node" />
+			<argument index="1" name="prop" type="String" />
+			<argument index="2" name="value" type="Variant" />
+			<description>
+			</description>
+		</method>
+		<method name="node_call_function" qualifiers="vararg">
+			<return type="Variant" />
+			<argument index="0" name="node" type="Node" />
+			<argument index="1" name="method" type="String" />
+			<description>
+			</description>
+		</method>
+	</methods>
+</class>
