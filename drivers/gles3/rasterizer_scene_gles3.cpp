@@ -2956,7 +2956,7 @@ void RasterizerSceneGLES3::_setup_reflections(RID *p_reflection_probe_cull_resul
 }
 
 void RasterizerSceneGLES3::_copy_screen(bool p_invalidate_color, bool p_invalidate_depth) {
-#ifndef GLES_OVER_GL
+#if !defined(GLES_OVER_GL) && !defined(ANGLE_ENABLED)
 	if (p_invalidate_color) {
 		GLenum attachments[2] = {
 			GL_COLOR_ATTACHMENT0,

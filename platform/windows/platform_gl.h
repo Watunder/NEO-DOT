@@ -42,4 +42,9 @@
 
 #include "thirdparty/glad/glad/gl.h"
 
+#ifdef GLES_OVER_GL
+#undef glClearDepthf
+#define glClearDepthf glClearDepth
+#endif
+
 #endif // PLATFORM_GL_H

@@ -136,16 +136,18 @@ Error RasterizerGLES3::is_viable() {
 	int version = gladLoaderLoadGLES2();
 #else
 	int version = gladLoaderLoadGL();
+
+	if (version) {
+		int major = GLAD_VERSION_MAJOR(version);
+		int minor = GLAD_VERSION_MINOR(version);
+
+		ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_3_3, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
+	}
 #endif
 	if (!version) {
 		ERR_PRINT("Error initializing GLAD");
 		return ERR_UNAVAILABLE;
 	}
-
-	int major = GLAD_VERSION_MAJOR(version);
-	int minor = GLAD_VERSION_MINOR(version);
-
-	//ERR_FAIL_COND_V_MSG(!GLAD_GL_VERSION_3_3, ERR_UNAVAILABLE, vformat("OpenGL version: %d.%d is too old!", major, minor));
 #endif // GLAD_ENABLED
 	return OK;
 }
