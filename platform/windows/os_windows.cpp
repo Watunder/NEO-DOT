@@ -36,6 +36,7 @@
 #include "core/io/marshalls.h"
 #include "core/math/geometry.h"
 #include "core/version_generated.gen.h"
+#include "drivers/dummy/rasterizer_dummy.h"
 #include "drivers/gles2/rasterizer_gles2.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 #include "drivers/windows/dir_access_windows.h"
@@ -1724,6 +1725,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	last_tilt = Vector2();
 
 	if (p_video_driver == VIDEO_DRIVER_DUMMY) {
+		RasterizerDummy::make_current();
 		video_driver_index = p_video_driver;
 		visual_server = memnew(VisualServerDummy);
 	} else {
