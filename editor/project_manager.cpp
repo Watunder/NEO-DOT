@@ -53,8 +53,9 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tool_button.h"
 
-// Used to test for GLES3 support.
+// Used to test for GLES support.
 #ifndef SERVER_ENABLED
+#include "drivers/gles2/rasterizer_gles2.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 #endif
 
@@ -836,12 +837,13 @@ public:
 		rasterizer_container->add_child(rshb);
 		rasterizer_button_group.instance();
 
-		// Enable GLES3 by default as it's the default value for the project setting.
-#ifndef SERVER_ENABLED
-		bool gles3_viable = RasterizerGLES3::is_viable() == OK;
-#else
-		// Whatever, project manager isn't even used in headless builds.
+		bool gles2_viable = false;
 		bool gles3_viable = false;
+#ifndef SERVER_ENABLED
+		if (!OS::get_singleton()->is_no_window_mode_enabled() && OS::get_singleton()->get_current_video_driver() != OS::VIDEO_DRIVER_DUMMY) {
+			gles2_viable = RasterizerGLES2::is_viable() == OK;
+			gles3_viable = RasterizerGLES3::is_viable() == OK;
+		}
 #endif
 
 		Container *rvb = memnew(VBoxContainer);
@@ -851,8 +853,8 @@ public:
 		rs_button->set_button_group(rasterizer_button_group);
 		rs_button->set_text(TTR("OpenGL ES 3.0"));
 		rs_button->set_meta("driver_name", "GLES3");
-		rvb->add_child(rs_button);
 		if (gles3_viable) {
+			// Enable GLES3 by default as it's the default value for the project setting.
 			rs_button->set_pressed(true);
 		} else {
 			// If GLES3 can't be used, don't let users shoot themselves in the foot.
@@ -861,6 +863,7 @@ public:
 			l->set_text(TTR("Not supported by your GPU drivers."));
 			rvb->add_child(l);
 		}
+		rvb->add_child(rs_button);
 		l = memnew(Label);
 		l->set_text(TTR("Higher visual quality\nAll features available\nIncompatible with older hardware\nNot recommended for web games"));
 		rvb->add_child(l);
@@ -874,7 +877,15 @@ public:
 		rs_button->set_button_group(rasterizer_button_group);
 		rs_button->set_text(TTR("OpenGL ES 2.0"));
 		rs_button->set_meta("driver_name", "GLES2");
-		rs_button->set_pressed(!gles3_viable);
+		if (gles2_viable) {
+			rs_button->set_pressed(!gles3_viable);
+		} else {
+			// If GLES2 can't be used, don't let users shoot themselves in the foot.
+			rs_button->set_disabled(true);
+			l = memnew(Label);
+			l->set_text(TTR("Not supported by your GPU drivers."));
+			rvb->add_child(l);
+		}
 		rvb->add_child(rs_button);
 		l = memnew(Label);
 		l->set_text(TTR("Lower visual quality\nSome features not available\nWorks on most hardware\nRecommended for web games"));
