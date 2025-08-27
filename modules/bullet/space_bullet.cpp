@@ -901,65 +901,10 @@ void SpaceBullet::update_gravity() {
 	}
 }
 
-/// IMPORTANT: Please don't turn it ON this is not managed correctly!!
-/// I'm leaving this here just for future tests.
-/// Debug motion and normal vector drawing
-#define debug_test_motion 0
-
 #define RECOVERING_MOVEMENT_SCALE 0.4
 #define RECOVERING_MOVEMENT_CYCLES 4
 
-#if debug_test_motion
-
-#include "scene/3d/mesh_instance.h"
-#include "scene/main/scene_tree.h"
-#include "scene/resources/immediate_mesh.h"
-
-static Ref<ImmediateMesh> motionVecMesh;
-static MeshInstance *motionVec(NULL);
-static Ref<ImmediateMesh> normalLineMesh;
-static MeshInstance *normalLine(NULL);
-static Ref<SpatialMaterial> red_mat;
-static Ref<SpatialMaterial> blue_mat;
-#endif
-
 bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia, PhysicsServer::MotionResult *r_result, bool p_exclude_raycast_shapes) {
-#if debug_test_motion
-	/// Yes I know this is not good, but I've used it as fast debugging hack.
-	/// I'm leaving it here just for speedup the other eventual debugs
-	if (!normalLine) {
-		motionVec = memnew(MeshInstance);
-		motionVecMesh.instance();
-		motionVec->set_mesh(motionVecMesh);
-		normalLine = memnew(MeshInstance);
-		normalLineMesh.instance();
-		normalLine->set_mesh(normalLineMesh);
-		SceneTree::get_singleton()->get_current_scene()->add_child(motionVec);
-		SceneTree::get_singleton()->get_current_scene()->add_child(normalLine);
-
-		motionVec->set_as_toplevel(true);
-		normalLine->set_as_toplevel(true);
-
-		red_mat = Ref<SpatialMaterial>(memnew(SpatialMaterial));
-		red_mat->set_flag(SpatialMaterial::FLAG_UNSHADED, true);
-		red_mat->set_line_width(20.0);
-		red_mat->set_feature(SpatialMaterial::FEATURE_TRANSPARENT, true);
-		red_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
-		red_mat->set_flag(SpatialMaterial::FLAG_SRGB_VERTEX_COLOR, true);
-		red_mat->set_albedo(Color(1, 0, 0, 1));
-		motionVec->set_material_override(red_mat);
-
-		blue_mat = Ref<SpatialMaterial>(memnew(SpatialMaterial));
-		blue_mat->set_flag(SpatialMaterial::FLAG_UNSHADED, true);
-		blue_mat->set_line_width(20.0);
-		blue_mat->set_feature(SpatialMaterial::FEATURE_TRANSPARENT, true);
-		blue_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
-		blue_mat->set_flag(SpatialMaterial::FLAG_SRGB_VERTEX_COLOR, true);
-		blue_mat->set_albedo(Color(0, 0, 1, 1));
-		normalLine->set_material_override(blue_mat);
-	}
-#endif
-
 	btTransform body_transform;
 	G_TO_B(p_from, body_transform);
 	UNSCALE_BT_BASIS(body_transform);
@@ -981,17 +926,6 @@ bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_f
 		// Phase two - sweep test, from a secure position without margin
 
 		const int shape_count(p_body->get_shape_count());
-
-#if debug_test_motion
-		Vector3 sup_line;
-		B_TO_G(body_transform.getOrigin(), sup_line);
-		motionVecMesh->clear_surfaces();
-		motionVecMesh->surface_begin(Mesh::PRIMITIVE_LINES, NULL);
-		motionVecMesh->surface_add_vertex(sup_line);
-		motionVecMesh->surface_add_vertex(sup_line + p_motion * 10);
-		motionVecMesh->surface_end();
-#endif
-
 		for (int shIndex = 0; shIndex < shape_count; ++shIndex) {
 			if (p_body->is_shape_disabled(shIndex)) {
 				continue;
@@ -1062,16 +996,6 @@ bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_f
 				r_result->collider_id = collisionObject->get_instance_id();
 				r_result->collider_shape = r_recover_result.other_compound_shape_index;
 				r_result->collision_local_shape = r_recover_result.local_shape_most_recovered;
-
-#if debug_test_motion
-				Vector3 sup_line2;
-				B_TO_G(motion, sup_line2);
-				normalLineMesh->clear_surfaces();
-				normalLineMesh->surface_begin(Mesh::PRIMITIVE_LINES, NULL);
-				normalLineMesh->surface_add_vertex(r_result->collision_point);
-				normalLineMesh->surface_add_vertex(r_result->collision_point + r_result->collision_normal * 10);
-				normalLineMesh->surface_end();
-#endif
 			} else {
 				r_result->remainder = Vector3();
 			}
