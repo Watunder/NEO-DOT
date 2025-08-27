@@ -911,10 +911,14 @@ void SpaceBullet::update_gravity() {
 
 #if debug_test_motion
 
-#include "scene/3d/immediate_geometry.h"
+#include "scene/3d/mesh_instance.h"
+#include "scene/main/scene_tree.h"
+#include "scene/resources/immediate_mesh.h"
 
-static ImmediateGeometry *motionVec(NULL);
-static ImmediateGeometry *normalLine(NULL);
+static Ref<ImmediateMesh> motionVecMesh;
+static MeshInstance *motionVec(NULL);
+static Ref<ImmediateMesh> normalLineMesh;
+static MeshInstance *normalLine(NULL);
 static Ref<SpatialMaterial> red_mat;
 static Ref<SpatialMaterial> blue_mat;
 #endif
@@ -924,8 +928,12 @@ bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_f
 	/// Yes I know this is not good, but I've used it as fast debugging hack.
 	/// I'm leaving it here just for speedup the other eventual debugs
 	if (!normalLine) {
-		motionVec = memnew(ImmediateGeometry);
-		normalLine = memnew(ImmediateGeometry);
+		motionVec = memnew(MeshInstance);
+		motionVecMesh.instance();
+		motionVec->set_mesh(motionVecMesh);
+		normalLine = memnew(MeshInstance);
+		normalLineMesh.instance();
+		normalLine->set_mesh(normalLineMesh);
 		SceneTree::get_singleton()->get_current_scene()->add_child(motionVec);
 		SceneTree::get_singleton()->get_current_scene()->add_child(normalLine);
 
@@ -976,12 +984,12 @@ bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_f
 
 #if debug_test_motion
 		Vector3 sup_line;
-		B_TO_G(body_safe_position.getOrigin(), sup_line);
-		motionVec->clear();
-		motionVec->begin(Mesh::PRIMITIVE_LINES, NULL);
-		motionVec->add_vertex(sup_line);
-		motionVec->add_vertex(sup_line + p_motion * 10);
-		motionVec->end();
+		B_TO_G(body_transform.getOrigin(), sup_line);
+		motionVecMesh->clear_surfaces();
+		motionVecMesh->surface_begin(Mesh::PRIMITIVE_LINES, NULL);
+		motionVecMesh->surface_add_vertex(sup_line);
+		motionVecMesh->surface_add_vertex(sup_line + p_motion * 10);
+		motionVecMesh->surface_end();
 #endif
 
 		for (int shIndex = 0; shIndex < shape_count; ++shIndex) {
@@ -1058,11 +1066,11 @@ bool SpaceBullet::test_body_motion(RigidBodyBullet *p_body, const Transform &p_f
 #if debug_test_motion
 				Vector3 sup_line2;
 				B_TO_G(motion, sup_line2);
-				normalLine->clear();
-				normalLine->begin(Mesh::PRIMITIVE_LINES, NULL);
-				normalLine->add_vertex(r_result->collision_point);
-				normalLine->add_vertex(r_result->collision_point + r_result->collision_normal * 10);
-				normalLine->end();
+				normalLineMesh->clear_surfaces();
+				normalLineMesh->surface_begin(Mesh::PRIMITIVE_LINES, NULL);
+				normalLineMesh->surface_add_vertex(r_result->collision_point);
+				normalLineMesh->surface_add_vertex(r_result->collision_point + r_result->collision_normal * 10);
+				normalLineMesh->surface_end();
 #endif
 			} else {
 				r_result->remainder = Vector3();

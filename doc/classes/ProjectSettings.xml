@@ -1125,9 +1125,6 @@
 		<member name="rendering/limits/buffers/canvas_polygon_index_buffer_size_kb" type="int" setter="" getter="" default="128">
 			Max index buffer size for drawing polygons. Any polygon bigger than this will not work.
 		</member>
-		<member name="rendering/limits/buffers/immediate_buffer_size_kb" type="int" setter="" getter="" default="2048">
-			Max buffer size for drawing immediate objects (ImmediateGeometry nodes). Nodes using more than this size will not work.
-		</member>
 		<member name="rendering/limits/rendering/max_lights_per_object" type="int" setter="" getter="" default="32">
 			Max number of lights renderable per object. This is further limited by hardware support. Most devices only support 409 lights, while many devices (especially mobile) only support 102. Setting this low will slightly reduce memory usage and may decrease shader compile times.
 		</member>
