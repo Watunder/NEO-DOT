@@ -108,7 +108,6 @@ public:
 
 		GLuint sky_verts;
 
-		GLuint immediate_buffer;
 		Color default_ambient;
 		Color default_bg;
 
@@ -182,9 +181,6 @@ public:
 		GLuint spot_array_ubo;
 		GLuint omni_array_ubo;
 		GLuint reflection_array_ubo;
-
-		GLuint immediate_buffer;
-		GLuint immediate_array;
 
 		uint32_t ubo_light_size;
 		uint8_t *spot_array_tmp;

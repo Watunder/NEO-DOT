@@ -1284,7 +1284,7 @@
 			<argument index="0" name="instance" type="RID" />
 			<argument index="1" name="base" type="RID" />
 			<description>
-				Sets the base of the instance. A base can be any of the 3D objects that are created in the VisualServer that can be displayed. For example, any of the light types, mesh, multimesh, immediate geometry, particle system, reflection probe, lightmap capture, and the GI probe are all types that can be set as the base of an instance in order to be displayed in the scenario.
+				Sets the base of the instance. A base can be any of the 3D objects that are created in the VisualServer that can be displayed. For example, any of the light types, mesh, multimesh, particle system, reflection probe, lightmap capture, and the GI probe are all types that can be set as the base of an instance in order to be displayed in the scenario.
 			</description>
 		</method>
 		<method name="instance_set_blend_shape_weight">
@@ -3444,9 +3444,6 @@
 		<constant name="INSTANCE_MULTIMESH" value="2" enum="InstanceType">
 			The instance is a multimesh.
 		</constant>
-		<constant name="INSTANCE_IMMEDIATE" value="3" enum="InstanceType">
-			The instance is an immediate geometry.
-		</constant>
 		<constant name="INSTANCE_PARTICLES" value="4" enum="InstanceType">
 			The instance is a particle emitter.
 		</constant>
@@ -3466,7 +3463,7 @@
 			Represents the size of the [enum InstanceType] enum.
 		</constant>
 		<constant name="INSTANCE_GEOMETRY_MASK" value="30" enum="InstanceType">
-			A combination of the flags of geometry instances (mesh, multimesh, immediate and particles).
+			A combination of the flags of geometry instances (mesh, multimesh and particles).
 		</constant>
 		<constant name="INSTANCE_FLAG_USE_BAKED_LIGHT" value="0" enum="InstanceFlags">
 			Allows the instance to be used in baked lighting.

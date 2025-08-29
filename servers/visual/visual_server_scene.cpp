@@ -541,7 +541,6 @@ void VisualServerScene::instance_set_base(RID p_instance, RID p_base) {
 			} break;
 			case VS::INSTANCE_MESH:
 			case VS::INSTANCE_MULTIMESH:
-			case VS::INSTANCE_IMMEDIATE:
 			case VS::INSTANCE_PARTICLES: {
 				InstanceGeometryData *geom = memnew(InstanceGeometryData);
 				instance->base_data = geom;
@@ -793,7 +792,7 @@ void VisualServerScene::instance_set_visible(RID p_instance, bool p_visible) {
 	}
 }
 inline bool is_geometry_instance(VisualServer::InstanceType p_type) {
-	return p_type == VS::INSTANCE_MESH || p_type == VS::INSTANCE_MULTIMESH || p_type == VS::INSTANCE_PARTICLES || p_type == VS::INSTANCE_IMMEDIATE;
+	return p_type == VS::INSTANCE_MESH || p_type == VS::INSTANCE_MULTIMESH || p_type == VS::INSTANCE_PARTICLES;
 }
 
 void VisualServerScene::instance_set_use_lightmap(RID p_instance, RID p_lightmap_instance, RID p_lightmap, int p_lightmap_slice, const Rect2 &p_lightmap_uv_rect) {
@@ -1106,13 +1105,6 @@ void VisualServerScene::_update_instance_aabb(Instance *p_instance) {
 				new_aabb = *p_instance->custom_aabb;
 			else
 				new_aabb = VSG::storage->multimesh_get_aabb(p_instance->base);
-
-		} break;
-		case VisualServer::INSTANCE_IMMEDIATE: {
-			if (p_instance->custom_aabb)
-				new_aabb = *p_instance->custom_aabb;
-			else
-				new_aabb = VSG::storage->immediate_get_aabb(p_instance->base);
 
 		} break;
 		case VisualServer::INSTANCE_PARTICLES: {
@@ -3354,14 +3346,6 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 						if (!cast_shadows) {
 							can_cast_shadows = false;
 						}
-					}
-				} else if (p_instance->base_type == VS::INSTANCE_IMMEDIATE) {
-					RID mat = VSG::storage->immediate_get_material(p_instance->base);
-
-					can_cast_shadows = !mat.is_valid() || VSG::storage->material_casts_shadows(mat);
-
-					if (mat.is_valid() && VSG::storage->material_is_animated(mat)) {
-						is_animated = true;
 					}
 				} else if (p_instance->base_type == VS::INSTANCE_PARTICLES) {
 					bool cast_shadows = false;

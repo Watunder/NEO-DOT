@@ -178,9 +178,6 @@ public:
 		GLuint omni_array_ubo;
 		GLuint reflection_array_ubo;
 
-		GLuint immediate_buffer;
-		GLuint immediate_array;
-
 		uint32_t ubo_light_size;
 		uint8_t *spot_array_tmp;
 		uint8_t *omni_array_tmp;

@@ -273,21 +273,6 @@ public:
 	BIND2(multimesh_set_visible_instances, RID, int)
 	BIND1RC(int, multimesh_get_visible_instances, RID)
 
-	/* IMMEDIATE API */
-
-	BIND0R(RID, immediate_create)
-	BIND3(immediate_begin, RID, PrimitiveType, RID)
-	BIND2(immediate_vertex, RID, const Vector3 &)
-	BIND2(immediate_normal, RID, const Vector3 &)
-	BIND2(immediate_tangent, RID, const Plane &)
-	BIND2(immediate_color, RID, const Color &)
-	BIND2(immediate_uv, RID, const Vector2 &)
-	BIND2(immediate_uv2, RID, const Vector2 &)
-	BIND1(immediate_end, RID)
-	BIND1(immediate_clear, RID)
-	BIND2(immediate_set_material, RID, RID)
-	BIND1RC(RID, immediate_get_material, RID)
-
 	/* SKELETON API */
 
 	BIND0R(RID, skeleton_create)

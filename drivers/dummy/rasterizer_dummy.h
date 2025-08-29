@@ -445,22 +445,6 @@ public:
 
 	AABB multimesh_get_aabb(RID p_multimesh) const { return AABB(); }
 
-	/* IMMEDIATE API */
-
-	RID immediate_create() { return RID(); }
-	void immediate_begin(RID p_immediate, VS::PrimitiveType p_rimitive, RID p_texture = RID()) {}
-	void immediate_vertex(RID p_immediate, const Vector3 &p_vertex) {}
-	void immediate_normal(RID p_immediate, const Vector3 &p_normal) {}
-	void immediate_tangent(RID p_immediate, const Plane &p_tangent) {}
-	void immediate_color(RID p_immediate, const Color &p_color) {}
-	void immediate_uv(RID p_immediate, const Vector2 &tex_uv) {}
-	void immediate_uv2(RID p_immediate, const Vector2 &tex_uv) {}
-	void immediate_end(RID p_immediate) {}
-	void immediate_clear(RID p_immediate) {}
-	void immediate_set_material(RID p_immediate, RID p_material) {}
-	RID immediate_get_material(RID p_immediate) const { return RID(); }
-	AABB immediate_get_aabb(RID p_immediate) const { return AABB(); }
-
 	/* SKELETON API */
 
 	RID skeleton_create() { return RID(); }
