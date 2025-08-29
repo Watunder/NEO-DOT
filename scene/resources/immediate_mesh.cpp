@@ -246,6 +246,9 @@ void ImmediateMesh::surface_end(const Array &p_indices) {
 	}
 
 	VS::get_singleton()->mesh_add_surface_from_arrays(mesh, VS::PrimitiveType(active_surface_data.primitive), mesh_array, Array(), (VS::ARRAY_COMPRESS_DEFAULT & ~VS::ARRAY_COMPRESS_TEX_UV) & ~VS::ARRAY_COMPRESS_COLOR);
+	if (active_surface_data.material.is_valid()) {
+		VS::get_singleton()->mesh_surface_set_material(mesh, 0, active_surface_data.material->get_rid());
+	}
 
 	active_surface_data.aabb = aabb;
 	active_surface_data.format = format;
