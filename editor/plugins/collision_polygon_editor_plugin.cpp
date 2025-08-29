@@ -429,6 +429,10 @@ void Polygon3DEditor::_polygon_draw() {
 
 	imesh->surface_end();
 
+	while (m->get_surface_count()) {
+		m->surface_remove(0);
+	}
+
 	if (poly.size() == 0) {
 		return;
 	}

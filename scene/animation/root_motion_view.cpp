@@ -78,7 +78,8 @@ bool RootMotionView::get_zero_y() const {
 
 void RootMotionView::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
-		immediate_material = SpatialMaterial::get_material_rid_for_2d(false, true, false, false, false);
+		RID mat = SpatialMaterial::get_material_rid_for_2d(false, true, false, false, false);
+		VisualServer::get_singleton()->instance_geometry_set_material_override(get_instance(), mat);
 		first = true;
 	}
 
@@ -111,7 +112,6 @@ void RootMotionView::_notification(int p_what) {
 		first = false;
 
 		transform.orthonormalize(); //don't want scale, too imprecise
-		transform.affine_invert();
 
 		accumulated = transform * accumulated;
 		accumulated.origin.x = Math::fposmod(accumulated.origin.x, cell_size);
@@ -124,16 +124,16 @@ void RootMotionView::_notification(int p_what) {
 
 		int cells_in_radius = int((radius / cell_size) + 1.0);
 
-		immediate->surface_begin(Mesh::PRIMITIVE_LINES, immediate_material);
+		immediate->surface_begin(Mesh::PRIMITIVE_LINES);
 
 		for (int i = -cells_in_radius; i < cells_in_radius; i++) {
 			for (int j = -cells_in_radius; j < cells_in_radius; j++) {
 				Vector3 from(i * cell_size, 0, j * cell_size);
 				Vector3 from_i((i + 1) * cell_size, 0, j * cell_size);
 				Vector3 from_j(i * cell_size, 0, (j + 1) * cell_size);
-				from = accumulated.xform(from);
-				from_i = accumulated.xform(from_i);
-				from_j = accumulated.xform(from_j);
+				from = accumulated.xform_inv(from);
+				from_i = accumulated.xform_inv(from_i);
+				from_j = accumulated.xform_inv(from_j);
 
 				Color c = color, c_i = color, c_j = color;
 				c.a *= MAX(0, 1.0 - from.length() / radius);

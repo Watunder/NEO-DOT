@@ -46,8 +46,6 @@ public:
 	bool first;
 	bool zero_y;
 
-	Ref<Material> immediate_material;
-
 	Transform accumulated;
 
 private:
