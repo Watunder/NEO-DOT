@@ -1,4 +1,4 @@
-name: 📄 Push Checks (v0.0.1)
+name: 📄 Push Checks (v0.0.2)
 on:
   workflow_call:
     outputs:
@@ -6,7 +6,7 @@ on:
         value: ${{ jobs.push-checks.outputs.has-open-pr }}
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-push_checks
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-push_checks
   cancel-in-progress: true
 
 jobs:

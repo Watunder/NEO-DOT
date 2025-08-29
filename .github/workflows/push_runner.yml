@@ -1,4 +1,4 @@
-name: 🔗 GHA for the push (v0.0.1)
+name: 🔗 GHA for the push (v0.0.2)
 run-name: |
   ${{
     (github.ref == 'refs/heads/master' && format('🚀 Production | {0}', github.event.head_commit.message))
@@ -8,7 +8,7 @@ run-name: |
 on: [push]
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-push_runner
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-push_runner
   cancel-in-progress: true
 
 jobs:

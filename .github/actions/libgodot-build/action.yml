@@ -8,17 +8,20 @@ inputs:
     description: The libgodot platform to build.
     required: false
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Generate api.json
-      shell: sh
-      run: ${{ inputs.bin }} --no-window --audio-driver Dummy --gdnative-generate-json-api ./bin/api.json
+      shell: bash
+      run: |
+        ${{ inputs.bin }} --no-window --video-driver Dummy --audio-driver Dummy --gdnative-generate-json-api ./bin/api.json
       continue-on-error: true
 
     - name: Scons Build (debug)
-      shell: sh
-      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=debug --jobs=2
+      shell: bash
+      run: |
+        scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=debug --jobs=2
 
     - name: Scons Build (release)
-      shell: sh
-      run: scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=release --jobs=2
+      shell: bash
+      run: |
+        scons --directory=modules/gdnative/binding p=${{ inputs.platform }} target=release --jobs=2

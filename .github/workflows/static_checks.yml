@@ -1,9 +1,9 @@
-name: 📊 Static Checks
+name: 📊 Static Checks (v0.0.2)
 on:
   workflow_call:
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-static_checks
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-static_checks
   cancel-in-progress: true
 
 jobs:

@@ -1,4 +1,4 @@
-name: ⚙️ Plugin Builds
+name: ⚙️ Plugin Builds (v0.0.2)
 on:
   workflow_dispatch:
     inputs:
@@ -76,7 +76,7 @@ jobs:
           path: "${{ runner.temp }}/libgodot/"
 
       - name: Copy artifact (libgodot)
-        shell: sh
+        shell: bash
         run: |
           cp -r "${{ runner.temp }}/libgodot/godot-cpp/include/gen/" modules/gdnative/binding/include/
           cp -r "${{ runner.temp }}/libgodot/godot-cpp/bin/" modules/gdnative/binding/
@@ -84,7 +84,7 @@ jobs:
 
       - name: Update submodule
         if: ${{ matrix.submodule && matrix.submodule != '' }}
-        shell: sh
+        shell: bash
         run: |
           cd plugins/${{ matrix.plugin }}
           git config --global url."https://github.com/".insteadOf "git@github.com:"
@@ -92,8 +92,9 @@ jobs:
 
       - name: Compilation
         if: ${{ !matrix.msys2 && matrix.plugin != 'godot_ffmpeg' }}
-        shell: sh
-        run: scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
+        shell: bash
+        run: |
+          scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
 
       - name: Compilation (godot_ffmpeg)
         if: ${{ matrix.msys2 && matrix.plugin == 'godot_ffmpeg' }}
@@ -103,11 +104,12 @@ jobs:
           scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
 
       - name: Prepare artifact
+        shell: bash
         run: |
-          Remove-Item plugins/${{ matrix.plugin }}/bin/* -Include *.exp,*.lib -Force
+          find plugins/${{ matrix.plugin }}/bin/ -type f \( -name "*.exp" -o -name "*.lib" \) -exec rm -f {} +
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
         with:
           name: windows-${{ matrix.plugin }}
-          path: plugins/${{ matrix.plugin }}/bin
+          path: "plugins/${{ matrix.plugin }}/bin/*"
