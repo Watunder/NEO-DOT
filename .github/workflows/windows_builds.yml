@@ -32,14 +32,14 @@ jobs:
           - name: Editor (target=release_debug, tools=yes, vsproj=yes)
             cache-name: windows-editor
             target: release_debug
-            tools: true
+            tools: yes
             sconsflags: vsproj=yes
             bin: "./bin/godot.windows.opt.tools.64.exe"
 
           - name: Template (target=release, tools=no)
             cache-name: windows-template
             target: release
-            tools: false
+            tools: no
 
     steps:
       - uses: actions/checkout@v4
