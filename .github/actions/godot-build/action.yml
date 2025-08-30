@@ -6,7 +6,7 @@ inputs:
     default: debug
   tools:
     description: If tools are to be built.
-    default: yes
+    default: no
   tests:
     description: If tests are to be built.
     default: no

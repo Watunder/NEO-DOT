@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           MATRIX_INCLUDE=()
-          [ "${{ inputs.libcriware-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_criware\"}")
+          [ "${{ inputs.libcriware-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_criware\",\"msys2\":true}")
           [ "${{ inputs.libeffekseer-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_effekseer\",\"submodule\":\"effekseer\"}")
           [ "${{ inputs.libffmpeg-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_ffmpeg\",\"submodule\":\"ffmpeg\",\"msys2\":true}")
           [ "${{ inputs.libsqlite-build }}" == "true" ] && MATRIX_INCLUDE+=("{\"plugin\":\"godot_sqlite\"}")
@@ -90,8 +90,29 @@ jobs:
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --depth 1 ${{ matrix.submodule }}
 
+      - name: Download SDK (godot_criware)
+        if: ${{ matrix.msys2 && matrix.plugin == 'godot_criware' }}
+        shell: msys2 {0}
+        run: |
+          cd plugins/godot_criware/criware
+          curl -o "${{ runner.temp }}/cri_adx2le_sdk_v2.29.01.zip" https://game.criware.jp/download/10769/?tmstv=1753335372
+          7z x "${{ runner.temp }}/cri_adx2le_sdk_v2.29.01.zip"
+          mv -f cri adx2le
+
+          find adx2le/ -type f \( -name "*.h" -o -name "*.cpp" \) | while read -r file; do
+            temp_file="${file}.utf8"
+            if file -i "$file" | grep -q "charset=unknown"; then
+              if iconv -f CP932 -t UTF-8 "$file" > "$temp_file"; then
+                  mv -f "$temp_file" "$file"
+                  echo "(CP932 to UTF-8) $file"
+              else
+                  rm -f "$temp_file"
+              fi
+            fi
+          done
+
       - name: Compilation
-        if: ${{ !matrix.msys2 && matrix.plugin != 'godot_ffmpeg' }}
+        if: ${{ matrix.plugin != 'godot_ffmpeg' }}
         shell: bash
         run: |
           scons --directory=plugins/${{ matrix.plugin }} platform=windows target=release bits=64 --jobs=2
