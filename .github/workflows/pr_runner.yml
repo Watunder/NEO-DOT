@@ -1,4 +1,4 @@
-name: 🔗 GHA for the PR (v0.0.1)
+name: 🔗 GHA for the PR (v0.0.2)
 run-name: |
   ${{
     (github.event.pull_request.draft && format('📝 Draft PR | {0}', github.event.pull_request.title))
@@ -8,7 +8,7 @@ run-name: |
 on: [pull_request]
 
 concurrency:
-  group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-pr_runner
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-pr_runner
   cancel-in-progress: true
 
 jobs:
