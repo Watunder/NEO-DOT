@@ -70,6 +70,13 @@ jobs:
           cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
+      - name: Test at runtime
+        if: ${{ matrix.tools == 'yes' }}
+        uses: ./.github/actions/godot-runtime-test
+        with:
+          bin: ${{ matrix.bin }}
+        continue-on-error: true
+
       - name: Prepare artifact
         shell: bash
         run: |
@@ -81,14 +88,14 @@ jobs:
           name: ${{ matrix.cache-name }}
 
       - name: Compilation (libgodot)
-        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools == 'yes' }}
         uses: ./.github/actions/libgodot-build
         with:
           bin: ${{ matrix.bin }}
           platform: windows
 
       - name: Prepare artifact (libgodot)
-        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools == 'yes' }}
         shell: bash
         run: |
           mkdir -p "${{ runner.temp }}/libgodot/godot-headers/"
@@ -100,7 +107,7 @@ jobs:
           cp -r modules/gdnative/binding/bin/** "${{ runner.temp }}/libgodot/godot-cpp/bin/"
 
       - name: Upload artifact (libgodot)
-        if: ${{ github.event.inputs.libgodot-build && matrix.tools }}
+        if: ${{ github.event.inputs.libgodot-build && matrix.tools == 'yes' }}
         uses: ./.github/actions/upload-artifact
         with:
           name: windows-libgodot
