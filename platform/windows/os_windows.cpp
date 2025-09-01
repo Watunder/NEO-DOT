@@ -1738,7 +1738,6 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		bool editor = Engine::get_singleton()->is_editor_hint();
 		bool gl_initialization_error = false;
 
-		gl_context = NULL;
 		while (!gl_context) {
 			gl_context = memnew(ContextGL_Windows(hWnd, gles3_context));
 
@@ -3952,6 +3951,10 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	stdo = fopen("stdout.txt", "wb");
 #endif
 	user_proc = NULL;
+
+#if defined(OPENGL_ENABLED)
+	gl_context = NULL;
+#endif
 
 #ifdef WASAPI_ENABLED
 	AudioDriverManager::add_driver(&driver_wasapi);
