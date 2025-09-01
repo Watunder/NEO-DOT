@@ -1,0 +1,42 @@
+name: Test at runtime
+description: Test at runtime.
+inputs:
+  bin:
+    description: Path to the Godot binary.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Run tests
+      shell: bash
+      run: |
+        bin_headless() {
+            ${{ inputs.bin }} --no-window --video-driver Dummy --audio-driver Dummy "$@"
+        }
+
+        print_title() {
+            terminal_width=$(tput cols)
+            printf "\n%*s\n" "$terminal_width" | tr " " "="
+            text="Testing $1"
+            text_length=${#text}
+            left_padding=$(( (terminal_width - text_length) / 2 ))
+            right_padding=$(( terminal_width - text_length - left_padding ))
+            printf "\n%*s%s%*s\n" $left_padding "" "$text" $right_padding ""
+            printf "\n%*s\n" "$terminal_width" | tr " " "="
+            printf "\n"
+        }
+
+        run_test() {
+            if [ $# -eq 0 ] || [[ "$1" =~ ^[[:space:]]*$ ]]; then
+                bin_headless --help | awk "/Run a test/ {print "\n" substr($0, index($0, "Run a test"))}"
+            else
+                print_title "$1"
+                bin_headless --test "$1"
+            fi
+        }
+
+        run_test string
+        run_test math
+        run_test basis
+        run_test oa_hash_map
+        run_test ordered_hash_map
