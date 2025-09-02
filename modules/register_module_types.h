@@ -31,7 +31,7 @@
 #ifndef REGISTER_MODULE_TYPES_H
 #define REGISTER_MODULE_TYPES_H
 
-//
+#include "modules_enabled.gen.h"
 
 void register_module_types();
 void unregister_module_types();

@@ -225,14 +225,31 @@ def is_module(path):
     return True
 
 
-def write_modules(modules):
+def write_modules_enabled(modules_enabled):
+    enabled_h = "// THIS FILE IS GENERATED DO NOT EDIT\n"
+    enabled_h += "#ifndef _MODULES_ENABLED_H\n"
+    enabled_h += "#define _MODULES_ENABLED_H\n"
+
+    for name, path in modules_enabled.items():
+        enabled_h += "\n// " + path + "\n"
+        enabled_h += "#define MODULE_" + name.upper() + "_ENABLED\n"
+
+    enabled_h += "\n#endif\n"
+
+    with open("modules_enabled.gen.h", "w") as f:
+        f.write(enabled_h)
+
+
+def write_modules_detected(modules_detected):
     includes_cpp = ""
     register_cpp = ""
     unregister_cpp = ""
 
     tests_h = "// THIS FILE IS GENERATED DO NOT EDIT\n"
+    tests_h += "#ifndef _MODULES_TESTS_H\n"
+    tests_h += "#define _MODULES_TESTS_H\n"
 
-    for name, path in modules.items():
+    for name, path in modules_detected.items():
         try:
             with open(os.path.join(path, "register_types.h")):
                 includes_cpp += '#include "' + path + '/register_types.h"\n'
@@ -248,6 +265,8 @@ def write_modules(modules):
                 tests_h += '#include "' + header + '"\n'
         except IOError:
             pass
+
+    tests_h += "\n#endif\n"
 
     modules_cpp = (
         """
