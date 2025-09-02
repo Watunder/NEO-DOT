@@ -157,7 +157,7 @@ if host_platform == "windows" and env["platform"] == "windows" and not env["use_
     env.Append(CCFLAGS=["/utf-8"])
 else:
     env.Append(CFLAGS=["-std=c17"])
-    env.Append(CFLAGS=["-utf-8"])
+    env.Append(CFLAGS=["-finput-charset=UTF-8", "-fexec-charset=UTF-8"])
 
 if env["platform"] == "linux" or env["platform"] == "freebsd":
     if env["use_llvm"]:
