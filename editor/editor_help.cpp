@@ -37,6 +37,7 @@
 #include "editor_node.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
+#include "modules_enabled.gen.h"
 
 #define CONTRIBUTE_URL "https://docs.godotengine.org/en/latest/community/contributing/updating_the_class_reference.html"
 
@@ -1551,7 +1552,7 @@ void EditorHelpBit::_meta_clicked(String p_select) {
 void EditorHelpBit::_minimum_size_changed() {
 	set_size(rich_text->get_size());
 
-#ifdef EMBED_WINDOW_ENABLED
+#ifdef MODULE_EMBED_WINDOW_ENABLED
 	call("_update_region");
 #endif
 }

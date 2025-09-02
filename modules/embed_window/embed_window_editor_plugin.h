@@ -31,7 +31,6 @@
 #ifndef EMBED_WINDOW_EDITOR_PLUGIN_H
 #define EMBED_WINDOW_EDITOR_PLUGIN_H
 
-#define EMBED_WINDOW_ENABLED
 #include "editor/editor_node.h"
 #include "editor/editor_plugin.h"
 #include "editor/script_editor_debugger.h"

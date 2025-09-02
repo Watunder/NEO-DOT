@@ -38,6 +38,7 @@
 #include "editor/inspector_dock.h"
 #include "editor/property_editor.h"
 #include "editor/scene_tree_dock.h"
+#include "modules_enabled.gen.h"
 #include "scene/gui/link_button.h"
 
 typedef void (*EditorNodeInitCallback)();
@@ -689,7 +690,7 @@ public:
 	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }
 	static EditorNode *get_singleton() { return singleton; }
 
-#ifdef EMBED_WINDOW_ENABLED
+#ifdef MODULE_EMBED_WINDOW_ENABLED
 	int idx_embed_window_editor_plugin = -1;
 	void set_embed_window_editor_plugin(int p_idx) { idx_embed_window_editor_plugin = p_idx; }
 	EditorPlugin *get_embed_window_editor_plugin() { return editor_data.get_editor_plugin(idx_embed_window_editor_plugin); }

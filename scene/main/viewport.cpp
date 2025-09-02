@@ -34,6 +34,7 @@
 #include "core/os/input.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "modules_enabled.gen.h"
 #include "scene/2d/collision_object_2d.h"
 #include "scene/3d/camera.h"
 #include "scene/3d/collision_object.h"
@@ -1548,7 +1549,7 @@ void Viewport::_gui_show_tooltip() {
 	gui.tooltip_popup->raise();
 	gui.tooltip_popup->show();
 
-#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+#if defined(TOOLS_ENABLED) && defined(MODULE_EMBED_WINDOW_ENABLED)
 	if (!custom_tooltip)
 		gui.tooltip_popup->call("_update_region");
 #endif

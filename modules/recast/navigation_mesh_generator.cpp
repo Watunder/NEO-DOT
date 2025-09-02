@@ -45,10 +45,10 @@
 #include "scene/resources/shape.h"
 #include "scene/resources/sphere_shape.h"
 
+#include "modules_enabled.gen.h"
 #ifdef MODULE_CSG_ENABLED
 #include "modules/csg/csg_shape.h"
 #endif
-
 #ifdef MODULE_GRIDMAP_ENABLED
 #include "modules/gridmap/grid_map.h"
 #endif

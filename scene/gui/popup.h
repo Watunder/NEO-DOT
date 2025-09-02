@@ -31,6 +31,7 @@
 #ifndef POPUP_H
 #define POPUP_H
 
+#include "modules_enabled.gen.h"
 #include "scene/gui/control.h"
 
 class Popup : public Control {
@@ -41,7 +42,7 @@ class Popup : public Control {
 
 private:
 	void _popup(const Rect2 &p_bounds = Rect2(), const bool p_centered = false);
-#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+#if defined(TOOLS_ENABLED) && defined(MODULE_EMBED_WINDOW_ENABLED)
 	void _update_region();
 #endif
 
