@@ -219,11 +219,11 @@ bool test_12() {
 }
 
 bool test_13() {
-	OS::get_singleton()->print("\n\nTest 13: UTF8\n");
+	OS::get_singleton()->print("\n\nTest 13: UTF8 😄\n");
 
 	/* how can i embed UTF in here? */
 
-	static const CharType ustr[] = { 0x304A, 0x360F, 0x3088, 0x3046, 0 };
+	static const CharType ustr[] = { 0x304A, 0x360F, 0x3088, 0x3046, 0x2714, 0 };
 	//static const wchar_t ustr[] = { 'P', 0xCE, 'p',0xD3, 0 };
 	String s = ustr;
 

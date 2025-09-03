@@ -138,7 +138,9 @@ char *wc_to_utf8(const wchar_t *wc) {
 __declspec(dllexport) int widechar_main(int argc, wchar_t **argv) {
 	OS_Windows os(NULL);
 
-	setlocale(LC_CTYPE, "");
+	setlocale(LC_ALL, ".UTF-8");
+	SetConsoleCP(CP_UTF8);
+	SetConsoleOutputCP(CP_UTF8);
 
 	char **argv_utf8 = new char *[argc];
 
