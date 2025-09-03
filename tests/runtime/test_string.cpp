@@ -37,7 +37,7 @@
 
 #include "test_string.h"
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_REGEX_ENABLED
 #include "modules/regex/regex.h"
 #endif

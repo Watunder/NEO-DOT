@@ -36,7 +36,7 @@
 #include "editor_scale.h"
 #include "editor_settings.h"
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_SVG_ENABLED
 #include "modules/svg/image_loader_svg.h"
 #endif

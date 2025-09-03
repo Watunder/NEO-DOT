@@ -37,7 +37,7 @@
 #include "editor/project_settings_editor.h"
 #include "scene/gui/grid_container.h"
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_GDSCRIPT_ENABLED
 #include "modules/gdscript/gdscript.h"
 #endif

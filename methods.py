@@ -63,10 +63,10 @@ def update_version(module_version_string=""):
         build_name = str(os.getenv("BUILD_NAME"))
         print("Using custom build name: " + build_name)
 
-    import version
+    from configs import version
 
     # NOTE: It is safe to generate this file here, since this is still executed serially
-    f = open("core/version_generated.gen.h", "w")
+    f = open("configs/version_generated.gen.h", "w")
     f.write('#define VERSION_SHORT_NAME "' + str(version.short_name) + '"\n')
     f.write('#define VERSION_NAME "' + str(version.name) + '"\n')
     f.write("#define VERSION_MAJOR " + str(version.major) + "\n")
@@ -86,7 +86,7 @@ def update_version(module_version_string=""):
     f.close()
 
     # NOTE: It is safe to generate this file here, since this is still executed serially
-    fhash = open("core/version_hash.gen.h", "w")
+    fhash = open("configs/version_hash.gen.h", "w")
     githash = ""
     gitfolder = ".git"
 
@@ -236,7 +236,7 @@ def write_modules_enabled(modules_enabled):
 
     enabled_h += "\n#endif\n"
 
-    with open("modules_enabled.gen.h", "w") as f:
+    with open("configs/modules_enabled.gen.h", "w") as f:
         f.write(enabled_h)
 
 

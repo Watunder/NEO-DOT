@@ -31,6 +31,7 @@
 #ifndef EDITOR_NODE_H
 #define EDITOR_NODE_H
 
+#include "configs/modules_enabled.gen.h"
 #include "core/safe_refcount.h"
 #include "editor/editor_data.h"
 #include "editor/editor_folding.h"
@@ -38,7 +39,6 @@
 #include "editor/inspector_dock.h"
 #include "editor/property_editor.h"
 #include "editor/scene_tree_dock.h"
-#include "modules_enabled.gen.h"
 #include "scene/gui/link_button.h"
 
 typedef void (*EditorNodeInitCallback)();

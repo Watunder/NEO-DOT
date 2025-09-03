@@ -31,7 +31,7 @@
 #ifndef POPUP_H
 #define POPUP_H
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #include "scene/gui/control.h"
 
 class Popup : public Control {

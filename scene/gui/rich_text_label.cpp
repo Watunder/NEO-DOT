@@ -35,7 +35,7 @@
 #include "core/os/os.h"
 #include "scene/scene_string_names.h"
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_REGEX_ENABLED
 #include "modules/regex/regex.h"
 #endif

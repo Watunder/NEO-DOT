@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
 
 #include "dynamic_font.h"

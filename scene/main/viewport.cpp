@@ -30,11 +30,11 @@
 
 #include "viewport.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/core_string_names.h"
 #include "core/os/input.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
-#include "modules_enabled.gen.h"
 #include "scene/2d/collision_object_2d.h"
 #include "scene/3d/camera.h"
 #include "scene/3d/collision_object.h"

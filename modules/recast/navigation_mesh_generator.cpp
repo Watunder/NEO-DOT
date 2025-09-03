@@ -45,7 +45,7 @@
 #include "scene/resources/shape.h"
 #include "scene/resources/sphere_shape.h"
 
-#include "modules_enabled.gen.h"
+#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_CSG_ENABLED
 #include "modules/csg/csg_shape.h"
 #endif
