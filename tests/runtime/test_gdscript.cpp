@@ -34,7 +34,8 @@
 #include "core/os/main_loop.h"
 #include "core/os/os.h"
 
-#ifdef GDSCRIPT_ENABLED
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_GDSCRIPT_ENABLED
 
 #include "modules/gdscript/gdscript.h"
 #include "modules/gdscript/gdscript_compiler.h"

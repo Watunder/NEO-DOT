@@ -31,7 +31,7 @@
 #ifndef GODOT_VERSION_H
 #define GODOT_VERSION_H
 
-#include "core/version_generated.gen.h"
+#include "configs/version_generated.gen.h"
 
 // Godot versions are of the form <major>.<minor> for the initial release,
 // and then <major>.<minor>.<patch> for subsequent bugfix releases where <patch> != 0

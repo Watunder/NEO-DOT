@@ -16,7 +16,6 @@ for name, path in env.module_list.items():
     if name in env.disabled_modules:
         continue
 
-    env_modules.Append(CPPDEFINES=["MODULE_" + name.upper() + "_ENABLED"])
     if not os.path.isabs(path):
         SConscript(name + "/SCsub")  # Built-in.
     else:

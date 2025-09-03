@@ -30,6 +30,7 @@
 
 #include "editor_node.h"
 
+#include "configs/version_hash.gen.h"
 #include "core/bind/core_bind.h"
 #include "core/class_db.h"
 #include "core/io/config_file.h"
@@ -47,7 +48,6 @@
 #include "core/project_settings.h"
 #include "core/translation.h"
 #include "core/version.h"
-#include "core/version_hash.gen.h"
 #include "main/input_default.h"
 #include "main/main.h"
 #include "scene/gui/center_container.h"
