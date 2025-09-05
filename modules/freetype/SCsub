@@ -50,6 +50,8 @@ if env["builtin_freetype"]:
         "src/pshinter/pshinter.c",
         "src/psnames/psnames.c",
         "src/raster/raster.c",
+        "src/sdf/sdf.c",
+        "src/svg/svg.c",
         "src/smooth/smooth.c",
         "src/truetype/truetype.c",
         "src/type1/type1.c",
