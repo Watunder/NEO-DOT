@@ -115,7 +115,7 @@ comments.
 ## freetype
 
 - Upstream: https://www.freetype.org
-- Version: 2.10.4 (6a2b3e4007e794bfc6c91030d0ed987f925164a8, 2020)
+- Version: 2.13.3 (42608f77f20749dd6ddc9e0536788eaad70ea4b5, 2024)
 - License: FreeType License (BSD-like)
 
 Files extracted from upstream source:
