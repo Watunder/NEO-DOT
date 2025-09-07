@@ -34,6 +34,11 @@
 #include "core/ustring.h"
 #include "core/variant.h"
 
+#ifndef FASTFLOAT_SKIP_WHITE_SPACE
+#define FASTFLOAT_SKIP_WHITE_SPACE
+#endif
+#include "thirdparty/misc/fast_float.h"
+
 #include <string.h>
 
 #ifdef __cplusplus
@@ -42,7 +47,106 @@ extern "C" {
 
 static_assert(sizeof(godot_char_string) == sizeof(CharString), "CharString size mismatch");
 static_assert(sizeof(godot_string) == sizeof(String), "String size mismatch");
-static_assert(sizeof(godot_char_type) == sizeof(CharType), "CharType size mismatch");
+#if defined(_WIN32)
+static_assert(sizeof(char16_t) == sizeof(wchar_t), "wchar_t size mismatch");
+#else
+static_assert(sizeof(char32_t) == sizeof(wchar_t), "wchar_t size mismatch");
+#endif
+
+/*************************************************************************/
+
+#define READING_SIGN 0
+#define READING_INT 1
+#define READING_DEC 2
+#define READING_EXP 3
+#define READING_DONE 4
+
+static int64_t wchar_to_int(const wchar_t *p_str, int p_len = -1) {
+	if (p_len == 0 || !p_str[0])
+		return 0;
+	///@todo make more exact so saving and loading does not lose precision
+
+	int64_t integer = 0;
+	int64_t sign = 1;
+	int reading = READING_SIGN;
+
+	const wchar_t *str = p_str;
+	const wchar_t *limit = &p_str[p_len];
+
+	while (*str && reading != READING_DONE && str != limit) {
+		wchar_t c = *(str++);
+		switch (reading) {
+			case READING_SIGN: {
+				if (c >= '0' && c <= '9') {
+					reading = READING_INT;
+					// let it fallthrough
+				} else if (c == '-') {
+					sign = -1;
+					reading = READING_INT;
+					break;
+				} else if (c == '+') {
+					sign = 1;
+					reading = READING_INT;
+					break;
+				} else {
+					break;
+				}
+			}
+			case READING_INT: {
+				if (c >= '0' && c <= '9') {
+					if (integer > INT64_MAX / 10) {
+						String number("");
+						str = p_str;
+						while (*str && str != limit) {
+							number += *(str++);
+						}
+						ERR_FAIL_V_MSG(sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + number + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
+					}
+					integer *= 10;
+					integer += c - '0';
+				} else {
+					reading = READING_DONE;
+				}
+
+			} break;
+		}
+	}
+
+	return sign * integer;
+}
+
+static uint32_t wchar_to_hash(const wchar_t *p_str, int p_len = -1) {
+	uint32_t hashv = 5381;
+	uint32_t c;
+
+	int len = 0;
+	while ((p_len < 0 || len < p_len) && (c = *p_str++)) {
+		hashv = ((hashv << 5) + hashv) + c; /* hash * 33 + c */
+		len++;
+	}
+
+	return hashv;
+}
+
+static double wchar_to_double(const wchar_t *p_str, const wchar_t **r_end = NULL) {
+	double ret = 0;
+
+	if (!p_str)
+		return ret;
+
+	int len = 0;
+	const wchar_t *ptr = p_str;
+	while (*(ptr++) != 0)
+		len++;
+
+	const wchar_t *end_ptr = fast_float::from_chars<double, wchar_t>(p_str, p_str + len, ret).ptr;
+	if (r_end != NULL) {
+		*r_end = end_ptr;
+	}
+	return ret;
+}
+
+/*************************************************************************/
 
 godot_int GDAPI godot_char_string_length(const godot_char_string *p_cs) {
 	const CharString *cs = (const CharString *)p_cs;
@@ -75,22 +179,40 @@ void GDAPI godot_string_new_copy(godot_string *r_dest, const godot_string *p_src
 
 void GDAPI godot_string_new_with_wide_string(godot_string *r_dest, const wchar_t *p_contents, const int p_size) {
 	String *dest = (String *)r_dest;
-	memnew_placement(dest, String(p_contents, p_size));
+#if defined(_WIN32)
+	memnew_placement(dest, String);
+	dest->parse_utf16((const char16_t *)p_contents, p_size);
+#else
+	memnew_placement(dest, String);
+	*dest = String((const char32_t *)p_contents, p_size);
+#endif
 }
 
 const wchar_t GDAPI *godot_string_operator_index(godot_string *p_self, const godot_int p_idx) {
 	String *self = (String *)p_self;
-	return &(self->operator[](p_idx));
+#if defined(_WIN32)
+	return (const wchar_t *)&(self->utf16().operator[](p_idx));
+#else
+	return (const wchar_t *)&(self->operator[](p_idx));
+#endif
 }
 
 wchar_t GDAPI godot_string_operator_index_const(const godot_string *p_self, const godot_int p_idx) {
 	const String *self = (const String *)p_self;
-	return self->operator[](p_idx);
+#if defined(_WIN32)
+	return (const wchar_t)(self->utf16().operator[](p_idx));
+#else
+	return (const wchar_t)(self->operator[](p_idx));
+#endif
 }
 
 const wchar_t GDAPI *godot_string_wide_str(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
-	return self->c_str();
+#if defined(_WIN32)
+	return (const wchar_t *)(self->utf16().get_data());
+#else
+	return (const wchar_t *)(self->c_str());
+#endif
 }
 
 godot_bool GDAPI godot_string_operator_equal(const godot_string *p_self, const godot_string *p_b) {
@@ -593,7 +715,7 @@ godot_int GDAPI godot_string_char_to_int(const char *p_what) {
 }
 
 int64_t GDAPI godot_string_wchar_to_int(const wchar_t *p_str) {
-	return String::to_int(p_str);
+	return wchar_to_int(p_str);
 }
 
 godot_int GDAPI godot_string_char_to_int_with_len(const char *p_what, godot_int p_len) {
@@ -601,7 +723,7 @@ godot_int GDAPI godot_string_char_to_int_with_len(const char *p_what, godot_int 
 }
 
 int64_t GDAPI godot_string_char_to_int64_with_len(const wchar_t *p_str, int p_len) {
-	return String::to_int(p_str, p_len);
+	return wchar_to_int(p_str, p_len);
 }
 
 int64_t GDAPI godot_string_hex_to_int64(const godot_string *p_self) {
@@ -623,7 +745,7 @@ int64_t GDAPI godot_string_to_int64(const godot_string *p_self) {
 }
 
 double GDAPI godot_string_unicode_char_to_double(const wchar_t *p_str, const wchar_t **r_end) {
-	return String::to_double(p_str, r_end);
+	return wchar_to_double(p_str, r_end);
 }
 
 godot_string GDAPI godot_string_get_slice(const godot_string *p_self, godot_string p_splitter, godot_int p_slice) {
@@ -903,8 +1025,12 @@ godot_string GDAPI godot_string_left(const godot_string *p_self, godot_int p_pos
 
 wchar_t GDAPI godot_string_ord_at(const godot_string *p_self, godot_int p_idx) {
 	const String *self = (const String *)p_self;
-
-	return self->ord_at(p_idx);
+	ERR_FAIL_INDEX_V(p_idx, self->length(), 0);
+#if defined(_WIN32)
+	return (const wchar_t)(self->utf16().operator[](p_idx));
+#else
+	return (const wchar_t)(self->operator[](p_idx));
+#endif
 }
 
 godot_string GDAPI godot_string_plus_file(const godot_string *p_self, const godot_string *p_file) {
@@ -1022,11 +1148,11 @@ uint32_t GDAPI godot_string_hash_chars_with_len(const char *p_cstr, godot_int p_
 }
 
 uint32_t GDAPI godot_string_hash_utf8_chars(const wchar_t *p_str) {
-	return String::hash(p_str);
+	return wchar_to_hash(p_str);
 }
 
 uint32_t GDAPI godot_string_hash_utf8_chars_with_len(const wchar_t *p_str, godot_int p_len) {
-	return String::hash(p_str, p_len);
+	return wchar_to_hash(p_str, p_len);
 }
 
 godot_pool_byte_array GDAPI godot_string_md5_buffer(const godot_string *p_self) {

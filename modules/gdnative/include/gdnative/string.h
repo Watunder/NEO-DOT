@@ -38,8 +38,6 @@ extern "C" {
 #include <stdint.h>
 #include <wchar.h>
 
-typedef wchar_t godot_char_type;
-
 #define GODOT_STRING_SIZE sizeof(void *)
 #define GODOT_CHAR_STRING_SIZE sizeof(void *)
 

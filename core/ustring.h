@@ -38,6 +38,7 @@
 
 template <class T>
 class CharProxy {
+	friend class Char16String;
 	friend class CharString;
 	friend class String;
 
@@ -109,26 +110,63 @@ protected:
 	void copy_from(const char *p_cstr);
 };
 
-typedef wchar_t CharType;
+class Char16String {
+	CowData<char16_t> _cowdata;
+	static const char16_t _null;
+
+public:
+	_FORCE_INLINE_ char16_t *ptrw() { return _cowdata.ptrw(); }
+	_FORCE_INLINE_ const char16_t *ptr() const { return _cowdata.ptr(); }
+	_FORCE_INLINE_ int size() const { return _cowdata.size(); }
+	Error resize(int p_size) { return _cowdata.resize(p_size); }
+
+	_FORCE_INLINE_ char16_t get(int p_index) const { return _cowdata.get(p_index); }
+	_FORCE_INLINE_ void set(int p_index, const char16_t &p_elem) { _cowdata.set(p_index, p_elem); }
+	_FORCE_INLINE_ const char16_t &operator[](int p_index) const {
+		if (unlikely(p_index == _cowdata.size()))
+			return _null;
+
+		return _cowdata.get(p_index);
+	}
+	_FORCE_INLINE_ CharProxy<char16_t> operator[](int p_index) { return CharProxy<char16_t>(p_index, _cowdata); }
+
+	_FORCE_INLINE_ Char16String() {}
+	_FORCE_INLINE_ Char16String(const Char16String &p_str) { _cowdata._ref(p_str._cowdata); }
+	_FORCE_INLINE_ Char16String operator=(const Char16String &p_str) {
+		_cowdata._ref(p_str._cowdata);
+		return *this;
+	}
+	_FORCE_INLINE_ Char16String(const char16_t *p_cstr) { copy_from(p_cstr); }
+
+	Char16String &operator=(const char16_t *p_cstr);
+	bool operator<(const Char16String &p_right) const;
+	Char16String &operator+=(char16_t p_char);
+	int length() const { return size() ? size() - 1 : 0; }
+	const char16_t *get_data() const;
+	operator const char16_t *() const { return get_data(); };
+
+protected:
+	void copy_from(const char16_t *p_cstr);
+};
 
 struct StrRange {
-	const CharType *c_str;
+	const char32_t *c_str;
 	int len;
 
-	StrRange(const CharType *p_c_str = NULL, int p_len = 0) {
+	StrRange(const char32_t *p_c_str = NULL, int p_len = 0) {
 		c_str = p_c_str;
 		len = p_len;
 	}
 };
 
 class String {
-	CowData<CharType> _cowdata;
-	static const CharType _null;
+	CowData<char32_t> _cowdata;
+	static const char32_t _null;
 
-	void copy_from(const char *p_cstr);
-	void copy_from(const CharType *p_cstr, const int p_clip_to = -1);
-	void copy_from(const CharType &p_char);
-	void copy_from_unchecked(const CharType *p_char, const int p_length);
+	void copy_from(const char *p_cstr, const int p_clip_to = -1);
+	void copy_from(const char32_t *p_cstr, const int p_clip_to = -1);
+	void copy_from(const char32_t &p_char);
+	void copy_from_unchecked(const char32_t *p_char, const int p_length);
 	bool _base_is_subsequence_of(const String &p_string, bool case_insensitive) const;
 	int _count(const String &p_string, int p_from, int p_to, bool p_case_insensitive) const;
 
@@ -138,46 +176,46 @@ public:
 		npos = -1 ///<for "some" compatibility with std::string (npos is a huge value in std::string)
 	};
 
-	_FORCE_INLINE_ CharType *ptrw() { return _cowdata.ptrw(); }
-	_FORCE_INLINE_ const CharType *ptr() const { return _cowdata.ptr(); }
+	_FORCE_INLINE_ char32_t *ptrw() { return _cowdata.ptrw(); }
+	_FORCE_INLINE_ const char32_t *ptr() const { return _cowdata.ptr(); }
 
 	void remove(int p_index) { _cowdata.remove(p_index); }
 
 	_FORCE_INLINE_ void clear() { resize(0); }
 
-	_FORCE_INLINE_ CharType get(int p_index) const { return _cowdata.get(p_index); }
-	_FORCE_INLINE_ void set(int p_index, const CharType &p_elem) { _cowdata.set(p_index, p_elem); }
+	_FORCE_INLINE_ char32_t get(int p_index) const { return _cowdata.get(p_index); }
+	_FORCE_INLINE_ void set(int p_index, const char32_t &p_elem) { _cowdata.set(p_index, p_elem); }
 	_FORCE_INLINE_ int size() const { return _cowdata.size(); }
 	Error resize(int p_size) { return _cowdata.resize(p_size); }
 
-	_FORCE_INLINE_ const CharType &operator[](int p_index) const {
+	_FORCE_INLINE_ const char32_t &operator[](int p_index) const {
 		if (unlikely(p_index == _cowdata.size()))
 			return _null;
 
 		return _cowdata.get(p_index);
 	}
-	_FORCE_INLINE_ CharProxy<CharType> operator[](int p_index) { return CharProxy<CharType>(p_index, _cowdata); }
+	_FORCE_INLINE_ CharProxy<char32_t> operator[](int p_index) { return CharProxy<char32_t>(p_index, _cowdata); }
 
 	bool operator==(const String &p_str) const;
 	bool operator!=(const String &p_str) const;
 	String operator+(const String &p_str) const;
-	//String operator+(CharType p_char) const;
+	//String operator+(char32_t p_char) const;
 
 	String &operator+=(const String &);
-	String &operator+=(CharType p_char);
+	String &operator+=(char32_t p_char);
 	String &operator+=(const char *p_str);
-	String &operator+=(const CharType *p_str);
+	String &operator+=(const char32_t *p_str);
 
 	/* Compatibility Operators */
 
 	void operator=(const char *p_str);
-	void operator=(const CharType *p_str);
+	void operator=(const char32_t *p_str);
 	bool operator==(const char *p_str) const;
-	bool operator==(const CharType *p_str) const;
+	bool operator==(const char32_t *p_str) const;
 	bool operator==(const StrRange &p_str_range) const;
 	bool operator!=(const char *p_str) const;
-	bool operator!=(const CharType *p_str) const;
-	bool operator<(const CharType *p_str) const;
+	bool operator!=(const char32_t *p_str) const;
+	bool operator<(const char32_t *p_str) const;
 	bool operator<(const char *p_str) const;
 	bool operator<(const String &p_str) const;
 	bool operator<=(const String &p_str) const;
@@ -186,7 +224,7 @@ public:
 	signed char nocasecmp_to(const String &p_str) const;
 	signed char naturalnocasecmp_to(const String &p_str) const;
 
-	const CharType *c_str() const;
+	const char32_t *c_str() const;
 	/* standard size stuff */
 
 	_FORCE_INLINE_ int length() const {
@@ -198,7 +236,7 @@ public:
 	String substr(int p_from, int p_chars = -1) const;
 	int find(const String &p_str, int p_from = 0) const; ///< return <0 if failed
 	int find(const char *p_str, int p_from = 0) const; ///< return <0 if failed
-	int find_char(const CharType &p_char, int p_from = 0) const; ///< return <0 if failed
+	int find_char(const char32_t &p_char, int p_from = 0) const; ///< return <0 if failed
 	int find_last(const String &p_str) const; ///< return <0 if failed
 	int findn(const String &p_str, int p_from = 0) const; ///< return <0 if failed, case insensitive
 	int rfind(const String &p_str, int p_from = -1) const; ///< return <0 if failed
@@ -236,7 +274,7 @@ public:
 	static String num_real(double p_num);
 	static String num_int64(int64_t p_num, int base = 10, bool capitalize_hex = false);
 	static String num_uint64(uint64_t p_num, int base = 10, bool capitalize_hex = false);
-	static String chr(CharType p_char);
+	static String chr(char32_t p_char);
 	static String md5(const uint8_t *p_md5);
 	static String hex_encode_buffer(const uint8_t *p_buffer, int p_len);
 	bool is_numeric() const;
@@ -250,14 +288,14 @@ public:
 	int64_t to_int64() const;
 	static int to_int(const char *p_str, int p_len = -1);
 	static double to_double(const char *p_str);
-	static double to_double(const CharType *p_str, const CharType **r_end = NULL);
-	static int64_t to_int(const CharType *p_str, int p_len = -1);
+	static double to_double(const char32_t *p_str, const char32_t **r_end = NULL);
+	static int64_t to_int(const char32_t *p_str, int p_len = -1);
 	String capitalize() const;
 	String camelcase_to_underscore(bool lowercase = true) const;
 
 	int get_slice_count(String p_splitter) const;
 	String get_slice(String p_splitter, int p_slice) const;
-	String get_slicec(CharType p_splitter, int p_slice) const;
+	String get_slicec(char32_t p_splitter, int p_slice) const;
 
 	Vector<String> split(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
 	Vector<String> rsplit(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
@@ -269,8 +307,8 @@ public:
 
 	String join(Vector<String> parts);
 
-	static CharType char_uppercase(CharType p_char);
-	static CharType char_lowercase(CharType p_char);
+	static char32_t char_uppercase(char32_t p_char);
+	static char32_t char_lowercase(char32_t p_char);
 	String to_upper() const;
 	String to_lower() const;
 
@@ -287,7 +325,7 @@ public:
 	String get_extension() const;
 	String get_basename() const;
 	String plus_file(const String &p_file) const;
-	CharType ord_at(int p_idx) const;
+	char32_t ord_at(int p_idx) const;
 
 	void erase(int p_pos, int p_chars);
 
@@ -295,9 +333,12 @@ public:
 	CharString utf8() const;
 	bool parse_utf8(const char *p_utf8, int p_len = -1); //return true on error
 	static String utf8(const char *p_utf8, int p_len = -1);
+	Char16String utf16() const;
+	bool parse_utf16(const char16_t *p_utf16, int p_len = -1); //return true on error
+	static String utf16(const char16_t *p_utf16, int p_len = -1);
 
-	static uint32_t hash(const CharType *p_cstr, int p_len); /* hash the string */
-	static uint32_t hash(const CharType *p_cstr); /* hash the string */
+	static uint32_t hash(const char32_t *p_cstr, int p_len); /* hash the string */
+	static uint32_t hash(const char32_t *p_cstr); /* hash the string */
 	static uint32_t hash(const char *p_cstr, int p_len); /* hash the string */
 	static uint32_t hash(const char *p_cstr); /* hash the string */
 	uint32_t hash() const; /* hash the string */
@@ -353,7 +394,6 @@ public:
 	/**
 	 * The constructors must not depend on other overloads
 	 */
-	/*	String(CharType p_char);*/
 
 	_FORCE_INLINE_ String() {}
 	_FORCE_INLINE_ String(const String &p_str) { _cowdata._ref(p_str._cowdata); }
@@ -363,14 +403,14 @@ public:
 	}
 
 	String(const char *p_str);
-	String(const CharType *p_str, int p_clip_to_len = -1);
+	String(const char32_t *p_str, int p_clip_to_len = -1);
 	String(const StrRange &p_range);
 };
 
 bool operator==(const char *p_chr, const String &p_str);
 
 String operator+(const char *p_chr, const String &p_str);
-String operator+(CharType p_chr, const String &p_str);
+String operator+(char32_t p_chr, const String &p_str);
 
 String itos(int64_t p_val);
 String uitos(uint64_t p_val);
@@ -431,7 +471,7 @@ String TTR(const String &);
 //tool or regular translate
 String RTR(const String &);
 
-bool is_symbol(CharType c);
+bool is_symbol(char32_t c);
 bool select_word(const String &p_s, int p_col, int &r_beg, int &r_end);
 
 #endif // USTRING_H

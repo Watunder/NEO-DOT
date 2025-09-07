@@ -127,7 +127,7 @@ CommandLineToArgvA(
 	return argv;
 }
 
-char *wc_to_utf8(const wchar_t *wc) {
+char *wc_to_utf8(const WCHAR *wc) {
 	int ulen = WideCharToMultiByte(CP_UTF8, 0, wc, -1, NULL, 0, NULL, NULL);
 	char *ubuf = new char[ulen + 1];
 	WideCharToMultiByte(CP_UTF8, 0, wc, -1, ubuf, ulen, NULL, NULL);
@@ -135,10 +135,12 @@ char *wc_to_utf8(const wchar_t *wc) {
 	return ubuf;
 }
 
-__declspec(dllexport) int widechar_main(int argc, wchar_t **argv) {
+__declspec(dllexport) int widechar_main(int argc, WCHAR **argv) {
 	OS_Windows os(NULL);
 
-	setlocale(LC_CTYPE, "");
+	setlocale(LC_ALL, ".UTF-8");
+	SetConsoleCP(CP_UTF8);
+	SetConsoleOutputCP(CP_UTF8);
 
 	char **argv_utf8 = new char *[argc];
 

@@ -161,7 +161,7 @@ class GetClassAndNamespace {
 				} break;
 				case '\'':
 				case '"': {
-					CharType begin_str = code[idx];
+					char32_t begin_str = code[idx];
 					idx++;
 					String tk_string = String();
 					while (true) {
@@ -175,13 +175,13 @@ class GetClassAndNamespace {
 						} else if (code[idx] == '\\') {
 							//escaped characters...
 							idx++;
-							CharType next = code[idx];
+							char32_t next = code[idx];
 							if (next == 0) {
 								error_str = "Unterminated String";
 								error = true;
 								return TK_ERROR;
 							}
-							CharType res = 0;
+							char32_t res = 0;
 
 							switch (next) {
 								case 'b':
@@ -239,7 +239,7 @@ class GetClassAndNamespace {
 
 					if (code[idx] == '-' || (code[idx] >= '0' && code[idx] <= '9')) {
 						//a number
-						const CharType *rptr;
+						const char32_t *rptr;
 						double number = String::to_double(&code[idx], &rptr);
 						idx += (rptr - &code[idx]);
 						value = number;

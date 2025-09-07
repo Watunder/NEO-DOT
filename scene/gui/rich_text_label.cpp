@@ -339,8 +339,8 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 				if (font.is_null())
 					font = p_base_font;
 
-				const CharType *c = text->text.c_str();
-				const CharType *cf = c;
+				const char32_t *c = text->text.c_str();
+				const char32_t *cf = c;
 				int ascent = font->get_ascent();
 				int descent = font->get_descent();
 
@@ -404,7 +404,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						}
 
 						// For info about the unicode range, see Label::regenerate_word_cache.
-						const CharType current = c[end];
+						const char32_t current = c[end];
 						const bool separatable = (current >= 0x2E08 && current <= 0x9FFF) || // CJK scripts and symbols.
 								(current >= 0xAC00 && current <= 0xD7FF) || // Hangul Syllables and Hangul Jamo Extended-B.
 								(current >= 0xF900 && current <= 0xFAFF) || // CJK Compatibility Ideographs.
@@ -468,7 +468,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 								bool selected = false;
 								Color fx_color = Color(color);
 								Point2 fx_offset;
-								CharType fx_char = c[i];
+								char32_t fx_char = c[i];
 
 								if (selection.active) {
 									int cofs = (&c[i]) - cf;
