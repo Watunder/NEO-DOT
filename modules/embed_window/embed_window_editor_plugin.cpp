@@ -208,7 +208,6 @@ void EmbedWindowEditorPlugin::_draw_focus() {
 
 EmbedWindowEditorPlugin::EmbedWindowEditorPlugin(EditorNode *p_node) {
 	editor = p_node;
-	editor->set_embed_window_editor_plugin(editor->get_editor_data().get_editor_plugin_count());
 	editor->call_deferred("connect", "embed_window_mode_changed", this, "_embed_window_mode_changed");
 
 	vbox = memnew(VBoxContainer);

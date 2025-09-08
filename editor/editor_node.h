@@ -31,7 +31,6 @@
 #ifndef EDITOR_NODE_H
 #define EDITOR_NODE_H
 
-#include "configs/modules_enabled.gen.h"
 #include "core/safe_refcount.h"
 #include "editor/editor_data.h"
 #include "editor/editor_folding.h"
@@ -690,11 +689,6 @@ public:
 	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }
 	static EditorNode *get_singleton() { return singleton; }
 
-#ifdef MODULE_EMBED_WINDOW_ENABLED
-	int idx_embed_window_editor_plugin = -1;
-	void set_embed_window_editor_plugin(int p_idx) { idx_embed_window_editor_plugin = p_idx; }
-	EditorPlugin *get_embed_window_editor_plugin() { return editor_data.get_editor_plugin(idx_embed_window_editor_plugin); }
-#endif
 	EditorPlugin *get_editor_plugin_screen() { return editor_plugin_screen; }
 	EditorPluginList *get_editor_plugins_over() { return editor_plugins_over; }
 	EditorPluginList *get_editor_plugins_force_over() { return editor_plugins_force_over; }
