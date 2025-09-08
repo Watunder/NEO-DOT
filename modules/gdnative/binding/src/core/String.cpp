@@ -70,7 +70,7 @@ String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
 	return String(godot::api->godot_string_num_int64_capitalized(p_num, base, capitalize_hex));
 }
 
-String String::chr(godot_char_type p_char) {
+String String::chr(wchar_t p_char) {
 	return String(godot::api->godot_string_chr(p_char));
 }
 

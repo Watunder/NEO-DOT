@@ -227,6 +227,12 @@ Comment: Robert Penner's Easing Functions
 Copyright: 2001, Robert Penner
 License: BSD-3-clause
 
+Files: ./thirdparty/misc/fast_float.h
+ ./thirdparty/misc/fast_float.h
+Comment: fast_float
+Copyright: 2021, The fast_float authors
+License: Apache 2.0, BSL-1.0, MIT
+
 Files: ./thirdparty/misc/fastlz.c
  ./thirdparty/misc/fastlz.h
 Comment: FastLZ

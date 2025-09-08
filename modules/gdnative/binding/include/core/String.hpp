@@ -78,7 +78,7 @@ public:
 	static String num_scientific(double p_num);
 	static String num_real(double p_num);
 	static String num_int64(int64_t p_num, int base = 10, bool capitalize_hex = false);
-	static String chr(godot_char_type p_char);
+	static String chr(wchar_t p_char);
 	static String md5(const uint8_t *p_md5);
 	static String hex_encode_buffer(const uint8_t *p_buffer, int p_len);
 

@@ -186,7 +186,7 @@ void IP_Unix::get_local_interfaces(Map<String, Interface_Info> *r_interfaces) co
 	while (adapter != NULL) {
 		Interface_Info info;
 		info.name = adapter->AdapterName;
-		info.name_friendly = adapter->FriendlyName;
+		info.name_friendly = String::utf16((const char16_t *)adapter->FriendlyName);
 		info.index = String::num_uint64(adapter->IfIndex);
 
 		IP_ADAPTER_UNICAST_ADDRESS *address = adapter->FirstUnicastAddress;

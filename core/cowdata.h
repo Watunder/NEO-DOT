@@ -41,6 +41,7 @@ template <class T>
 class Vector;
 class String;
 class CharString;
+class Char16String;
 template <class T, class V>
 class VMap;
 
@@ -54,6 +55,7 @@ class CowData {
 	friend class Vector;
 	friend class String;
 	friend class CharString;
+	friend class Char16String;
 	template <class TV, class VV>
 	friend class VMap;
 
