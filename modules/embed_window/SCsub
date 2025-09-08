@@ -3,8 +3,6 @@
 Import("env")
 Import("env_modules")
 
-env.Append(CPPDEFINES=["EMBED_WINDOW_ENABLED"])
-
 env_embed_window = env_modules.Clone()
 
 env_embed_window.add_source_files(env.modules_sources, "*.cpp")

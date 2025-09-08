@@ -63,10 +63,10 @@ def update_version(module_version_string=""):
         build_name = str(os.getenv("BUILD_NAME"))
         print("Using custom build name: " + build_name)
 
-    import version
+    from configs import version
 
     # NOTE: It is safe to generate this file here, since this is still executed serially
-    f = open("core/version_generated.gen.h", "w")
+    f = open("configs/version_generated.gen.h", "w")
     f.write('#define VERSION_SHORT_NAME "' + str(version.short_name) + '"\n')
     f.write('#define VERSION_NAME "' + str(version.name) + '"\n')
     f.write("#define VERSION_MAJOR " + str(version.major) + "\n")
@@ -86,7 +86,7 @@ def update_version(module_version_string=""):
     f.close()
 
     # NOTE: It is safe to generate this file here, since this is still executed serially
-    fhash = open("core/version_hash.gen.h", "w")
+    fhash = open("configs/version_hash.gen.h", "w")
     githash = ""
     gitfolder = ".git"
 
@@ -225,14 +225,31 @@ def is_module(path):
     return True
 
 
-def write_modules(modules):
+def write_modules_enabled(modules_enabled):
+    enabled_h = "// THIS FILE IS GENERATED DO NOT EDIT\n"
+    enabled_h += "#ifndef _MODULES_ENABLED_H\n"
+    enabled_h += "#define _MODULES_ENABLED_H\n"
+
+    for name, path in modules_enabled.items():
+        enabled_h += "\n// " + path + "\n"
+        enabled_h += "#define MODULE_" + name.upper() + "_ENABLED\n"
+
+    enabled_h += "\n#endif\n"
+
+    with open("configs/modules_enabled.gen.h", "w") as f:
+        f.write(enabled_h)
+
+
+def write_modules_detected(modules_detected):
     includes_cpp = ""
     register_cpp = ""
     unregister_cpp = ""
 
     tests_h = "// THIS FILE IS GENERATED DO NOT EDIT\n"
+    tests_h += "#ifndef _MODULES_TESTS_H\n"
+    tests_h += "#define _MODULES_TESTS_H\n"
 
-    for name, path in modules.items():
+    for name, path in modules_detected.items():
         try:
             with open(os.path.join(path, "register_types.h")):
                 includes_cpp += '#include "' + path + '/register_types.h"\n'
@@ -249,9 +266,12 @@ def write_modules(modules):
         except IOError:
             pass
 
+    tests_h += "\n#endif\n"
+
     modules_cpp = (
         """
 // THIS FILE IS GENERATED DO NOT EDIT
+#include "configs/modules_enabled.gen.h"
 #include "register_module_types.h"
 
 """

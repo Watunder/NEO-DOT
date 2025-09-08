@@ -30,6 +30,7 @@
 
 #include "project_manager.h"
 
+#include "configs/version_hash.gen.h"
 #include "core/io/config_file.h"
 #include "core/io/resource_saver.h"
 #include "core/io/stream_peer_ssl.h"
@@ -40,7 +41,6 @@
 #include "core/os/os.h"
 #include "core/translation.h"
 #include "core/version.h"
-#include "core/version_hash.gen.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
 #include "editor_themes.h"

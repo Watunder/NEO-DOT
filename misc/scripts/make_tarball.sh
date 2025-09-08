@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -e "version.py" ]; then
+if [ ! -e "SConstruct" ]; then
   echo "This script should be ran from the root folder of the Godot repository."
   exit 1
 fi

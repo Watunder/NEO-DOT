@@ -30,6 +30,7 @@
 
 #include "editor_help.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
 #include "doc_data_compressed.gen.h"
@@ -1551,7 +1552,7 @@ void EditorHelpBit::_meta_clicked(String p_select) {
 void EditorHelpBit::_minimum_size_changed() {
 	set_size(rich_text->get_size());
 
-#ifdef EMBED_WINDOW_ENABLED
+#ifdef MODULE_EMBED_WINDOW_ENABLED
 	call("_update_region");
 #endif
 }

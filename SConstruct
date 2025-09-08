@@ -118,7 +118,6 @@ opts.Add(BoolVariable("use_lto", "Use link-time optimization", False))
 
 # Components
 opts.Add(BoolVariable("deprecated", "Enable deprecated features", True))
-opts.Add(BoolVariable("gdscript", "Enable GDScript support", True))
 opts.Add(BoolVariable("minizip", "Enable ZIP archive support using minizip", True))
 opts.Add(BoolVariable("xaudio2", "Enable the XAudio2 audio driver", False))
 opts.Add("custom_modules", "A list of comma-separated directory paths containing custom modules to build.", "")
@@ -271,7 +270,7 @@ for name, path in modules_detected.items():
     sys.modules.pop("config")
     opts.Add(BoolVariable("module_" + name + "_enabled", "Enable module '%s'" % (name,), enabled))
 
-methods.write_modules(modules_detected)
+methods.write_modules_detected(modules_detected)
 
 # Update the environment again after all the module options are added.
 opts.Update(env_base)
@@ -317,15 +316,6 @@ if selected_platform in platform_list:
         env = detect.create(env_base)
     else:
         env = env_base.Clone()
-
-    # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
-    from SCons import __version__ as scons_raw_version
-
-    scons_ver = env._get_major_minor_revision(scons_raw_version)
-
-    if scons_ver >= (4, 0, 0):
-        env.Tool("compilation_db")
-        env.Alias("compiledb", env.CompilationDatabase())
 
     # 'dev' and 'production' are aliases to set default options if they haven't been set
     # manually by the user.
@@ -541,6 +531,7 @@ if selected_platform in platform_list:
         sys.path.remove(path)
         sys.modules.pop("config")
 
+    methods.write_modules_enabled(modules_enabled)
     env.module_list = modules_enabled
 
     methods.update_version(env.module_version_string)
@@ -573,8 +564,6 @@ if selected_platform in platform_list:
             sys.exit(255)
         else:
             env.Append(CPPDEFINES=["_3D_DISABLED"])
-    if env["gdscript"]:
-        env.Append(CPPDEFINES=["GDSCRIPT_ENABLED"])
     if env["disable_advanced_gui"]:
         if env["tools"]:
             print(
@@ -624,6 +613,15 @@ if selected_platform in platform_list:
     if env["vsproj"]:
         env.vs_incs = []
         env.vs_srcs = []
+
+    # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
+    from SCons import __version__ as scons_raw_version
+
+    scons_ver = env._get_major_minor_revision(scons_raw_version)
+
+    if scons_ver >= (4, 0, 0):
+        env.Tool("compilation_db")
+        env.Alias("compiledb", env.CompilationDatabase())
 
     Export("env")
 

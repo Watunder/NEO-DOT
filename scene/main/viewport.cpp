@@ -30,6 +30,7 @@
 
 #include "viewport.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/core_string_names.h"
 #include "core/os/input.h"
 #include "core/os/os.h"
@@ -1548,7 +1549,7 @@ void Viewport::_gui_show_tooltip() {
 	gui.tooltip_popup->raise();
 	gui.tooltip_popup->show();
 
-#if defined(TOOLS_ENABLED) && defined(EMBED_WINDOW_ENABLED)
+#if defined(TOOLS_ENABLED) && defined(MODULE_EMBED_WINDOW_ENABLED)
 	if (!custom_tooltip)
 		gui.tooltip_popup->call("_update_region");
 #endif

@@ -30,11 +30,11 @@
 
 #include "engine.h"
 
+#include "configs/version_hash.gen.h"
 #include "core/authors.gen.h"
 #include "core/donors.gen.h"
 #include "core/license.gen.h"
 #include "core/version.h"
-#include "core/version_hash.gen.h"
 
 void Engine::set_iterations_per_second(int p_ips) {
 	ERR_FAIL_COND_MSG(p_ips <= 0, "Engine iterations per second must be greater than 0.");
