@@ -271,6 +271,7 @@ def write_modules_detected(modules_detected):
     modules_cpp = (
         """
 // THIS FILE IS GENERATED DO NOT EDIT
+#include "configs/modules_enabled.gen.h"
 #include "register_module_types.h"
 
 """
