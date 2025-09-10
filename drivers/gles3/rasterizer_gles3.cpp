@@ -59,7 +59,7 @@ Error RasterizerGLES3::is_viable() {
 	}
 #endif
 	if (!version) {
-		ERR_PRINT("Error initializing GLAD");
+		ERR_PRINT("[glad] Failed to initialize OpenGL");
 		return ERR_UNAVAILABLE;
 	}
 

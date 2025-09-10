@@ -31,8 +31,8 @@
 #ifndef PLATFORM_GL_H
 #define PLATFORM_GL_H
 
-#ifdef EGL_ENABLED
-#ifdef ANGLE_ENABLED
+#if defined(EGL_ENABLED)
+#if defined(ANGLE_ENABLED)
 #include "thirdparty/angle/EGL/egl.h"
 #include "thirdparty/angle/EGL/eglext.h"
 #else
@@ -40,7 +40,11 @@
 #endif
 #endif
 
+#if defined(WGL_ENABLED)
+#include "thirdparty/glad/glad/wgl.h"
+#else
 #include "thirdparty/glad/glad/gl.h"
+#endif
 
 #if defined(GLES_OVER_GL) && !defined(GL_VERSION_4_1)
 #undef glClearDepthf

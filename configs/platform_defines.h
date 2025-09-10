@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  context_gl_windows.h                                                 */
+/*  platform_defines.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,49 +28,34 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#if defined(OPENGL_ENABLED) || defined(GLES_ENABLED)
+#ifndef PLATFORM_DEFINES_H
+#define PLATFORM_DEFINES_H
 
-// Author: Juan Linietsky <reduzio@gmail.com>, (C) 2008
+#if defined(_WIN32)
 
-#ifndef CONTEXT_GL_WIN_H
-#define CONTEXT_GL_WIN_H
+#include <malloc.h>
 
-#include "core/error_list.h"
-#include "core/os/os.h"
+#elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__)
 
-#include <windows.h>
+#include <alloca.h>
 
-class ContextGL_Windows {
-	HDC hDC;
-	HGLRC hRC;
-	unsigned int pixel_format;
-	HWND hWnd;
-	bool opengl_3_context;
-	bool use_vsync;
-	bool vsync_via_compositor;
+#if defined(__ANDROID__)
+#include <malloc.h> // ndk
+#elif defined(__APPLE__)
+#define PTHREAD_RENAME_SELF
+#endif
 
-	static bool should_vsync_via_compositor();
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 
-public:
-	void release_current();
-
-	void make_current();
-
-	HDC get_hdc();
-	HGLRC get_hglrc();
-
-	int get_window_width();
-	int get_window_height();
-	void swap_buffers();
-
-	Error initialize();
-
-	void set_use_vsync(bool p_use);
-	bool is_using_vsync() const;
-
-	ContextGL_Windows(HWND hwnd, bool p_opengl_3_context);
-	~ContextGL_Windows();
-};
-
+#include <stdlib.h> // alloca
+// FreeBSD and OpenBSD use pthread_set_name_np, while other platforms,
+// include NetBSD, use pthread_setname_np. NetBSD's version however requires
+// a different format, we handle this directly in thread_posix.
+#if defined(__NetBSD__)
+#define PTHREAD_NETBSD_SET_NAME
+#else
+#define PTHREAD_BSD_SET_NAME
 #endif
 #endif
+
+#endif // PLATFORM_DEFINES_H

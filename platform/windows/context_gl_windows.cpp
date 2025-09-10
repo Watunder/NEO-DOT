@@ -32,16 +32,11 @@
 
 // Author: Juan Linietsky <reduzio@gmail.com>, (C) 2008
 
+#include "configs/platform_gl.h"
+
 #include "context_gl_windows.h"
 
 #include <dwmapi.h>
-
-#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
-#define WGL_CONTEXT_FLAGS_ARB 0x2094
-#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x00000002
-#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
 
 #if defined(__GNUC__)
 // Workaround GCC warning from -Wcast-function-type.
@@ -96,15 +91,17 @@ void ContextGL_Windows::swap_buffers() {
 	if (use_vsync) {
 		bool vsync_via_compositor_now = should_vsync_via_compositor();
 
-		if (vsync_via_compositor_now && wglGetSwapIntervalEXT() == 0) {
-			DwmFlush();
-		}
+		if (wglGetSwapIntervalEXT) {
+			if (vsync_via_compositor_now && wglGetSwapIntervalEXT() == 0) {
+				DwmFlush();
+			}
 
-		if (vsync_via_compositor_now != vsync_via_compositor) {
-			// The previous frame had a different operating mode than this
-			// frame.  Set the 'vsync_via_compositor' member variable and the
-			// OpenGL swap interval to their proper values.
-			set_use_vsync(true);
+			if (vsync_via_compositor_now != vsync_via_compositor) {
+				// The previous frame had a different operating mode than this
+				// frame.  Set the 'vsync_via_compositor' member variable and the
+				// OpenGL swap interval to their proper values.
+				set_use_vsync(true);
+			}
 		}
 	}
 }
@@ -123,8 +120,6 @@ void ContextGL_Windows::set_use_vsync(bool p_use) {
 bool ContextGL_Windows::is_using_vsync() const {
 	return use_vsync;
 }
-
-#define _WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
 
 Error ContextGL_Windows::initialize() {
 	static PIXELFORMATDESCRIPTOR pfd = {
@@ -173,43 +168,56 @@ Error ContextGL_Windows::initialize() {
 
 	wglMakeCurrent(hDC, hRC);
 
+	int version = gladLoaderLoadWGL(hDC);
+	if (!version) {
+		ERR_PRINT("[glad] Failed to initialize WGL");
+		return ERR_UNAVAILABLE;
+	}
+
+	int attribs[9] = { 0 };
+	int index = 0, mask = 0, flags = 0;
+#define setAttrib(a, v)                                                   \
+	{                                                                     \
+		CRASH_BAD_INDEX(index + 1, sizeof(attribs) / sizeof(attribs[0])); \
+		attribs[index++] = a;                                             \
+		attribs[index++] = v;                                             \
+	}
+
 	if (opengl_3_context) {
-		int attribs[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3, //we want a 3.3 context
-			WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-			//and it shall be forward compatible so that we can only use up to date functionality
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB /*| _WGL_CONTEXT_DEBUG_BIT_ARB*/,
-			0
-		}; //zero indicates the end of the array
+		setAttrib(WGL_CONTEXT_MAJOR_VERSION_ARB, 3);
+		setAttrib(WGL_CONTEXT_MINOR_VERSION_ARB, 3);
 
-		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = NULL; //pointer to the method
-		wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+		flags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
+		mask |= WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 
-		if (wglCreateContextAttribsARB == NULL) //OpenGL 3.0 is not supported
-		{
+		if (flags)
+			setAttrib(WGL_CONTEXT_FLAGS_ARB, flags);
+		if (mask)
+			setAttrib(WGL_CONTEXT_PROFILE_MASK_ARB, mask);
+	} else {
+		setAttrib(WGL_CONTEXT_MAJOR_VERSION_ARB, 2);
+		setAttrib(WGL_CONTEXT_MINOR_VERSION_ARB, 1);
+	}
+#undef setAttrib
+
+	if (wglCreateContextAttribsARB) {
+		HGLRC new_hRC = wglCreateContextAttribsARB(hDC, 0, attribs);
+		if (!new_hRC) {
 			wglDeleteContext(hRC);
 			return ERR_CANT_CREATE;
 		}
 
-		HGLRC new_hRC = wglCreateContextAttribsARB(hDC, 0, attribs);
-		if (!new_hRC) {
-			wglDeleteContext(hRC);
-			return ERR_CANT_CREATE; // Return false
-		}
 		wglMakeCurrent(hDC, NULL);
 		wglDeleteContext(hRC);
 		hRC = new_hRC;
 
-		if (!wglMakeCurrent(hDC, hRC)) // Try To Activate The Rendering Context
-		{
-			return ERR_CANT_CREATE; // Return FALSE
+		if (!wglMakeCurrent(hDC, hRC)) {
+			return ERR_CANT_CREATE;
 		}
+	} else if (opengl_3_context) {
+		wglDeleteContext(hRC);
+		return ERR_CANT_CREATE;
 	}
-
-	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
-	//glWrapperInit(wrapper_get_proc_address);
 
 	return OK;
 }
