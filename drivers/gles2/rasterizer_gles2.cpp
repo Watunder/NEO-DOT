@@ -46,7 +46,7 @@ RasterizerScene *RasterizerGLES2::get_scene() {
 }
 
 Error RasterizerGLES2::is_viable() {
-#ifdef ANGLE_ENABLED
+#ifndef GLES_OVER_GL
 	int version = gladLoaderLoadGLES2();
 #else
 	int version = gladLoaderLoadGL();
