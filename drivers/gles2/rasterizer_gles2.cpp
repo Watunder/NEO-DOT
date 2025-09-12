@@ -92,8 +92,12 @@ Error RasterizerGLES2::is_viable() {
 	if (GLAD_GL_EXT_framebuffer_multisample) {
 		glRenderbufferStorageMultisample = glRenderbufferStorageMultisampleEXT;
 	}
-#endif // GLES_OVER_GL
-
+#else
+	if (GL_EXT_multisampled_render_to_texture) {
+		glRenderbufferStorageMultisample = glRenderbufferStorageMultisampleEXT;
+		glFramebufferTexture2DMultisample = glFramebufferTexture2DMultisampleEXT;
+	}
+#endif
 	return OK;
 }
 

@@ -39,16 +39,6 @@
 #include "servers/camera/camera_feed.h"
 #include "servers/visual/visual_server_raster.h"
 
-#ifndef GLES_OVER_GL
-#ifdef IPHONE_ENABLED
-#include <OpenGLES/ES2/glext.h>
-//void *glResolveMultisampleFramebufferAPPLE;
-
-#define GL_READ_FRAMEBUFFER 0x8CA8
-#define GL_DRAW_FRAMEBUFFER 0x8CA9
-#endif
-#endif
-
 static const GLenum _cube_side_enum[6] = {
 
 	GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -2572,20 +2562,8 @@ void RasterizerSceneGLES2::_post_process(Environment *env, const CameraMatrix &p
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-#elif IPHONE_ENABLED
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, storage->frame.current_rt->multisample_fbo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, next_buffer);
-		glResolveMultisampleFramebufferAPPLE();
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-#elif ANDROID_ENABLED
-
-		// In GLES2 Android Blit is not available, so just copy color texture manually
-		_copy_texture_to_buffer(storage->frame.current_rt->multisample_color, next_buffer);
 #else
-		// TODO: any other platform not supported? this will fail.. maybe we should just call _copy_texture_to_buffer here as well?
+		_copy_texture_to_buffer(storage->frame.current_rt->multisample_color, next_buffer);
 #endif
 	} else if (use_post_process) {
 		if (storage->frame.current_rt->external.fbo != 0) {
@@ -3292,17 +3270,7 @@ void RasterizerSceneGLES2::render_scene(const Transform &p_cam_transform, const 
 
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-#elif IPHONE_ENABLED
-
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, storage->frame.current_rt->multisample_fbo);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, storage->frame.current_rt->fbo);
-			glResolveMultisampleFramebufferAPPLE();
-
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-#elif ANDROID_ENABLED
-
-			// In GLES2 AndroidBlit is not available, so just copy color texture manually
+#else
 			_copy_texture_to_buffer(storage->frame.current_rt->multisample_color, storage->frame.current_rt->fbo);
 #endif
 		}

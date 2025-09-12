@@ -10,7 +10,7 @@ if env["platform"] in ["windows"] and env["use_angle"]:
     env.Append(CPPDEFINES=["ANGLE_ENABLED"])
     env.Append(CPPDEFINES=["EGL_ENABLED"])
 
-    env.Append(CPPDEFINES=["GLAD_GLES2", "GLAD_GLES2_USE_SYSTEM_EGL"])
+    env.Append(CPPDEFINES=["GLAD_GLES2_USE_SYSTEM_EGL"])
     env.Append(CPPDEFINES=["EGL_EGLEXT_PROTOTYPES"])
 
     env.Prepend(CPPPATH=[thirdparty_angle_dir])
@@ -19,7 +19,7 @@ if env["platform"] in ["windows"] and env["use_angle"]:
 if env["platform"] in ["haiku", "osx", "windows", "x11"]:
     # Thirdparty source files
     thirdparty_glad_dir = "#thirdparty/glad/"
-    thirdparty_glad_sources = ["gl.c"]
+    thirdparty_glad_sources = []
 
     if env["platform"] != "windows":
         thirdparty_glad_sources += ["egl.c"]
@@ -28,7 +28,10 @@ if env["platform"] in ["haiku", "osx", "windows", "x11"]:
         thirdparty_glad_sources += ["wgl.c"]
         env.Append(CPPDEFINES=["WGL_ENABLED"])
 
-    if not env["use_angle"]:
+    if env["use_angle"]:
+        thirdparty_glad_sources += ["gles2.c"]
+    else:
+        thirdparty_glad_sources += ["gl.c"]
         env.Append(CPPDEFINES=["GLES_OVER_GL"])
 
     thirdparty_sources = [thirdparty_glad_dir + file for file in thirdparty_glad_sources]

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  platform_defines.h                                                   */
+/*  platform_stdinc.h                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,14 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PLATFORM_DEFINES_H
-#define PLATFORM_DEFINES_H
+#ifndef PLATFORM_STDINC_H
+#define PLATFORM_STDINC_H
 
 #if defined(_WIN32)
 
 #include <malloc.h>
 
-#elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__)
+#elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 
 #include <alloca.h>
 
@@ -58,4 +58,4 @@
 #endif
 #endif
 
-#endif // PLATFORM_DEFINES_H
+#endif // PLATFORM_STDINC_H
