@@ -32,18 +32,11 @@
 
 // Author: Juan Linietsky <reduzio@gmail.com>, (C) 2008
 
-#include "configs/platform_gl.h"
-
 #include "context_gl_windows.h"
 
+#include "configs/platform_gl.h"
+
 #include <dwmapi.h>
-
-#if defined(__GNUC__)
-// Workaround GCC warning from -Wcast-function-type.
-#define wglGetProcAddress (void *)wglGetProcAddress
-#endif
-
-typedef HGLRC(APIENTRY *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC, HGLRC, const int *);
 
 void ContextGL_Windows::release_current() {
 	wglMakeCurrent(hDC, NULL);
