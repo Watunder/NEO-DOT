@@ -1756,7 +1756,8 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 			}
 
 			if (gl_error != OK) {
-				if (gles3_context && GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
+				if (gles3_context && (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor)) {
+					WARN_PRINT("Falling back to the GLES2 driver");
 					p_video_driver = VIDEO_DRIVER_GLES2;
 					gles3_context = false;
 				} else {
