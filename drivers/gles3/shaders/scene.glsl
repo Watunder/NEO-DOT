@@ -118,7 +118,7 @@ uniform highp vec4 lightmap_uv_rect;
 layout(std140) uniform DirectionalLightData { //ubo:3
 
 	highp vec4 light_pos_inv_radius;
-	highp vec4 light_direction_attenuation;
+	mediump vec4 light_direction_attenuation;
 	mediump vec4 light_color_energy;
 	mediump vec4 light_params; // cone attenuation, angle, specular, shadow enabled,
 	mediump vec4 light_clamp;
@@ -137,7 +137,7 @@ layout(std140) uniform DirectionalLightData { //ubo:3
 
 struct LightData {
 	highp vec4 light_pos_inv_radius;
-	highp vec4 light_direction_attenuation;
+	mediump vec4 light_direction_attenuation;
 	mediump vec4 light_color_energy;
 	mediump vec4 light_params; // cone attenuation, angle, specular, shadow enabled,
 	mediump vec4 light_clamp;
@@ -748,7 +748,7 @@ layout(std140) uniform SceneData {
 
 layout(std140) uniform DirectionalLightData {
 	highp vec4 light_pos_inv_radius;
-	highp vec4 light_direction_attenuation;
+	mediump vec4 light_direction_attenuation;
 	mediump vec4 light_color_energy;
 	mediump vec4 light_params; // cone attenuation, angle, specular, shadow enabled,
 	mediump vec4 light_clamp;
@@ -772,7 +772,7 @@ in vec4 specular_light_interp;
 
 struct LightData {
 	highp vec4 light_pos_inv_radius;
-	highp vec4 light_direction_attenuation;
+	mediump vec4 light_direction_attenuation;
 	mediump vec4 light_color_energy;
 	mediump vec4 light_params; // cone attenuation, angle, specular, shadow enabled,
 	mediump vec4 light_clamp;

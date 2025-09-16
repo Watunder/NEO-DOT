@@ -31,13 +31,7 @@
 #ifndef SHADER_GLES2_H
 #define SHADER_GLES2_H
 
-// This must come first to avoid windows.h mess
-#include "platform_config.h"
-#ifndef GLES2_INCLUDE_H
-#include <GLES2/gl2.h>
-#else
-#include GLES2_INCLUDE_H
-#endif
+#include "configs/platform_gl.h"
 
 #include "core/hash_map.h"
 #include "core/map.h"

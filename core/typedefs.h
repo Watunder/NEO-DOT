@@ -37,7 +37,7 @@
  * Basic definitions and simple functions to be used everywhere.
  */
 
-#include "platform_config.h"
+#include "configs/platform_stdinc.h"
 
 #ifndef _STR
 #define _STR(m_x) #m_x

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  platform_config.h                                                    */
+/*  platform_stdinc.h                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,14 +28,34 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#ifndef PLATFORM_STDINC_H
+#define PLATFORM_STDINC_H
+
+#if defined(_WIN32)
+
 #include <malloc.h>
-//#else
-//#include <alloca.h>
-//#endif
-#ifdef ANGLE_ENABLED
-#define GLES3_INCLUDE_H <GLES3/gl3.h>
-#define GLES2_INCLUDE_H <GLES3/gl3.h>
-#else
-#define GLES3_INCLUDE_H "thirdparty/glad/glad/glad.h"
-#define GLES2_INCLUDE_H "thirdparty/glad/glad/glad.h"
+
+#elif defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+
+#include <alloca.h>
+
+#if defined(__ANDROID__)
+#include <malloc.h> // ndk
+#elif defined(__APPLE__)
+#define PTHREAD_RENAME_SELF
 #endif
+
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+
+#include <stdlib.h> // alloca
+// FreeBSD and OpenBSD use pthread_set_name_np, while other platforms,
+// include NetBSD, use pthread_setname_np. NetBSD's version however requires
+// a different format, we handle this directly in thread_posix.
+#if defined(__NetBSD__)
+#define PTHREAD_NETBSD_SET_NAME
+#else
+#define PTHREAD_BSD_SET_NAME
+#endif
+#endif
+
+#endif // PLATFORM_STDINC_H

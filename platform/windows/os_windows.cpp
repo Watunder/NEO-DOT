@@ -1736,59 +1736,40 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		}
 
 		bool editor = Engine::get_singleton()->is_editor_hint();
-		bool gl_initialization_error = false;
+		Error gl_error = OK;
 
 		while (!gl_context) {
 			gl_context = memnew(ContextGL_Windows(hWnd, gles3_context));
 
-			if (gl_context->initialize() != OK) {
-				memdelete(gl_context);
-				gl_context = NULL;
+			gl_error = gl_context->initialize();
 
-				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
-					if (p_video_driver == VIDEO_DRIVER_GLES2) {
-						gl_initialization_error = true;
-						break;
-					}
+			if (gl_error == OK) {
+				if (gles3_context) {
+					gl_error = RasterizerGLES3::is_viable();
+					RasterizerGLES3::register_config();
+					RasterizerGLES3::make_current();
+				} else {
+					gl_error = RasterizerGLES2::is_viable();
+					RasterizerGLES2::register_config();
+					RasterizerGLES2::make_current();
+				}
+			}
 
+			if (gl_error != OK) {
+				if (gles3_context && (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor)) {
+					WARN_PRINT("Falling back to the GLES2 driver");
 					p_video_driver = VIDEO_DRIVER_GLES2;
 					gles3_context = false;
 				} else {
-					gl_initialization_error = true;
 					break;
 				}
+
+				memdelete(gl_context);
+				gl_context = NULL;
 			}
 		}
 
-		while (true) {
-			if (gles3_context) {
-				if (RasterizerGLES3::is_viable() == OK) {
-					RasterizerGLES3::register_config();
-					RasterizerGLES3::make_current();
-					break;
-				} else {
-					if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
-						p_video_driver = VIDEO_DRIVER_GLES2;
-						gles3_context = false;
-						continue;
-					} else {
-						gl_initialization_error = true;
-						break;
-					}
-				}
-			} else {
-				if (RasterizerGLES2::is_viable() == OK) {
-					RasterizerGLES2::register_config();
-					RasterizerGLES2::make_current();
-					break;
-				} else {
-					gl_initialization_error = true;
-					break;
-				}
-			}
-		}
-
-		if (gl_initialization_error) {
+		if (gl_error != OK) {
 			OS::get_singleton()->alert("Your video card driver does not support any of the supported OpenGL versions.\n"
 									   "Please update your drivers or if you have a very old or integrated GPU, upgrade it.",
 					"Unable to initialize Video driver");

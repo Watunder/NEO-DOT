@@ -40,87 +40,6 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 
 /* TEXTURE API */
 
-#define _EXT_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
-#define _EXT_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
-#define _EXT_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
-
-#define _EXT_COMPRESSED_RED_RGTC1_EXT 0x8DBB
-#define _EXT_COMPRESSED_RED_RGTC1 0x8DBB
-#define _EXT_COMPRESSED_SIGNED_RED_RGTC1 0x8DBC
-#define _EXT_COMPRESSED_RG_RGTC2 0x8DBD
-#define _EXT_COMPRESSED_SIGNED_RG_RGTC2 0x8DBE
-#define _EXT_COMPRESSED_SIGNED_RED_RGTC1_EXT 0x8DBC
-#define _EXT_COMPRESSED_RED_GREEN_RGTC2_EXT 0x8DBD
-#define _EXT_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT 0x8DBE
-#define _EXT_ETC1_RGB8_OES 0x8D64
-
-#define _EXT_COMPRESSED_RGB_PVRTC_4BPPV1_IMG 0x8C00
-#define _EXT_COMPRESSED_RGB_PVRTC_2BPPV1_IMG 0x8C01
-#define _EXT_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG 0x8C02
-#define _EXT_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG 0x8C03
-
-#define _EXT_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT 0x8A54
-#define _EXT_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT 0x8A55
-#define _EXT_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT 0x8A56
-#define _EXT_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT 0x8A57
-
-#define _EXT_COMPRESSED_RGBA_BPTC_UNORM 0x8E8C
-#define _EXT_COMPRESSED_SRGB_ALPHA_BPTC_UNORM 0x8E8D
-#define _EXT_COMPRESSED_RGB_BPTC_SIGNED_FLOAT 0x8E8E
-#define _EXT_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT 0x8E8F
-
-#define _GL_TEXTURE_EXTERNAL_OES 0x8D65
-
-#ifdef GLES_OVER_GL
-#define _GL_HALF_FLOAT_OES 0x140B
-#else
-#define _GL_HALF_FLOAT_OES 0x8D61
-#endif
-
-#define _EXT_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
-
-#define _GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#define _GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-
-#define _RED_OES 0x1903
-
-#define _DEPTH_COMPONENT24_OES 0x81A6
-
-#ifndef GLES_OVER_GL
-#define glClearDepth glClearDepthf
-
-// enable extensions manually for android and ios
-#ifndef UWP_ENABLED
-#ifndef WINDOWS_ENABLED
-#include <dlfcn.h> // needed to load extensions
-
-#endif // !WINDOWS_ENABLED
-#endif
-
-#ifdef IPHONE_ENABLED
-
-#include <OpenGLES/ES2/glext.h>
-//void *glRenderbufferStorageMultisampleAPPLE;
-//void *glResolveMultisampleFramebufferAPPLE;
-#define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleAPPLE
-#elif defined(ANDROID_ENABLED)
-
-#include <GLES2/gl2ext.h>
-PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC glRenderbufferStorageMultisampleEXT;
-PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEEXTPROC glFramebufferTexture2DMultisampleEXT;
-#define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleEXT
-#define glFramebufferTexture2DMultisample glFramebufferTexture2DMultisampleEXT
-
-#elif defined(UWP_ENABLED)
-#include <GLES2/gl2ext.h>
-#define glRenderbufferStorageMultisample glRenderbufferStorageMultisampleANGLE
-#define glFramebufferTexture2DMultisample glFramebufferTexture2DMultisampleANGLE
-#endif
-
-#define GL_TEXTURE_3D 0x806F
-#define GL_MAX_SAMPLES 0x8D57
-#endif //!GLES_OVER_GL
-
 void RasterizerStorageGLES2::bind_quad_array() const {
 	glBindBuffer(GL_ARRAY_BUFFER, resources.quadie);
 	glVertexAttribPointer(VS::ARRAY_VERTEX, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
@@ -269,7 +188,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_DXT1: {
 			if (config.s3tc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -280,7 +199,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_DXT3: {
 			if (config.s3tc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -291,7 +210,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_DXT5: {
 			if (config.s3tc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -302,7 +221,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_RGTC_R: {
 			if (config.rgtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RED_RGTC1_EXT;
+				r_gl_internal_format = GL_COMPRESSED_RED_RGTC1_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -314,7 +233,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_RGTC_RG: {
 			if (config.rgtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RED_GREEN_RGTC2_EXT;
+				r_gl_internal_format = GL_COMPRESSED_RG_RGTC2_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -325,7 +244,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_BPTC_RGBA: {
 			if (config.bptc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_BPTC_UNORM;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_BPTC_UNORM;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -336,7 +255,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_BPTC_RGBF: {
 			if (config.bptc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGB_BPTC_SIGNED_FLOAT;
+				r_gl_internal_format = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT;
 				r_gl_format = GL_RGB;
 				r_gl_type = GL_FLOAT;
 				r_compressed = true;
@@ -346,7 +265,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_BPTC_RGBFU: {
 			if (config.bptc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
+				r_gl_internal_format = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
 				r_gl_format = GL_RGB;
 				r_gl_type = GL_FLOAT;
 				r_compressed = true;
@@ -356,7 +275,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_PVRTC2: {
 			if (config.pvrtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+				r_gl_internal_format = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -367,7 +286,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_PVRTC2A: {
 			if (config.pvrtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -379,7 +298,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_PVRTC4: {
 			if (config.pvrtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+				r_gl_internal_format = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -391,7 +310,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_PVRTC4A: {
 			if (config.pvrtc_supported) {
-				r_gl_internal_format = _EXT_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+				r_gl_internal_format = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -403,7 +322,7 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 		} break;
 		case Image::FORMAT_ETC: {
 			if (config.etc1_supported) {
-				r_gl_internal_format = _EXT_ETC1_RGB8_OES;
+				r_gl_internal_format = GL_ETC1_RGB8_OES;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
 				r_compressed = true;
@@ -530,7 +449,7 @@ void RasterizerStorageGLES2::texture_allocate(RID p_texture, int p_width, int p_
 		} break;
 		case VS::TEXTURE_TYPE_EXTERNAL: {
 #ifdef ANDROID_ENABLED
-			texture->target = _GL_TEXTURE_EXTERNAL_OES;
+			texture->target = GL_TEXTURE_EXTERNAL_OES;
 #else
 			texture->target = GL_TEXTURE_2D;
 #endif
@@ -707,9 +626,9 @@ void RasterizerStorageGLES2::texture_set_data(RID p_texture, const Ref<Image> &p
 
 	if (config.use_anisotropic_filter) {
 		if (texture->flags & VS::TEXTURE_FLAG_ANISOTROPIC_FILTER) {
-			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
+			glTexParameterf(texture->target, GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
 		} else {
-			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+			glTexParameterf(texture->target, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
 		}
 	}
 
@@ -917,9 +836,9 @@ void RasterizerStorageGLES2::texture_set_flags(RID p_texture, uint32_t p_flags) 
 
 	if (config.use_anisotropic_filter) {
 		if (texture->flags & VS::TEXTURE_FLAG_ANISOTROPIC_FILTER) {
-			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
+			glTexParameterf(texture->target, GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
 		} else {
-			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+			glTexParameterf(texture->target, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
 		}
 	}
 
@@ -2261,7 +2180,11 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 				}
 
 				if (p_format & VS::ARRAY_COMPRESS_VERTEX) {
-					attribs[i].type = _GL_HALF_FLOAT_OES;
+#ifdef GLES_OVER_GL
+					attribs[i].type = GL_HALF_FLOAT;
+#else
+					attribs[i].type = GL_HALF_FLOAT_OES;
+#endif
 					stride += attribs[i].size * 2;
 					uses_half_float = true;
 				} else {
@@ -2318,7 +2241,11 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 				attribs[i].size = 2;
 
 				if (p_format & VS::ARRAY_COMPRESS_TEX_UV) {
-					attribs[i].type = _GL_HALF_FLOAT_OES;
+#ifdef GLES_OVER_GL
+					attribs[i].type = GL_HALF_FLOAT;
+#else
+					attribs[i].type = GL_HALF_FLOAT_OES;
+#endif
 					stride += 4;
 					uses_half_float = true;
 				} else {
@@ -2333,7 +2260,11 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 				attribs[i].size = 2;
 
 				if (p_format & VS::ARRAY_COMPRESS_TEX_UV2) {
-					attribs[i].type = _GL_HALF_FLOAT_OES;
+#ifdef GLES_OVER_GL
+					attribs[i].type = GL_HALF_FLOAT;
+#else
+					attribs[i].type = GL_HALF_FLOAT_OES;
+#endif
 					stride += 4;
 					uses_half_float = true;
 				} else {
@@ -4592,7 +4523,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->multisample_depth);
 
-#if defined(GLES_OVER_GL) || defined(IPHONE_ENABLED)
+#if defined(GLES_OVER_GL)
 
 		glGenRenderbuffers(1, &rt->multisample_color);
 		glBindRenderbuffer(GL_RENDERBUFFER, rt->multisample_color);
@@ -4779,7 +4710,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 				glClearColor(1.0, 0.0, 1.0, 0.0);
 				glClear(GL_COLOR_BUFFER_BIT);
 				if (used_depth) {
-					glClearDepth(1.0);
+					glClearDepthf(1.0f);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 			}
@@ -5224,9 +5155,9 @@ RID RasterizerStorageGLES2::canvas_light_shadow_buffer_create(int p_width) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cls->size, cls->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	} else {
 #ifdef GLES_OVER_GL
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, cls->size, cls->height, 0, _RED_OES, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, cls->size, cls->height, 0, GL_RED_EXT, GL_FLOAT, NULL);
 #else
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_FLOAT, cls->size, cls->height, 0, _RED_OES, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_FLOAT, cls->size, cls->height, 0, GL_RED_EXT, GL_FLOAT, NULL);
 #endif
 	}
 
@@ -5707,28 +5638,12 @@ void RasterizerStorageGLES2::initialize() {
 #else
 	// on mobile check for 24 bit depth support for RenderBufferStorage
 	if (config.extensions.has("GL_OES_depth24")) {
-		config.depth_buffer_internalformat = _DEPTH_COMPONENT24_OES;
+		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT24_OES;
 		config.depth_type = GL_UNSIGNED_INT;
 	} else {
 		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT16;
 		config.depth_type = GL_UNSIGNED_SHORT;
 	}
-#endif
-#endif
-
-#ifndef GLES_OVER_GL
-	//Manually load extensions for android and ios
-
-#ifdef IPHONE_ENABLED
-	// appears that IPhone doesn't need to dlopen TODO: test this rigorously before removing
-	//void *gles2_lib = dlopen(NULL, RTLD_LAZY);
-	//glRenderbufferStorageMultisampleAPPLE = dlsym(gles2_lib, "glRenderbufferStorageMultisampleAPPLE");
-	//glResolveMultisampleFramebufferAPPLE = dlsym(gles2_lib, "glResolveMultisampleFramebufferAPPLE");
-#elif ANDROID_ENABLED
-
-	void *gles2_lib = dlopen("libGLESv2.so", RTLD_LAZY);
-	glRenderbufferStorageMultisampleEXT = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)dlsym(gles2_lib, "glRenderbufferStorageMultisampleEXT");
-	glFramebufferTexture2DMultisampleEXT = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEEXTPROC)dlsym(gles2_lib, "glFramebufferTexture2DMultisampleEXT");
 #endif
 #endif
 
@@ -5785,7 +5700,7 @@ void RasterizerStorageGLES2::initialize() {
 	config.anisotropic_level = 1.0;
 	config.use_anisotropic_filter = config.extensions.has("GL_EXT_texture_filter_anisotropic");
 	if (config.use_anisotropic_filter) {
-		glGetFloatv(_GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &config.anisotropic_level);
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &config.anisotropic_level);
 		config.anisotropic_level = MIN(int(ProjectSettings::get_singleton()->get("rendering/quality/filters/anisotropic_filter_level")), config.anisotropic_level);
 	}
 
@@ -6012,7 +5927,7 @@ void RasterizerStorageGLES2::initialize() {
 	//this needs to be enabled manually in OpenGL 2.1
 
 	if (config.extensions.has("GL_ARB_seamless_cube_map")) {
-		glEnable(_EXT_TEXTURE_CUBE_MAP_SEAMLESS);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
