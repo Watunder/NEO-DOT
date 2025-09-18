@@ -36,7 +36,7 @@
 void register_webxr_types() {
 	ClassDB::register_virtual_class<WebXRInterface>();
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	Ref<WebXRInterfaceJS> webxr;
 	webxr.instance();
 	ARVRServer::get_singleton()->add_interface(webxr);

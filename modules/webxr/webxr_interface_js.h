@@ -31,7 +31,7 @@
 #ifndef WEBXR_INTERFACE_JS_H
 #define WEBXR_INTERFACE_JS_H
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 
 #include "webxr_interface.h"
 
@@ -98,6 +98,6 @@ public:
 	~WebXRInterfaceJS();
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 #endif // WEBXR_INTERFACE_JS_H

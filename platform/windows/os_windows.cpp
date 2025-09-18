@@ -3929,9 +3929,7 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	pressrc = 0;
 	old_invalid = true;
 	mouse_mode = MOUSE_MODE_VISIBLE;
-#ifdef STDOUT_FILE
-	stdo = fopen("stdout.txt", "wb");
-#endif
+
 	user_proc = NULL;
 
 #if defined(OPENGL_ENABLED)
@@ -3955,7 +3953,4 @@ OS_Windows::~OS_Windows() {
 		wintab_WTClose(wtctx);
 		wtctx = 0;
 	}
-#ifdef STDOUT_FILE
-	fclose(stdo);
-#endif
 }

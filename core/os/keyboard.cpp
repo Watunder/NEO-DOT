@@ -62,7 +62,7 @@ static const _KeyCodeText _keycodes[] = {
 		{KEY_PAGEDOWN                      ,"PageDown"},
 		{KEY_SHIFT                         ,"Shift"},
 		{KEY_CONTROL                       ,"Control"},
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 		{KEY_META                          ,"Command"},
 #else
 		{KEY_META                          ,"Meta"},

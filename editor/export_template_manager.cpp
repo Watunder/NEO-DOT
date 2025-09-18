@@ -312,7 +312,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 
 		f->store_buffer(data.ptr(), data.size());
 
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 		FileAccess::set_unix_permissions(to_write, (info.external_fa >> 16) & 0x01FF);
 #endif
 
@@ -624,7 +624,7 @@ Error ExportTemplateManager::install_android_template() {
 			if (f) {
 				f->store_buffer(data.ptr(), data.size());
 				memdelete(f);
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 				FileAccess::set_unix_permissions(to_write, (info.external_fa >> 16) & 0x01FF);
 #endif
 			} else {

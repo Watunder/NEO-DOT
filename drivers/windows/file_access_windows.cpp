@@ -28,7 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifdef WINDOWS_ENABLED
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
 #include "file_access_windows.h"
 
@@ -145,7 +146,7 @@ void FileAccessWindows::close() {
 			// antiviruses that love reading just written files even if they are not executable, thus
 			// locking the file and preventing renaming from happening.
 
-#ifdef UWP_ENABLED
+#if TARGET_UWP
 			// UWP has no PathFileExists, so we check attributes instead
 			DWORD fileAttr;
 

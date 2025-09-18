@@ -284,10 +284,6 @@ class OS_Windows : public OS {
 		KEY_EVENT_BUFFER_SIZE = 512
 	};
 
-#ifdef STDOUT_FILE
-	FILE *stdo;
-#endif
-
 	struct KeyEvent {
 		bool alt, shift, control, meta;
 		UINT uMsg;
@@ -406,7 +402,7 @@ protected:
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;
 	};
-	Map<ProcessID, ProcessInfo> *process_map;
+	Map<ProcessID, ProcessInfo> *process_map = NULL;
 
 	bool pre_fs_valid;
 	RECT pre_fs_rect;

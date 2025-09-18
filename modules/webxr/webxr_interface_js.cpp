@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 
 #include "webxr_interface_js.h"
 #include "core/os/input.h"
@@ -37,7 +37,6 @@
 #include "godot_webxr.h"
 #include "main/input_default.h"
 #include "servers/visual/visual_server_globals.h"
-#include <stdlib.h>
 
 void _emwebxr_on_session_supported(char *p_session_mode, int p_supported) {
 	ARVRServer *arvr_server = ARVRServer::get_singleton();
@@ -459,4 +458,4 @@ WebXRInterfaceJS::~WebXRInterfaceJS() {
 	};
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
