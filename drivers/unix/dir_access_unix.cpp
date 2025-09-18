@@ -41,7 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef ANDROID_ENABLED
+#ifndef PLATFORM_ANDROID
 #include <sys/statvfs.h>
 #endif
 
@@ -167,7 +167,7 @@ void DirAccessUnix::list_dir_end() {
 	_cisdir = false;
 }
 
-#if defined(HAVE_MNTENT) && defined(X11_ENABLED)
+#if defined(HAVE_MNTENT) && defined(PLATFORM_LINUX)
 static bool _filter_drive(struct mntent *mnt) {
 	// Ignore devices that don't point to /dev
 	if (strncmp(mnt->mnt_fsname, "/dev", 4) != 0) {
@@ -188,7 +188,7 @@ static bool _filter_drive(struct mntent *mnt) {
 #endif
 
 static void _get_drives(List<String> *list) {
-#if defined(HAVE_MNTENT) && defined(X11_ENABLED)
+#if defined(HAVE_MNTENT) && defined(PLATFORM_LINUX)
 	// Check /etc/mtab for the list of mounted partitions
 	FILE *mtab = setmntent("/etc/mtab", "r");
 	if (mtab) {

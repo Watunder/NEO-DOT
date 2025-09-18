@@ -45,7 +45,7 @@ const char *HTTPClient::_methods[METHOD_MAX] = {
 	"PATCH"
 };
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 Error HTTPClient::connect_to_host(const String &p_host, int p_port, bool p_ssl, bool p_verify_host) {
 	close();
 
@@ -747,7 +747,7 @@ HTTPClient::HTTPClient() {
 HTTPClient::~HTTPClient() {
 }
 
-#endif // #ifndef JAVASCRIPT_ENABLED
+#endif // #ifndef PLATFORM_EMSCRIPTEN
 
 String HTTPClient::query_string_from_dict(const Dictionary &p_dict) {
 	String query = "";

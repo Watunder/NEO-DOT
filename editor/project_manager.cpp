@@ -1824,7 +1824,7 @@ void ProjectManager::_unhandled_input(const Ref<InputEvent> &p_ev) {
 		// Pressing Command + Q quits the Project Manager
 		// This is handled by the platform implementation on macOS,
 		// so only define the shortcut on other platforms
-#ifndef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 		if (k->get_scancode_with_modifiers() == (KEY_MASK_CMD | KEY_Q)) {
 			_dim_window();
 			get_tree()->quit();
@@ -2343,7 +2343,7 @@ ProjectManager::ProjectManager() {
 				// Try applying a suitable display scale automatically.
 				// The code below is adapted in `editor/editor_settings.cpp` and `editor/editor_node.cpp`.
 				// Make sure to update those when modifying the code below.
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 				editor_set_scale(OS::get_singleton()->get_screen_max_scale());
 #else
 				const int screen = OS::get_singleton()->get_current_screen();

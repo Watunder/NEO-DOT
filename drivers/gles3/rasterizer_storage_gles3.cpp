@@ -36,7 +36,7 @@
 
 /* TEXTURE API */
 
-#ifdef __EMSCRIPTEN__
+#ifdef PLATFORM_EMSCRIPTEN
 #include <emscripten/emscripten.h>
 
 void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data) {
@@ -520,7 +520,7 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 			texture->images.resize(1);
 		} break;
 		case VS::TEXTURE_TYPE_EXTERNAL: {
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 			texture->target = GL_TEXTURE_EXTERNAL_OES;
 #else
 			texture->target = GL_TEXTURE_2D;
@@ -543,7 +543,7 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 
 	if (p_type != VS::TEXTURE_TYPE_EXTERNAL) {
 		texture->is_npot_repeat_mipmap = false;
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 		// WebGL 2.0 on browsers does not seem to properly support compressed non power-of-two (NPOT)
 		// textures with repeat/mipmaps, even though NPOT textures should be supported as per the spec.
 		// Force decompressing them to work it around on WebGL 2.0 at a performance cost (GH-33058).
@@ -554,7 +554,7 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 		if (!is_po2 && (p_flags & VS::TEXTURE_FLAG_REPEAT || p_flags & VS::TEXTURE_FLAG_MIPMAPS)) {
 			texture->is_npot_repeat_mipmap = true;
 		}
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 		Image::Format real_format;
 		_get_gl_image_and_format(Ref<Image>(),
@@ -3776,7 +3776,7 @@ PoolVector<uint8_t> RasterizerStorageGLES3::mesh_surface_get_array(RID p_mesh, i
 	ret.resize(surface->array_byte_size);
 	glBindBuffer(GL_ARRAY_BUFFER, surface->vertex_id);
 
-#if defined(GLES_OVER_GL) || defined(__EMSCRIPTEN__)
+#if defined(GLES_OVER_GL) || defined(PLATFORM_EMSCRIPTEN)
 	{
 		PoolVector<uint8_t>::Write w = ret.write();
 		glGetBufferSubData(GL_ARRAY_BUFFER, 0, surface->array_byte_size, w.ptr());
@@ -3808,7 +3808,7 @@ PoolVector<uint8_t> RasterizerStorageGLES3::mesh_surface_get_index_array(RID p_m
 	if (surface->index_array_byte_size > 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, surface->index_id);
 
-#if defined(GLES_OVER_GL) || defined(__EMSCRIPTEN__)
+#if defined(GLES_OVER_GL) || defined(PLATFORM_EMSCRIPTEN)
 		{
 			PoolVector<uint8_t>::Write w = ret.write();
 			glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, surface->index_array_byte_size, w.ptr());
@@ -3865,7 +3865,7 @@ Vector<PoolVector<uint8_t>> RasterizerStorageGLES3::mesh_surface_get_blend_shape
 		ret.resize(mesh->surfaces[p_surface]->array_byte_size);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->surfaces[p_surface]->blend_shapes[i].vertex_id);
 
-#if defined(GLES_OVER_GL) || defined(__EMSCRIPTEN__)
+#if defined(GLES_OVER_GL) || defined(PLATFORM_EMSCRIPTEN)
 		{
 			PoolVector<uint8_t>::Write w = ret.write();
 			glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mesh->surfaces[p_surface]->array_byte_size, w.ptr());
@@ -6037,7 +6037,7 @@ AABB RasterizerStorageGLES3::particles_get_current_aabb(RID p_particles) {
 	const float *data;
 	glBindBuffer(GL_ARRAY_BUFFER, particles->particle_buffers[0]);
 
-#if defined(GLES_OVER_GL) || defined(__EMSCRIPTEN__)
+#if defined(GLES_OVER_GL) || defined(PLATFORM_EMSCRIPTEN)
 	PoolVector<uint8_t> vector;
 	vector.resize(particles->amount * 16 * 6);
 	{
@@ -6065,7 +6065,7 @@ AABB RasterizerStorageGLES3::particles_get_current_aabb(RID p_particles) {
 			aabb.expand_to(pos);
 	}
 
-#if defined(GLES_OVER_GL) || defined(__EMSCRIPTEN__)
+#if defined(GLES_OVER_GL) || defined(PLATFORM_EMSCRIPTEN)
 	r.release();
 	vector = PoolVector<uint8_t>();
 #else

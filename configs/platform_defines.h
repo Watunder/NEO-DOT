@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  platform_stdinc.h                                                    */
+/*  platform_defines.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,76 +28,115 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PLATFORM_STDINC_H
-#define PLATFORM_STDINC_H
-
-#include "configs/platform_defines.h"
-
-#include <stddef.h>
-#include <stdint.h>
-
-#if defined(PLATFORM_WINDOWS)
-
-#include <malloc.h>
-
-/**
- * Windows badly defines a lot of stuff we'll never use. Undefine it.
- */
-
-#undef min // override standard definition
-#undef max // override standard definition
-#undef ERROR // override (really stupid) wingdi.h standard definition
-#undef DELETE // override (another really stupid) winnt.h standard definition
-#undef MessageBox // override winuser.h standard definition
-#undef MIN // override standard definition
-#undef MAX // override standard definition
-#undef CLAMP // override standard definition
-#undef Error
-#undef OK
-#undef CONNECT_DEFERRED // override from Windows SDK, clashes with Object enum
+#ifndef PLATFORM_DEFINES_H
+#define PLATFORM_DEFINES_H
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_LINUX)
+#if defined(_WIN32)
 
-#include <alloca.h>
+#define PLATFORM_WINDOWS 1
+
+#if defined(_MSC_VER) && defined(__has_include)
+#if __has_include(<winapifamily.h>)
+#define HAVE_WINAPIFAMILY_H 1
+#endif
+#elif defined(_MSC_VER) && (_MSC_VER >= 1700 && !_USING_V110_SDK71_)
+#define HAVE_WINAPIFAMILY_H 1
+#endif
+
+#if defined(HAVE_WINAPIFAMILY_H)
+#include <winapifamily.h>
+#if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#define TARGET_UWP 1
+#endif
+#endif
+
+#if !defined(TARGET_UWP)
+#define TARGET_UWP 0
+#endif
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_ANDROID)
+#elif defined(__ANDROID__)
 
-#include <alloca.h>
-#include <malloc.h> // ndk
-
-/*************************************************************************/
-
-#elif defined(PLATFORM_APPLE)
-
-#include <alloca.h>
-#define PTHREAD_RENAME_SELF
+#define PLATFORM_ANDROID 1
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_EMSCRIPTEN)
+#elif defined(__linux__)
 
-#include <alloca.h>
+#define PLATFORM_LINUX 1
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_BSD) || defined(PLATFORM_OPENBSD) || defined(PLATFORM_NETBSD) || defined(PLATFORM_DRAGONFLY)
+#elif defined(__APPLE__)
 
-#include <stdlib.h>
-// FreeBSD and OpenBSD use pthread_set_name_np, while other platforms,
-// include NetBSD, use pthread_setname_np. NetBSD's version however requires
-// a different format, we handle this directly in thread_posix.
-#if defined(PLATFORM_NETBSD)
-#define PTHREAD_NETBSD_SET_NAME
+#define PLATFORM_APPLE 1
+
+#include <AvailabilityMacros.h>
+#ifndef __has_extension
+#define __has_extension(x) 0
+#include <TargetConditionals.h>
+#undef __has_extension
 #else
-#define PTHREAD_BSD_SET_NAME
+#include <TargetConditionals.h>
+#endif
+
+#if defined(TARGET_OS_OSX) && TARGET_OS_OSX
+#define TARGET_OSX 1
+#elif defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#define TARGET_IOS 1
+#endif
+
+#if !defined(TARGET_OSX)
+#define TARGET_OSX 0
+#endif
+
+#if !defined(TARGET_IOS)
+#define TARGET_IOS 0
 #endif
 
 /*************************************************************************/
 
+#elif defined(__EMSCRIPTEN__)
+
+#define PLATFORM_EMSCRIPTEN 1
+
+/*************************************************************************/
+
+#elif defined(__FreeBSD__)
+
+#define PLATFORM_FREEBSD 1
+
+#elif defined(__OpenBSD__)
+
+#define PLATFORM_OPENBSD 1
+
+#elif defined(__NetBSD__)
+
+#define PLATFORM_NETBSD 1
+
+#elif defined(__DragonFly__)
+
+#define PLATFORM_DRAGONFLY 1
+
+/*************************************************************************/
+
+#else
+
+#error this platform is not supported
+
 #endif
 
-#endif // PLATFORM_STDINC_H
+/*************************************************************************/
+
+#if !defined(PLATFORM_WINDOWS)
+
+#define UNIX_ENABLED 1
+
+#endif
+
+/*************************************************************************/
+
+#endif // PLATFORM_DEFINES_H

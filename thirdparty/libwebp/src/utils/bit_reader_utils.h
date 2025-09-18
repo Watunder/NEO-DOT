@@ -59,7 +59,7 @@ extern "C" {
 // Pick values that fit natural register size.
 
 // -- GODOT -- start
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 #define BITS 16
 #else
 // -- GODOT -- end

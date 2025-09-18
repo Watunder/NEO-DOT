@@ -31,7 +31,7 @@
 #ifndef EMWSCLIENT_H
 #define EMWSCLIENT_H
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"
 #include "emws_peer.h"
@@ -66,6 +66,6 @@ public:
 	~EMWSClient();
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 #endif // EMWSCLIENT_H

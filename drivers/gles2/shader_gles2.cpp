@@ -171,7 +171,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 #else
 	strings.push_back("#version 100\n");
 //angle does not like
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	strings.push_back("#define USE_HIGHP_PRECISION\n");
 #endif
 
@@ -183,8 +183,8 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 
 #endif
 
-#ifdef ANDROID_ENABLED
-	strings.push_back("#define ANDROID_ENABLED\n");
+#ifdef PLATFORM_ANDROID
+	strings.push_back("#define PLATFORM_ANDROID\n");
 #endif
 
 	for (int i = 0; i < custom_defines.size(); i++) {

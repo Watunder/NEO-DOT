@@ -5588,7 +5588,7 @@ EditorNode::EditorNode() {
 				// Try applying a suitable display scale automatically.
 				// The code below is adapted in `editor/editor_settings.cpp` and `editor/project_manager.cpp`.
 				// Make sure to update those when modifying the code below.
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 				editor_set_scale(OS::get_singleton()->get_screen_max_scale());
 #else
 				const int screen = OS::get_singleton()->get_current_screen();
@@ -5984,7 +5984,7 @@ EditorNode::EditorNode() {
 
 	distraction_free = memnew(ToolButton);
 	tabbar_container->add_child(distraction_free);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	distraction_free->set_shortcut(ED_SHORTCUT("editor/distraction_free_mode", TTR("Distraction Free Mode"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_D));
 #else
 	distraction_free->set_shortcut(ED_SHORTCUT("editor/distraction_free_mode", TTR("Distraction Free Mode"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F11));
@@ -5996,7 +5996,7 @@ EditorNode::EditorNode() {
 
 	embed_window = memnew(ToolButton);
 	tabbar_container->add_child(embed_window);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	embed_window->set_shortcut(ED_SHORTCUT("editor/embed", TTR("Embed Window Mode"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_E));
 #else
 	embed_window->set_shortcut(ED_SHORTCUT("editor/embed", TTR("Embed Window Mode"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F12));
@@ -6190,7 +6190,7 @@ EditorNode::EditorNode() {
 	tool_menu->add_item(TTR("Orphan Resource Explorer..."), TOOLS_ORPHAN_RESOURCES);
 
 	p->add_separator();
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	p->add_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_Q), RUN_PROJECT_MANAGER, true);
 #else
 	p->add_shortcut(ED_SHORTCUT("editor/quit_to_project_list", TTR("Quit to Project List"), KEY_MASK_SHIFT + KEY_MASK_CMD + KEY_Q), RUN_PROJECT_MANAGER, true);
@@ -6245,7 +6245,7 @@ EditorNode::EditorNode() {
 
 	p = settings_menu->get_popup();
 	p->set_hide_on_window_lose_focus(true);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	p->add_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings..."), KEY_MASK_CMD + KEY_COMMA), SETTINGS_PREFERENCES);
 #else
 	p->add_shortcut(ED_SHORTCUT("editor/editor_settings", TTR("Editor Settings...")), SETTINGS_PREFERENCES);
@@ -6258,18 +6258,18 @@ EditorNode::EditorNode() {
 	editor_layouts->connect("id_pressed", this, "_layout_menu_option");
 	p->add_submenu_item(TTR("Editor Layout"), "Layouts");
 	p->add_separator();
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	p->add_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CMD | KEY_F12), EDITOR_SCREENSHOT);
 #else
 	p->add_shortcut(ED_SHORTCUT("editor/take_screenshot", TTR("Take Screenshot"), KEY_MASK_CTRL | KEY_F12), EDITOR_SCREENSHOT);
 #endif
 	p->set_item_tooltip(p->get_item_count() - 1, TTR("Screenshots are stored in the Editor Data/Settings Folder."));
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	p->add_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_F), SETTINGS_TOGGLE_FULLSCREEN);
 #else
 	p->add_shortcut(ED_SHORTCUT("editor/fullscreen_mode", TTR("Toggle Fullscreen"), KEY_MASK_SHIFT | KEY_F11), SETTINGS_TOGGLE_FULLSCREEN);
 #endif
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	p->add_item(TTR("Toggle System Console"), SETTINGS_TOGGLE_CONSOLE);
 #endif
 	p->add_separator();
@@ -6298,7 +6298,7 @@ EditorNode::EditorNode() {
 	p = help_menu->get_popup();
 	p->set_hide_on_window_lose_focus(true);
 	p->connect("id_pressed", this, "_menu_option");
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	p->add_icon_shortcut(gui_base->get_icon("HelpSearch", "EditorIcons"), ED_SHORTCUT("editor/editor_help", TTR("Search Help"), KEY_MASK_ALT | KEY_SPACE), HELP_SEARCH);
 #else
 	p->add_icon_shortcut(gui_base->get_icon("HelpSearch", "EditorIcons"), ED_SHORTCUT("editor/editor_help", TTR("Search Help"), KEY_F1), HELP_SEARCH);
@@ -6332,7 +6332,7 @@ EditorNode::EditorNode() {
 	play_button->set_focus_mode(Control::FOCUS_NONE);
 	play_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY));
 	play_button->set_tooltip(TTR("Play the main scene."));
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play Main"), KEY_MASK_CMD | KEY_B));
 #else
 	play_button->set_shortcut(ED_SHORTCUT("editor/play", TTR("Play Main"), KEY_F5));
@@ -6345,7 +6345,7 @@ EditorNode::EditorNode() {
 	pause_button->set_tooltip(TTR("Pause the scene."));
 	pause_button->set_disabled(true);
 	play_hb->add_child(pause_button);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	pause_button->set_shortcut(ED_SHORTCUT("editor/pause_scene", TTR("Pause Scene"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_Y));
 #else
 	pause_button->set_shortcut(ED_SHORTCUT("editor/pause_scene", TTR("Pause Scene"), KEY_F7));
@@ -6358,7 +6358,7 @@ EditorNode::EditorNode() {
 	next_button->set_tooltip(TTR("Call the next frame."));
 	next_button->set_disabled(true);
 	play_hb->add_child(next_button);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_X));
 #else
 	next_button->set_shortcut(ED_SHORTCUT("editor/next_scene", TTR("Next Frame"), KEY_F8));
@@ -6371,7 +6371,7 @@ EditorNode::EditorNode() {
 	select_button->set_tooltip(TTR("Enable the runtime node selector."));
 	select_button->set_disabled(true);
 	play_hb->add_child(select_button);
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	select_button->set_shortcut(ED_SHORTCUT("editor/runtime_node_selector", TTR("Enable Selector"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_C));
 #else
 	select_button->set_shortcut(ED_SHORTCUT("editor/runtime_node_selector", TTR("Enable Selector"), KEY_F9));
@@ -6384,7 +6384,7 @@ EditorNode::EditorNode() {
 	play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 	play_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_SCENE));
 	play_scene_button->set_tooltip(TTR("Play the current scene."));
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Current"), KEY_MASK_CMD | KEY_R));
 #else
 	play_scene_button->set_shortcut(ED_SHORTCUT("editor/play_scene", TTR("Play Current"), KEY_F6));
@@ -6397,7 +6397,7 @@ EditorNode::EditorNode() {
 	play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 	play_custom_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_CUSTOM_SCENE));
 	play_custom_scene_button->set_tooltip(TTR("Play the custom scene."));
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_R));
 #else
 	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F5));
@@ -6880,7 +6880,7 @@ EditorNode::EditorNode() {
 	ResourceSaver::set_save_callback(_resource_saved);
 	ResourceLoader::set_load_callback(_resource_loaded);
 
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	ED_SHORTCUT("editor/editor_2d", TTR("Open 2D Editor"), KEY_MASK_ALT | KEY_1);
 	ED_SHORTCUT("editor/editor_3d", TTR("Open 3D Editor"), KEY_MASK_ALT | KEY_2);
 	ED_SHORTCUT("editor/editor_script", TTR("Open Script Editor"), KEY_MASK_ALT | KEY_3);

@@ -33,7 +33,7 @@
 
 #include "core/io/ip.h"
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED)
+#if defined(UNIX_ENABLED) || defined(PLATFORM_WINDOWS)
 
 class IP_Unix : public IP {
 	GDCLASS(IP_Unix, IP);
