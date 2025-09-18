@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 
 #ifndef WEBRTC_DATA_CHANNEL_JS_H
 #define WEBRTC_DATA_CHANNEL_JS_H
@@ -90,4 +90,4 @@ public:
 
 #endif // WEBRTC_DATA_CHANNEL_JS_H
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN

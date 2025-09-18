@@ -28,9 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "windows_terminal_logger.h"
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
-#ifdef WINDOWS_ENABLED
+#include "windows_terminal_logger.h"
 
 #include <stdio.h>
 #include <windows.h>
@@ -64,12 +65,12 @@ void WindowsTerminalLogger::log_error(const char *p_function, const char *p_file
 		return;
 	}
 
-#ifndef UWP_ENABLED
+#if !TARGET_UWP
 	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (!hCon || hCon == INVALID_HANDLE_VALUE) {
 #endif
 		StdLogger::log_error(p_function, p_file, p_line, p_code, p_rationale, p_type);
-#ifndef UWP_ENABLED
+#if !TARGET_UWP
 	} else {
 		CONSOLE_SCREEN_BUFFER_INFO sbi; //original
 		GetConsoleScreenBufferInfo(hCon, &sbi);

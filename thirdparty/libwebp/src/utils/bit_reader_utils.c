@@ -42,7 +42,7 @@ void VP8InitBitReader(VP8BitReader* const br,
   br->eof_     = 0;
   VP8BitReaderSetBuffer(br, start, size);
 // -- GODOT -- begin
-#ifdef JAVASCRIPT_ENABLED // html5 required aligned reads
+#ifdef PLATFORM_EMSCRIPTEN // html5 required aligned reads
   while(((uintptr_t)br->buf_ & 1) != 0 && !br->eof_)
     VP8LoadFinalBytes(br);
 #else

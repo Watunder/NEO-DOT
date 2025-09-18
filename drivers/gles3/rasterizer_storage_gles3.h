@@ -45,7 +45,7 @@
 #include "shaders/particles.glsl.gen.h"
 
 // WebGL 2.0 has no MapBufferRange/UnmapBuffer, but offers a non-ES style BufferSubData API instead.
-#ifdef __EMSCRIPTEN__
+#ifdef PLATFORM_EMSCRIPTEN
 void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data);
 #endif
 

@@ -30,18 +30,18 @@
 
 #include "register_types.h"
 
-#if defined(WINDOWS_ENABLED)
+#if defined(PLATFORM_WINDOWS)
 #include "camera_win.h"
 #endif
-#if defined(OSX_ENABLED)
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 #include "camera_osx.h"
 #endif
 
 void register_camera_types() {
-#if defined(WINDOWS_ENABLED)
+#if defined(PLATFORM_WINDOWS)
 	CameraServer::make_default<CameraWindows>();
 #endif
-#if defined(OSX_ENABLED)
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 	CameraServer::make_default<CameraOSX>();
 #endif
 }

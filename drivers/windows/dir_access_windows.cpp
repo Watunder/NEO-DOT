@@ -28,7 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#if defined(WINDOWS_ENABLED)
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
 #include "dir_access_windows.h"
 
@@ -341,7 +342,7 @@ DirAccessWindows::DirAccessWindows() {
 
 	drive_count = 0;
 
-#ifdef UWP_ENABLED
+#if TARGET_UWP
 	Windows::Storage::StorageFolder ^ install_folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
 	change_dir(install_folder->Path->Data());
 

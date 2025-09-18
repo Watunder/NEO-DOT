@@ -31,7 +31,8 @@
 #ifndef DIR_ACCESS_WINDOWS_H
 #define DIR_ACCESS_WINDOWS_H
 
-#ifdef WINDOWS_ENABLED
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
 #include "core/os/dir_access.h"
 
@@ -87,6 +88,6 @@ public:
 	~DirAccessWindows();
 };
 
-#endif //WINDOWS_ENABLED
+#endif //PLATFORM_WINDOWS
 
 #endif

@@ -448,7 +448,7 @@ void RasterizerStorageGLES2::texture_allocate(RID p_texture, int p_width, int p_
 			texture->images.resize(1);
 		} break;
 		case VS::TEXTURE_TYPE_EXTERNAL: {
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 			texture->target = GL_TEXTURE_EXTERNAL_OES;
 #else
 			texture->target = GL_TEXTURE_2D;
@@ -4499,7 +4499,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 	/* BACK FBO */
 	/* For MSAA */
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 	if (rt->msaa >= VS::VIEWPORT_MSAA_2X && rt->msaa <= VS::VIEWPORT_MSAA_16X && config.multisample_supported) {
 		rt->multisample_active = true;
 
@@ -4530,7 +4530,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, color_internal_format, rt->width, rt->height);
 
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rt->multisample_color);
-#elif ANDROID_ENABLED
+#elif PLATFORM_ANDROID
 		// Render to a texture in android
 		glGenTextures(1, &rt->multisample_color);
 		glBindTexture(GL_TEXTURE_2D, rt->multisample_color);
@@ -4558,7 +4558,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 			glDeleteRenderbuffers(1, &rt->multisample_depth);
 			rt->multisample_depth = 0;
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 			glDeleteTextures(1, &rt->multisample_color);
 #else
 			glDeleteRenderbuffers(1, &rt->multisample_color);
@@ -4568,12 +4568,12 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 		glBindTexture(GL_TEXTURE_2D, 0);
 #endif
 
 	} else
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 	{
 		rt->multisample_active = false;
 	}
@@ -4810,7 +4810,7 @@ void RasterizerStorageGLES2::_render_target_clear(RenderTarget *rt) {
 
 		glDeleteRenderbuffers(1, &rt->multisample_depth);
 		rt->multisample_depth = 0;
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 		glDeleteTextures(1, &rt->multisample_color);
 #else
 		glDeleteRenderbuffers(1, &rt->multisample_color);
@@ -5587,7 +5587,7 @@ void RasterizerStorageGLES2::initialize() {
 	config.pvrtc_supported = config.extensions.has("GL_IMG_texture_compression_pvrtc") || config.extensions.has("WEBGL_compressed_texture_pvrtc");
 	config.support_npot_repeat_mipmap = config.extensions.has("GL_OES_texture_npot");
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	// RenderBuffer internal format must be 16 bits in WebGL,
 	// but depth_texture should default to 32 always
 	// if the implementation doesn't support 32, it should just quietly use 16 instead
@@ -5637,7 +5637,7 @@ void RasterizerStorageGLES2::initialize() {
 
 #ifdef GLES_OVER_GL
 	config.support_write_depth = true;
-#elif defined(JAVASCRIPT_ENABLED)
+#elif defined(PLATFORM_EMSCRIPTEN)
 	config.support_write_depth = false;
 #else
 	config.support_write_depth = config.extensions.has("GL_EXT_frag_depth");
@@ -5645,7 +5645,7 @@ void RasterizerStorageGLES2::initialize() {
 
 	config.support_half_float_vertices = true;
 //every platform should support this except web, iOS has issues with their support, so add option to disable
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	config.support_half_float_vertices = false;
 #endif
 	bool disable_half_float = GLOBAL_GET("rendering/gles2/compatibility/disable_half_float");

@@ -428,7 +428,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	I = args.front();
 	while (I) {
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 		// Ignore the process serial number argument passed by macOS Gatekeeper.
 		// Otherwise, Godot would try to open a non-existent project on the first start and abort.
 		if (I->get().begins_with("-psn_")) {
@@ -1271,7 +1271,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 	MAIN_PRINT("Main: Setup Logo");
 
-#if defined(JAVASCRIPT_ENABLED) || defined(ANDROID_ENABLED)
+#if defined(PLATFORM_EMSCRIPTEN) || defined(PLATFORM_ANDROID)
 	bool show_logo = false;
 #else
 	bool show_logo = true;
@@ -1803,7 +1803,7 @@ bool Main::start() {
 				ERR_FAIL_COND_V_MSG(!scene, false, "Failed loading scene: " + local_game_path);
 				sml->add_current_scene(scene);
 
-#ifdef OSX_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_OSX
 				String mac_iconpath = GLOBAL_DEF("application/config/macos_native_icon", "Variant()");
 				if (mac_iconpath != "") {
 					OS::get_singleton()->set_native_icon(mac_iconpath);
@@ -1811,7 +1811,7 @@ bool Main::start() {
 				}
 #endif
 
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 				String win_iconpath = GLOBAL_DEF("application/config/windows_native_icon", "Variant()");
 				if (win_iconpath != "") {
 					OS::get_singleton()->set_native_icon(win_iconpath);

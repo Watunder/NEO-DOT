@@ -173,7 +173,7 @@ Dictionary GDScriptLanguageProtocol::initialize(const Dictionary &p_params) {
 	String root_uri = p_params["rootUri"];
 	String root = p_params["rootPath"];
 	bool is_same_workspace;
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	is_same_workspace = root.to_lower() == workspace->root.to_lower();
 #else
 	is_same_workspace = root.replace("\\", "/").to_lower() == workspace->root.to_lower();

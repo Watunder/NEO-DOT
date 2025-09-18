@@ -31,7 +31,7 @@
 #ifndef WSLCLIENT_H
 #define WSLCLIENT_H
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"
 #include "core/io/stream_peer_ssl.h"
@@ -84,6 +84,6 @@ public:
 	~WSLClient();
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 #endif // WSLCLIENT_H
