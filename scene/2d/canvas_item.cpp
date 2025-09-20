@@ -862,11 +862,11 @@ void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const
 	p_font->draw(canvas_item, p_pos, p_text, p_modulate, p_clip_w);
 }
 
-float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_char, const String &p_next, const Color &p_modulate) {
-	ERR_FAIL_COND_V_MSG(!drawing, 0, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
+Vector2 CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_char, const String &p_next, const Color &p_modulate) {
+	ERR_FAIL_COND_V_MSG(!drawing, Vector2(), "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
-	ERR_FAIL_COND_V(p_char.length() != 1, 0);
-	ERR_FAIL_COND_V(p_font.is_null(), 0);
+	ERR_FAIL_COND_V(p_char.length() != 1, Vector2());
+	ERR_FAIL_COND_V(p_font.is_null(), Vector2());
 
 	if (p_font->has_outline()) {
 		p_font->draw_char(canvas_item, p_pos, p_char[0], p_next.c_str()[0], Color(1, 1, 1), true);

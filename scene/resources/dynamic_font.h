@@ -146,7 +146,8 @@ class DynamicFontAtSize : public Reference {
 		Rect2 rect_uv;
 		float v_align;
 		float h_align;
-		float advance;
+		float x_advance;
+		float y_advance;
 
 		Character() {
 			texture_idx = 0;
@@ -164,8 +165,9 @@ class DynamicFontAtSize : public Reference {
 
 	const Pair<const Character *, DynamicFontAtSize *> _find_char_with_font(char32_t p_char, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks) const;
 	Character _make_outline_char(char32_t p_char);
+	Vector2 _get_kerning_advance(const DynamicFontAtSize *font, char32_t p_char, char32_t p_next) const;
 	TexturePosition _find_texture_pos_for_glyph(int p_color_size, Image::Format p_image_format, int p_width, int p_height);
-	Character _bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float advance);
+	Character _bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float x_advance, float y_advance);
 
 	HashMap<char32_t, Character> char_map;
 
@@ -188,7 +190,7 @@ public:
 	Size2 get_char_size(char32_t p_char, char32_t p_next, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks) const;
 	String get_available_chars() const;
 
-	float draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only = false, bool p_outline = false) const;
+	Vector2 draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only = false, bool p_outline = false) const;
 
 	void set_texture_flags(uint32_t p_flags);
 	void update_oversampling();
@@ -279,7 +281,9 @@ public:
 
 	virtual bool has_outline() const;
 
-	virtual float draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next = 0, const Color &p_modulate = Color(1, 1, 1), bool p_outline = false) const;
+	virtual void draw(RID p_canvas_item, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1, const Color &p_outline_modulate = Color(1, 1, 1)) const;
+
+	virtual Vector2 draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next = 0, const Color &p_modulate = Color(1, 1, 1), bool p_outline = false) const;
 
 	SelfList<DynamicFont> font_list;
 
