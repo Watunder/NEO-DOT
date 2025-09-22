@@ -312,6 +312,11 @@ Comment: Recast
 Copyright: 2009, Mikko Mononen
 License: Zlib
 
+Files: ./thirdparty/sheenbidi/
+Comment: sheenbidi
+Copyright: 2025, Muhammad Tayyab Akram
+License: Apache 2.0
+
 Files: ./thirdparty/squish/
 Comment: libSquish
 Copyright: 2006, Simon Brown

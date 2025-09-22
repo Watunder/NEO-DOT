@@ -388,6 +388,13 @@ Files extracted from upstream source:
 - License.txt
 
 
+## sheenbidi
+
+- Upstream: https://github.com/Tehreer/SheenBidi
+- Version: 2.9.0 (83f77108a2873600283f6da4b326a2dca7a3a7a6, 2025)
+- License: Apache 2.0
+
+
 ## squish
 
 - Upstream: https://sourceforge.net/projects/libsquish
