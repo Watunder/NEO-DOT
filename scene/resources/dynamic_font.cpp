@@ -41,8 +41,12 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-bool DynamicFontData::CacheID::operator<(CacheID right) const {
+bool DynamicFontData::CacheID::operator<(const CacheID &right) const {
 	return key < right.key;
+}
+
+bool DynamicFontData::CacheID::operator==(const CacheID &right) const {
+	return key == right.key;
 }
 
 Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_cache_id) {

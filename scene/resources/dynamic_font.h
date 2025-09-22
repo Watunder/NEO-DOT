@@ -61,7 +61,8 @@ public:
 			};
 			uint32_t key;
 		};
-		bool operator<(CacheID right) const;
+		bool operator<(const CacheID &right) const;
+		bool operator==(const CacheID &right) const;
 		CacheID() {
 			key = 0;
 		}
@@ -180,6 +181,12 @@ class DynamicFontAtSize : public Reference {
 	Error _load();
 
 public:
+	FT_Library get_library() const { return library; }
+	FT_Face get_face() const { return face; }
+	DynamicFontData::CacheID get_cache_id() const { return id; }
+
+	friend class DynamicFont;
+
 	static float font_oversampling;
 
 	float get_height() const;
@@ -205,6 +212,8 @@ class DynamicFont : public Font {
 	GDCLASS(DynamicFont, Font);
 
 public:
+	friend class DynamicFontAtSize;
+
 	enum SpacingType {
 		SPACING_TOP,
 		SPACING_BOTTOM,
@@ -242,6 +251,8 @@ protected:
 	static void _bind_methods();
 
 public:
+	Ref<DynamicFontAtSize> get_data_at_size() const { return data_at_size; }
+
 	void set_font_data(const Ref<DynamicFontData> &p_data);
 	Ref<DynamicFontData> get_font_data() const;
 

@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+Import("env")
+Import("env_modules")
+
+env_font_drawer = env_modules.Clone()
+env_font_drawer.Prepend(CPPPATH=["#thirdparty/harfbuzz/src", "#thirdparty/freetype/include"])
+
+
+# Thirdparty source files
+
+thirdparty_obj = []
+
+env_thirdparty = env_font_drawer.Clone()
+env_thirdparty.disable_warnings()
+
+# SheenBiDi
+thirdparty_sheenbidi_dir = "#thirdparty/sheenbidi/"
+thirdparty_sheenbidi_sources = [
+    "Source/BidiChain.c",
+    "Source/BidiTypeLookup.c",
+    "Source/BracketQueue.c",
+    "Source/GeneralCategoryLookup.c",
+    "Source/IsolatingRun.c",
+    "Source/LevelRun.c",
+    "Source/Object.c",
+    "Source/PairingLookup.c",
+    "Source/RunQueue.c",
+    "Source/SBAlgorithm.c",
+    "Source/SBBase.c",
+    "Source/SBCodepoint.c",
+    "Source/SBCodepointSequence.c",
+    "Source/SBLine.c",
+    "Source/SBLog.c",
+    "Source/SBMirrorLocator.c",
+    "Source/SBParagraph.c",
+    "Source/SBScriptLocator.c",
+    "Source/ScriptLookup.c",
+    "Source/ScriptStack.c",
+    "Source/StatusStack.c",
+]
+thirdparty_sheenbidi_sources = [thirdparty_sheenbidi_dir + file for file in thirdparty_sheenbidi_sources]
+
+env_thirdparty.Prepend(CPPPATH=[thirdparty_sheenbidi_dir + "/Headers"])
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sheenbidi_sources)
+
+# libraqm
+thirdparty_libraqm_dir = "#thirdparty/libraqm/"
+thirdparty_libraqm_sources = ["raqm.c"]
+thirdparty_libraqm_sources = [thirdparty_libraqm_dir + file for file in thirdparty_libraqm_sources]
+
+env_thirdparty.Append(CPPDEFINES=["RAQM_SHEENBIDI", "RAQM_SHEENBIDI_GT_2_9"])
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_libraqm_sources)
+
+env_font_drawer.Prepend(CPPPATH=[thirdparty_libraqm_dir])
+
+env.modules_sources += thirdparty_obj
+
+
+# Godot source files
+
+module_obj = []
+
+env_font_drawer.add_source_files(module_obj, "*.cpp")
+env.modules_sources += module_obj
+
+# Needed to force rebuilding the module files when the thirdparty library is updated.
+env.Depends(module_obj, thirdparty_obj)
