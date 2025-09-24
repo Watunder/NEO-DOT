@@ -169,6 +169,13 @@ Files extracted from upstream source:
 - COPYING
 
 
+## libraqm
+
+- Upstream: https://github.com/HOST-Oman/libraqm
+- Version: 0.10.3 (3efba870c8d2775cb3287122f58530c6fbb20f72, 2025)
+- License: MIT
+
+
 ## libwebp
 
 - Upstream: https://chromium.googlesource.com/webm/libwebp/
