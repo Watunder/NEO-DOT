@@ -3113,13 +3113,7 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 	ZeroMemory(&pi.pi, sizeof(pi.pi));
 	LPSTARTUPINFOW si_w = (LPSTARTUPINFOW)&pi.si;
 
-	Vector<WCHAR> modstr; // Windows wants to change this no idea why.
-	modstr.resize(cmdline.size());
-	for (int i = 0; i < cmdline.size(); i++) {
-		modstr.write[i] = cmdline[i];
-	}
-
-	int ret = CreateProcessW(NULL, modstr.ptrw(), NULL, NULL, 0, NORMAL_PRIORITY_CLASS & CREATE_NO_WINDOW, NULL, NULL, si_w, &pi.pi);
+	int ret = CreateProcessW(NULL, (LPWSTR)cmdline.utf16().ptrw(), NULL, NULL, 0, NORMAL_PRIORITY_CLASS & CREATE_NO_WINDOW, NULL, NULL, si_w, &pi.pi);
 	ERR_FAIL_COND_V(ret == 0, ERR_CANT_FORK);
 
 	if (p_blocking) {
@@ -3788,9 +3782,11 @@ void OS_Windows::process_and_drop_events() {
 
 Error OS_Windows::move_to_trash(const String &p_path) {
 	SHFILEOPSTRUCTW sf;
-	WCHAR *from = new WCHAR[p_path.length() + 2];
-	wcscpy_s(from, p_path.length() + 1, (LPCWCHAR)(p_path.utf16().get_data()));
-	from[p_path.length() + 1] = 0;
+
+	Char16String utf16 = p_path.utf16();
+	WCHAR *from = new WCHAR[utf16.length() + 2];
+	wcscpy_s(from, utf16.length() + 1, (LPCWSTR)(utf16.get_data()));
+	from[utf16.length() + 1] = 0;
 
 	sf.hwnd = hWnd;
 	sf.wFunc = FO_DELETE;
