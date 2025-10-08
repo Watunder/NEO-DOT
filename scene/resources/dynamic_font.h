@@ -181,7 +181,6 @@ class DynamicFontAtSize : public Reference {
 	Error _load();
 
 public:
-	FT_Library get_library() const { return library; }
 	FT_Face get_face() const { return face; }
 	DynamicFontData::CacheID get_cache_id() const { return id; }
 

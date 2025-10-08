@@ -68,7 +68,7 @@ TextDrawer *TextDrawer::get_singleton() {
 	return singleton;
 }
 
-static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_default_face, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, HashMap<uint32_t, DynamicFontData::CacheID> &p_map, raqm_t *p_raqm_context, const uint32_t *p_text, size_t p_text_len) {
+static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_default_face, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, raqm_t *p_raqm_context, const uint32_t *p_text, size_t p_text_len) {
 	for (int i = 0; i < p_text_len; i++) {
 		if (FT_Get_Char_Index(p_default_face, p_text[i])) {
 			continue;
@@ -77,7 +77,6 @@ static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_default_face, const
 			const FT_Face &fallback_face = p_fallbacks[j]->get_face();
 			uint32_t glyph_index = FT_Get_Char_Index(fallback_face, p_text[i]);
 			if (glyph_index) {
-				p_map[glyph_index] = p_fallbacks[j]->get_cache_id();
 				raqm_set_freetype_face_range(p_raqm_context, fallback_face, i, 1);
 				break;
 			}
@@ -90,7 +89,7 @@ Vector2 TextDrawer::draw(const Ref<DynamicFont> &p_font, RID p_canvas_item, cons
 
 	raqm_t *raqm_context = raqm_create();
 
-	const DynamicFontData::CacheID &default_cache_id = p_font->get_data_at_size()->get_cache_id();
+	const DynamicFontData::CacheID &cache_id = p_font->get_data_at_size()->get_cache_id();
 	const FT_Face &default_face = p_font->get_data_at_size()->get_face();
 	const Vector<Ref<DynamicFontAtSize>> &fallback_data_at_size = p_font->get_fallback_data_at_size();
 
@@ -98,9 +97,8 @@ Vector2 TextDrawer::draw(const Ref<DynamicFont> &p_font, RID p_canvas_item, cons
 	int text_len = p_text.length();
 
 	if (raqm_context && raqm_set_text(raqm_context, text, text_len) && raqm_set_freetype_face(raqm_context, default_face)) {
-		HashMap<uint32_t, DynamicFontData::CacheID> fallback_cache_id_map;
 		if (fallback_data_at_size.size() > 0) {
-			do_font_fallback(default_face, fallback_data_at_size, fallback_cache_id_map, raqm_context, text, text_len);
+			do_font_fallback(default_face, fallback_data_at_size, raqm_context, text, text_len);
 		}
 
 		size_t glyph_count;
@@ -121,9 +119,7 @@ Vector2 TextDrawer::draw(const Ref<DynamicFont> &p_font, RID p_canvas_item, cons
 				}
 				glyph_cluster = glyphs[i].cluster;
 
-				DynamicFontData::CacheID glyph_cache_id = fallback_cache_id_map.has(glyph_index) ? fallback_cache_id_map[glyph_index] : default_cache_id;
-
-				_draw_glyph(glyph_cache_id, glyphs[i].ftface, p_canvas_item, p_pos + ofs, glyph_index, glyph_offset, p_modulate);
+				_draw_glyph(cache_id, glyphs[i].ftface, p_canvas_item, p_pos + ofs, glyph_index, glyph_offset, p_modulate);
 				ofs += Vector2(glyph_advance.x / 64.0, glyph_advance.y / 64.0);
 			}
 		}
