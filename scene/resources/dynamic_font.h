@@ -252,6 +252,7 @@ protected:
 
 public:
 	Ref<DynamicFontAtSize> get_data_at_size() const { return data_at_size; }
+	Vector<Ref<DynamicFontAtSize>> get_fallback_data_at_size() const { return fallback_data_at_size; }
 
 	void set_font_data(const Ref<DynamicFontData> &p_data);
 	Ref<DynamicFontData> get_font_data() const;

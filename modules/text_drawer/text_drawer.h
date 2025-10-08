@@ -42,7 +42,7 @@ class TextDrawer : public Object {
 
 	GlyphManager *glyph_manager = NULL;
 
-	void _draw_glyph(const Ref<DynamicFont> &p_font, RID p_canvas_item, const Vector2 &p_pos, const uint32_t &p_index, const Vector2 &p_offset, const Color &p_modulate = Color(1, 1, 1)) const;
+	void _draw_glyph(const DynamicFontData::CacheID &p_cache_id, const FT_Face &p_face, RID p_canvas_item, const Vector2 &p_pos, const uint32_t &p_index, const Vector2 &p_offset, const Color &p_modulate = Color(1, 1, 1)) const;
 
 protected:
 	static void _bind_methods();

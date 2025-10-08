@@ -238,7 +238,7 @@ void GlyphManager::update_cache(const DynamicFontData::CacheID &p_cache_id) {
 }
 
 void GlyphManager::clear_cache() {
-	current_cache_id = DynamicFontData::CacheID();
+	current_cache_id.key = 0;
 	glyph_map.clear();
 	texture_map.clear();
 }
