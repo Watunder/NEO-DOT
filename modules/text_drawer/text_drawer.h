@@ -52,6 +52,8 @@ public:
 
 	Vector2 draw(const Ref<DynamicFont> &p_font, RID p_canvas_item, const Vector2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
 
+	void clear_cache();
+
 	TextDrawer();
 	~TextDrawer();
 };

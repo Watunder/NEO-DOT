@@ -237,6 +237,12 @@ void GlyphManager::update_cache(const DynamicFontData::CacheID &p_cache_id) {
 	}
 }
 
+void GlyphManager::clear_cache() {
+	current_cache_id = DynamicFontData::CacheID();
+	glyph_map.clear();
+	texture_map.clear();
+}
+
 GlyphManager::Glyph GlyphManager::get_glyph(const FT_Face &p_face, const uint32_t &p_index) {
 	if (glyph_map[current_cache_id].has(p_index)) {
 		return glyph_map[current_cache_id][p_index];

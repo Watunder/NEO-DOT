@@ -107,6 +107,10 @@ Vector2 TextDrawer::draw(const Ref<DynamicFont> &p_font, RID p_canvas_item, cons
 	return ofs;
 }
 
+void TextDrawer::clear_cache() {
+	glyph_manager->clear_cache();
+}
+
 TextDrawer::TextDrawer() {
 	singleton = this;
 

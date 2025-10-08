@@ -105,6 +105,7 @@ private:
 
 public:
 	void update_cache(const DynamicFontData::CacheID &p_cache_id);
+	void clear_cache();
 
 	Glyph get_glyph(const FT_Face &p_face, const uint32_t &p_index);
 

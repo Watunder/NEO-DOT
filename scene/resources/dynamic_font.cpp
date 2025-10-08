@@ -36,6 +36,10 @@
 #include "core/os/file_access.h"
 #include "core/os/os.h"
 
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+#include "modules/text_drawer/text_drawer.h"
+#endif
+
 #include FT_STROKER_H
 
 #define __STDC_LIMIT_MACROS
@@ -693,6 +697,10 @@ void DynamicFont::_reload_cache() {
 void DynamicFont::set_font_data(const Ref<DynamicFontData> &p_data) {
 	data = p_data;
 	_reload_cache();
+
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+	TextDrawer::get_singleton()->clear_cache();
+#endif
 
 	emit_changed();
 	_change_notify();
