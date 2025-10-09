@@ -184,8 +184,6 @@ public:
 	FT_Face get_face() const { return face; }
 	DynamicFontData::CacheID get_cache_id() const { return id; }
 
-	friend class DynamicFont;
-
 	static float font_oversampling;
 
 	float get_height() const;
@@ -211,8 +209,6 @@ class DynamicFont : public Font {
 	GDCLASS(DynamicFont, Font);
 
 public:
-	friend class DynamicFontAtSize;
-
 	enum SpacingType {
 		SPACING_TOP,
 		SPACING_BOTTOM,
@@ -291,8 +287,6 @@ public:
 	virtual bool is_distance_field_hint() const;
 
 	virtual bool has_outline() const;
-
-	virtual void draw(RID p_canvas_item, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1, const Color &p_outline_modulate = Color(1, 1, 1)) const;
 
 	virtual Vector2 draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next = 0, const Color &p_modulate = Color(1, 1, 1), bool p_outline = false) const;
 
