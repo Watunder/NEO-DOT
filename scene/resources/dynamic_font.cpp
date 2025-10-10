@@ -36,13 +36,21 @@
 #include "core/os/file_access.h"
 #include "core/os/os.h"
 
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+#include "modules/text_drawer/text_drawer.h"
+#endif
+
 #include FT_STROKER_H
 
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-bool DynamicFontData::CacheID::operator<(CacheID right) const {
+bool DynamicFontData::CacheID::operator<(const CacheID &right) const {
 	return key < right.key;
+}
+
+bool DynamicFontData::CacheID::operator==(const CacheID &right) const {
+	return key == right.key;
 }
 
 Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_cache_id) {
@@ -242,13 +250,16 @@ Size2 DynamicFontAtSize::get_char_size(char32_t p_char, char32_t p_next, const V
 
 	Pair<const Character *, DynamicFontAtSize *> char_pair_with_font = _find_char_with_font(p_char, p_fallbacks);
 	const Character *ch = char_pair_with_font.first;
+	DynamicFontAtSize *font = char_pair_with_font.second;
 	ERR_FAIL_COND_V(!ch, Size2());
 
 	Size2 ret(0, get_height());
 
 	if (ch->found) {
-		ret.x = ch->advance;
+		ret.x = ch->x_advance;
 	}
+
+	ret += _get_kerning_advance(font, p_char, p_next);
 
 	return ret;
 }
@@ -281,9 +292,9 @@ void DynamicFontAtSize::set_texture_flags(uint32_t p_flags) {
 	}
 }
 
-float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only, bool p_outline) const {
+Vector2 DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only, bool p_outline) const {
 	if (!valid)
-		return 0;
+		return Vector2();
 
 	const_cast<DynamicFontAtSize *>(this)->_update_char(p_char);
 
@@ -291,9 +302,9 @@ float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char3
 	const Character *ch = char_pair_with_font.first;
 	DynamicFontAtSize *font = char_pair_with_font.second;
 
-	ERR_FAIL_COND_V(!ch, 0.0);
+	ERR_FAIL_COND_V(!ch, Vector2());
 
-	float advance = 0.0;
+	Vector2 advance;
 
 	// use normal character size if there's no outline character
 	if (p_outline && !ch->found) {
@@ -303,14 +314,15 @@ float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char3
 			error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 			if (!error) {
 				Character character = Character::not_found();
-				character = const_cast<DynamicFontAtSize *>(this)->_bitmap_to_character(slot->bitmap, slot->bitmap_top, slot->bitmap_left, slot->advance.x / 64.0);
-				advance = character.advance;
+				character = const_cast<DynamicFontAtSize *>(this)->_bitmap_to_character(slot->bitmap, slot->bitmap_top, slot->bitmap_left, slot->advance.x / 64.0, slot->advance.y / 64.0);
+				advance.x = character.x_advance;
+				advance.y = character.y_advance;
 			}
 		}
 	}
 
 	if (ch->found) {
-		ERR_FAIL_COND_V(ch->texture_idx < -1 || ch->texture_idx >= font->textures.size(), 0);
+		ERR_FAIL_COND_V(ch->texture_idx < -1 || ch->texture_idx >= font->textures.size(), Vector2());
 
 		if (!p_advance_only && ch->texture_idx != -1) {
 			Point2 cpos = p_pos;
@@ -325,8 +337,11 @@ float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char3
 			VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, ch->rect.size), texture, ch->rect_uv, modulate, false, RID(), false);
 		}
 
-		advance = ch->advance;
+		advance.x = ch->x_advance;
+		advance.y = ch->y_advance;
 	}
+
+	advance += _get_kerning_advance(font, p_char, p_next);
 
 	return advance;
 }
@@ -334,7 +349,8 @@ float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, char3
 DynamicFontAtSize::Character DynamicFontAtSize::Character::not_found() {
 	Character ch;
 	ch.texture_idx = -1;
-	ch.advance = 0;
+	ch.x_advance = 0;
+	ch.y_advance = 0;
 	ch.h_align = 0;
 	ch.v_align = 0;
 	ch.found = false;
@@ -435,7 +451,7 @@ DynamicFontAtSize::TexturePosition DynamicFontAtSize::_find_texture_pos_for_glyp
 	return ret;
 }
 
-DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float advance) {
+DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap bitmap, int yofs, int xofs, float x_advance, float y_advance) {
 	int w = bitmap.width;
 	int h = bitmap.rows;
 
@@ -510,7 +526,8 @@ DynamicFontAtSize::Character DynamicFontAtSize::_bitmap_to_character(FT_Bitmap b
 	Character chr;
 	chr.h_align = xofs * scale_color_font / oversampling;
 	chr.v_align = ascent - (yofs * scale_color_font / oversampling); // + ascent - descent;
-	chr.advance = advance * scale_color_font / oversampling;
+	chr.x_advance = x_advance * scale_color_font / oversampling;
+	chr.y_advance = y_advance * scale_color_font / oversampling;
 	chr.texture_idx = tex_pos.index;
 	chr.found = true;
 
@@ -543,13 +560,26 @@ DynamicFontAtSize::Character DynamicFontAtSize::_make_outline_char(char32_t p_ch
 		goto cleanup_glyph;
 
 	glyph_bitmap = (FT_BitmapGlyph)glyph;
-	ret = _bitmap_to_character(glyph_bitmap->bitmap, glyph_bitmap->top, glyph_bitmap->left, glyph->advance.x / 65536.0);
+	ret = _bitmap_to_character(glyph_bitmap->bitmap, glyph_bitmap->top, glyph_bitmap->left, glyph->advance.x / 65536.0, glyph->advance.y / 65536.0);
 
 cleanup_glyph:
 	FT_Done_Glyph(glyph);
 cleanup_stroker:
 	FT_Stroker_Done(stroker);
 	return ret;
+}
+
+Vector2 DynamicFontAtSize::_get_kerning_advance(const DynamicFontAtSize *font, char32_t p_char, char32_t p_next) const {
+	Vector2 advance;
+
+	if (p_next) {
+		FT_Vector kerning;
+		FT_Get_Kerning(font->face, FT_Get_Char_Index(font->face, p_char), FT_Get_Char_Index(font->face, p_next), FT_KERNING_DEFAULT, &kerning);
+		advance.x = (kerning.x / 64.0) / oversampling;
+		advance.y = (kerning.y / 64.0) / oversampling;
+	}
+
+	return advance;
 }
 
 void DynamicFontAtSize::_update_char(char32_t p_char) {
@@ -592,7 +622,7 @@ void DynamicFontAtSize::_update_char(char32_t p_char) {
 	} else {
 		error = FT_Render_Glyph(face->glyph, font->antialiased ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO);
 		if (!error)
-			character = _bitmap_to_character(slot->bitmap, slot->bitmap_top, slot->bitmap_left, slot->advance.x / 64.0);
+			character = _bitmap_to_character(slot->bitmap, slot->bitmap_top, slot->bitmap_left, slot->advance.x / 64.0, slot->advance.y / 64.0);
 	}
 
 	char_map[p_char] = character;
@@ -622,6 +652,9 @@ DynamicFontAtSize::DynamicFontAtSize() {
 }
 
 DynamicFontAtSize::~DynamicFontAtSize() {
+	if (face) {
+		FT_Done_Face(face);
+	}
 	if (valid) {
 		FT_Done_FreeType(library);
 	}
@@ -664,6 +697,10 @@ void DynamicFont::_reload_cache() {
 void DynamicFont::set_font_data(const Ref<DynamicFontData> &p_data) {
 	data = p_data;
 	_reload_cache();
+
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+	TextDrawer::get_singleton()->clear_cache();
+#endif
 
 	emit_changed();
 	_change_notify();
@@ -842,9 +879,9 @@ bool DynamicFont::has_outline() const {
 	return outline_cache_id.outline_size > 0;
 }
 
-float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, bool p_outline) const {
+Vector2 DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, bool p_outline) const {
 	if (!data_at_size.is_valid())
-		return 0;
+		return Vector2();
 
 	int spacing = spacing_char;
 	if (p_char == ' ') {
@@ -855,9 +892,9 @@ float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_
 		if (outline_data_at_size.is_valid() && outline_cache_id.outline_size > 0) {
 			outline_data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate * outline_color, fallback_outline_data_at_size, false, true); // Draw glyph outline.
 		}
-		return data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, fallback_data_at_size, true, false) + spacing; // Return advance of the base glyph.
+		return data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, fallback_data_at_size, true, false) + Vector2(spacing, 0); // Return advance of the base glyph.
 	} else {
-		return data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, fallback_data_at_size, false, false) + spacing; // Draw base glyph and return advance.
+		return data_at_size->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, fallback_data_at_size, false, false) + Vector2(spacing, 0); // Draw base glyph and return advance.
 	}
 }
 

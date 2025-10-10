@@ -41,6 +41,11 @@
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual_server.h"
 
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+#include "modules/text_drawer/text_drawer.h"
+#endif
+
 Mutex CanvasItemMaterial::material_mutex;
 SelfList<CanvasItemMaterial>::List *CanvasItemMaterial::dirty_materials = NULL;
 Map<CanvasItemMaterial::MaterialKey, CanvasItemMaterial::ShaderData> CanvasItemMaterial::shader_map;
@@ -859,14 +864,23 @@ void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND(p_font.is_null());
-	p_font->draw(canvas_item, p_pos, p_text, p_modulate, p_clip_w);
+
+#ifdef MODULE_TEXT_DRAWER_ENABLED
+	Ref<DynamicFont> font = p_font;
+	if (font.is_valid()) {
+		TextDrawer::get_singleton()->draw(font, canvas_item, p_pos, p_text, p_modulate, p_clip_w);
+	} else
+#endif
+	{
+		p_font->draw(canvas_item, p_pos, p_text, p_modulate, p_clip_w);
+	}
 }
 
-float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_char, const String &p_next, const Color &p_modulate) {
-	ERR_FAIL_COND_V_MSG(!drawing, 0, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
+Vector2 CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_char, const String &p_next, const Color &p_modulate) {
+	ERR_FAIL_COND_V_MSG(!drawing, Vector2(), "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
-	ERR_FAIL_COND_V(p_char.length() != 1, 0);
-	ERR_FAIL_COND_V(p_font.is_null(), 0);
+	ERR_FAIL_COND_V(p_char.length() != 1, Vector2());
+	ERR_FAIL_COND_V(p_font.is_null(), Vector2());
 
 	if (p_font->has_outline()) {
 		p_font->draw_char(canvas_item, p_pos, p_char[0], p_next.c_str()[0], Color(1, 1, 1), true);
