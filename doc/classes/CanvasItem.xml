@@ -38,7 +38,7 @@
 			</description>
 		</method>
 		<method name="draw_char">
-			<return type="Vector2" />
+			<return type="float" />
 			<argument index="0" name="font" type="Font" />
 			<argument index="1" name="position" type="Vector2" />
 			<argument index="2" name="char" type="String" />

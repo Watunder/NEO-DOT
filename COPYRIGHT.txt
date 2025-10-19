@@ -189,12 +189,6 @@ Copyright: 1995-2019, The PNG Reference Library Authors.
  1995-1996, Guy Eric Schalnat, Group 42, Inc.
 License: Zlib
 
-Files: ./thirdparty/libraqm/
-Comment: libraqm
-Copyright: 2015 Information Technology Authority (ITA).
- 2016-2025 Khaled Hosny
-License: MIT
-
 Files: ./thirdparty/libwebp/
 Comment: WebP codec
 Copyright: 2010, Google Inc.
@@ -317,11 +311,6 @@ Files: ./thirdparty/recastnavigation/
 Comment: Recast
 Copyright: 2009, Mikko Mononen
 License: Zlib
-
-Files: ./thirdparty/sheenbidi/
-Comment: sheenbidi
-Copyright: 2025, Muhammad Tayyab Akram
-License: Apache 2.0
 
 Files: ./thirdparty/squish/
 Comment: libSquish
