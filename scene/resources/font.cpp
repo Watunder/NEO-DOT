@@ -70,14 +70,14 @@ void Font::draw(RID p_canvas_item, const Point2 &p_pos, const String &p_text, co
 		if (p_clip_w >= 0 && (ofs.x + width) > p_clip_w)
 			break; //clip
 
-		ofs += draw_char(p_canvas_item, p_pos + ofs, p_text[i], p_text[i + 1], with_outline ? p_outline_modulate : p_modulate, with_outline);
+		ofs.x += draw_char(p_canvas_item, p_pos + ofs, p_text[i], p_text[i + 1], with_outline ? p_outline_modulate : p_modulate, with_outline);
 		++chars_drawn;
 	}
 
 	if (has_outline()) {
 		ofs = Vector2(0, 0);
 		for (int i = 0; i < chars_drawn; i++) {
-			ofs += draw_char(p_canvas_item, p_pos + ofs, p_text[i], p_text[i + 1], p_modulate, false);
+			ofs.x += draw_char(p_canvas_item, p_pos + ofs, p_text[i], p_text[i + 1], p_modulate, false);
 		}
 	}
 }
@@ -137,7 +137,7 @@ PoolVector<int> BitmapFont::_get_chars() const {
 		chars.push_back(c->rect.size.y);
 		chars.push_back(c->h_align);
 		chars.push_back(c->v_align);
-		chars.push_back(c->x_advance);
+		chars.push_back(c->advance);
 	}
 
 	return chars;
@@ -285,11 +285,11 @@ Error BitmapFont::create_from_fnt(const String &p_file) {
 			int texture = 0;
 			if (keys.has("page"))
 				texture = keys["page"].to_int();
-			int x_advance = -1;
+			int advance = -1;
 			if (keys.has("xadvance"))
-				x_advance = keys["xadvance"].to_int();
+				advance = keys["xadvance"].to_int();
 
-			add_char(idx, texture, rect, ofs, x_advance);
+			add_char(idx, texture, rect, ofs, advance);
 
 		} else if (type == "kerning") {
 			char32_t first = 0, second = 0;
@@ -369,15 +369,15 @@ BitmapFont::Character BitmapFont::get_character(char32_t p_char) const {
 	return char_map[p_char];
 };
 
-void BitmapFont::add_char(char32_t p_char, int p_texture_idx, const Rect2 &p_rect, const Size2 &p_align, float p_x_advance) {
-	if (p_x_advance < 0)
-		p_x_advance = p_rect.size.width;
+void BitmapFont::add_char(char32_t p_char, int p_texture_idx, const Rect2 &p_rect, const Size2 &p_align, float p_advance) {
+	if (p_advance < 0)
+		p_advance = p_rect.size.width;
 
 	Character c;
 	c.rect = p_rect;
 	c.texture_idx = p_texture_idx;
 	c.v_align = p_align.y;
-	c.x_advance = p_x_advance;
+	c.advance = p_advance;
 	c.h_align = p_align.x;
 
 	char_map[p_char] = c;
@@ -494,16 +494,16 @@ Ref<BitmapFont> BitmapFont::get_fallback() const {
 	return fallback;
 }
 
-Vector2 BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, bool p_outline) const {
+float BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p_char, char32_t p_next, const Color &p_modulate, bool p_outline) const {
 	const Character *c = char_map.getptr(p_char);
 
 	if (!c) {
 		if (fallback.is_valid())
 			return fallback->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, p_outline);
-		return Vector2();
+		return 0;
 	}
 
-	ERR_FAIL_COND_V(c->texture_idx < -1 || c->texture_idx >= textures.size(), Vector2());
+	ERR_FAIL_COND_V(c->texture_idx < -1 || c->texture_idx >= textures.size(), 0);
 	if (!p_outline && c->texture_idx != -1) {
 		Point2 cpos = p_pos;
 		cpos.x += c->h_align;
@@ -512,7 +512,7 @@ Vector2 BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, char32_t p
 		VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, c->rect.size), textures[c->texture_idx]->get_rid(), c->rect, p_modulate, false, RID(), false);
 	}
 
-	return Vector2(get_char_size(p_char, p_next).width, 0);
+	return get_char_size(p_char, p_next).width;
 }
 
 Size2 BitmapFont::get_char_size(char32_t p_char, char32_t p_next) const {
@@ -524,7 +524,7 @@ Size2 BitmapFont::get_char_size(char32_t p_char, char32_t p_next) const {
 		return Size2();
 	}
 
-	Size2 ret(c->x_advance, c->rect.size.y);
+	Size2 ret(c->advance, c->rect.size.y);
 
 	if (p_next) {
 		KerningPairKey kpk;
