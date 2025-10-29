@@ -140,7 +140,7 @@ void main() {
 
 #elif defined(USE_ASYM_PANO)
 
-	// When an asymmetrical projection matrix is used (applicable for stereoscopic rendering i.e. VR) we need to do this calculation per fragment to get a perspective correct result.
+	// When an asymmetrical projection matrix is used for stereoscopic rendering, we need to do this calculation per fragment to get a perspective correct result.
 	// Asymmetrical projection means the center of projection is no longer in the center of the screen but shifted.
 	// The Matrix[2][0] (= asym_proj.x) and Matrix[2][1] (= asym_proj.z) values are what provide the right shift in the image.
 

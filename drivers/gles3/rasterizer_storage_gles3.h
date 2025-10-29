@@ -1310,7 +1310,6 @@ public:
 					fbo(0) {}
 		} exposure;
 
-		// External FBO to render our final result to (mostly used for ARVR)
 		struct External {
 			GLuint fbo;
 			GLuint color;

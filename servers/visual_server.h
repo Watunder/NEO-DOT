@@ -605,7 +605,6 @@ public:
 
 	virtual RID viewport_create() = 0;
 
-	virtual void viewport_set_use_arvr(RID p_viewport, bool p_use_arvr) = 0;
 	virtual void viewport_set_size(RID p_viewport, int p_width, int p_height) = 0;
 	virtual void viewport_set_active(RID p_viewport, bool p_active) = 0;
 	virtual void viewport_set_parent_viewport(RID p_viewport, RID p_parent_viewport) = 0;
@@ -660,8 +659,6 @@ public:
 		VIEWPORT_MSAA_4X,
 		VIEWPORT_MSAA_8X,
 		VIEWPORT_MSAA_16X,
-		VIEWPORT_MSAA_EXT_2X,
-		VIEWPORT_MSAA_EXT_4X,
 	};
 
 	virtual void viewport_set_msaa(RID p_viewport, ViewportMSAA p_msaa) = 0;

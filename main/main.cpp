@@ -62,7 +62,6 @@
 #include "scene/main/viewport.h"
 #include "scene/register_scene_types.h"
 #include "scene/resources/packed_scene.h"
-#include "servers/arvr_server.h"
 #include "servers/audio_server.h"
 #include "servers/camera_server.h"
 #include "servers/physics_2d_server.h"
@@ -96,7 +95,6 @@ static MessageQueue *message_queue = NULL;
 // Initialized in setup2()
 static AudioServer *audio_server = NULL;
 static CameraServer *camera_server = NULL;
-static ARVRServer *arvr_server = NULL;
 static PhysicsServer *physics_server = NULL;
 static Physics2DServer *physics_2d_server = NULL;
 // We error out if setup2() doesn't turn this true
@@ -1266,9 +1264,6 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	audio_server = memnew(AudioServer);
 	audio_server->init();
 
-	// also init our arvr_server from here
-	arvr_server = memnew(ARVRServer);
-
 	// and finally setup this property under visual_server
 	VisualServer::get_singleton()->set_render_loop_enabled(!disable_render_loop);
 
@@ -2076,11 +2071,6 @@ void Main::cleanup(bool p_force) {
 #ifdef TOOLS_ENABLED
 	EditorNode::unregister_editor_types();
 #endif
-
-	if (arvr_server) {
-		// cleanup now before we pull the rug from underneath...
-		memdelete(arvr_server);
-	}
 
 	ImageLoader::cleanup();
 

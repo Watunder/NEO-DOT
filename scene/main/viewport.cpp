@@ -694,16 +694,6 @@ RID Viewport::get_viewport_rid() const {
 	return viewport;
 }
 
-void Viewport::set_use_arvr(bool p_use_arvr) {
-	arvr = p_use_arvr;
-
-	VS::get_singleton()->viewport_set_use_arvr(viewport, arvr);
-}
-
-bool Viewport::use_arvr() {
-	return arvr;
-}
-
 void Viewport::update_canvas_items() {
 	if (!is_inside_tree())
 		return;
@@ -2824,7 +2814,7 @@ int Viewport::gui_get_canvas_sort_index() {
 }
 
 void Viewport::set_msaa(MSAA p_msaa) {
-	ERR_FAIL_INDEX(p_msaa, 7);
+	ERR_FAIL_INDEX(p_msaa, 5);
 	if (msaa == p_msaa)
 		return;
 	msaa = p_msaa;
@@ -2939,9 +2929,6 @@ void Viewport::_validate_property(PropertyInfo &property) const {
 }
 
 void Viewport::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_use_arvr", "use"), &Viewport::set_use_arvr);
-	ClassDB::bind_method(D_METHOD("use_arvr"), &Viewport::use_arvr);
-
 	ClassDB::bind_method(D_METHOD("set_size", "size"), &Viewport::set_size);
 	ClassDB::bind_method(D_METHOD("get_size"), &Viewport::get_size);
 	ClassDB::bind_method(D_METHOD("set_world_2d", "world_2d"), &Viewport::set_world_2d);
@@ -3069,8 +3056,6 @@ void Viewport::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_process_picking", "ignore_paused"), &Viewport::_process_picking);
 
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "arvr"), "set_use_arvr", "use_arvr");
-
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "size"), "set_size", "get_size");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "size_override_stretch"), "set_size_override_stretch", "is_size_override_stretch_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "own_world"), "set_use_own_world", "is_using_own_world");
@@ -3079,7 +3064,7 @@ void Viewport::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "transparent_bg"), "set_transparent_background", "has_transparent_background");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "handle_input_locally"), "set_handle_input_locally", "is_handling_input_locally");
 	ADD_GROUP("Rendering", "");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "msaa", PROPERTY_HINT_ENUM, "Disabled,2x,4x,8x,16x,AndroidVR 2x,AndroidVR 4x"), "set_msaa", "get_msaa");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "msaa", PROPERTY_HINT_ENUM, "Disabled,2x,4x,8x,16x"), "set_msaa", "get_msaa");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fxaa"), "set_use_fxaa", "get_use_fxaa");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "debanding"), "set_use_debanding", "get_use_debanding");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "hdr"), "set_hdr", "get_hdr");
@@ -3188,7 +3173,6 @@ Viewport::Viewport() {
 	camera = NULL;
 	override_canvas_transform = false;
 	canvas_layers.insert(NULL); // This eases picking code (interpreted as the canvas of the Viewport)
-	arvr = false;
 	size_override = false;
 	size_override_stretch = false;
 	size_override_size = Size2(1, 1);

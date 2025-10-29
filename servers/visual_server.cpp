@@ -1694,7 +1694,6 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("camera_set_use_vertical_aspect", "camera", "enable"), &VisualServer::camera_set_use_vertical_aspect);
 
 	ClassDB::bind_method(D_METHOD("viewport_create"), &VisualServer::viewport_create);
-	ClassDB::bind_method(D_METHOD("viewport_set_use_arvr", "viewport", "use_arvr"), &VisualServer::viewport_set_use_arvr);
 	ClassDB::bind_method(D_METHOD("viewport_set_size", "viewport", "width", "height"), &VisualServer::viewport_set_size);
 	ClassDB::bind_method(D_METHOD("viewport_set_active", "viewport", "active"), &VisualServer::viewport_set_active);
 	ClassDB::bind_method(D_METHOD("viewport_set_parent_viewport", "viewport", "parent_viewport"), &VisualServer::viewport_set_parent_viewport);
@@ -2017,8 +2016,6 @@ void VisualServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(VIEWPORT_MSAA_4X);
 	BIND_ENUM_CONSTANT(VIEWPORT_MSAA_8X);
 	BIND_ENUM_CONSTANT(VIEWPORT_MSAA_16X);
-	BIND_ENUM_CONSTANT(VIEWPORT_MSAA_EXT_2X);
-	BIND_ENUM_CONSTANT(VIEWPORT_MSAA_EXT_4X);
 
 	BIND_ENUM_CONSTANT(VIEWPORT_USAGE_2D);
 	BIND_ENUM_CONSTANT(VIEWPORT_USAGE_2D_NO_SAMPLING);

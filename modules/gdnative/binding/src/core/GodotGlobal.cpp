@@ -63,7 +63,6 @@ const godot_gdnative_ext_nativescript_api_struct *nativescript_api = nullptr;
 const godot_gdnative_ext_nativescript_1_1_api_struct *nativescript_1_1_api = nullptr;
 const godot_gdnative_ext_pluginscript_api_struct *pluginscript_api = nullptr;
 const godot_gdnative_ext_android_api_struct *android_api = nullptr;
-const godot_gdnative_ext_arvr_api_struct *arvr_api = nullptr;
 const godot_gdnative_ext_videodecoder_api_struct *videodecoder_api = nullptr;
 const godot_gdnative_ext_net_api_struct *net_api = nullptr;
 const godot_gdnative_ext_net_3_2_api_struct *net_3_2_api = nullptr;
@@ -151,9 +150,6 @@ void Godot::gdnative_init(godot_gdnative_init_options *options) {
 			} break;
 			case GDNATIVE_EXT_ANDROID: {
 				godot::android_api = (const godot_gdnative_ext_android_api_struct *)godot::api->extensions[i];
-			} break;
-			case GDNATIVE_EXT_ARVR: {
-				godot::arvr_api = (const godot_gdnative_ext_arvr_api_struct *)godot::api->extensions[i];
 			} break;
 			case GDNATIVE_EXT_VIDEODECODER: {
 				godot::videodecoder_api = (const godot_gdnative_ext_videodecoder_api_struct *)godot::api->extensions[i];

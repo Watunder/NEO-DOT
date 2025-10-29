@@ -40,7 +40,6 @@
 #include "core/os/thread.h"
 #include "core/safe_refcount.h"
 #include "core/self_list.h"
-#include "servers/arvr/arvr_interface.h"
 
 class VisualServerScene {
 public:
@@ -537,7 +536,6 @@ public:
 	void render_empty_scene(RID p_scenario, RID p_shadow_atlas);
 
 	void render_camera(RID p_camera, RID p_scenario, Size2 p_viewport_size, RID p_shadow_atlas);
-	void render_camera(Ref<ARVRInterface> &p_interface, ARVRInterface::Eyes p_eye, RID p_camera, RID p_scenario, Size2 p_viewport_size, RID p_shadow_atlas);
 	void update_dirty_instances();
 
 	//probes

@@ -118,7 +118,6 @@ public:
 class VisualServerViewportDummy {
 public:
 	RID viewport_create() { return RID(); }
-	void viewport_set_use_arvr(RID p_viewport, bool p_use_arvr) {}
 	void viewport_set_size(RID p_viewport, int p_width, int p_height) {}
 	void viewport_attach_to_screen(RID p_viewport, const Rect2 &p_rect = Rect2(), int p_screen = 0) {}
 	void viewport_set_render_direct_to_screen(RID p_viewport, bool p_enable) {}
@@ -567,7 +566,6 @@ public:
 
 	BIND0R_DUMMY(RID, viewport_create)
 
-	BIND2_DUMMY(viewport_set_use_arvr, RID, bool)
 	BIND3_DUMMY(viewport_set_size, RID, int, int)
 
 	BIND2_DUMMY(viewport_set_active, RID, bool)
