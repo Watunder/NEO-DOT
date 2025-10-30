@@ -64,20 +64,11 @@ static Transform2D _canvas_get_transform(VisualServerViewport::Viewport *p_viewp
 	return xf;
 }
 
-void VisualServerViewport::_draw_3d(Viewport *p_viewport, ARVRInterface::Eyes p_eye) {
-	Ref<ARVRInterface> arvr_interface;
-	if (ARVRServer::get_singleton() != NULL) {
-		arvr_interface = ARVRServer::get_singleton()->get_primary_interface();
-	}
-
-	if (p_viewport->use_arvr && arvr_interface.is_valid()) {
-		VSG::scene->render_camera(arvr_interface, p_eye, p_viewport->camera, p_viewport->scenario, p_viewport->size, p_viewport->shadow_atlas);
-	} else {
-		VSG::scene->render_camera(p_viewport->camera, p_viewport->scenario, p_viewport->size, p_viewport->shadow_atlas);
-	}
+void VisualServerViewport::_draw_3d(Viewport *p_viewport) {
+	VSG::scene->render_camera(p_viewport->camera, p_viewport->scenario, p_viewport->size, p_viewport->shadow_atlas);
 }
 
-void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::Eyes p_eye) {
+void VisualServerViewport::_draw_viewport(Viewport *p_viewport) {
 	/* Camera should always be BEFORE any other 3D */
 
 	bool scenario_draw_canvas_bg = false; //draw canvas, or some layer of it, as BG for 3D instead of in front
@@ -103,7 +94,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::E
 	}
 
 	if (!scenario_draw_canvas_bg && can_draw_3d) {
-		_draw_3d(p_viewport, p_eye);
+		_draw_3d(p_viewport);
 	}
 
 	if (!p_viewport->hide_canvas) {
@@ -207,7 +198,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::E
 			if (!can_draw_3d) {
 				VSG::scene->render_empty_scene(p_viewport->scenario, p_viewport->shadow_atlas);
 			} else {
-				_draw_3d(p_viewport, p_eye);
+				_draw_3d(p_viewport);
 			}
 			scenario_draw_canvas_bg = false;
 		}
@@ -236,7 +227,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::E
 				if (!can_draw_3d) {
 					VSG::scene->render_empty_scene(p_viewport->scenario, p_viewport->shadow_atlas);
 				} else {
-					_draw_3d(p_viewport, p_eye);
+					_draw_3d(p_viewport);
 				}
 
 				scenario_draw_canvas_bg = false;
@@ -247,7 +238,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::E
 			if (!can_draw_3d) {
 				VSG::scene->render_empty_scene(p_viewport->scenario, p_viewport->shadow_atlas);
 			} else {
-				_draw_3d(p_viewport, p_eye);
+				_draw_3d(p_viewport);
 			}
 		}
 
@@ -256,16 +247,6 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport, ARVRInterface::E
 }
 
 void VisualServerViewport::draw_viewports() {
-	// get our arvr interface in case we need it
-	Ref<ARVRInterface> arvr_interface;
-
-	if (ARVRServer::get_singleton() != NULL) {
-		arvr_interface = ARVRServer::get_singleton()->get_primary_interface();
-
-		// process all our active interfaces
-		ARVRServer::get_singleton()->_process();
-	}
-
 	if (Engine::get_singleton()->is_editor_hint()) {
 		clear_color = GLOBAL_GET("rendering/environment/default_clear_color");
 	}
@@ -290,39 +271,7 @@ void VisualServerViewport::draw_viewports() {
 
 		VSG::storage->render_target_clear_used(vp->render_target);
 
-		if (vp->use_arvr && arvr_interface.is_valid()) {
-			// override our size, make sure it matches our required size
-			vp->size = arvr_interface->get_render_targetsize();
-			VSG::storage->render_target_set_size(vp->render_target, vp->size.x, vp->size.y);
-
-			// render mono or left eye first
-			ARVRInterface::Eyes leftOrMono = arvr_interface->is_stereo() ? ARVRInterface::EYE_LEFT : ARVRInterface::EYE_MONO;
-
-			// check for an external texture destination for our left eye/mono
-			VSG::storage->render_target_set_external_texture(vp->render_target, arvr_interface->get_external_texture_for_eye(leftOrMono), arvr_interface->get_external_depth_for_eye(leftOrMono));
-
-			// set our render target as current
-			VSG::rasterizer->set_current_render_target(vp->render_target);
-
-			// and draw left eye/mono
-			_draw_viewport(vp, leftOrMono);
-			arvr_interface->commit_for_eye(leftOrMono, vp->render_target, vp->viewport_to_screen_rect);
-
-			// render right eye
-			if (leftOrMono == ARVRInterface::EYE_LEFT) {
-				// check for an external texture destination for our right eye
-				VSG::storage->render_target_set_external_texture(vp->render_target, arvr_interface->get_external_texture_for_eye(ARVRInterface::EYE_RIGHT), arvr_interface->get_external_depth_for_eye(ARVRInterface::EYE_RIGHT));
-
-				// commit for eye may have changed the render target
-				VSG::rasterizer->set_current_render_target(vp->render_target);
-
-				_draw_viewport(vp, ARVRInterface::EYE_RIGHT);
-				arvr_interface->commit_for_eye(ARVRInterface::EYE_RIGHT, vp->render_target, vp->viewport_to_screen_rect);
-			}
-
-			// and for our frame timing, mark when we've finished committing our eyes
-			ARVRServer::get_singleton()->_mark_commit();
-		} else {
+		{
 			VSG::storage->render_target_set_external_texture(vp->render_target, 0, 0);
 			VSG::rasterizer->set_current_render_target(vp->render_target);
 
@@ -369,13 +318,6 @@ RID VisualServerViewport::viewport_create() {
 	viewport->viewport_render_direct_to_screen = false;
 
 	return rid;
-}
-
-void VisualServerViewport::viewport_set_use_arvr(RID p_viewport, bool p_use_arvr) {
-	Viewport *viewport = viewport_owner.getornull(p_viewport);
-	ERR_FAIL_COND(!viewport);
-
-	viewport->use_arvr = p_use_arvr;
 }
 
 void VisualServerViewport::viewport_set_size(RID p_viewport, int p_width, int p_height) {

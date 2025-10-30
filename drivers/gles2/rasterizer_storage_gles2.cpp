@@ -4975,47 +4975,6 @@ void RasterizerStorageGLES2::render_target_set_external_texture(RID p_render_tar
 		t->alloc_width = rt->height;
 
 		// Switch our texture on our frame buffer
-#if ANDROID_ENABLED
-		if (rt->msaa >= VS::VIEWPORT_MSAA_EXT_2X && rt->msaa <= VS::VIEWPORT_MSAA_EXT_4X) {
-			// This code only applies to the Oculus Go and Oculus Quest. Due to the the tiled nature
-			// of the GPU we can do a single render pass by rendering directly into our texture chains
-			// texture and apply MSAA as we render.
-
-			// On any other hardware these two modes are ignored and we do not have any MSAA,
-			// the normal MSAA modes need to be used to enable our two pass approach
-
-			// If we created a depth buffer before and we're now passed one, we need to clear it out
-			if (rt->external.depth != 0 && rt->external.depth_owned && p_depth_id != 0) {
-				glDeleteRenderbuffers(1, &rt->external.depth);
-				rt->external.depth_owned = false;
-				rt->external.depth = 0;
-			}
-
-			if (!rt->external.depth_owned) {
-				rt->external.depth = p_depth_id;
-			}
-
-			static const int msaa_value[] = { 2, 4 };
-			int msaa = msaa_value[rt->msaa - VS::VIEWPORT_MSAA_EXT_2X];
-
-			if (rt->external.depth == 0) {
-				rt->external.depth_owned = true;
-
-				// create a multisample depth buffer, we're not reusing Godots because Godot's didn't get created..
-				glGenRenderbuffers(1, &rt->external.depth);
-				glBindRenderbuffer(GL_RENDERBUFFER, rt->external.depth);
-				glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, config.depth_buffer_internalformat, rt->width, rt->height);
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->external.depth);
-			} else if (!rt->external.depth_owned) {
-				// we make an exception here, external plugin MUST make sure this is a proper multisample render buffer!
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->external.depth);
-			}
-
-			// and set our external texture as the texture...
-			glFramebufferTexture2DMultisample(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, p_texture_id, 0, msaa);
-
-		} else
-#endif
 		{
 			// if MSAA as on before, clear our render buffer
 			if (rt->external.depth != 0 && rt->external.depth_owned) {

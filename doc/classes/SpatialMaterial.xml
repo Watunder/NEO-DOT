@@ -202,7 +202,7 @@
 			[b]Note:[/b] this is only effective for objects whose geometry is point-based rather than triangle-based. See also [member params_point_size].
 		</member>
 		<member name="flags_use_shadow_to_opacity" type="bool" setter="set_flag" getter="get_flag" default="false">
-			If [code]true[/code], enables the "shadow to opacity" render mode where lighting modifies the alpha so shadowed areas are opaque and non-shadowed areas are transparent. Useful for overlaying shadows onto a camera feed in AR.
+			If [code]true[/code], enables the "shadow to opacity" render mode where lighting modifies the alpha so shadowed areas are opaque and non-shadowed areas are transparent.
 		</member>
 		<member name="flags_vertex_lighting" type="bool" setter="set_flag" getter="get_flag" default="false">
 			If [code]true[/code], lighting is calculated per vertex rather than per pixel. This may increase performance on low-end devices.
@@ -241,7 +241,6 @@
 		</member>
 		<member name="params_billboard_mode" type="int" setter="set_billboard_mode" getter="get_billboard_mode" enum="SpatialMaterial.BillboardMode" default="0">
 			Controls how the object faces the camera. See [enum BillboardMode].
-			[b]Note:[/b] Billboard mode is not suitable for VR because the left-right vector of the camera is not horizontal when the screen is attached to your head instead of on the table. See [url=https://github.com/godotengine/godot/issues/41567]GitHub issue #41567[/url] for details.
 		</member>
 		<member name="params_blend_mode" type="int" setter="set_blend_mode" getter="get_blend_mode" enum="SpatialMaterial.BlendMode" default="0">
 			The material's blend mode.
