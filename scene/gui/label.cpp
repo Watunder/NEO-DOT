@@ -373,7 +373,7 @@ void Label::regenerate_word_cache() {
 	WordCache *last = NULL;
 
 	for (int i = 0; i <= xl_text.length(); i++) {
-		char32_t current = i < xl_text.length() ? xl_text[i] : L' '; //always a space at the end, so the algo works
+		char32_t current = i < xl_text.length() ? xl_text[i] : U' '; //always a space at the end, so the algo works
 
 		if (uppercase)
 			current = String::char_uppercase(current);
