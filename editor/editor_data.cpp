@@ -82,7 +82,7 @@ void EditorHistory::_add_object(ObjectID p_object, const String &p_property, int
 	Reference *r = Object::cast_to<Reference>(obj);
 	Obj o;
 	if (r)
-		o.ref = REF(r);
+		o.ref = Ref<Reference>(r);
 	o.object = p_object;
 	o.property = p_property;
 	o.inspector_only = p_inspector_only;

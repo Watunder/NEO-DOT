@@ -119,8 +119,8 @@ public:
 
 	virtual String get_name();
 	virtual Ref<Texture> get_icon();
-	virtual RES get_edited_resource() const;
-	virtual void set_edited_resource(const RES &p_res);
+	virtual Ref<Resource> get_edited_resource() const;
+	virtual void set_edited_resource(const Ref<Resource> &p_res);
 	virtual void enable_editor();
 	virtual void reload_text();
 	virtual void apply_code();

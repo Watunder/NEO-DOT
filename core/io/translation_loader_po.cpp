@@ -33,7 +33,7 @@
 #include "core/os/file_access.h"
 #include "core/translation.h"
 
-RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
+Ref<Resource> TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 	enum Status {
 		STATUS_NONE,
 		STATUS_READING_ID,
@@ -64,7 +64,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 		if (is_eof && l.empty()) {
 			if (status == STATUS_READING_ID) {
 				memdelete(f);
-				ERR_FAIL_V_MSG(RES(), "Unexpected EOF while reading 'msgid' at: " + path + ":" + itos(line));
+				ERR_FAIL_V_MSG(Ref<Resource>(), "Unexpected EOF while reading 'msgid' at: " + path + ":" + itos(line));
 			} else {
 				break;
 			}
@@ -73,7 +73,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 		if (l.begins_with("msgid")) {
 			if (status == STATUS_READING_ID) {
 				memdelete(f);
-				ERR_FAIL_V_MSG(RES(), "Unexpected 'msgid', was expecting 'msgstr' while parsing: " + path + ":" + itos(line));
+				ERR_FAIL_V_MSG(Ref<Resource>(), "Unexpected 'msgid', was expecting 'msgstr' while parsing: " + path + ":" + itos(line));
 			}
 
 			if (msg_id != "") {
@@ -93,7 +93,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 		if (l.begins_with("msgstr")) {
 			if (status != STATUS_READING_ID) {
 				memdelete(f);
-				ERR_FAIL_V_MSG(RES(), "Unexpected 'msgstr', was expecting 'msgid' while parsing: " + path + ":" + itos(line));
+				ERR_FAIL_V_MSG(Ref<Resource>(), "Unexpected 'msgstr', was expecting 'msgid' while parsing: " + path + ":" + itos(line));
 			}
 
 			l = l.substr(6, l.length()).strip_edges();
@@ -110,7 +110,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 
 		if (!l.begins_with("\"") || status == STATUS_NONE) {
 			memdelete(f);
-			ERR_FAIL_V_MSG(RES(), "Invalid line '" + l + "' while parsing: " + path + ":" + itos(line));
+			ERR_FAIL_V_MSG(Ref<Resource>(), "Invalid line '" + l + "' while parsing: " + path + ":" + itos(line));
 		}
 
 		l = l.substr(1, l.length());
@@ -125,7 +125,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 
 		if (end_pos == -1) {
 			memdelete(f);
-			ERR_FAIL_V_MSG(RES(), "Expected '\"' at end of message while parsing: " + path + ":" + itos(line));
+			ERR_FAIL_V_MSG(Ref<Resource>(), "Expected '\"' at end of message while parsing: " + path + ":" + itos(line));
 		}
 
 		l = l.substr(0, end_pos);
@@ -149,7 +149,7 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 			config = msg_str;
 	}
 
-	ERR_FAIL_COND_V_MSG(config == "", RES(), "No config found in file: " + path + ".");
+	ERR_FAIL_COND_V_MSG(config == "", Ref<Resource>(), "No config found in file: " + path + ".");
 
 	Vector<String> configs = config.split("\n");
 	for (int i = 0; i < configs.size(); i++) {
@@ -171,12 +171,12 @@ RES TranslationLoaderPO::load_translation(FileAccess *f, Error *r_error) {
 	return translation;
 }
 
-RES TranslationLoaderPO::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> TranslationLoaderPO::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_CANT_OPEN;
 
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ);
-	ERR_FAIL_COND_V_MSG(!f, RES(), "Cannot open file '" + p_path + "'.");
+	ERR_FAIL_COND_V_MSG(!f, Ref<Resource>(), "Cannot open file '" + p_path + "'.");
 
 	return load_translation(f, r_error);
 }

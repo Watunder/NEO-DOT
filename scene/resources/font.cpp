@@ -591,7 +591,7 @@ BitmapFont::~BitmapFont() {
 
 ////////////
 
-RES ResourceFormatLoaderBMFont::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderBMFont::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
@@ -603,7 +603,7 @@ RES ResourceFormatLoaderBMFont::load(const String &p_path, const String &p_origi
 	if (err) {
 		if (r_error)
 			*r_error = err;
-		return RES();
+		return Ref<Resource>();
 	}
 
 	return font;

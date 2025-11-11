@@ -1536,7 +1536,7 @@ StringName Object::tr(const StringName &p_message) const {
 void Object::_clear_internal_resource_paths(const Variant &p_var) {
 	switch (p_var.get_type()) {
 		case Variant::OBJECT: {
-			RES r = p_var;
+			Ref<Resource> r = p_var;
 			if (!r.is_valid())
 				return;
 

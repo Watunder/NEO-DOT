@@ -283,7 +283,7 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 				case OBJECT_INTERNAL_RESOURCE: {
 					uint32_t index = f->get_32();
 					String path = res_path + "::" + itos(index);
-					RES res = ResourceLoader::load(path);
+					Ref<Resource> res = ResourceLoader::load(path);
 					if (res.is_null()) {
 						WARN_PRINT(String("Couldn't load resource: " + path).utf8().get_data());
 					}
@@ -305,7 +305,7 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 						path = remaps[path];
 					}
 
-					RES res = ResourceLoader::load(path, exttype);
+					Ref<Resource> res = ResourceLoader::load(path, exttype);
 
 					if (res.is_null()) {
 						WARN_PRINT(String("Couldn't load resource: " + path).utf8().get_data());
@@ -329,7 +329,7 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 							path = ProjectSettings::get_singleton()->localize_path(res_path.get_base_dir().plus_file(path));
 						}
 
-						RES res = ResourceLoader::load(path, exttype);
+						Ref<Resource> res = ResourceLoader::load(path, exttype);
 
 						if (res.is_null()) {
 							WARN_PRINT(String("Couldn't load resource: " + path).utf8().get_data());
@@ -596,7 +596,7 @@ Error ResourceInteractiveLoaderBinary::poll() {
 		if (remaps.has(path)) {
 			path = remaps[path];
 		}
-		RES res = ResourceLoader::load(path, external_resources[s].type);
+		Ref<Resource> res = ResourceLoader::load(path, external_resources[s].type);
 		if (res.is_null()) {
 			if (!ResourceLoader::get_abort_on_missing_resources()) {
 				ResourceLoader::notify_dependency_error(local_path, path, external_resources[s].type);
@@ -665,7 +665,7 @@ Error ResourceInteractiveLoaderBinary::poll() {
 		ERR_FAIL_V_MSG(ERR_FILE_CORRUPT, local_path + ":Resource type in resource field not a resource, type is: " + obj_class + ".");
 	}
 
-	RES res = RES(r);
+	Ref<Resource> res = Ref<Resource>(r);
 
 	r->set_path(path);
 	r->set_subindex(subindex);
@@ -1071,7 +1071,7 @@ Error ResourceFormatLoaderBinary::rename_dependencies(const String &p_path, cons
 		}
 
 		ERR_FAIL_COND_V(err != ERR_FILE_EOF, ERR_FILE_CORRUPT);
-		RES res = ria->get_resource();
+		Ref<Resource> res = ria->get_resource();
 		ERR_FAIL_COND_V(!res.is_valid(), ERR_FILE_CORRUPT);
 
 		return ResourceFormatSaverBinary::singleton->save(p_path, res);
@@ -1208,7 +1208,7 @@ void ResourceFormatSaverBinaryInstance::_write_variant(const Variant &p_property
 	write_variant(f, p_property, resource_set, external_resources, string_map, p_hint);
 }
 
-void ResourceFormatSaverBinaryInstance::write_variant(FileAccess *f, const Variant &p_property, Set<RES> &resource_set, Map<RES, int> &external_resources, Map<StringName, int> &string_map, const PropertyInfo &p_hint) {
+void ResourceFormatSaverBinaryInstance::write_variant(FileAccess *f, const Variant &p_property, Set<Ref<Resource>> &resource_set, Map<Ref<Resource>, int> &external_resources, Map<StringName, int> &string_map, const PropertyInfo &p_hint) {
 	switch (p_property.get_type()) {
 		case Variant::NIL: {
 			f->store_32(VARIANT_NIL);
@@ -1386,7 +1386,7 @@ void ResourceFormatSaverBinaryInstance::write_variant(FileAccess *f, const Varia
 		} break;
 		case Variant::OBJECT: {
 			f->store_32(VARIANT_OBJECT);
-			RES res = p_property;
+			Ref<Resource> res = p_property;
 			if (res.is_null()) {
 				f->store_32(OBJECT_EMPTY);
 				return; // don't save it
@@ -1525,7 +1525,7 @@ void ResourceFormatSaverBinaryInstance::write_variant(FileAccess *f, const Varia
 void ResourceFormatSaverBinaryInstance::_find_resources(const Variant &p_variant, bool p_main) {
 	switch (p_variant.get_type()) {
 		case Variant::OBJECT: {
-			RES res = p_variant.operator RefPtr();
+			Ref<Resource> res = p_variant.operator RefPtr();
 
 			if (res.is_null() || external_resources.has(res))
 				return;
@@ -1551,7 +1551,7 @@ void ResourceFormatSaverBinaryInstance::_find_resources(const Variant &p_variant
 				if (E->get().usage & PROPERTY_USAGE_STORAGE) {
 					Variant value = res->get(E->get().name);
 					if (E->get().usage & PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT) {
-						RES sres = value;
+						Ref<Resource> sres = value;
 						if (sres.is_valid()) {
 							NonPersistentKey npk;
 							npk.base = res;
@@ -1625,7 +1625,7 @@ int ResourceFormatSaverBinaryInstance::get_string_index(const String &p_string) 
 	return strings.size() - 1;
 }
 
-Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	Error err;
 	if (p_flags & ResourceSaver::FLAG_COMPRESS) {
 		FileAccessCompressed *fac = memnew(FileAccessCompressed);
@@ -1686,7 +1686,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 	List<ResourceData> resources;
 
 	{
-		for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
+		for (List<Ref<Resource>>::Element *E = saved_resources.front(); E; E = E->next()) {
 			ResourceData &rd = resources.push_back(ResourceData())->get();
 			rd.type = E->get()->get_class();
 
@@ -1732,10 +1732,10 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 
 	// save external resource table
 	f->store_32(external_resources.size()); //amount of external resources
-	Vector<RES> save_order;
+	Vector<Ref<Resource>> save_order;
 	save_order.resize(external_resources.size());
 
-	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
+	for (Map<Ref<Resource>, int>::Element *E = external_resources.front(); E; E = E->next()) {
 		save_order.write[E->get()] = E->key();
 	}
 
@@ -1750,8 +1750,8 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 	Vector<uint64_t> ofs_pos;
 	Set<int> used_indices;
 
-	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
-		RES r = E->get();
+	for (List<Ref<Resource>>::Element *E = saved_resources.front(); E; E = E->next()) {
+		Ref<Resource> r = E->get();
 		if (r->get_path() == "" || r->get_path().find("::") != -1) {
 			if (r->get_subindex() != 0) {
 				if (used_indices.has(r->get_subindex())) {
@@ -1763,8 +1763,8 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 		}
 	}
 
-	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
-		RES r = E->get();
+	for (List<Ref<Resource>>::Element *E = saved_resources.front(); E; E = E->next()) {
+		Ref<Resource> r = E->get();
 		if (r->get_path() == "" || r->get_path().find("::") != -1) {
 			if (r->get_subindex() == 0) {
 				int new_subindex = 1;
@@ -1828,17 +1828,17 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 	return OK;
 }
 
-Error ResourceFormatSaverBinary::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverBinary::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	String local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 	ResourceFormatSaverBinaryInstance saver;
 	return saver.save(local_path, p_resource, p_flags);
 }
 
-bool ResourceFormatSaverBinary::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverBinary::recognize(const Ref<Resource> &p_resource) const {
 	return true; //all recognized
 }
 
-void ResourceFormatSaverBinary::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverBinary::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	String base = p_resource->get_base_extension().to_lower();
 	p_extensions->push_back(base);
 	if (base != "res")

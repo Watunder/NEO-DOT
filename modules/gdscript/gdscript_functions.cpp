@@ -563,7 +563,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 			if (p_args[0]->get_type() == Variant::OBJECT) {
 				if (p_args[0]->is_ref()) {
 					Ref<WeakRef> wref = memnew(WeakRef);
-					REF r = *p_args[0];
+					Ref<Reference> r = *p_args[0];
 					if (r.is_valid()) {
 						wref->set_ref(r);
 					}

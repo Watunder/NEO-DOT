@@ -68,9 +68,9 @@ Ref<ResourceInteractiveLoader> _ResourceLoader::load_interactive(const String &p
 	return ResourceLoader::load_interactive(p_path, p_type_hint);
 }
 
-RES _ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p_no_cache) {
+Ref<Resource> _ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p_no_cache) {
 	Error err = OK;
-	RES ret = ResourceLoader::load(p_path, p_type_hint, p_no_cache, &err);
+	Ref<Resource> ret = ResourceLoader::load(p_path, p_type_hint, p_no_cache, &err);
 
 	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
 	return ret;
@@ -136,12 +136,12 @@ _ResourceLoader::_ResourceLoader() {
 	singleton = this;
 }
 
-Error _ResourceSaver::save(const String &p_path, const RES &p_resource, SaverFlags p_flags) {
+Error _ResourceSaver::save(const String &p_path, const Ref<Resource> &p_resource, SaverFlags p_flags) {
 	ERR_FAIL_COND_V_MSG(p_resource.is_null(), ERR_INVALID_PARAMETER, "Can't save empty resource to path '" + String(p_path) + "'.");
 	return ResourceSaver::save(p_path, p_resource, p_flags);
 }
 
-PoolVector<String> _ResourceSaver::get_recognized_extensions(const RES &p_resource) {
+PoolVector<String> _ResourceSaver::get_recognized_extensions(const Ref<Resource> &p_resource) {
 	ERR_FAIL_COND_V_MSG(p_resource.is_null(), PoolVector<String>(), "It's not a reference to a valid Resource object.");
 	List<String> exts;
 	ResourceSaver::get_recognized_extensions(p_resource, &exts);
@@ -2727,7 +2727,7 @@ Variant _ClassDB::instance(const StringName &p_class) const {
 
 	Reference *r = Object::cast_to<Reference>(obj);
 	if (r) {
-		return REF(r);
+		return Ref<Reference>(r);
 	} else {
 		return obj;
 	}

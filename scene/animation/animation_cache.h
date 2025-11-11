@@ -38,7 +38,7 @@ class AnimationCache : public Object {
 	GDCLASS(AnimationCache, Object);
 
 	struct Path {
-		RES resource;
+		Ref<Resource> resource;
 		Object *object;
 		Skeleton *skeleton; // haxor
 		Node *node;

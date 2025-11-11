@@ -462,11 +462,11 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			editor_data->get_undo_redo()->create_action(TTR("Paste Node(s)"), UndoRedo::MERGE_DISABLE, edited_scene);
 			editor_data->get_undo_redo()->add_do_method(editor_selection, "clear");
 
-			Map<RES, RES> resource_remap;
+			Map<Ref<Resource>, Ref<Resource>> resource_remap;
 			String target_scene = editor->get_edited_scene()->get_filename();
 			if (target_scene != clipboard_source_scene) {
 				if (!clipboard_resource_remap.has(target_scene)) {
-					Map<RES, RES> remap;
+					Map<Ref<Resource>, Ref<Resource>> remap;
 					for (List<Node *>::Element *E = node_clipboard.front(); E; E = E->next()) {
 						_create_remap_for_node(E->get(), remap);
 					}
@@ -2843,7 +2843,7 @@ void SceneTreeDock::_clear_clipboard() {
 	clipboard_resource_remap.clear();
 }
 
-void SceneTreeDock::_create_remap_for_node(Node *p_node, Map<RES, RES> &r_remap) {
+void SceneTreeDock::_create_remap_for_node(Node *p_node, Map<Ref<Resource>, Ref<Resource>> &r_remap) {
 	List<PropertyInfo> props;
 	p_node->get_property_list(&props);
 
@@ -2854,7 +2854,7 @@ void SceneTreeDock::_create_remap_for_node(Node *p_node, Map<RES, RES> &r_remap)
 
 		Variant v = p_node->get(E->get().name);
 		if (v.is_ref()) {
-			RES res = v;
+			Ref<Resource> res = v;
 			if (res.is_valid()) {
 				if ((res->get_path() == "" || res->get_path().find("::") > -1) && !r_remap.has(res)) {
 					_create_remap_for_resource(res, r_remap);
@@ -2868,7 +2868,7 @@ void SceneTreeDock::_create_remap_for_node(Node *p_node, Map<RES, RES> &r_remap)
 	}
 }
 
-void SceneTreeDock::_create_remap_for_resource(RES p_resource, Map<RES, RES> &r_remap) {
+void SceneTreeDock::_create_remap_for_resource(Ref<Resource> p_resource, Map<Ref<Resource>, Ref<Resource>> &r_remap) {
 	r_remap[p_resource] = p_resource->duplicate();
 
 	List<PropertyInfo> props;
@@ -2881,7 +2881,7 @@ void SceneTreeDock::_create_remap_for_resource(RES p_resource, Map<RES, RES> &r_
 
 		Variant v = p_resource->get(E->get().name);
 		if (v.is_ref()) {
-			RES res = v;
+			Ref<Resource> res = v;
 			if (res.is_valid()) {
 				if ((res->get_path() == "" || res->get_path().find("::") > -1) && !r_remap.has(res)) {
 					_create_remap_for_resource(res, r_remap);

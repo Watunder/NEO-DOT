@@ -91,7 +91,7 @@ class PacketPeerStream : public PacketPeer {
 	Error _poll_buffer() const;
 
 protected:
-	void _set_stream_peer(REF p_peer);
+	void _set_stream_peer(Ref<Reference> p_peer);
 	static void _bind_methods();
 
 public:

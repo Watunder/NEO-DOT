@@ -48,7 +48,7 @@ PoolVector<String> EditorFolding::_get_unfolds(const Object *p_object) {
 	return sections;
 }
 
-void EditorFolding::save_resource_folding(const RES &p_resource, const String &p_path) {
+void EditorFolding::save_resource_folding(const Ref<Resource> &p_resource, const String &p_path) {
 	Ref<ConfigFile> config;
 	config.instance();
 	PoolVector<String> unfolds = _get_unfolds(p_resource.ptr());
@@ -68,7 +68,7 @@ void EditorFolding::_set_unfolds(Object *p_object, const PoolVector<String> &p_u
 	}
 }
 
-void EditorFolding::load_resource_folding(RES p_resource, const String &p_path) {
+void EditorFolding::load_resource_folding(Ref<Resource> p_resource, const String &p_path) {
 	Ref<ConfigFile> config;
 	config.instance();
 
@@ -87,7 +87,7 @@ void EditorFolding::load_resource_folding(RES p_resource, const String &p_path) 
 	_set_unfolds(p_resource.ptr(), unfolds);
 }
 
-void EditorFolding::_fill_folds(const Node *p_root, const Node *p_node, Array &p_folds, Array &resource_folds, Array &nodes_folded, Set<RES> &resources) {
+void EditorFolding::_fill_folds(const Node *p_root, const Node *p_node, Array &p_folds, Array &resource_folds, Array &nodes_folded, Set<Ref<Resource>> &resources) {
 	if (p_root != p_node) {
 		if (!p_node->get_owner()) {
 			return; //not owned, bye
@@ -112,7 +112,7 @@ void EditorFolding::_fill_folds(const Node *p_root, const Node *p_node, Array &p
 	for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
 		if (E->get().usage & PROPERTY_USAGE_EDITOR) {
 			if (E->get().type == Variant::OBJECT) {
-				RES res = p_node->get(E->get().name);
+				Ref<Resource> res = p_node->get(E->get().name);
 				if (res.is_valid() && !resources.has(res) && res->get_path() != String() && !res->get_path().is_resource_file()) {
 					PoolVector<String> res_unfolds = _get_unfolds(res.ptr());
 					resource_folds.push_back(res->get_path());
@@ -138,7 +138,7 @@ void EditorFolding::save_scene_folding(const Node *p_scene, const String &p_path
 	config.instance();
 
 	Array unfolds, res_unfolds;
-	Set<RES> resources;
+	Set<Ref<Resource>> resources;
 	Array nodes_folded;
 	_fill_folds(p_scene, p_scene, unfolds, res_unfolds, nodes_folded, resources);
 
@@ -190,9 +190,9 @@ void EditorFolding::load_scene_folding(Node *p_scene, const String &p_path) {
 
 	for (int i = 0; i < res_unfolds.size(); i += 2) {
 		String path2 = res_unfolds[i];
-		RES res;
+		Ref<Resource> res;
 		if (ResourceCache::has(path2)) {
-			res = RES(ResourceCache::get(path2));
+			res = Ref<Resource>(ResourceCache::get(path2));
 		}
 		if (res.is_null()) {
 			continue;
@@ -217,7 +217,7 @@ bool EditorFolding::has_folding_data(const String &p_path) {
 	return FileAccess::exists(file);
 }
 
-void EditorFolding::_do_object_unfolds(Object *p_object, Set<RES> &resources) {
+void EditorFolding::_do_object_unfolds(Object *p_object, Set<Ref<Resource>> &resources) {
 	List<PropertyInfo> plist;
 	p_object->get_property_list(&plist);
 	String group_base;
@@ -259,7 +259,7 @@ void EditorFolding::_do_object_unfolds(Object *p_object, Set<RES> &resources) {
 		}
 
 		if (E->get().type == Variant::OBJECT) {
-			RES res = p_object->get(E->get().name);
+			Ref<Resource> res = p_object->get(E->get().name);
 			if (res.is_valid() && !resources.has(res) && res->get_path() != String() && !res->get_path().is_resource_file()) {
 				resources.insert(res);
 				_do_object_unfolds(res.ptr(), resources);
@@ -272,7 +272,7 @@ void EditorFolding::_do_object_unfolds(Object *p_object, Set<RES> &resources) {
 	}
 }
 
-void EditorFolding::_do_node_unfolds(Node *p_root, Node *p_node, Set<RES> &resources) {
+void EditorFolding::_do_node_unfolds(Node *p_root, Node *p_node, Set<Ref<Resource>> &resources) {
 	if (p_root != p_node) {
 		if (!p_node->get_owner()) {
 			return; //not owned, bye
@@ -290,7 +290,7 @@ void EditorFolding::_do_node_unfolds(Node *p_root, Node *p_node, Set<RES> &resou
 }
 
 void EditorFolding::unfold_scene(Node *p_scene) {
-	Set<RES> resources;
+	Set<Ref<Resource>> resources;
 	_do_node_unfolds(p_scene, p_scene, resources);
 }
 

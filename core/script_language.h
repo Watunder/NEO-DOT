@@ -217,7 +217,7 @@ struct ScriptCodeCompletionOption {
 	Kind kind;
 	String display;
 	String insert_text;
-	RES icon;
+	Ref<Resource> icon;
 	Variant default_value;
 
 	ScriptCodeCompletionOption() {
@@ -235,7 +235,7 @@ class ScriptCodeCompletionCache {
 	static ScriptCodeCompletionCache *singleton;
 
 public:
-	virtual RES get_cached_resource(const String &p_path) = 0;
+	virtual Ref<Resource> get_cached_resource(const String &p_path) = 0;
 
 	static ScriptCodeCompletionCache *get_singleton() { return singleton; }
 

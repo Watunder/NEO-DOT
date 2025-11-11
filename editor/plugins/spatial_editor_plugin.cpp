@@ -2762,7 +2762,7 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 			bool current = view_menu->get_popup()->is_item_checked(idx);
 			current = !current;
 			if (current) {
-				camera->set_environment(RES());
+				camera->set_environment(Ref<Resource>());
 			} else {
 				camera->set_environment(SpatialEditor::get_singleton()->get_viewport_environment());
 			}
@@ -3425,7 +3425,7 @@ AABB SpatialEditorViewport::_calculate_spatial_bounds(const Spatial *p_parent, b
 void SpatialEditorViewport::_create_preview(const Vector<String> &files) const {
 	for (int i = 0; i < files.size(); i++) {
 		String path = files[i];
-		RES res = ResourceLoader::load(path);
+		Ref<Resource> res = ResourceLoader::load(path);
 		ERR_CONTINUE(res.is_null());
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
 		Ref<Mesh> mesh = Ref<Mesh>(Object::cast_to<Mesh>(*res));
@@ -3475,7 +3475,7 @@ bool SpatialEditorViewport::_cyclical_dependency_exists(const String &p_target_s
 }
 
 bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const Point2 &p_point) {
-	RES res = ResourceLoader::load(path);
+	Ref<Resource> res = ResourceLoader::load(path);
 	ERR_FAIL_COND_V(res.is_null(), false);
 
 	Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
@@ -3549,7 +3549,7 @@ void SpatialEditorViewport::_perform_drop_data() {
 
 	for (int i = 0; i < selected_files.size(); i++) {
 		String path = selected_files[i];
-		RES res = ResourceLoader::load(path);
+		Ref<Resource> res = ResourceLoader::load(path);
 		if (res.is_null()) {
 			continue;
 		}
@@ -3591,7 +3591,7 @@ bool SpatialEditorViewport::can_drop_data_fw(const Point2 &p_point, const Varian
 
 			for (int i = 0; i < files.size(); i++) {
 				if (mesh_extensions.find(files[i].get_extension()) || scene_extensions.find(files[i].get_extension())) {
-					RES res = ResourceLoader::load(files[i]);
+					Ref<Resource> res = ResourceLoader::load(files[i]);
 					if (res.is_null()) {
 						continue;
 					}

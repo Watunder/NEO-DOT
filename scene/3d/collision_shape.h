@@ -43,7 +43,7 @@ class CollisionShape : public Spatial {
 	uint32_t owner_id;
 	CollisionObject *parent;
 
-	void resource_changed(RES res);
+	void resource_changed(Ref<Resource> res);
 	bool disabled;
 
 protected:

@@ -525,7 +525,7 @@ public:
 
 	void set_cursor_shape(CursorShape p_shape);
 	CursorShape get_cursor_shape() const;
-	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
+	virtual void set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
 	void GetMaskBitmaps(HBITMAP hSourceBitmap, COLORREF clrTransparent, OUT HBITMAP &hAndMaskBitmap, OUT HBITMAP &hXorMaskBitmap);
 
 	void set_native_icon(const String &p_filename);

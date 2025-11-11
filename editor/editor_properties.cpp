@@ -2070,7 +2070,7 @@ EditorPropertyRID::EditorPropertyRID() {
 ////////////// RESOURCE //////////////////////
 
 void EditorPropertyResource::_file_selected(const String &p_path) {
-	RES res = ResourceLoader::load(p_path);
+	Ref<Resource> res = ResourceLoader::load(p_path);
 
 	ERR_FAIL_COND_MSG(res.is_null(), "Cannot load resource from path '" + p_path + "'.");
 
@@ -2132,20 +2132,20 @@ void EditorPropertyResource::_menu_option(int p_which) {
 		} break;
 
 		case OBJ_MENU_EDIT: {
-			RES res = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 			if (!res.is_null()) {
 				emit_signal("resource_selected", get_edited_property(), res);
 			}
 		} break;
 		case OBJ_MENU_CLEAR: {
-			emit_changed(get_edited_property(), RES());
+			emit_changed(get_edited_property(), Ref<Resource>());
 			update_property();
 
 		} break;
 
 		case OBJ_MENU_MAKE_UNIQUE: {
-			RES res_orig = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res_orig = get_edited_object()->get(get_edited_property());
 			if (res_orig.is_null())
 				return;
 
@@ -2183,20 +2183,20 @@ void EditorPropertyResource::_menu_option(int p_which) {
 		} break;
 
 		case OBJ_MENU_SAVE: {
-			RES res = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res = get_edited_object()->get(get_edited_property());
 			if (res.is_null())
 				return;
 			EditorNode::get_singleton()->save_resource(res);
 		} break;
 
 		case OBJ_MENU_COPY: {
-			RES res = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 			EditorSettings::get_singleton()->set_resource_clipboard(res);
 
 		} break;
 		case OBJ_MENU_PASTE: {
-			RES res = EditorSettings::get_singleton()->get_resource_clipboard();
+			Ref<Resource> res = EditorSettings::get_singleton()->get_resource_clipboard();
 			emit_changed(get_edited_property(), res);
 			update_property();
 
@@ -2214,7 +2214,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 
 		} break;
 		case OBJ_MENU_SHOW_IN_FILE_SYSTEM: {
-			RES res = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 			FileSystemDock *file_system_dock = EditorNode::get_singleton()->get_filesystem_dock();
 			file_system_dock->navigate_to_path(res->get_path());
@@ -2223,7 +2223,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 			tab_container->set_current_tab(file_system_dock->get_position_in_parent());
 		} break;
 		default: {
-			RES res = get_edited_object()->get(get_edited_property());
+			Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 			if (p_which >= CONVERT_BASE_ID) {
 				int to_type = p_which - CONVERT_BASE_ID;
@@ -2294,7 +2294,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 				resp->call("set_instance_base_type", get_edited_object()->get_class());
 			}
 
-			res = RES(resp);
+			res = Ref<Resource>(resp);
 			emit_changed(get_edited_property(), res);
 			update_property();
 
@@ -2303,7 +2303,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 }
 
 void EditorPropertyResource::_resource_preview(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, ObjectID p_obj) {
-	RES p = get_edited_object()->get(get_edited_property());
+	Ref<Resource> p = get_edited_object()->get(get_edited_property());
 	if (p.is_valid() && p->get_instance_id() == p_obj) {
 		String type = p->get_class_name();
 
@@ -2331,7 +2331,7 @@ void EditorPropertyResource::_resource_preview(const String &p_path, const Ref<T
 
 void EditorPropertyResource::_update_menu_items() {
 	//////////////////// UPDATE MENU //////////////////////////
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 	menu->clear();
 
@@ -2418,14 +2418,14 @@ void EditorPropertyResource::_update_menu_items() {
 		menu->add_icon_item(get_icon("Clear", "EditorIcons"), TTR("Clear"), OBJ_MENU_CLEAR);
 		menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), TTR("Make Unique"), OBJ_MENU_MAKE_UNIQUE);
 		menu->add_icon_item(get_icon("Save", "EditorIcons"), TTR("Save"), OBJ_MENU_SAVE);
-		RES r = res;
+		Ref<Resource> r = res;
 		if (r.is_valid() && r->get_path().is_resource_file()) {
 			menu->add_separator();
 			menu->add_item(TTR("Show in FileSystem"), OBJ_MENU_SHOW_IN_FILE_SYSTEM);
 		}
 	}
 
-	RES cb = EditorSettings::get_singleton()->get_resource_clipboard();
+	Ref<Resource> cb = EditorSettings::get_singleton()->get_resource_clipboard();
 	bool paste_valid = false;
 	if (cb.is_valid()) {
 		if (base_type == "")
@@ -2484,7 +2484,7 @@ void EditorPropertyResource::_sub_inspector_property_keyed(const String &p_prope
 	emit_signal("property_keyed_with_value", String(get_edited_property()) + ":" + p_property, p_value, false);
 }
 
-void EditorPropertyResource::_sub_inspector_resource_selected(const RES &p_resource, const String &p_property) {
+void EditorPropertyResource::_sub_inspector_resource_selected(const Ref<Resource> &p_resource, const String &p_property) {
 	emit_signal("resource_selected", String(get_edited_property()) + ":" + p_property, p_resource);
 }
 
@@ -2507,7 +2507,7 @@ void EditorPropertyResource::_button_input(const Ref<InputEvent> &p_event) {
 }
 
 void EditorPropertyResource::_open_editor_pressed() {
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 	if (res.is_valid()) {
 		EditorNode::get_singleton()->call_deferred("edit_item_resource", res); //may clear the editor so do it deferred
 	}
@@ -2518,7 +2518,7 @@ void EditorPropertyResource::_fold_other_editors(Object *p_self) {
 		return;
 	}
 
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 	if (!res.is_valid())
 		return;
@@ -2580,7 +2580,7 @@ void EditorPropertyResource::_update_property_bg() {
 	update();
 }
 void EditorPropertyResource::update_property() {
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 	if (use_sub_inspector) {
 		if (res.is_valid() != assign->is_toggle_mode()) {
@@ -2652,7 +2652,7 @@ void EditorPropertyResource::update_property() {
 	}
 
 	preview->set_texture(Ref<Texture>());
-	if (res == RES()) {
+	if (res == Ref<Resource>()) {
 		assign->set_icon(Ref<Texture>());
 		assign->set_text(TTR("[empty]"));
 	} else {
@@ -2677,7 +2677,7 @@ void EditorPropertyResource::update_property() {
 }
 
 void EditorPropertyResource::_resource_selected() {
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 
 	if (res.is_null()) {
 		edit->set_pressed(true);
@@ -2761,7 +2761,7 @@ void EditorPropertyResource::_button_draw() {
 }
 
 Variant EditorPropertyResource::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
-	RES res = get_edited_object()->get(get_edited_property());
+	Ref<Resource> res = get_edited_object()->get(get_edited_property());
 	if (res.is_valid()) {
 		return EditorNode::get_singleton()->drag_resource(res, p_from);
 	}
@@ -2839,7 +2839,7 @@ void EditorPropertyResource::drop_data_fw(const Point2 &p_point, const Variant &
 
 		if (files.size() == 1) {
 			String file = files[0];
-			RES file_res = ResourceLoader::load(file);
+			Ref<Resource> file_res = ResourceLoader::load(file);
 			if (file_res.is_valid()) {
 				emit_changed(get_edited_property(), file_res);
 				update_property();

@@ -85,9 +85,9 @@ public:
 	virtual void set_syntax_highlighter(SyntaxHighlighter *p_highlighter) = 0;
 
 	virtual void apply_code() = 0;
-	virtual RES get_edited_resource() const = 0;
+	virtual Ref<Resource> get_edited_resource() const = 0;
 	virtual Vector<String> get_functions() = 0;
-	virtual void set_edited_resource(const RES &p_res) = 0;
+	virtual void set_edited_resource(const Ref<Resource> &p_res) = 0;
 	virtual void enable_editor() = 0;
 	virtual void reload_text() = 0;
 	virtual String get_name() = 0;
@@ -123,7 +123,7 @@ public:
 };
 
 typedef SyntaxHighlighter *(*CreateSyntaxHighlighterFunc)();
-typedef ScriptEditorBase *(*CreateScriptEditorFunc)(const RES &p_resource);
+typedef ScriptEditorBase *(*CreateScriptEditorFunc)(const Ref<Resource> &p_resource);
 
 class EditorScriptCodeCompletionCache;
 class FindInFilesDialog;
@@ -279,7 +279,7 @@ class ScriptEditor : public PanelContainer {
 	void _resave_scripts(const String &p_str);
 	void _reload_scripts();
 
-	bool _test_script_times_on_disk(RES p_for_script = Ref<Resource>());
+	bool _test_script_times_on_disk(Ref<Resource> p_for_script = Ref<Resource>());
 
 	void _add_recent_script(String p_path);
 	void _update_recent_scripts();
@@ -325,9 +325,9 @@ class ScriptEditor : public PanelContainer {
 	void _trim_trailing_whitespace(TextEdit *tx);
 
 	void _goto_script_line2(int p_line);
-	void _goto_script_line(REF p_script, int p_line);
-	void _set_execution(REF p_script, int p_line);
-	void _clear_execution(REF p_script);
+	void _goto_script_line(Ref<Reference> p_script, int p_line);
+	void _set_execution(Ref<Reference> p_script, int p_line);
+	void _clear_execution(Ref<Reference> p_script);
 	void _breaked(bool p_breaked, bool p_can_debug);
 	void _show_debugger(bool p_show);
 	void _update_window_menu();
@@ -422,8 +422,8 @@ public:
 
 	void ensure_select_current();
 
-	_FORCE_INLINE_ bool edit(const RES &p_resource, bool p_grab_focus = true) { return edit(p_resource, -1, 0, p_grab_focus); }
-	bool edit(const RES &p_resource, int p_line, int p_col, bool p_grab_focus = true);
+	_FORCE_INLINE_ bool edit(const Ref<Resource> &p_resource, bool p_grab_focus = true) { return edit(p_resource, -1, 0, p_grab_focus); }
+	bool edit(const Ref<Resource> &p_resource, int p_line, int p_col, bool p_grab_focus = true);
 
 	void get_breakpoints(List<String> *p_breakpoints);
 

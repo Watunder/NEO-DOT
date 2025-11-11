@@ -133,7 +133,7 @@ class SceneTreeDock : public VBoxContainer {
 
 	List<Node *> node_clipboard;
 	String clipboard_source_scene;
-	HashMap<String, Map<RES, RES>> clipboard_resource_remap;
+	HashMap<String, Map<Ref<Resource>, Ref<Resource>>> clipboard_resource_remap;
 
 	ScriptCreateDialog *script_create_dialog;
 	AcceptDialog *accept;
@@ -242,8 +242,8 @@ class SceneTreeDock : public VBoxContainer {
 	void _feature_profile_changed();
 
 	void _clear_clipboard();
-	void _create_remap_for_node(Node *p_node, Map<RES, RES> &r_remap);
-	void _create_remap_for_resource(RES p_resource, Map<RES, RES> &r_remap);
+	void _create_remap_for_node(Node *p_node, Map<Ref<Resource>, Ref<Resource>> &r_remap);
+	void _create_remap_for_resource(Ref<Resource> p_resource, Map<Ref<Resource>, Ref<Resource>> &r_remap);
 
 	bool profile_allow_editing;
 	bool profile_allow_script_editing;

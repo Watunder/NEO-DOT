@@ -672,7 +672,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 				return ERR_PARSE_ERROR;
 			}
 
-			REF ref = REF(Object::cast_to<Reference>(obj));
+			Ref<Reference> ref = Ref<Reference>(Object::cast_to<Reference>(obj));
 
 			get_token(p_stream, token, line, r_err_str);
 			if (token.type != TK_COMMA) {
@@ -749,21 +749,21 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			}
 
 			if (p_res_parser && id == "Resource" && p_res_parser->func) {
-				RES res;
+				Ref<Resource> res;
 				Error err = p_res_parser->func(p_res_parser->userdata, p_stream, res, line, r_err_str);
 				if (err)
 					return err;
 
 				value = res;
 			} else if (p_res_parser && id == "ExtResource" && p_res_parser->ext_func) {
-				RES res;
+				Ref<Resource> res;
 				Error err = p_res_parser->ext_func(p_res_parser->userdata, p_stream, res, line, r_err_str);
 				if (err)
 					return err;
 
 				value = res;
 			} else if (p_res_parser && id == "SubResource" && p_res_parser->sub_func) {
-				RES res;
+				Ref<Resource> res;
 				Error err = p_res_parser->sub_func(p_res_parser->userdata, p_stream, res, line, r_err_str);
 				if (err)
 					return err;
@@ -773,7 +773,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type == TK_STRING) {
 					String path = token.value;
-					RES res = ResourceLoader::load(path);
+					Ref<Resource> res = ResourceLoader::load(path);
 					if (res.is_null()) {
 						r_err_str = "Can't load resource at path: '" + path + "'.";
 						return ERR_PARSE_ERROR;
@@ -1560,7 +1560,7 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 				break; // don't save it
 			}
 
-			RES res = p_variant;
+			Ref<Resource> res = p_variant;
 			if (res.is_valid()) {
 				//is resource
 				String res_text;

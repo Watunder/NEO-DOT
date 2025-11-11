@@ -42,27 +42,27 @@ struct ETC1Header {
 	uint16_t origHeight;
 };
 
-RES ResourceFormatPKM::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatPKM::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_CANT_OPEN;
 
 	Error err;
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
 	if (!f)
-		return RES();
+		return Ref<Resource>();
 
 	FileAccessRef fref(f);
 	if (r_error)
 		*r_error = ERR_FILE_CORRUPT;
 
-	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Unable to open PKM texture file '" + p_path + "'.");
+	ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Unable to open PKM texture file '" + p_path + "'.");
 
 	// big endian
 	f->set_endian_swap(true);
 
 	ETC1Header h;
 	f->get_buffer((uint8_t *)&h.tag, sizeof(h.tag));
-	ERR_FAIL_COND_V_MSG(strncmp(h.tag, "PKM 10", sizeof(h.tag)), RES(), "Invalid or unsupported PKM texture file '" + p_path + "'.");
+	ERR_FAIL_COND_V_MSG(strncmp(h.tag, "PKM 10", sizeof(h.tag)), Ref<Resource>(), "Invalid or unsupported PKM texture file '" + p_path + "'.");
 
 	h.format = f->get_16();
 	h.texWidth = f->get_16();

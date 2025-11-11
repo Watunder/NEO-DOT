@@ -138,7 +138,7 @@ bool Listener::_can_gizmo_scale() const {
 	return false;
 }
 
-RES Listener::_get_gizmo_geometry() const {
+Ref<Resource> Listener::_get_gizmo_geometry() const {
 	Ref<ArrayMesh> mesh = memnew(ArrayMesh);
 
 	return mesh;

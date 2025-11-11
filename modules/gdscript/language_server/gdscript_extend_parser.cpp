@@ -241,7 +241,7 @@ void ExtendGDScriptParser::parse_class_symbol(const GDScriptParser::ClassNode *p
 
 		String value_text;
 		if (node->value.get_type() == Variant::OBJECT) {
-			RES res = node->value;
+			Ref<Resource> res = node->value;
 			if (res.is_valid() && !res->get_path().empty()) {
 				value_text = "preload(\"" + res->get_path() + "\")";
 				if (symbol.documentation.empty()) {

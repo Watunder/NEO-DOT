@@ -99,7 +99,7 @@ void CollisionShape::_notification(int p_what) {
 	}
 }
 
-void CollisionShape::resource_changed(RES res) {
+void CollisionShape::resource_changed(Ref<Resource> res) {
 	update_gizmo();
 }
 

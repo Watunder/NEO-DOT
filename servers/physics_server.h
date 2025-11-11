@@ -113,7 +113,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_shape(const RES &p_shape);
+	void set_shape(const Ref<Resource> &p_shape);
 	void set_shape_rid(const RID &p_shape);
 	RID get_shape_rid() const;
 
@@ -516,7 +516,7 @@ public:
 	virtual void soft_body_set_space(RID p_body, RID p_space) = 0;
 	virtual RID soft_body_get_space(RID p_body) const = 0;
 
-	virtual void soft_body_set_mesh(RID p_body, const REF &p_mesh) = 0;
+	virtual void soft_body_set_mesh(RID p_body, const Ref<Reference> &p_mesh) = 0;
 
 	virtual void soft_body_set_collision_layer(RID p_body, uint32_t p_layer) = 0;
 	virtual uint32_t soft_body_get_collision_layer(RID p_body) const = 0;

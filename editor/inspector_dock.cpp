@@ -83,16 +83,16 @@ void InspectorDock::_menu_option(int p_option) {
 			if (current) {
 				List<PropertyInfo> props;
 				current->get_property_list(&props);
-				Map<RES, RES> duplicates;
+				Map<Ref<Resource>, Ref<Resource>> duplicates;
 				for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
 					if (!(E->get().usage & PROPERTY_USAGE_STORAGE))
 						continue;
 
 					Variant v = current->get(E->get().name);
 					if (v.is_ref()) {
-						REF ref = v;
+						Ref<Reference> ref = v;
 						if (ref.is_valid()) {
-							RES res = ref;
+							Ref<Resource> res = ref;
 							if (res.is_valid()) {
 								if (!duplicates.has(res)) {
 									duplicates[res] = res->duplicate();
@@ -152,7 +152,7 @@ void InspectorDock::_load_resource(const String &p_type) {
 }
 
 void InspectorDock::_resource_file_selected(String p_file) {
-	RES res = ResourceLoader::load(p_file);
+	Ref<Resource> res = ResourceLoader::load(p_file);
 
 	if (res.is_null()) {
 		warning_dialog->set_text(TTR("Failed to load resource."));
@@ -168,7 +168,7 @@ void InspectorDock::_save_resource(bool save_as) const {
 
 	ERR_FAIL_COND(!Object::cast_to<Resource>(current_obj));
 
-	RES current_res = RES(Object::cast_to<Resource>(current_obj));
+	Ref<Resource> current_res = Ref<Resource>(Object::cast_to<Resource>(current_obj));
 
 	if (save_as)
 		editor->save_resource_as(current_res);
@@ -182,7 +182,7 @@ void InspectorDock::_unref_resource() const {
 
 	ERR_FAIL_COND(!Object::cast_to<Resource>(current_obj));
 
-	RES current_res = RES(Object::cast_to<Resource>(current_obj));
+	Ref<Resource> current_res = Ref<Resource>(Object::cast_to<Resource>(current_obj));
 	current_res->set_path("");
 	editor->edit_current();
 }
@@ -193,13 +193,13 @@ void InspectorDock::_copy_resource() const {
 
 	ERR_FAIL_COND(!Object::cast_to<Resource>(current_obj));
 
-	RES current_res = RES(Object::cast_to<Resource>(current_obj));
+	Ref<Resource> current_res = Ref<Resource>(Object::cast_to<Resource>(current_obj));
 
 	EditorSettings::get_singleton()->set_resource_clipboard(current_res);
 }
 
 void InspectorDock::_paste_resource() const {
-	RES r = EditorSettings::get_singleton()->get_resource_clipboard();
+	Ref<Resource> r = EditorSettings::get_singleton()->get_resource_clipboard();
 	if (r.is_valid()) {
 		editor->push_item(EditorSettings::get_singleton()->get_resource_clipboard().ptr(), String());
 	}
@@ -275,11 +275,11 @@ void InspectorDock::_resource_created() const {
 	editor->push_item(r);
 }
 
-void InspectorDock::_resource_selected(const RES &p_res, const String &p_property) const {
+void InspectorDock::_resource_selected(const Ref<Resource> &p_res, const String &p_property) const {
 	if (p_res.is_null())
 		return;
 
-	RES r = p_res;
+	Ref<Resource> r = p_res;
 	editor->push_item(r.operator->(), p_property);
 }
 

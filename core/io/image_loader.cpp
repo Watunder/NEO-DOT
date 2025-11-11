@@ -117,13 +117,13 @@ void ImageLoader::cleanup() {
 
 /////////////////
 
-RES ResourceFormatLoaderImage::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderImage::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ);
 	if (!f) {
 		if (r_error) {
 			*r_error = ERR_CANT_OPEN;
 		}
-		return RES();
+		return Ref<Resource>();
 	}
 
 	uint8_t header[4] = { 0, 0, 0, 0 };
@@ -135,7 +135,7 @@ RES ResourceFormatLoaderImage::load(const String &p_path, const String &p_origin
 		if (r_error) {
 			*r_error = ERR_FILE_UNRECOGNIZED;
 		}
-		ERR_FAIL_V(RES());
+		ERR_FAIL_V(Ref<Resource>());
 	}
 
 	String extension = f->get_pascal_string();
@@ -154,7 +154,7 @@ RES ResourceFormatLoaderImage::load(const String &p_path, const String &p_origin
 		if (r_error) {
 			*r_error = ERR_FILE_UNRECOGNIZED;
 		}
-		ERR_FAIL_V(RES());
+		ERR_FAIL_V(Ref<Resource>());
 	}
 
 	Ref<Image> image;
@@ -168,7 +168,7 @@ RES ResourceFormatLoaderImage::load(const String &p_path, const String &p_origin
 		if (r_error) {
 			*r_error = err;
 		}
-		return RES();
+		return Ref<Resource>();
 	}
 
 	if (r_error) {

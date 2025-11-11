@@ -39,7 +39,7 @@ ResourceFormatLoaderPluginScript::ResourceFormatLoaderPluginScript(PluginScriptL
 	_language = language;
 }
 
-RES ResourceFormatLoaderPluginScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderPluginScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
@@ -49,7 +49,7 @@ RES ResourceFormatLoaderPluginScript::load(const String &p_path, const String &p
 	Ref<PluginScript> scriptres(script);
 
 	Error err = script->load_source_code(p_path);
-	ERR_FAIL_COND_V(err != OK, RES());
+	ERR_FAIL_COND_V(err != OK, Ref<Resource>());
 
 	script->set_path(p_original_path);
 
@@ -80,7 +80,7 @@ ResourceFormatSaverPluginScript::ResourceFormatSaverPluginScript(PluginScriptLan
 	_language = language;
 }
 
-Error ResourceFormatSaverPluginScript::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverPluginScript::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	Ref<PluginScript> sqscr = p_resource;
 	ERR_FAIL_COND_V(sqscr.is_null(), ERR_INVALID_PARAMETER);
 
@@ -100,12 +100,12 @@ Error ResourceFormatSaverPluginScript::save(const String &p_path, const RES &p_r
 	return OK;
 }
 
-void ResourceFormatSaverPluginScript::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverPluginScript::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (Object::cast_to<PluginScript>(*p_resource)) {
 		p_extensions->push_back(_language->get_extension());
 	}
 }
 
-bool ResourceFormatSaverPluginScript::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverPluginScript::recognize(const Ref<Resource> &p_resource) const {
 	return Object::cast_to<PluginScript>(*p_resource) != NULL;
 }

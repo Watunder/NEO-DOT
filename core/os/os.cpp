@@ -226,7 +226,7 @@ OS::CursorShape OS::get_cursor_shape() const {
 	return CURSOR_ARROW;
 }
 
-void OS::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+void OS::set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
 }
 
 void OS::print_all_resources(String p_to_file) {

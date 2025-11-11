@@ -48,25 +48,25 @@ enum PVRFLags {
 
 };
 
-RES ResourceFormatPVR::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatPVR::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_CANT_OPEN;
 
 	Error err;
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
 	if (!f)
-		return RES();
+		return Ref<Resource>();
 
 	FileAccessRef faref(f);
 
-	ERR_FAIL_COND_V(err, RES());
+	ERR_FAIL_COND_V(err, Ref<Resource>());
 
 	if (r_error)
 		*r_error = ERR_FILE_CORRUPT;
 
 	uint32_t hsize = f->get_32();
 
-	ERR_FAIL_COND_V(hsize != 52, RES());
+	ERR_FAIL_COND_V(hsize != 52, Ref<Resource>());
 	uint32_t height = f->get_32();
 	uint32_t width = f->get_32();
 	uint32_t mipmaps = f->get_32();
@@ -75,7 +75,7 @@ RES ResourceFormatPVR::load(const String &p_path, const String &p_original_path,
 	f->seek(f->get_position() + 20); // bpp, rmask, gmask, bmask, amask
 	uint8_t pvrid[5] = { 0, 0, 0, 0, 0 };
 	f->get_buffer(pvrid, 4);
-	ERR_FAIL_COND_V(String((char *)pvrid) != "PVR!", RES());
+	ERR_FAIL_COND_V(String((char *)pvrid) != "PVR!", Ref<Resource>());
 	f->get_32(); // surfcount
 
 	/*
@@ -95,12 +95,12 @@ RES ResourceFormatPVR::load(const String &p_path, const String &p_original_path,
 	PoolVector<uint8_t> data;
 	data.resize(surfsize);
 
-	ERR_FAIL_COND_V(data.size() == 0, RES());
+	ERR_FAIL_COND_V(data.size() == 0, Ref<Resource>());
 
 	PoolVector<uint8_t>::Write w = data.write();
 	f->get_buffer(&w[0], surfsize);
 	err = f->get_error();
-	ERR_FAIL_COND_V(err != OK, RES());
+	ERR_FAIL_COND_V(err != OK, Ref<Resource>());
 
 	Image::Format format = Image::FORMAT_MAX;
 
@@ -148,7 +148,7 @@ RES ResourceFormatPVR::load(const String &p_path, const String &p_original_path,
 			format = Image::FORMAT_ETC;
 			break;
 		default:
-			ERR_FAIL_V_MSG(RES(), "Unsupported format in PVR texture: " + itos(flags & 0xFF) + ".");
+			ERR_FAIL_V_MSG(Ref<Resource>(), "Unsupported format in PVR texture: " + itos(flags & 0xFF) + ".");
 	}
 
 	w.release();
@@ -159,7 +159,7 @@ RES ResourceFormatPVR::load(const String &p_path, const String &p_original_path,
 		tex_flags |= Texture::FLAG_MIPMAPS;
 
 	Ref<Image> image = memnew(Image(width, height, mipmaps, format, data));
-	ERR_FAIL_COND_V(image->empty(), RES());
+	ERR_FAIL_COND_V(image->empty(), Ref<Resource>());
 
 	Ref<ImageTexture> texture = memnew(ImageTexture);
 	texture->create_from_image(image, tex_flags);

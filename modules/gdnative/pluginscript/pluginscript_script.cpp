@@ -88,7 +88,7 @@ Variant PluginScript::_new(const Variant **p_args, int p_argcount, Variant::Call
 		return Variant();
 	}
 
-	REF ref;
+	Ref<Reference> ref;
 	Object *owner = NULL;
 
 	if (get_instance_base_type() == "") {
@@ -104,7 +104,7 @@ Variant PluginScript::_new(const Variant **p_args, int p_argcount, Variant::Call
 
 	Reference *r = Object::cast_to<Reference>(owner);
 	if (r) {
-		ref = REF(r);
+		ref = Ref<Reference>(r);
 	}
 
 	PluginScriptInstance *instance = _create_instance(p_args, p_argcount, owner, r_error);

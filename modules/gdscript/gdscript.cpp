@@ -67,7 +67,7 @@ Variant GDScriptNativeClass::_new() {
 
 	Reference *ref = Object::cast_to<Reference>(o);
 	if (ref) {
-		return REF(ref);
+		return Ref<Reference>(ref);
 	} else {
 		return o;
 	}
@@ -128,7 +128,7 @@ Variant GDScript::_new(const Variant **p_args, int p_argcount, Variant::CallErro
 	}
 
 	r_error.error = Variant::CallError::CALL_OK;
-	REF ref;
+	Ref<Reference> ref;
 	Object *owner = NULL;
 
 	GDScript *_baseptr = this;
@@ -146,7 +146,7 @@ Variant GDScript::_new(const Variant **p_args, int p_argcount, Variant::CallErro
 
 	Reference *r = Object::cast_to<Reference>(owner);
 	if (r) {
-		ref = REF(r);
+		ref = Ref<Reference>(r);
 	}
 
 	GDScriptInstance *instance = _create_instance(p_args, p_argcount, owner, r != NULL, r_error);
@@ -2081,7 +2081,7 @@ Ref<GDScript> GDScriptLanguage::get_orphan_subclass(const String &p_qualified_na
 
 /*************** RESOURCE ***************/
 
-RES ResourceFormatLoaderGDScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderGDScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
@@ -2093,11 +2093,11 @@ RES ResourceFormatLoaderGDScript::load(const String &p_path, const String &p_ori
 		script->set_script_path(p_original_path); // script needs this.
 		script->set_path(p_original_path);
 		Error err = script->load_byte_code(p_path);
-		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load byte code from file '" + p_path + "'.");
+		ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Cannot load byte code from file '" + p_path + "'.");
 
 	} else {
 		Error err = script->load_source_code(p_path);
-		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load source code from file '" + p_path + "'.");
+		ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Cannot load source code from file '" + p_path + "'.");
 
 		script->set_script_path(p_original_path); // script needs this.
 		script->set_path(p_original_path);
@@ -2146,7 +2146,7 @@ void ResourceFormatLoaderGDScript::get_dependencies(const String &p_path, List<S
 	}
 }
 
-Error ResourceFormatSaverGDScript::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverGDScript::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	Ref<GDScript> sqscr = p_resource;
 	ERR_FAIL_COND_V(sqscr.is_null(), ERR_INVALID_PARAMETER);
 
@@ -2172,11 +2172,11 @@ Error ResourceFormatSaverGDScript::save(const String &p_path, const RES &p_resou
 	return OK;
 }
 
-void ResourceFormatSaverGDScript::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverGDScript::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (Object::cast_to<GDScript>(*p_resource)) {
 		p_extensions->push_back("gd");
 	}
 }
-bool ResourceFormatSaverGDScript::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverGDScript::recognize(const Ref<Resource> &p_resource) const {
 	return Object::cast_to<GDScript>(*p_resource) != NULL;
 }

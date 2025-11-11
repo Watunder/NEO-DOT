@@ -719,7 +719,7 @@ void AnimationPlayerEditor::_dialog_action(String p_file) {
 
 				ERR_FAIL_COND(!Object::cast_to<Resource>(*anim));
 
-				RES current_res = RES(Object::cast_to<Resource>(*anim));
+				Ref<Resource> current_res = Ref<Resource>(Object::cast_to<Resource>(*anim));
 
 				_animation_save_in_path(current_res, p_file);
 			}

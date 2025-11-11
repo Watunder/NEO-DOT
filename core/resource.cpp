@@ -151,13 +151,13 @@ Ref<Resource> Resource::duplicate_for_local_scene(Node *p_for_scene, Map<Ref<Res
 			continue;
 		Variant p = get(E->get().name);
 		if (p.get_type() == Variant::OBJECT) {
-			RES sr = p;
+			Ref<Resource> sr = p;
 			if (sr.is_valid()) {
 				if (sr->is_local_to_scene()) {
 					if (remap_cache.has(sr)) {
 						p = remap_cache[sr];
 					} else {
-						RES dupe = sr->duplicate_for_local_scene(p_for_scene, remap_cache);
+						Ref<Resource> dupe = sr->duplicate_for_local_scene(p_for_scene, remap_cache);
 						p = dupe;
 						remap_cache[sr] = dupe;
 					}
@@ -182,7 +182,7 @@ void Resource::configure_for_local_scene(Node *p_for_scene, Map<Ref<Resource>, R
 			continue;
 		Variant p = get(E->get().name);
 		if (p.get_type() == Variant::OBJECT) {
-			RES sr = p;
+			Ref<Resource> sr = p;
 			if (sr.is_valid()) {
 				if (sr->is_local_to_scene()) {
 					if (!remap_cache.has(sr)) {
@@ -210,7 +210,7 @@ Ref<Resource> Resource::duplicate(bool p_subresources) const {
 		if ((p.get_type() == Variant::DICTIONARY || p.get_type() == Variant::ARRAY)) {
 			r->set(E->get().name, p.duplicate(p_subresources));
 		} else if (p.get_type() == Variant::OBJECT && (p_subresources || (E->get().usage & PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE))) {
-			RES sr = p;
+			Ref<Resource> sr = p;
 			if (sr.is_valid()) {
 				r->set(E->get().name, sr->duplicate(p_subresources));
 			}
@@ -247,7 +247,7 @@ void Resource::notify_change_to_owners() {
 		Object *obj = ObjectDB::get_instance(E->get());
 		ERR_CONTINUE_MSG(!obj, "Object was deleted, while still owning a resource."); //wtf
 		//TODO store string
-		obj->call("resource_changed", RES(this));
+		obj->call("resource_changed", Ref<Resource>(this));
 	}
 }
 
@@ -261,7 +261,7 @@ uint32_t Resource::hash_edited_version() const {
 
 	for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
 		if (E->get().usage & PROPERTY_USAGE_STORAGE && E->get().type == Variant::OBJECT && E->get().hint == PROPERTY_HINT_RESOURCE_TYPE) {
-			RES res = get(E->get().name);
+			Ref<Resource> res = get(E->get().name);
 			if (res.is_valid()) {
 				hash = hash_djb2_one_32(res->hash_edited_version(), hash);
 			}

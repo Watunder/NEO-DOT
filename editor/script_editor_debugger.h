@@ -103,7 +103,7 @@ private:
 	String last_filter;
 	ScriptEditorDebuggerVariables *variables;
 	Map<ObjectID, ScriptEditorDebuggerInspectedObject *> remote_objects;
-	Set<RES> remote_dependencies;
+	Set<Ref<Resource>> remote_dependencies;
 	Set<ObjectID> unfold_cache;
 
 	VBoxContainer *errors_tab;

@@ -112,7 +112,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_shape(const RES &p_shape);
+	void set_shape(const Ref<Resource> &p_shape);
 	void set_shape_rid(const RID &p_shape);
 	RID get_shape_rid() const;
 

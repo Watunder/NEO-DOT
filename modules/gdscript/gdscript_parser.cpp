@@ -6022,7 +6022,7 @@ GDScriptParser::DataType GDScriptParser::_get_operation_type(const Variant::Oper
 	Variant::Type b_type = p_b.kind == DataType::BUILTIN ? p_b.builtin_type : Variant::OBJECT;
 
 	Variant a;
-	REF a_ref;
+	Ref<Reference> a_ref;
 	if (a_type == Variant::OBJECT) {
 		a_ref.instance();
 		a = a_ref;
@@ -6035,7 +6035,7 @@ GDScriptParser::DataType GDScriptParser::_get_operation_type(const Variant::Oper
 		}
 	}
 	Variant b;
-	REF b_ref;
+	Ref<Reference> b_ref;
 	if (b_type == Variant::OBJECT) {
 		b_ref.instance();
 		b = b_ref;

@@ -43,7 +43,7 @@ class EditorTexturePreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
 	virtual bool generate_small_preview_automatically() const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorTexturePreviewPlugin();
 };
@@ -54,7 +54,7 @@ class EditorImagePreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
 	virtual bool generate_small_preview_automatically() const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorImagePreviewPlugin();
 };
@@ -65,7 +65,7 @@ class EditorBitmapPreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
 	virtual bool generate_small_preview_automatically() const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorBitmapPreviewPlugin();
 };
@@ -73,7 +73,7 @@ public:
 class EditorPackedScenePreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 	virtual Ref<Texture> generate_from_path(const String &p_path, const Size2 &p_size) const;
 
 	EditorPackedScenePreviewPlugin();
@@ -102,7 +102,7 @@ protected:
 public:
 	virtual bool handles(const String &p_type) const;
 	virtual bool generate_small_preview_automatically() const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorMaterialPreviewPlugin();
 	~EditorMaterialPreviewPlugin();
@@ -111,7 +111,7 @@ public:
 class EditorScriptPreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorScriptPreviewPlugin();
 };
@@ -119,7 +119,7 @@ public:
 class EditorAudioStreamPreviewPlugin : public EditorResourcePreviewGenerator {
 public:
 	virtual bool handles(const String &p_type) const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorAudioStreamPreviewPlugin();
 };
@@ -145,7 +145,7 @@ protected:
 
 public:
 	virtual bool handles(const String &p_type) const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 
 	EditorMeshPreviewPlugin();
 	~EditorMeshPreviewPlugin();
@@ -167,7 +167,7 @@ protected:
 
 public:
 	virtual bool handles(const String &p_type) const;
-	virtual Ref<Texture> generate(const RES &p_from, const Size2 &p_size) const;
+	virtual Ref<Texture> generate(const Ref<Resource> &p_from, const Size2 &p_size) const;
 	virtual Ref<Texture> generate_from_path(const String &p_path, const Size2 &p_size) const;
 
 	EditorFontPreviewPlugin();
