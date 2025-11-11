@@ -31,7 +31,7 @@
 #ifndef EMWSPEER_H
 #define EMWSPEER_H
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"
 #include "core/io/packet_peer.h"
@@ -88,6 +88,6 @@ public:
 	~EMWSPeer();
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 #endif // LSWPEER_H

@@ -31,7 +31,7 @@
 #ifndef OBJECTID_H
 #define OBJECTID_H
 
-#include "core/int_types.h"
+#include "configs/platform_stdinc.h"
 
 typedef uint64_t ObjectID;
 

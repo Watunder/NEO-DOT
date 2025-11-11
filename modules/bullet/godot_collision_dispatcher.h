@@ -31,7 +31,7 @@
 #ifndef GODOT_COLLISION_DISPATCHER_H
 #define GODOT_COLLISION_DISPATCHER_H
 
-#include "core/int_types.h"
+#include "configs/platform_stdinc.h"
 
 #include <btBulletDynamicsCommon.h>
 

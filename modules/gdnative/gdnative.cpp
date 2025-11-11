@@ -217,7 +217,7 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 		}
 	}
 
-#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+#if defined(PLATFORM_WINDOWS) && defined(TOOLS_ENABLED)
 	if (!entry_lib_path.empty() && Engine::get_singleton()->is_editor_hint()) {
 		temp_library_path = entry_lib_path.get_base_dir().plus_file("~" + entry_lib_path.get_file());
 
@@ -303,7 +303,7 @@ bool GDNative::initialize() {
 		ERR_PRINT("No library set for this platform");
 		return false;
 	}
-#ifdef IPHONE_ENABLED
+#if defined(PLATFORM_APPLE) && TARGET_IOS
 	// On iOS we use static linking by default.
 	String path = "";
 
@@ -324,15 +324,15 @@ bool GDNative::initialize() {
 			path = OS::get_singleton()->get_executable_path().get_base_dir().plus_file(framework_path);
 		}
 	}
-#elif defined(ANDROID_ENABLED)
+#elif defined(PLATFORM_ANDROID)
 	// On Android dynamic libraries are located separately from resource assets,
 	// we should pass library name to dlopen(). The library name is flattened
 	// during export.
 	String path = lib_path.get_file();
-#elif defined(UWP_ENABLED)
+#elif TARGET_UWP
 	// On UWP we use a relative path from the app
 	String path = lib_path.replace("res://", "");
-#elif defined(OSX_ENABLED)
+#elif defined(PLATFORM_APPLE) && TARGET_OSX
 	// On OSX the exported libraries are located under the Frameworks directory.
 	// So we need to replace the library path.
 	String path = ProjectSettings::get_singleton()->globalize_path(lib_path);
@@ -458,7 +458,7 @@ bool GDNative::terminate() {
 	OS::get_singleton()->close_dynamic_library(native_handle);
 	native_handle = NULL;
 
-#if defined(WINDOWS_ENABLED) && defined(TOOLS_ENABLED)
+#if defined(PLATFORM_WINDOWS) && defined(TOOLS_ENABLED)
 	DirAccess *d = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	String temp_lib_path = library->get_temp_library_path();
 	if (d->file_exists(temp_lib_path)) {

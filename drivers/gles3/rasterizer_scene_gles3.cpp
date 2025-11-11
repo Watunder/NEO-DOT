@@ -1349,7 +1349,7 @@ void RasterizerSceneGLES3::_setup_geometry(RenderList::Element *e, const Transfo
 			if (particles->draw_order == VS::PARTICLES_DRAW_ORDER_VIEW_DEPTH && particles->particle_valid_histories[1]) {
 				glBindBuffer(GL_ARRAY_BUFFER, particles->particle_buffer_histories[1]); //modify the buffer, this was used 2 frames ago so it should be good enough for flushing
 				RasterizerGLES3Particle *particle_array;
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_EMSCRIPTEN
 				particle_array = static_cast<RasterizerGLES3Particle *>(glMapBufferRange(GL_ARRAY_BUFFER, 0, particles->amount * 24 * sizeof(float), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT));
 #else
 				PoolVector<RasterizerGLES3Particle> particle_vector;
@@ -1369,7 +1369,7 @@ void RasterizerSceneGLES3::_setup_geometry(RenderList::Element *e, const Transfo
 
 				sorter.sort(particle_array, particles->amount);
 
-#ifndef __EMSCRIPTEN__
+#ifndef PLATFORM_EMSCRIPTEN
 				glUnmapBuffer(GL_ARRAY_BUFFER);
 #else
 				particle_writer.release();

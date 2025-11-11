@@ -48,12 +48,9 @@
 #endif
 #include "thirdparty/misc/fast_float.h"
 
-#include <cstdint>
-
-#ifndef NO_USE_STDLIB
 #include <stdio.h>
 #include <stdlib.h>
-#endif
+#include <cstdint>
 
 #if defined(MINGW_ENABLED) || defined(_MSC_VER)
 #define snprintf _snprintf_s
@@ -1089,8 +1086,6 @@ String String::chr(char32_t p_char) {
 	return String(c);
 }
 String String::num(double p_num, int p_decimals) {
-#ifndef NO_USE_STDLIB
-
 	if (p_decimals > 16)
 		p_decimals = 16;
 
@@ -1152,83 +1147,6 @@ String String::num(double p_num, int p_decimals) {
 	}
 
 	return buf;
-#else
-
-	String s;
-	String sd;
-	/* integer part */
-
-	bool neg = p_num < 0;
-	p_num = ABS(p_num);
-	int intn = (int)p_num;
-
-	/* decimal part */
-
-	if (p_decimals > 0 || (p_decimals == -1 && (int)p_num != p_num)) {
-		double dec = p_num - (float)((int)p_num);
-
-		int digit = 0;
-		if (p_decimals > MAX_DIGITS)
-			p_decimals = MAX_DIGITS;
-
-		int dec_int = 0;
-		int dec_max = 0;
-
-		while (true) {
-			dec *= 10.0;
-			dec_int = dec_int * 10 + (int)dec % 10;
-			dec_max = dec_max * 10 + 9;
-			digit++;
-
-			if (p_decimals == -1) {
-				if (digit == MAX_DIGITS) //no point in going to infinite
-					break;
-
-				if ((dec - (float)((int)dec)) < 1e-6)
-					break;
-			}
-
-			if (digit == p_decimals)
-				break;
-		}
-		dec *= 10;
-		int last = (int)dec % 10;
-
-		if (last > 5) {
-			if (dec_int == dec_max) {
-				dec_int = 0;
-				intn++;
-			} else {
-				dec_int++;
-			}
-		}
-
-		String decimal;
-		for (int i = 0; i < digit; i++) {
-			char num[2] = { 0, 0 };
-			num[0] = '0' + dec_int % 10;
-			decimal = num + decimal;
-			dec_int /= 10;
-		}
-		sd = '.' + decimal;
-	}
-
-	if (intn == 0)
-
-		s = "0";
-	else {
-		while (intn) {
-			char32_t num = '0' + (intn % 10);
-			intn /= 10;
-			s = num + s;
-		}
-	}
-
-	s = s + sd;
-	if (neg)
-		s = "-" + s;
-	return s;
-#endif
 }
 
 String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
@@ -1371,8 +1289,6 @@ String String::num_real(double p_num) {
 }
 
 String String::num_scientific(double p_num) {
-#ifndef NO_USE_STDLIB
-
 	char buf[256];
 
 #if defined(__GNUC__) || defined(_MSC_VER)
@@ -1394,10 +1310,6 @@ String String::num_scientific(double p_num) {
 	buf[255] = 0;
 
 	return buf;
-#else
-
-	return String::num(p_num);
-#endif
 }
 
 CharString String::ascii(bool p_allow_extended) const {

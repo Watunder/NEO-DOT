@@ -156,7 +156,7 @@ private:
 
 	};
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 	Status status;
 	IP::ResolverID resolving;
 	int conn_port;

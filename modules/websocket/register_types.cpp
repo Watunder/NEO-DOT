@@ -31,7 +31,7 @@
 #include "register_types.h"
 #include "core/error_macros.h"
 #include "core/project_settings.h"
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 #include "emscripten.h"
 #include "emws_client.h"
 #include "emws_peer.h"
@@ -58,7 +58,7 @@ void register_websocket_types() {
 	_SET_HINT(WSS_OUT_BUF, 64, 4096);
 	_SET_HINT(WSS_OUT_PKT, 1024, 16384);
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	EMWSPeer::make_default();
 	EMWSClient::make_default();
 	EMWSServer::make_default();

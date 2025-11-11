@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 
 #include "wsl_peer.h"
 
@@ -347,4 +347,4 @@ WSLPeer::~WSLPeer() {
 	_data = NULL;
 }
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN

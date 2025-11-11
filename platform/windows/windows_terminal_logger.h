@@ -31,7 +31,8 @@
 #ifndef WINDOWS_TERMINAL_LOGGER_H
 #define WINDOWS_TERMINAL_LOGGER_H
 
-#ifdef WINDOWS_ENABLED
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
 #include "core/io/logger.h"
 

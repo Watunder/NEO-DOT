@@ -44,7 +44,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef ANDROID_ENABLED
+#ifndef PLATFORM_ANDROID
 #include <sys/statvfs.h>
 #endif
 

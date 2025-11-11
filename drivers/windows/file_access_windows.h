@@ -31,7 +31,8 @@
 #ifndef FILE_ACCESS_WINDOWS_H
 #define FILE_ACCESS_WINDOWS_H
 
-#ifdef WINDOWS_ENABLED
+#include "configs/platform_defines.h"
+#ifdef PLATFORM_WINDOWS
 
 #include "core/os/file_access.h"
 #include "core/os/memory.h"

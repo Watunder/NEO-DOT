@@ -31,13 +31,12 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-#include <stddef.h>
-
 /**
  * Basic definitions and simple functions to be used everywhere.
  */
 
 #include "configs/platform_stdinc.h"
+#include "core/error_list.h"
 
 #ifndef _STR
 #define _STR(m_x) #m_x
@@ -86,28 +85,6 @@ T *_nullptr() {
 #ifndef NULL
 #define NULL 0
 #endif
-
-/**
- * Windows badly defines a lot of stuff we'll never use. Undefine it.
- */
-
-#ifdef _WIN32
-#undef min // override standard definition
-#undef max // override standard definition
-#undef ERROR // override (really stupid) wingdi.h standard definition
-#undef DELETE // override (another really stupid) winnt.h standard definition
-#undef MessageBox // override winuser.h standard definition
-#undef MIN // override standard definition
-#undef MAX // override standard definition
-#undef CLAMP // override standard definition
-#undef Error
-#undef OK
-#undef CONNECT_DEFERRED // override from Windows SDK, clashes with Object enum
-#endif
-
-#include "core/int_types.h"
-
-#include "core/error_list.h"
 
 /** Generic ABS function, for math uses please use Math::abs */
 

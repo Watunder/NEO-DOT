@@ -30,17 +30,17 @@
 
 #include "ip_unix.h"
 
-#if defined(UNIX_ENABLED) || defined(WINDOWS_ENABLED)
+#if defined(UNIX_ENABLED) || defined(PLATFORM_WINDOWS)
 
 #include <string.h>
 
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 #include <stdio.h>
 #include <winsock2.h>
 // Needs to be included after winsocks2.h
 #include <windows.h>
 #include <ws2tcpip.h>
-#ifndef UWP_ENABLED
+#if !TARGET_UWP
 #if defined(__MINGW32__) && (!defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 4)
 // MinGW-w64 on Ubuntu 12.04 (our Travis build env) has bugs in this code where
 // some includes are missing in dependencies of iphlpapi.h for WINVER >= 0x0600 (Vista).
@@ -57,19 +57,19 @@
 #endif
 #else // UNIX
 #include <netdb.h>
-#ifdef ANDROID_ENABLED
+#ifdef PLATFORM_ANDROID
 // We could drop this file once we up our API level to 24,
 // where the NDK's ifaddrs.h supports to needed getifaddrs.
 #include "thirdparty/misc/ifaddrs-android.h"
 #else
-#ifdef __FreeBSD__
+#ifdef PLATFORM_FREEBSD
 #include <sys/types.h>
 #endif
 #include <ifaddrs.h>
 #endif
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#ifdef __FreeBSD__
+#ifdef PLATFORM_FREEBSD
 #include <netinet/in.h>
 #endif
 #include <net/if.h> // Order is important on OpenBSD, leave as last
@@ -125,9 +125,9 @@ IP_Address IP_Unix::_resolve_hostname(const String &p_hostname, Type p_type) {
 	return ip;
 }
 
-#if defined(WINDOWS_ENABLED)
+#if defined(PLATFORM_WINDOWS)
 
-#if defined(UWP_ENABLED)
+#if TARGET_UWP
 
 void IP_Unix::get_local_interfaces(Map<String, Interface_Info> *r_interfaces) const {
 	using namespace Windows::Networking;

@@ -106,13 +106,13 @@ def make_default_controller_mappings(target, source, env):
                 platform_mappings[current_platform][guid] = line
 
     platform_variables = {
-        "Linux": "#if X11_ENABLED",
-        "Windows": "#ifdef WINDOWS_ENABLED",
-        "Mac OS X": "#ifdef OSX_ENABLED",
-        "Android": "#if defined(__ANDROID__)",
-        "iOS": "#ifdef IPHONE_ENABLED",
-        "Javascript": "#ifdef JAVASCRIPT_ENABLED",
-        "UWP": "#ifdef UWP_ENABLED",
+        "Linux": "#if defined(PLATFORM_LINUX)",
+        "Windows": "#if defined(PLATFORM_WINDOWS)",
+        "UWP": "#if defined(PLATFORM_WINDOWS) && TARGET_UWP",
+        "Mac OS X": "#if defined(PLATFORM_APPLE) && TARGET_OSX",
+        "iOS": "#if defined(PLATFORM_APPLE) && TARGET_IOS",
+        "Android": "#if defined(PLATFORM_ANDROID)",
+        "Javascript": "#if defined(PLATFORM_EMSCRIPTEN)",
     }
 
     g.write("const char* DefaultControllerMappings::mappings[] = {\n")

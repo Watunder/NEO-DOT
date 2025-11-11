@@ -33,7 +33,7 @@
 #include "webrtc_data_channel.h"
 #include "webrtc_peer_connection.h"
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 #include "emscripten.h"
 #include "webrtc_peer_connection_js.h"
 #endif
@@ -50,7 +50,7 @@ void register_webrtc_types() {
 
 	_SET_HINT(WRTC_IN_BUF, 64, 4096);
 
-#ifdef JAVASCRIPT_ENABLED
+#ifdef PLATFORM_EMSCRIPTEN
 	WebRTCPeerConnectionJS::make_default();
 #elif defined(WEBRTC_GDNATIVE_ENABLED)
 	WebRTCPeerConnectionGDNative::make_default();

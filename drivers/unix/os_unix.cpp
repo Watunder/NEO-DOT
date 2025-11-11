@@ -39,12 +39,12 @@
 #include "drivers/unix/thread_posix.h"
 #include "servers/visual_server.h"
 
-#ifdef __APPLE__
+#if defined(PLATFORM_APPLE)
 #include <mach-o/dyld.h>
 #include <mach/mach_time.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(PLATFORM_FREEBSD) || defined(PLATFORM_OPENBSD) || defined(PLATFORM_NETBSD)
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #endif
@@ -65,7 +65,7 @@
 
 /// Clock Setup function (used by get_ticks_usec)
 static uint64_t _clock_start = 0;
-#if defined(__APPLE__)
+#if defined(PLATFORM_APPLE)
 static double _clock_scale = 0;
 static void _setup_clock() {
 	mach_timebase_info_data_t info;
@@ -75,7 +75,7 @@ static void _setup_clock() {
 	_clock_start = mach_absolute_time() * _clock_scale;
 }
 #else
-#if defined(CLOCK_MONOTONIC_RAW) && !defined(JAVASCRIPT_ENABLED) // This is a better clock on Linux.
+#if defined(CLOCK_MONOTONIC_RAW) && !defined(PLATFORM_EMSCRIPTEN) // This is a better clock on Linux.
 #define GODOT_CLOCK CLOCK_MONOTONIC_RAW
 #else
 #define GODOT_CLOCK CLOCK_MONOTONIC
@@ -244,7 +244,7 @@ void OS_Unix::delay_usec(uint32_t p_usec) const {
 	}
 }
 uint64_t OS_Unix::get_ticks_usec() const {
-#if defined(__APPLE__)
+#if defined(PLATFORM_APPLE)
 	uint64_t longtime = mach_absolute_time() * _clock_scale;
 #else
 	// Unchecked return. Static analyzers might complain.
@@ -259,7 +259,7 @@ uint64_t OS_Unix::get_ticks_usec() const {
 }
 
 Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
-#ifdef __EMSCRIPTEN__
+#ifdef PLATFORM_EMSCRIPTEN
 	// Don't compile this code at all to avoid undefined references.
 	// Actual virtual call goes to OS_JavaScript.
 	ERR_FAIL_V(ERR_BUG);
@@ -457,7 +457,7 @@ String OS_Unix::get_user_data_dir() const {
 }
 
 String OS_Unix::get_executable_path() const {
-#ifdef __linux__
+#ifdef PLATFORM_LINUX
 	//fix for running from a symlink
 	char buf[256];
 	memset(buf, 0, 256);
@@ -471,13 +471,13 @@ String OS_Unix::get_executable_path() const {
 		return OS::get_executable_path();
 	}
 	return b;
-#elif defined(__OpenBSD__) || defined(__NetBSD__)
+#elif defined(PLATFORM_OPENBSD) || defined(PLATFORM_NETBSD)
 	char resolved_path[MAXPATHLEN];
 
 	realpath(OS::get_executable_path().utf8().get_data(), resolved_path);
 
 	return String(resolved_path);
-#elif defined(__FreeBSD__)
+#elif defined(PLATFORM_FREEBSD)
 	int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
 	char buf[MAXPATHLEN];
 	size_t len = sizeof(buf);
@@ -488,7 +488,7 @@ String OS_Unix::get_executable_path() const {
 	String b;
 	b.parse_utf8(buf);
 	return b;
-#elif defined(__APPLE__)
+#elif defined(PLATFORM_APPLE)
 	char temp_path[1];
 	uint32_t buff_size = 1;
 	_NSGetExecutablePath(temp_path, &buff_size);

@@ -75,7 +75,7 @@ void EditorExportPlatformWindows::get_export_options(List<ExportOption> *r_optio
 	EditorExportPlatformPC::get_export_options(r_options);
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "codesign/enable"), false));
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "codesign/identity_type", PROPERTY_HINT_ENUM, "Select automatically,Use PKCS12 file (specify *.PFX/*.P12 file),Use certificate store (specify SHA1 hash)"), 0));
 #endif
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "codesign/identity", PROPERTY_HINT_GLOBAL_FILE, "*.pfx,*.p12"), ""));
@@ -108,7 +108,7 @@ void EditorExportPlatformWindows::_rcedit_add_data(const Ref<EditorExportPreset>
 		return;
 	}
 
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	// On non-Windows we need WINE to run rcedit
 	String wine_path = EditorSettings::get_singleton()->get("export/windows/wine");
 
@@ -172,7 +172,7 @@ void EditorExportPlatformWindows::_rcedit_add_data(const Ref<EditorExportPreset>
 		args.push_back(trademarks);
 	}
 
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	OS::get_singleton()->execute(rcedit_path, args, true);
 #else
 	// On non-Windows we need WINE to run rcedit
@@ -184,7 +184,7 @@ void EditorExportPlatformWindows::_rcedit_add_data(const Ref<EditorExportPreset>
 Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_preset, const String &p_path) {
 	List<String> args;
 
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	String signtool_path = EditorSettings::get_singleton()->get("export/windows/signtool");
 	if (signtool_path != String() && !FileAccess::exists(signtool_path)) {
 		ERR_PRINTS("Could not find signtool executable at " + signtool_path + ", aborting.");
@@ -207,7 +207,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 	args.push_back("sign");
 
 	//identity
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	int id_type = p_preset->get("codesign/identity_type");
 	if (id_type == 0) { //auto select
 		args.push_back("/a");
@@ -243,7 +243,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 
 	//password
 	if (p_preset->get("codesign/password") != "") {
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 		args.push_back("/p");
 #else
 		args.push_back("-pass");
@@ -254,7 +254,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 	//timestamp
 	if (p_preset->get("codesign/timestamp")) {
 		if (p_preset->get("codesign/timestamp_server") != "") {
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 			args.push_back("/tr");
 			args.push_back(p_preset->get("codesign/timestamp_server_url"));
 			args.push_back("/td");
@@ -274,7 +274,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 	}
 
 	//digest
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	args.push_back("/fd");
 #else
 	args.push_back("-h");
@@ -287,7 +287,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 
 	//description
 	if (p_preset->get("codesign/description") != "") {
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 		args.push_back("/d");
 #else
 		args.push_back("-n");
@@ -304,11 +304,11 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 		}
 	}
 
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	args.push_back("-in");
 #endif
 	args.push_back(p_path);
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	args.push_back("-out");
 	args.push_back(p_path + "_signed");
 #endif
@@ -318,7 +318,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 	ERR_FAIL_COND_V(err != OK, err);
 
 	print_line("codesign (" + p_path + "): " + str);
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	if (str.find("SignTool Error") != -1) {
 #else
 	if (str.find("Failed") != -1) {
@@ -326,7 +326,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 		return FAILED;
 	}
 
-#ifndef WINDOWS_ENABLED
+#ifndef PLATFORM_WINDOWS
 	DirAccessRef tmp_dir = DirAccess::create_for_path(p_path.get_base_dir());
 
 	err = tmp_dir->remove(p_path);
@@ -342,7 +342,7 @@ Error EditorExportPlatformWindows::_code_sign(const Ref<EditorExportPreset> &p_p
 void register_windows_exporter() {
 	EDITOR_DEF("export/windows/rcedit", "");
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/windows/rcedit", PROPERTY_HINT_GLOBAL_FILE, "*.exe"));
-#ifdef WINDOWS_ENABLED
+#ifdef PLATFORM_WINDOWS
 	EDITOR_DEF("export/windows/signtool", "");
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "export/windows/signtool", PROPERTY_HINT_GLOBAL_FILE, "*.exe"));
 #else

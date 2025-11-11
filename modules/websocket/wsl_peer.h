@@ -31,7 +31,7 @@
 #ifndef WSLPEER_H
 #define WSLPEER_H
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"
 #include "core/io/packet_peer.h"
@@ -122,6 +122,6 @@ public:
 	~WSLPeer();
 };
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN
 
 #endif // LSWPEER_H

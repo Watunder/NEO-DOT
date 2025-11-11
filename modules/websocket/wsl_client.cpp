@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef JAVASCRIPT_ENABLED
+#ifndef PLATFORM_EMSCRIPTEN
 
 #include "wsl_client.h"
 #include "core/io/ip.h"
@@ -347,4 +347,4 @@ WSLClient::~WSLClient() {
 	disconnect_from_host();
 }
 
-#endif // JAVASCRIPT_ENABLED
+#endif // PLATFORM_EMSCRIPTEN

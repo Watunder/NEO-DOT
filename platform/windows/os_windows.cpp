@@ -2662,10 +2662,12 @@ void *OS_Windows::get_native_handle(int p_handle_type) {
 			return NULL; // Do we have a value to return here?
 		case WINDOW_HANDLE:
 			return hWnd;
+#ifdef OPENGL_ENABLED
 		case WINDOW_VIEW:
 			return gl_context->get_hdc();
 		case OPENGL_CONTEXT:
 			return gl_context->get_hglrc();
+#endif
 		default:
 			return NULL;
 	}
@@ -3575,15 +3577,21 @@ String OS_Windows::keyboard_get_layout_name(int p_index) const {
 }
 
 void OS_Windows::release_rendering_thread() {
+#ifdef OPENGL_ENABLED
 	gl_context->release_current();
+#endif
 }
 
 void OS_Windows::make_rendering_thread() {
+#ifdef OPENGL_ENABLED
 	gl_context->make_current();
+#endif
 }
 
 void OS_Windows::swap_buffers() {
+#ifdef OPENGL_ENABLED
 	gl_context->swap_buffers();
+#endif
 }
 
 void OS_Windows::force_process_input() {
@@ -3738,17 +3746,11 @@ String OS_Windows::get_joy_guid(int p_device) const {
 }
 
 void OS_Windows::_set_use_vsync(bool p_enable) {
+#ifdef OPENGL_ENABLED
 	if (gl_context)
 		gl_context->set_use_vsync(p_enable);
+#endif
 }
-/*
-bool OS_Windows::is_vsync_enabled() const {
-
-	if (gl_context)
-		return gl_context->is_using_vsync();
-
-	return true;
-}*/
 
 OS::PowerState OS_Windows::get_power_state() {
 	return power_manager->get_power_state();
@@ -3925,9 +3927,7 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	pressrc = 0;
 	old_invalid = true;
 	mouse_mode = MOUSE_MODE_VISIBLE;
-#ifdef STDOUT_FILE
-	stdo = fopen("stdout.txt", "wb");
-#endif
+
 	user_proc = NULL;
 
 #if defined(OPENGL_ENABLED)
@@ -3951,7 +3951,4 @@ OS_Windows::~OS_Windows() {
 		wintab_WTClose(wtctx);
 		wtctx = 0;
 	}
-#ifdef STDOUT_FILE
-	fclose(stdo);
-#endif
 }
