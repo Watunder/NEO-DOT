@@ -1838,7 +1838,7 @@ void FileSystemDock::_resource_created() const {
 		fpath = fpath.get_base_dir();
 	}
 
-	editor->save_resource_as(RES(r), fpath);
+	editor->save_resource_as(Ref<Resource>(r), fpath);
 }
 
 void FileSystemDock::_search_changed(const String &p_text, const Control *p_from) {

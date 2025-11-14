@@ -471,7 +471,7 @@ Variant NativeScript::_new(const Variant **p_args, int p_argcount, Variant::Call
 
 	r_error.error = Variant::CallError::CALL_OK;
 
-	REF ref;
+	Ref<Reference> ref;
 	Object *owner = NULL;
 
 	if (!(script_data->base_native_type == "")) {
@@ -487,7 +487,7 @@ Variant NativeScript::_new(const Variant **p_args, int p_argcount, Variant::Call
 
 	Reference *r = Object::cast_to<Reference>(owner);
 	if (r) {
-		ref = REF(r);
+		ref = Ref<Reference>(r);
 	}
 
 	NativeScriptInstance *instance = (NativeScriptInstance *)instance_create(owner);
@@ -1723,7 +1723,7 @@ void NativeReloadNode::_notification(int p_what) {
 #endif
 }
 
-RES ResourceFormatLoaderNativeScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderNativeScript::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	return ResourceFormatLoaderText::singleton->load(p_path, p_original_path, r_error);
 }
 
@@ -1742,16 +1742,16 @@ String ResourceFormatLoaderNativeScript::get_resource_type(const String &p_path)
 	return "";
 }
 
-Error ResourceFormatSaverNativeScript::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverNativeScript::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	ResourceFormatSaverText rfst;
 	return rfst.save(p_path, p_resource, p_flags);
 }
 
-bool ResourceFormatSaverNativeScript::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverNativeScript::recognize(const Ref<Resource> &p_resource) const {
 	return Object::cast_to<NativeScript>(*p_resource) != NULL;
 }
 
-void ResourceFormatSaverNativeScript::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverNativeScript::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (Object::cast_to<NativeScript>(*p_resource)) {
 		p_extensions->push_back("gdns");
 	}

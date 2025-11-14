@@ -924,7 +924,7 @@ Error EditorNode::load_resource(const String &p_resource, bool p_ignore_broken_d
 	dependency_errors.clear();
 
 	Error err;
-	RES res = ResourceLoader::load(p_resource, "", false, &err);
+	Ref<Resource> res = ResourceLoader::load(p_resource, "", false, &err);
 	ERR_FAIL_COND_V(!res.is_valid(), ERR_CANT_OPEN);
 
 	if (!p_ignore_broken_deps && dependency_errors.has(p_resource)) {
@@ -1148,7 +1148,7 @@ void EditorNode::_set_scene_metadata(const String &p_file, int p_idx) {
 	ERR_FAIL_COND_MSG(err != OK, "Cannot save config file to '" + path + "'.");
 }
 
-bool EditorNode::_find_and_save_resource(RES p_res, Map<RES, bool> &processed, int32_t flags) {
+bool EditorNode::_find_and_save_resource(Ref<Resource> p_res, Map<Ref<Resource>, bool> &processed, int32_t flags) {
 	if (p_res.is_null())
 		return false;
 
@@ -1174,7 +1174,7 @@ bool EditorNode::_find_and_save_resource(RES p_res, Map<RES, bool> &processed, i
 	}
 }
 
-bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<RES, bool> &processed, int32_t flags) {
+bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<Ref<Resource>, bool> &processed, int32_t flags) {
 	bool ret_changed = false;
 	List<PropertyInfo> pi;
 	obj->get_property_list(&pi);
@@ -1184,7 +1184,7 @@ bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<RES, bool> 
 
 		switch (E->get().type) {
 			case Variant::OBJECT: {
-				RES res = obj->get(E->get().name);
+				Ref<Resource> res = obj->get(E->get().name);
 
 				if (_find_and_save_resource(res, processed, flags))
 					ret_changed = true;
@@ -1195,7 +1195,7 @@ bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<RES, bool> 
 				int len = varray.size();
 				for (int i = 0; i < len; i++) {
 					const Variant &v = varray.get(i);
-					RES res = v;
+					Ref<Resource> res = v;
 					if (_find_and_save_resource(res, processed, flags))
 						ret_changed = true;
 				}
@@ -1207,7 +1207,7 @@ bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<RES, bool> 
 				d.get_key_list(&keys);
 				for (List<Variant>::Element *F = keys.front(); F; F = F->next()) {
 					Variant v = d[F->get()];
-					RES res = v;
+					Ref<Resource> res = v;
 					if (_find_and_save_resource(res, processed, flags))
 						ret_changed = true;
 				}
@@ -1220,7 +1220,7 @@ bool EditorNode::_find_and_save_edited_subresources(Object *obj, Map<RES, bool> 
 	return ret_changed;
 }
 
-void EditorNode::_save_edited_subresources(Node *scene, Map<RES, bool> &processed, int32_t flags) {
+void EditorNode::_save_edited_subresources(Node *scene, Map<Ref<Resource>, bool> &processed, int32_t flags) {
 	_find_and_save_edited_subresources(scene, processed, flags);
 
 	for (int i = 0; i < scene->get_child_count(); i++) {
@@ -1360,7 +1360,7 @@ static bool _find_edited_resources(const Ref<Resource> &p_resource, Set<Ref<Reso
 
 	for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
 		if (E->get().type == Variant::OBJECT && E->get().usage & PROPERTY_USAGE_STORAGE && !(E->get().usage & PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT)) {
-			RES res = p_resource->get(E->get().name);
+			Ref<Resource> res = p_resource->get(E->get().name);
 			if (res.is_null()) {
 				continue;
 			}
@@ -1752,7 +1752,7 @@ bool EditorNode::item_has_editor(Object *p_object) {
 	return editor_data.get_subeditors(p_object).size() > 0;
 }
 
-void EditorNode::edit_item_resource(RES p_resource) {
+void EditorNode::edit_item_resource(Ref<Resource> p_resource) {
 	edit_item(p_resource.ptr());
 }
 
@@ -1836,7 +1836,7 @@ void EditorNode::_save_default_environment() {
 	Ref<Environment> fallback = get_tree()->get_root()->get_world()->get_fallback_environment();
 
 	if (fallback.is_valid() && fallback->get_path().is_resource_file()) {
-		Map<RES, bool> processed;
+		Map<Ref<Resource>, bool> processed;
 		_find_and_save_edited_subresources(fallback.ptr(), processed, 0);
 		save_resource_in_path(fallback, fallback->get_path());
 	}
@@ -5327,7 +5327,7 @@ void EditorNode::_video_driver_selected(int p_which) {
 	_update_video_driver_color();
 }
 
-void EditorNode::_resource_saved(RES p_resource, const String &p_path) {
+void EditorNode::_resource_saved(Ref<Resource> p_resource, const String &p_path) {
 	if (EditorFileSystem::get_singleton()) {
 		EditorFileSystem::get_singleton()->update_file(p_path);
 	}
@@ -5335,7 +5335,7 @@ void EditorNode::_resource_saved(RES p_resource, const String &p_path) {
 	singleton->editor_folding.save_resource_folding(p_resource, p_path);
 }
 
-void EditorNode::_resource_loaded(RES p_resource, const String &p_path) {
+void EditorNode::_resource_loaded(Ref<Resource> p_resource, const String &p_path) {
 	singleton->editor_folding.load_resource_folding(p_resource, p_path);
 }
 
@@ -5559,7 +5559,7 @@ EditorNode::EditorNode() {
 			//only if no touchscreen ui hint, set emulation
 			id->set_emulate_touch_from_mouse(false); //just disable just in case
 		}
-		id->set_custom_mouse_cursor(RES());
+		id->set_custom_mouse_cursor(Ref<Resource>());
 	}
 
 	singleton = this;

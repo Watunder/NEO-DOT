@@ -1043,7 +1043,7 @@ void AnimationTreePlayerEditor::_file_dialog_selected(String p_path) {
 			for (int i = 0; i < files.size(); i++) {
 				StringName node = _add_node(AnimationTreePlayer::NODE_ANIMATION);
 
-				RES anim = ResourceLoader::load(files[i]);
+				Ref<Resource> anim = ResourceLoader::load(files[i]);
 				anim_tree->animation_node_set_animation(node, anim);
 				//anim_tree->node_set_name(node, files[i].get_file());
 			};

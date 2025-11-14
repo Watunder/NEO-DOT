@@ -632,13 +632,13 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 			if (pinfo.type == Variant::OBJECT) {
 				if (var.is_zero()) {
-					var = RES();
+					var = Ref<Resource>();
 				} else if (var.get_type() == Variant::STRING) {
 					String path = var;
 					if (path.find("::") != -1) {
 						// built-in resource
 						String base_path = path.get_slice("::", 0);
-						RES dependency = ResourceLoader::load(base_path);
+						Ref<Resource> dependency = ResourceLoader::load(base_path);
 						if (dependency.is_valid()) {
 							remote_dependencies.insert(dependency);
 						}

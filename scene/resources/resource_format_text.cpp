@@ -123,9 +123,9 @@ Error ResourceInteractiveLoaderText::_parse_sub_resource(VariantParser::Stream *
 			return ERR_PARSE_ERROR;
 		}
 
-		r_res = RES(ResourceCache::get(path));
+		r_res = Ref<Resource>(ResourceCache::get(path));
 	} else {
-		r_res = RES();
+		r_res = Ref<Resource>();
 	}
 
 	VariantParser::get_token(p_stream, token, line, r_err_str);
@@ -167,7 +167,7 @@ Error ResourceInteractiveLoaderText::_parse_ext_resource(VariantParser::Stream *
 			WARN_PRINT(String("Couldn't load external resource: " + path).utf8().get_data());
 		}
 	} else {
-		r_res = RES();
+		r_res = Ref<Resource>();
 	}
 
 	VariantParser::get_token(p_stream, token, line, r_err_str);
@@ -421,7 +421,7 @@ Error ResourceInteractiveLoaderText::poll() {
 			path = remaps[path];
 		}
 
-		RES res = ResourceLoader::load(path, type);
+		Ref<Resource> res = ResourceLoader::load(path, type);
 
 		if (res.is_null()) {
 			if (ResourceLoader::get_abort_on_missing_resources()) {
@@ -1288,12 +1288,12 @@ Error ResourceFormatLoaderText::convert_file_to_binary(const String &p_src_path,
 /*****************************************************************************************************/
 /*****************************************************************************************************/
 
-String ResourceFormatSaverTextInstance::_write_resources(void *ud, const RES &p_resource) {
+String ResourceFormatSaverTextInstance::_write_resources(void *ud, const Ref<Resource> &p_resource) {
 	ResourceFormatSaverTextInstance *rsi = (ResourceFormatSaverTextInstance *)ud;
 	return rsi->_write_resource(p_resource);
 }
 
-String ResourceFormatSaverTextInstance::_write_resource(const RES &res) {
+String ResourceFormatSaverTextInstance::_write_resource(const Ref<Resource> &res) {
 	if (external_resources.has(res)) {
 		return "ExtResource( " + itos(external_resources[res]) + " )";
 	} else {
@@ -1316,7 +1316,7 @@ String ResourceFormatSaverTextInstance::_write_resource(const RES &res) {
 void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, bool p_main) {
 	switch (p_variant.get_type()) {
 		case Variant::OBJECT: {
-			RES res = p_variant.operator RefPtr();
+			Ref<Resource> res = p_variant.operator RefPtr();
 
 			if (res.is_null() || external_resources.has(res))
 				return;
@@ -1348,7 +1348,7 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 					Variant v = res->get(I->get().name);
 
 					if (pi.usage & PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT) {
-						RES sres = v;
+						Ref<Resource> sres = v;
 						if (sres.is_valid()) {
 							NonPersistentKey npk;
 							npk.base = res;
@@ -1392,7 +1392,7 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 	}
 }
 
-Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverTextInstance::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	if (p_path.ends_with(".tscn")) {
 		packed_scene = p_resource;
 	}
@@ -1453,7 +1453,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 #ifdef TOOLS_ENABLED
 	//keep order from cached ids
 	Set<int> cached_ids_found;
-	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
+	for (Map<Ref<Resource>, int>::Element *E = external_resources.front(); E; E = E->next()) {
 		int cached_id = E->key()->get_id_for_path(local_path);
 		if (cached_id < 0 || cached_ids_found.has(cached_id)) {
 			E->get() = -1; //reset
@@ -1463,7 +1463,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		}
 	}
 	//create IDs for non cached resources
-	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
+	for (Map<Ref<Resource>, int>::Element *E = external_resources.front(); E; E = E->next()) {
 		if (cached_ids_found.has(E->get())) { //already cached, go on
 			continue;
 		}
@@ -1481,14 +1481,14 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 	}
 #else
 	//make sure to start from one, as it makes format more readable
-	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
+	for (Map<Ref<Resource>, int>::Element *E = external_resources.front(); E; E = E->next()) {
 		E->get() = E->get() + 1;
 	}
 #endif
 
 	Vector<ResourceSort> sorted_er;
 
-	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
+	for (Map<Ref<Resource>, int>::Element *E = external_resources.front(); E; E = E->next()) {
 		ResourceSort rs;
 		rs.resource = E->key();
 		rs.index = E->get();
@@ -1508,8 +1508,8 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 	Set<int> used_indices;
 
-	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
-		RES res = E->get();
+	for (List<Ref<Resource>>::Element *E = saved_resources.front(); E; E = E->next()) {
+		Ref<Resource> res = E->get();
 		if (E->next() && (res->get_path() == "" || res->get_path().find("::") != -1)) {
 			if (res->get_subindex() != 0) {
 				if (used_indices.has(res->get_subindex())) {
@@ -1521,8 +1521,8 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		}
 	}
 
-	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
-		RES res = E->get();
+	for (List<Ref<Resource>>::Element *E = saved_resources.front(); E; E = E->next()) {
+		Ref<Resource> res = E->get();
 		ERR_CONTINUE(!resource_set.has(res));
 		bool main = (E->next() == NULL);
 
@@ -1712,7 +1712,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 	return OK;
 }
 
-Error ResourceFormatSaverText::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverText::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	if (p_path.ends_with(".sct") && p_resource->get_class() != "PackedScene") {
 		return ERR_FILE_UNRECOGNIZED;
 	}
@@ -1721,10 +1721,10 @@ Error ResourceFormatSaverText::save(const String &p_path, const RES &p_resource,
 	return saver.save(p_path, p_resource, p_flags);
 }
 
-bool ResourceFormatSaverText::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverText::recognize(const Ref<Resource> &p_resource) const {
 	return true; // all recognized!
 }
-void ResourceFormatSaverText::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverText::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (p_resource->get_class() == "PackedScene")
 		p_extensions->push_back("tscn"); //text scene
 	else

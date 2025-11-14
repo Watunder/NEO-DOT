@@ -44,7 +44,7 @@ private:
 	RID scenario_id;
 
 	virtual bool _can_gizmo_scale() const;
-	virtual RES _get_gizmo_geometry() const;
+	virtual Ref<Resource> _get_gizmo_geometry() const;
 
 	friend class Viewport;
 	void _update_audio_listener_state();

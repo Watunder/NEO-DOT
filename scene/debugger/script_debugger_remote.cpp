@@ -656,7 +656,7 @@ void ScriptDebuggerRemote::_send_object_id(ObjectID p_id) {
 		const PropertyInfo &pi = properties[i].first;
 		Variant &var = properties[i].second;
 
-		RES res = var;
+		Ref<Resource> res = var;
 
 		Array prop;
 		prop.push_back(pi.name);

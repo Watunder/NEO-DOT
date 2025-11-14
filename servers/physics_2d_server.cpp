@@ -130,7 +130,7 @@ Physics2DDirectBodyState::Physics2DDirectBodyState() {}
 
 ///////////////////////////////////////////////////////
 
-void Physics2DShapeQueryParameters::set_shape(const RES &p_shape) {
+void Physics2DShapeQueryParameters::set_shape(const Ref<Resource> &p_shape) {
 	ERR_FAIL_COND(p_shape.is_null());
 	shape = p_shape->get_rid();
 }

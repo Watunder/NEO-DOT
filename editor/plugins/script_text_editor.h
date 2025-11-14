@@ -197,8 +197,8 @@ public:
 	void update_toggle_scripts_button();
 
 	virtual void apply_code();
-	virtual RES get_edited_resource() const;
-	virtual void set_edited_resource(const RES &p_res);
+	virtual Ref<Resource> get_edited_resource() const;
+	virtual void set_edited_resource(const Ref<Resource> &p_res);
 	virtual void enable_editor();
 	virtual Vector<String> get_functions();
 	virtual void reload_text();

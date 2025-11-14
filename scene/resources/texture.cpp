@@ -809,14 +809,14 @@ StreamTexture::~StreamTexture() {
 	VS::get_singleton()->free(texture);
 }
 
-RES ResourceFormatLoaderStreamTexture::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderStreamTexture::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	Ref<StreamTexture> st;
 	st.instance();
 	Error err = st->load(p_path);
 	if (r_error)
 		*r_error = err;
 	if (err != OK)
-		return RES();
+		return Ref<Resource>();
 
 	return st;
 }
@@ -2354,7 +2354,7 @@ TextureLayered::~TextureLayered() {
 	}
 }
 
-RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderTextureLayered::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error) {
 		*r_error = ERR_CANT_OPEN;
 	}
@@ -2370,14 +2370,14 @@ RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String 
 		texarr.instance();
 		lt = texarr;
 	} else {
-		ERR_FAIL_V_MSG(RES(), "Unrecognized layered texture extension.");
+		ERR_FAIL_V_MSG(Ref<Resource>(), "Unrecognized layered texture extension.");
 	}
 
 	Error err = lt->load(p_path);
 	if (r_error)
 		*r_error = OK;
 	if (err != OK)
-		return RES();
+		return Ref<Resource>();
 
 	return lt;
 }

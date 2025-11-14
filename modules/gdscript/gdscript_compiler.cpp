@@ -332,7 +332,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 					return -1;
 				}
 
-				RES res = ResourceLoader::load(ScriptServer::get_global_class_path(identifier));
+				Ref<Resource> res = ResourceLoader::load(ScriptServer::get_global_class_path(identifier));
 				if (res.is_null()) {
 					_set_error("Can't load global class " + String(identifier) + ", cyclic reference?", p_expression);
 					return -1;

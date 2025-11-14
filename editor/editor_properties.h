@@ -586,7 +586,7 @@ class EditorPropertyResource : public EditorProperty {
 	void _update_menu();
 
 	void _sub_inspector_property_keyed(const String &p_property, const Variant &p_value, bool);
-	void _sub_inspector_resource_selected(const RES &p_resource, const String &p_property);
+	void _sub_inspector_resource_selected(const Ref<Resource> &p_resource, const String &p_property);
 	void _sub_inspector_object_id_selected(int p_id);
 
 	void _button_draw();

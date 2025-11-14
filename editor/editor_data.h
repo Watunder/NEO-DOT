@@ -45,7 +45,7 @@ class EditorHistory {
 	};
 
 	struct Obj {
-		REF ref;
+		Ref<Reference> ref;
 		ObjectID object;
 		String property;
 		bool inspector_only;

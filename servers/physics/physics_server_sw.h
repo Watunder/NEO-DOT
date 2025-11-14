@@ -294,7 +294,7 @@ public:
 	virtual void soft_body_set_drag_coefficient(RID p_body, real_t p_drag_coefficient) {}
 	virtual real_t soft_body_get_drag_coefficient(RID p_body) { return 0.; }
 
-	virtual void soft_body_set_mesh(RID p_body, const REF &p_mesh) {}
+	virtual void soft_body_set_mesh(RID p_body, const Ref<Reference> &p_mesh) {}
 
 	virtual void soft_body_move_point(RID p_body, int p_point_index, const Vector3 &p_global_position) {}
 	virtual Vector3 soft_body_get_point_global_position(RID p_body, int p_point_index) { return Vector3(); }

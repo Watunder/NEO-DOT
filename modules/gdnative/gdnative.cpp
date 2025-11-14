@@ -530,7 +530,7 @@ Error GDNative::get_symbol(StringName p_procedure_name, void *&r_handle, bool p_
 	return result;
 }
 
-RES GDNativeLibraryResourceLoader::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> GDNativeLibraryResourceLoader::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	Ref<GDNativeLibrary> lib;
 	lib.instance();
 
@@ -562,7 +562,7 @@ String GDNativeLibraryResourceLoader::get_resource_type(const String &p_path) co
 	return "";
 }
 
-Error GDNativeLibraryResourceSaver::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error GDNativeLibraryResourceSaver::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	Ref<GDNativeLibrary> lib = p_resource;
 
 	if (lib.is_null()) {
@@ -579,11 +579,11 @@ Error GDNativeLibraryResourceSaver::save(const String &p_path, const RES &p_reso
 	return config->save(p_path);
 }
 
-bool GDNativeLibraryResourceSaver::recognize(const RES &p_resource) const {
+bool GDNativeLibraryResourceSaver::recognize(const Ref<Resource> &p_resource) const {
 	return Object::cast_to<GDNativeLibrary>(*p_resource) != NULL;
 }
 
-void GDNativeLibraryResourceSaver::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void GDNativeLibraryResourceSaver::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (Object::cast_to<GDNativeLibrary>(*p_resource) != NULL) {
 		p_extensions->push_back("gdnlib");
 	}

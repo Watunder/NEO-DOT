@@ -366,13 +366,13 @@ void VideoStreamGDNative::set_audio_track(int p_track) {
 
 /* --- NOTE ResourceFormatLoaderVideoStreamGDNative starts here. ----- */
 
-RES ResourceFormatLoaderVideoStreamGDNative::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderVideoStreamGDNative::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ);
 	if (!f) {
 		if (r_error) {
 			*r_error = ERR_CANT_OPEN;
 		}
-		return RES();
+		return Ref<Resource>();
 	}
 	memdelete(f);
 	VideoStreamGDNative *stream = memnew(VideoStreamGDNative);

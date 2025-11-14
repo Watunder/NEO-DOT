@@ -3240,7 +3240,7 @@ static Error _lookup_symbol_from_base(const GDScriptParser::DataType &p_base, co
 				}
 
 				Variant v;
-				REF v_ref;
+				Ref<Reference> v_ref;
 				if (base_type.builtin_type == Variant::OBJECT) {
 					v_ref.instance();
 					v = v_ref;

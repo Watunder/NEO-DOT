@@ -124,7 +124,7 @@ public:
 	virtual CursorShape get_default_cursor_shape() const = 0;
 	virtual void set_default_cursor_shape(CursorShape p_shape) = 0;
 	virtual CursorShape get_current_cursor_shape() const = 0;
-	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape = CURSOR_ARROW, const Vector2 &p_hotspot = Vector2()) = 0;
+	virtual void set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape = CURSOR_ARROW, const Vector2 &p_hotspot = Vector2()) = 0;
 
 	virtual String get_joy_button_string(int p_button) = 0;
 	virtual String get_joy_axis_string(int p_axis) = 0;

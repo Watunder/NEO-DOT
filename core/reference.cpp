@@ -113,7 +113,7 @@ Variant WeakRef::get_ref() const {
 		return Variant();
 	Reference *r = cast_to<Reference>(obj);
 	if (r) {
-		return REF(r);
+		return Ref<Reference>(r);
 	}
 
 	return obj;
@@ -123,7 +123,7 @@ void WeakRef::set_obj(Object *p_object) {
 	ref = p_object ? p_object->get_instance_id() : 0;
 }
 
-void WeakRef::set_ref(const REF &p_ref) {
+void WeakRef::set_ref(const Ref<Reference> &p_ref) {
 	ref = p_ref.is_valid() ? p_ref->get_instance_id() : 0;
 }
 

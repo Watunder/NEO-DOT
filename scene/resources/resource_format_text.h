@@ -84,10 +84,10 @@ class ResourceInteractiveLoaderText : public ResourceInteractiveLoader {
 	};
 
 	struct DummyReadData {
-		Map<RES, int> external_resources;
-		Map<int, RES> rev_external_resources;
-		Set<RES> resource_set;
-		Map<int, RES> resource_map;
+		Map<Ref<Resource>, int> external_resources;
+		Map<int, Ref<Resource>> rev_external_resources;
+		Set<Ref<Resource>> resource_set;
+		Map<int, Ref<Resource>> resource_map;
 	};
 
 	static Error _parse_sub_resource_dummys(void *p_self, VariantParser::Stream *p_stream, Ref<Resource> &r_res, int &line, String &r_err_str) { return _parse_sub_resource_dummy((DummyReadData *)(p_self), p_stream, r_res, line, r_err_str); }
@@ -100,10 +100,10 @@ class ResourceInteractiveLoaderText : public ResourceInteractiveLoader {
 
 	friend class ResourceFormatLoaderText;
 
-	List<RES> resource_cache;
+	List<Ref<Resource>> resource_cache;
 	Error error;
 
-	RES resource;
+	Ref<Resource> resource;
 
 	Ref<PackedScene> _parse_node_tag(VariantParser::ResourceParser &parser);
 
@@ -153,20 +153,20 @@ class ResourceFormatSaverTextInstance {
 	FileAccess *f;
 
 	struct NonPersistentKey { //for resource properties generated on the fly
-		RES base;
+		Ref<Resource> base;
 		StringName property;
 		bool operator<(const NonPersistentKey &p_key) const { return base == p_key.base ? property < p_key.property : base < p_key.base; }
 	};
 
-	Map<NonPersistentKey, RES> non_persistent_map;
+	Map<NonPersistentKey, Ref<Resource>> non_persistent_map;
 
-	Set<RES> resource_set;
-	List<RES> saved_resources;
-	Map<RES, int> external_resources;
-	Map<RES, int> internal_resources;
+	Set<Ref<Resource>> resource_set;
+	List<Ref<Resource>> saved_resources;
+	Map<Ref<Resource>, int> external_resources;
+	Map<Ref<Resource>, int> internal_resources;
 
 	struct ResourceSort {
-		RES resource;
+		Ref<Resource> resource;
 		int index;
 		bool operator<(const ResourceSort &p_right) const {
 			return index < p_right.index;
@@ -175,19 +175,19 @@ class ResourceFormatSaverTextInstance {
 
 	void _find_resources(const Variant &p_variant, bool p_main = false);
 
-	static String _write_resources(void *ud, const RES &p_resource);
-	String _write_resource(const RES &res);
+	static String _write_resources(void *ud, const Ref<Resource> &p_resource);
+	String _write_resource(const Ref<Resource> &res);
 
 public:
-	Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
+	Error save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags = 0);
 };
 
 class ResourceFormatSaverText : public ResourceFormatSaver {
 public:
 	static ResourceFormatSaverText *singleton;
-	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
-	virtual bool recognize(const RES &p_resource) const;
-	virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const;
+	virtual Error save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags = 0);
+	virtual bool recognize(const Ref<Resource> &p_resource) const;
+	virtual void get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const;
 
 	ResourceFormatSaverText();
 };

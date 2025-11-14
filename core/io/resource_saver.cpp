@@ -40,7 +40,7 @@ int ResourceSaver::saver_count = 0;
 bool ResourceSaver::timestamp_on_save = false;
 ResourceSavedCallback ResourceSaver::save_callback = 0;
 
-Error ResourceFormatSaver::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaver::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	if (get_script_instance() && get_script_instance()->has_method("save")) {
 		return (Error)get_script_instance()->call("save", p_path, p_resource, p_flags).operator int64_t();
 	}
@@ -48,7 +48,7 @@ Error ResourceFormatSaver::save(const String &p_path, const RES &p_resource, uin
 	return ERR_METHOD_NOT_FOUND;
 }
 
-bool ResourceFormatSaver::recognize(const RES &p_resource) const {
+bool ResourceFormatSaver::recognize(const Ref<Resource> &p_resource) const {
 	if (get_script_instance() && get_script_instance()->has_method("recognize")) {
 		return get_script_instance()->call("recognize", p_resource);
 	}
@@ -56,7 +56,7 @@ bool ResourceFormatSaver::recognize(const RES &p_resource) const {
 	return false;
 }
 
-void ResourceFormatSaver::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaver::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (get_script_instance() && get_script_instance()->has_method("get_recognized_extensions")) {
 		PoolStringArray exts = get_script_instance()->call("get_recognized_extensions", p_resource);
 
@@ -81,7 +81,7 @@ void ResourceFormatSaver::_bind_methods() {
 	ClassDB::add_virtual_method(get_class_static(), MethodInfo(Variant::BOOL, "recognize", PropertyInfo(Variant::OBJECT, "resource", PROPERTY_HINT_RESOURCE_TYPE, "Resource")));
 }
 
-Error ResourceSaver::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceSaver::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	String extension = p_path.get_extension();
 	Error err = ERR_FILE_UNRECOGNIZED;
 
@@ -105,7 +105,7 @@ Error ResourceSaver::save(const String &p_path, const RES &p_resource, uint32_t 
 
 		String local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 
-		RES rwcopy = p_resource;
+		Ref<Resource> rwcopy = p_resource;
 		if (p_flags & FLAG_CHANGE_PATH)
 			rwcopy->set_path(local_path);
 
@@ -139,7 +139,7 @@ void ResourceSaver::set_save_callback(ResourceSavedCallback p_callback) {
 	save_callback = p_callback;
 }
 
-void ResourceSaver::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) {
+void ResourceSaver::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) {
 	for (int i = 0; i < saver_count; i++) {
 		saver[i]->get_recognized_extensions(p_resource, p_extensions);
 	}

@@ -266,7 +266,7 @@ public:
 	virtual void soft_body_set_space(RID p_body, RID p_space);
 	virtual RID soft_body_get_space(RID p_body) const;
 
-	virtual void soft_body_set_mesh(RID p_body, const REF &p_mesh);
+	virtual void soft_body_set_mesh(RID p_body, const Ref<Reference> &p_mesh);
 
 	virtual void soft_body_set_collision_layer(RID p_body, uint32_t p_layer);
 	virtual uint32_t soft_body_get_collision_layer(RID p_body) const;

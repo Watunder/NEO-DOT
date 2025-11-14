@@ -48,7 +48,7 @@ class ResourceInteractiveLoaderBinary : public ResourceInteractiveLoader {
 	uint64_t importmd_ofs;
 
 	Vector<char> str_buf;
-	List<RES> resource_cache;
+	List<Ref<Resource>> resource_cache;
 
 	//Map<int,StringName> string_map;
 	Vector<StringName> string_map;
@@ -120,20 +120,20 @@ class ResourceFormatSaverBinaryInstance {
 	bool takeover_paths;
 	FileAccess *f;
 	String magic;
-	Set<RES> resource_set;
+	Set<Ref<Resource>> resource_set;
 
 	struct NonPersistentKey { //for resource properties generated on the fly
-		RES base;
+		Ref<Resource> base;
 		StringName property;
 		bool operator<(const NonPersistentKey &p_key) const { return base == p_key.base ? property < p_key.property : base < p_key.base; }
 	};
 
-	Map<NonPersistentKey, RES> non_persistent_map;
+	Map<NonPersistentKey, Ref<Resource>> non_persistent_map;
 	Map<StringName, int> string_map;
 	Vector<StringName> strings;
 
-	Map<RES, int> external_resources;
-	List<RES> saved_resources;
+	Map<Ref<Resource>, int> external_resources;
+	List<Ref<Resource>> saved_resources;
 
 	struct Property {
 		int name_idx;
@@ -153,16 +153,16 @@ class ResourceFormatSaverBinaryInstance {
 	int get_string_index(const String &p_string);
 
 public:
-	Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
-	static void write_variant(FileAccess *f, const Variant &p_property, Set<RES> &resource_set, Map<RES, int> &external_resources, Map<StringName, int> &string_map, const PropertyInfo &p_hint = PropertyInfo());
+	Error save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags = 0);
+	static void write_variant(FileAccess *f, const Variant &p_property, Set<Ref<Resource>> &resource_set, Map<Ref<Resource>, int> &external_resources, Map<StringName, int> &string_map, const PropertyInfo &p_hint = PropertyInfo());
 };
 
 class ResourceFormatSaverBinary : public ResourceFormatSaver {
 public:
 	static ResourceFormatSaverBinary *singleton;
-	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);
-	virtual bool recognize(const RES &p_resource) const;
-	virtual void get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const;
+	virtual Error save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags = 0);
+	virtual bool recognize(const Ref<Resource> &p_resource) const;
+	virtual void get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const;
 
 	ResourceFormatSaverBinary();
 };

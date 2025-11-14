@@ -160,7 +160,7 @@ void PacketPeer::_bind_methods() {
 
 /***************/
 
-void PacketPeerStream::_set_stream_peer(REF p_peer) {
+void PacketPeerStream::_set_stream_peer(Ref<Reference> p_peer) {
 	ERR_FAIL_COND_MSG(p_peer.is_null(), "It's not a reference to a valid Resource object.");
 	set_stream_peer(p_peer);
 }

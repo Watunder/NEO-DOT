@@ -116,7 +116,7 @@ void AnimationCache::_update_cache() {
 
 		} else {
 			if (np.get_subname_count() > 0) {
-				RES res2;
+				Ref<Resource> res2;
 				Vector<StringName> leftover_subpath;
 
 				// We don't want to cache the last resource unless it is a method call

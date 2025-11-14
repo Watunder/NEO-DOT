@@ -134,7 +134,7 @@ PhysicsDirectBodyState::PhysicsDirectBodyState() {}
 
 ///////////////////////////////////////////////////////
 
-void PhysicsShapeQueryParameters::set_shape(const RES &p_shape) {
+void PhysicsShapeQueryParameters::set_shape(const Ref<Resource> &p_shape) {
 	ERR_FAIL_COND(p_shape.is_null());
 	shape = p_shape->get_rid();
 }

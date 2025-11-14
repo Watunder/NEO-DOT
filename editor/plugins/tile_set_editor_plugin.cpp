@@ -184,7 +184,7 @@ bool TileSetEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_dat
 		return false;
 
 	if (String(d["type"]) == "resource" && d.has("resource")) {
-		RES r = d["resource"];
+		Ref<Resource> r = d["resource"];
 
 		Ref<Texture> texture = r;
 
@@ -223,7 +223,7 @@ void TileSetEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, C
 		return;
 
 	if (String(d["type"]) == "resource" && d.has("resource")) {
-		RES r = d["resource"];
+		Ref<Resource> r = d["resource"];
 
 		Ref<Texture> texture = r;
 

@@ -1364,7 +1364,7 @@ void SceneTree::_live_edit_node_set_func(int p_id, const StringName &p_prop, con
 }
 
 void SceneTree::_live_edit_node_set_res_func(int p_id, const StringName &p_prop, const String &p_value) {
-	RES r = ResourceLoader::load(p_value);
+	Ref<Resource> r = ResourceLoader::load(p_value);
 	if (!r.is_valid())
 		return;
 	_live_edit_node_set_func(p_id, p_prop, r);
@@ -1404,14 +1404,14 @@ void SceneTree::_live_edit_res_set_func(int p_id, const StringName &p_prop, cons
 	if (!ResourceCache::has(resp))
 		return;
 
-	RES r = ResourceCache::get(resp);
+	Ref<Resource> r = ResourceCache::get(resp);
 	if (!r.is_valid())
 		return;
 
 	r->set(p_prop, p_value);
 }
 void SceneTree::_live_edit_res_set_res_func(int p_id, const StringName &p_prop, const String &p_value) {
-	RES r = ResourceLoader::load(p_value);
+	Ref<Resource> r = ResourceLoader::load(p_value);
 	if (!r.is_valid())
 		return;
 	_live_edit_res_set_func(p_id, p_prop, r);
@@ -1425,7 +1425,7 @@ void SceneTree::_live_edit_res_call_func(int p_id, const StringName &p_method, V
 	if (!ResourceCache::has(resp))
 		return;
 
-	RES r = ResourceCache::get(resp);
+	Ref<Resource> r = ResourceCache::get(resp);
 	if (!r.is_valid())
 		return;
 

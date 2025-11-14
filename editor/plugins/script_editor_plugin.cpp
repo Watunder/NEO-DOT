@@ -72,7 +72,7 @@ static bool _is_built_in_script(Script *p_script) {
 class EditorScriptCodeCompletionCache : public ScriptCodeCompletionCache {
 	struct Cache {
 		uint64_t time_loaded;
-		RES cache;
+		Ref<Resource> cache;
 	};
 
 	Map<String, Cache> cached;
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	virtual RES get_cached_resource(const String &p_path) {
+	virtual Ref<Resource> get_cached_resource(const String &p_path) {
 		Map<String, Cache>::Element *E = cached.find(p_path);
 		if (!E) {
 			Cache c;
@@ -284,7 +284,7 @@ void ScriptEditor::_goto_script_line2(int p_line) {
 		current->goto_line(p_line);
 }
 
-void ScriptEditor::_goto_script_line(REF p_script, int p_line) {
+void ScriptEditor::_goto_script_line(Ref<Reference> p_script, int p_line) {
 	if (EditorNode::get_singleton()->is_embed_window_mode_enabled()) {
 		EditorNode::get_singleton()->set_embed_window_mode(false);
 	}
@@ -304,7 +304,7 @@ void ScriptEditor::_goto_script_line(REF p_script, int p_line) {
 	}
 }
 
-void ScriptEditor::_set_execution(REF p_script, int p_line) {
+void ScriptEditor::_set_execution(Ref<Reference> p_script, int p_line) {
 	Ref<Script> script = Object::cast_to<Script>(*p_script);
 	if (script.is_valid() && (script->has_source_code() || script->get_path().is_resource_file())) {
 		for (int i = 0; i < tab_container->get_child_count(); i++) {
@@ -319,7 +319,7 @@ void ScriptEditor::_set_execution(REF p_script, int p_line) {
 	}
 }
 
-void ScriptEditor::_clear_execution(REF p_script) {
+void ScriptEditor::_clear_execution(Ref<Reference> p_script) {
 	Ref<Script> script = Object::cast_to<Script>(*p_script);
 	if (script.is_valid() && (script->has_source_code() || script->get_path().is_resource_file())) {
 		for (int i = 0; i < tab_container->get_child_count(); i++) {
@@ -622,7 +622,7 @@ void ScriptEditor::_close_docs_tab() {
 void ScriptEditor::_copy_script_path() {
 	ScriptEditorBase *se = _get_current_editor();
 	if (se) {
-		RES script = se->get_edited_resource();
+		Ref<Resource> script = se->get_edited_resource();
 		OS::get_singleton()->set_clipboard(script->get_path());
 	}
 }
@@ -681,7 +681,7 @@ void ScriptEditor::_resave_scripts(const String &p_str) {
 		if (!se)
 			continue;
 
-		RES script = se->get_edited_resource();
+		Ref<Resource> script = se->get_edited_resource();
 
 		if (script->get_path() == "" || script->get_path().find("local://") != -1 || script->get_path().find("::") != -1)
 			continue; //internal script, who cares
@@ -721,7 +721,7 @@ void ScriptEditor::_reload_scripts() {
 			continue;
 		}
 
-		RES edited_res = se->get_edited_resource();
+		Ref<Resource> edited_res = se->get_edited_resource();
 
 		if (edited_res->get_path() == "" || edited_res->get_path().find("local://") != -1 || edited_res->get_path().find("::") != -1) {
 			continue; //internal script, who cares
@@ -765,7 +765,7 @@ void ScriptEditor::_res_saved_callback(const Ref<Resource> &p_res) {
 			continue;
 		}
 
-		RES script = se->get_edited_resource();
+		Ref<Resource> script = se->get_edited_resource();
 
 		if (script->get_path() == "" || script->get_path().find("local://") != -1 || script->get_path().find("::") != -1) {
 			continue; //internal script, who cares
@@ -789,7 +789,7 @@ void ScriptEditor::_live_auto_reload_running_scripts() {
 	debugger->reload_scripts();
 }
 
-bool ScriptEditor::_test_script_times_on_disk(RES p_for_script) {
+bool ScriptEditor::_test_script_times_on_disk(Ref<Resource> p_for_script) {
 	disk_changed_list->clear();
 	TreeItem *r = disk_changed_list->create_item();
 	disk_changed_list->set_hide_root(true);
@@ -801,7 +801,7 @@ bool ScriptEditor::_test_script_times_on_disk(RES p_for_script) {
 	for (int i = 0; i < tab_container->get_child_count(); i++) {
 		ScriptEditorBase *se = Object::cast_to<ScriptEditorBase>(tab_container->get_child(i));
 		if (se) {
-			RES edited_res = se->get_edited_resource();
+			Ref<Resource> edited_res = se->get_edited_resource();
 			if (p_for_script.is_valid() && edited_res.is_valid() && p_for_script != edited_res)
 				continue;
 
@@ -879,7 +879,7 @@ void ScriptEditor::_file_dialog_action(String p_file) {
 		case FILE_SAVE_AS: {
 			ScriptEditorBase *current = _get_current_editor();
 			if (current) {
-				RES resource = current->get_edited_resource();
+				Ref<Resource> resource = current->get_edited_resource();
 				String path = ProjectSettings::get_singleton()->localize_path(p_file);
 				Error err = _save_text_file(resource, path);
 
@@ -1091,7 +1091,7 @@ void ScriptEditor::_menu_option(int p_option) {
 					}
 				}
 
-				RES resource = current->get_edited_resource();
+				Ref<Resource> resource = current->get_edited_resource();
 				Ref<TextFile> text_file = resource;
 				if (text_file != NULL) {
 					current->apply_code();
@@ -1115,7 +1115,7 @@ void ScriptEditor::_menu_option(int p_option) {
 					}
 				}
 
-				RES resource = current->get_edited_resource();
+				Ref<Resource> resource = current->get_edited_resource();
 				Ref<TextFile> text_file = resource;
 				if (text_file != NULL) {
 					file_dialog->set_mode(EditorFileDialog::MODE_SAVE_FILE);
@@ -1183,7 +1183,7 @@ void ScriptEditor::_menu_option(int p_option) {
 				_copy_script_path();
 			} break;
 			case SHOW_IN_FILE_SYSTEM: {
-				const RES script = current->get_edited_resource();
+				const Ref<Resource> script = current->get_edited_resource();
 				const String path = script->get_path();
 				if (!path.empty()) {
 					FileSystemDock *file_system_dock = EditorNode::get_singleton()->get_filesystem_dock();
@@ -1915,7 +1915,7 @@ Ref<TextFile> ScriptEditor::_load_text_file(const String &p_path, Error *r_error
 	Ref<TextFile> text_res(text_file);
 	Error err = text_file->load_text(path);
 
-	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load text file '" + path + "'.");
+	ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Cannot load text file '" + path + "'.");
 
 	text_file->set_file_path(local_path);
 	text_file->set_path(local_path, true);
@@ -1958,7 +1958,7 @@ Error ScriptEditor::_save_text_file(Ref<TextFile> p_text_file, const String &p_p
 	return OK;
 }
 
-bool ScriptEditor::edit(const RES &p_resource, int p_line, int p_col, bool p_grab_focus) {
+bool ScriptEditor::edit(const Ref<Resource> &p_resource, int p_line, int p_col, bool p_grab_focus) {
 	if (p_resource.is_null())
 		return false;
 
@@ -2160,7 +2160,7 @@ void ScriptEditor::save_all_scripts() {
 		if (!se->is_unsaved())
 			continue;
 
-		RES edited_res = se->get_edited_resource();
+		Ref<Resource> edited_res = se->get_edited_resource();
 		if (edited_res.is_valid()) {
 			se->apply_code();
 		}
@@ -2896,7 +2896,7 @@ void ScriptEditor::_on_find_in_files_requested(String text) {
 
 void ScriptEditor::_on_find_in_files_result_selected(String fpath, int line_number, int begin, int end) {
 	if (ResourceLoader::exists(fpath)) {
-		RES res = ResourceLoader::load(fpath);
+		Ref<Resource> res = ResourceLoader::load(fpath);
 
 		if (fpath.get_extension() == "gdshader" || fpath.get_extension() == "shader") {
 			ShaderEditorPlugin *shader_editor = Object::cast_to<ShaderEditorPlugin>(EditorNode::get_singleton()->get_editor_data().get_editor("Shader"));

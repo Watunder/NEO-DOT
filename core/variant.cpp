@@ -2113,7 +2113,7 @@ Variant::Variant(const RefPtr &p_resource) {
 #ifdef DEBUG_ENABLED
 	_get_obj().rc = NULL;
 #else
-	REF *ref = reinterpret_cast<REF *>(p_resource.get_data());
+	Ref<Reference> *ref = reinterpret_cast<Ref<Reference> *>(p_resource.get_data());
 	_get_obj().obj = ref->ptr();
 #endif
 	_get_obj().ref = p_resource;

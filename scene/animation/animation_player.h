@@ -87,7 +87,7 @@ private:
 	struct TrackNodeCache {
 		NodePath path;
 		uint32_t id;
-		RES resource;
+		Ref<Resource> resource;
 		Node *node;
 		Spatial *spatial;
 		Node2D *node_2d;

@@ -1630,7 +1630,7 @@ bool Main::start() {
 						path = path.substr(1, path.length() - 1);
 					}
 
-					RES res = ResourceLoader::load(path);
+					Ref<Resource> res = ResourceLoader::load(path);
 					ERR_CONTINUE_MSG(res.is_null(), "Can't autoload: " + path);
 					Node *n = NULL;
 					if (res->is_class("PackedScene")) {

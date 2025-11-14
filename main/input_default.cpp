@@ -616,7 +616,7 @@ Input::CursorShape InputDefault::get_current_cursor_shape() const {
 	return (Input::CursorShape)OS::get_singleton()->get_cursor_shape();
 }
 
-void InputDefault::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+void InputDefault::set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
 	if (Engine::get_singleton()->is_editor_hint())
 		return;
 

@@ -1388,7 +1388,7 @@ AnimationTreePlayer::Track *AnimationTreePlayer::_find_track(const NodePath &p_p
 	Node *parent = get_node(base_path);
 	ERR_FAIL_COND_V(!parent, NULL);
 
-	RES resource;
+	Ref<Resource> resource;
 	Vector<StringName> leftover_path;
 	Node *child = parent->get_node_and_resource(p_path, resource, leftover_path);
 	if (!child) {

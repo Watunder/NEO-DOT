@@ -162,7 +162,7 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoader::load_interactive(const Stri
 	return ril;
 }
 
-RES ResourceFormatLoader::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoader::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	// Check user-defined loader if there's any. Hard fail if it returns an error.
 	if (get_script_instance() && get_script_instance()->has_method("load")) {
 		Variant res = get_script_instance()->call("load", p_path, p_original_path);
@@ -171,7 +171,7 @@ RES ResourceFormatLoader::load(const String &p_path, const String &p_original_pa
 			if (r_error) {
 				*r_error = (Error)res.operator int64_t();
 			}
-			return RES();
+			return Ref<Resource>();
 		} else { // Success, pass on result.
 			if (r_error) {
 				*r_error = OK;
@@ -183,7 +183,7 @@ RES ResourceFormatLoader::load(const String &p_path, const String &p_original_pa
 	// Warning: See previous note about the risk of infinite recursion.
 	Ref<ResourceInteractiveLoader> ril = load_interactive(p_path, p_original_path, r_error);
 	if (!ril.is_valid())
-		return RES();
+		return Ref<Resource>();
 	ril->set_local_path(p_original_path);
 
 	while (true) {
@@ -198,7 +198,7 @@ RES ResourceFormatLoader::load(const String &p_path, const String &p_original_pa
 		if (r_error)
 			*r_error = err;
 
-		ERR_FAIL_COND_V_MSG(err != OK, RES(), "Failed to load resource '" + p_path + "'.");
+		ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Failed to load resource '" + p_path + "'.");
 	}
 }
 
@@ -245,7 +245,7 @@ void ResourceFormatLoader::_bind_methods() {
 
 ///////////////////////////////////
 
-RES ResourceLoader::_load(const String &p_path, const String &p_original_path, const String &p_type_hint, bool p_no_cache, Error *r_error) {
+Ref<Resource> ResourceLoader::_load(const String &p_path, const String &p_original_path, const String &p_type_hint, bool p_no_cache, Error *r_error) {
 	bool found = false;
 
 	// Try all loaders and pick the first match for the type hint
@@ -254,7 +254,7 @@ RES ResourceLoader::_load(const String &p_path, const String &p_original_path, c
 			continue;
 		}
 		found = true;
-		RES res = loader[i]->load(p_path, p_original_path != String() ? p_original_path : p_path, r_error);
+		Ref<Resource> res = loader[i]->load(p_path, p_original_path != String() ? p_original_path : p_path, r_error);
 		if (res.is_null()) {
 			continue;
 		}
@@ -262,15 +262,15 @@ RES ResourceLoader::_load(const String &p_path, const String &p_original_path, c
 		return res;
 	}
 
-	ERR_FAIL_COND_V_MSG(found, RES(),
+	ERR_FAIL_COND_V_MSG(found, Ref<Resource>(),
 			vformat("Failed loading resource: %s. Make sure resources have been imported by opening the project in the editor at least once.", p_path));
 
 #ifdef TOOLS_ENABLED
 	FileAccessRef file_check = FileAccess::create(FileAccess::ACCESS_RESOURCES);
-	ERR_FAIL_COND_V_MSG(!file_check->file_exists(p_path), RES(), "Resource file not found: " + p_path + ".");
+	ERR_FAIL_COND_V_MSG(!file_check->file_exists(p_path), Ref<Resource>(), "Resource file not found: " + p_path + ".");
 #endif
 
-	ERR_FAIL_V_MSG(RES(), "No loader found for resource: " + p_path + ".");
+	ERR_FAIL_V_MSG(Ref<Resource>(), "No loader found for resource: " + p_path + ".");
 }
 
 bool ResourceLoader::_add_to_loading_map(const String &p_path) {
@@ -317,7 +317,7 @@ void ResourceLoader::_remove_from_loading_map_and_thread(const String &p_path, T
 	loading_map_mutex.unlock();
 }
 
-RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p_no_cache, Error *r_error) {
+Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p_no_cache, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_CANT_OPEN;
 
@@ -330,7 +330,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 	if (!p_no_cache) {
 		{
 			bool success = _add_to_loading_map(local_path);
-			ERR_FAIL_COND_V_MSG(!success, RES(), "Resource: '" + local_path + "' is already being loaded. Cyclic reference?");
+			ERR_FAIL_COND_V_MSG(!success, Ref<Resource>(), "Resource: '" + local_path + "' is already being loaded. Cyclic reference?");
 		}
 
 		//lock first if possible
@@ -340,7 +340,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 		Resource **rptr = ResourceCache::resources.getptr(local_path);
 
 		if (rptr) {
-			RES res(*rptr);
+			Ref<Resource> res(*rptr);
 			//it is possible this resource was just freed in a thread. If so, this referencing will not work and resource is considered not cached
 			if (res.is_valid()) {
 				//referencing is fine
@@ -361,17 +361,17 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 		if (!p_no_cache) {
 			_remove_from_loading_map(local_path);
 		}
-		ERR_FAIL_V_MSG(RES(), "Remapping '" + local_path + "' failed.");
+		ERR_FAIL_V_MSG(Ref<Resource>(), "Remapping '" + local_path + "' failed.");
 	}
 
 	print_verbose("Loading resource: " + path);
-	RES res = _load(path, local_path, p_type_hint, p_no_cache, r_error);
+	Ref<Resource> res = _load(path, local_path, p_type_hint, p_no_cache, r_error);
 
 	if (res.is_null()) {
 		if (!p_no_cache) {
 			_remove_from_loading_map(local_path);
 		}
-		return RES();
+		return Ref<Resource>();
 	}
 	if (!p_no_cache)
 		res->set_path(local_path);
@@ -439,7 +439,7 @@ Ref<ResourceInteractiveLoader> ResourceLoader::load_interactive(const String &p_
 
 	if (!p_no_cache) {
 		bool success = _add_to_loading_map(local_path);
-		ERR_FAIL_COND_V_MSG(!success, RES(), "Resource: '" + local_path + "' is already being loaded. Cyclic reference?");
+		ERR_FAIL_COND_V_MSG(!success, Ref<Resource>(), "Resource: '" + local_path + "' is already being loaded. Cyclic reference?");
 
 		if (ResourceCache::has(local_path)) {
 			print_verbose("Loading resource: " + local_path + " (cached)");
@@ -459,7 +459,7 @@ Ref<ResourceInteractiveLoader> ResourceLoader::load_interactive(const String &p_
 		if (!p_no_cache) {
 			_remove_from_loading_map(local_path);
 		}
-		ERR_FAIL_V_MSG(RES(), "Remapping '" + local_path + "' failed.");
+		ERR_FAIL_V_MSG(Ref<Resource>(), "Remapping '" + local_path + "' failed.");
 	}
 
 	print_verbose("Loading resource: " + path);

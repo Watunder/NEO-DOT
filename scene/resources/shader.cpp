@@ -179,7 +179,7 @@ Shader::~Shader() {
 }
 ////////////
 
-RES ResourceFormatLoaderShader::load(const String &p_path, const String &p_original_path, Error *r_error) {
+Ref<Resource> ResourceFormatLoaderShader::load(const String &p_path, const String &p_original_path, Error *r_error) {
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
@@ -216,7 +216,7 @@ String ResourceFormatLoaderShader::get_resource_type(const String &p_path) const
 	return "";
 }
 
-Error ResourceFormatSaverShader::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
+Error ResourceFormatSaverShader::save(const String &p_path, const Ref<Resource> &p_resource, uint32_t p_flags) {
 	Ref<Shader> shader = p_resource;
 	ERR_FAIL_COND_V(shader.is_null(), ERR_INVALID_PARAMETER);
 
@@ -238,7 +238,7 @@ Error ResourceFormatSaverShader::save(const String &p_path, const RES &p_resourc
 	return OK;
 }
 
-void ResourceFormatSaverShader::get_recognized_extensions(const RES &p_resource, List<String> *p_extensions) const {
+void ResourceFormatSaverShader::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	if (const Shader *shader = Object::cast_to<Shader>(*p_resource)) {
 		if (shader->is_text_shader()) {
 			p_extensions->push_back("gdshader");
@@ -247,6 +247,6 @@ void ResourceFormatSaverShader::get_recognized_extensions(const RES &p_resource,
 	}
 }
 
-bool ResourceFormatSaverShader::recognize(const RES &p_resource) const {
+bool ResourceFormatSaverShader::recognize(const Ref<Resource> &p_resource) const {
 	return p_resource->get_class_name() == "Shader"; //only shader, not inherited
 }
