@@ -1,0 +1,174 @@
+#!/usr/bin/env python
+
+Import("env")
+Import("env_modules")
+
+from compat import isbasestring
+
+env_raqm = env_modules.Clone()
+
+# Thirdparty source files
+
+thirdparty_obj = []
+
+if env["builtin_harfbuzz"]:
+    env_harfbuzz = env_modules.Clone()
+    env_harfbuzz.disable_warnings()
+
+    thirdparty_harfbuzz_dir = "#thirdparty/harfbuzz/"
+    thirdparty_harfbuzz_sources = [
+        "src/OT/Var/VARC/VARC.cc",
+        "src/hb-aat-layout.cc",
+        "src/hb-aat-map.cc",
+        "src/hb-blob.cc",
+        "src/hb-buffer-serialize.cc",
+        "src/hb-buffer-verify.cc",
+        "src/hb-buffer.cc",
+        "src/hb-common.cc",
+        # "src/hb-coretext-font.cc",
+        # "src/hb-coretext-shape.cc",
+        # "src/hb-coretext.cc",
+        # "src/hb-directwrite-font.cc",
+        # "src/hb-directwrite-shape.cc",
+        # "src/hb-directwrite.cc",
+        # "src/hb-draw.cc",
+        "src/hb-face-builder.cc",
+        "src/hb-face.cc",
+        "src/hb-fallback-shape.cc",
+        "src/hb-font.cc",
+        # "src/hb-ft.cc",
+        # "src/hb-gdi.cc",
+        # "src/hb-glib.cc",
+        # "src/hb-graphite2.cc",
+        "src/hb-map.cc",
+        "src/hb-number.cc",
+        "src/hb-ot-cff1-table.cc",
+        "src/hb-ot-cff2-table.cc",
+        "src/hb-ot-color.cc",
+        "src/hb-ot-face.cc",
+        "src/hb-ot-font.cc",
+        "src/hb-ot-layout.cc",
+        "src/hb-ot-map.cc",
+        "src/hb-ot-math.cc",
+        "src/hb-ot-meta.cc",
+        "src/hb-ot-metrics.cc",
+        "src/hb-ot-name.cc",
+        "src/hb-ot-shape-fallback.cc",
+        "src/hb-ot-shape-normalize.cc",
+        "src/hb-ot-shape.cc",
+        "src/hb-ot-shaper-arabic.cc",
+        "src/hb-ot-shaper-default.cc",
+        "src/hb-ot-shaper-hangul.cc",
+        "src/hb-ot-shaper-hebrew.cc",
+        "src/hb-ot-shaper-indic-table.cc",
+        "src/hb-ot-shaper-indic.cc",
+        "src/hb-ot-shaper-khmer.cc",
+        "src/hb-ot-shaper-myanmar.cc",
+        "src/hb-ot-shaper-syllabic.cc",
+        "src/hb-ot-shaper-thai.cc",
+        "src/hb-ot-shaper-use.cc",
+        "src/hb-ot-shaper-vowel-constraints.cc",
+        "src/hb-ot-tag.cc",
+        "src/hb-ot-var.cc",
+        # "src/hb-outline.cc",
+        # "src/hb-paint-bounded.cc",
+        # "src/hb-paint-extents.cc",
+        # "src/hb-paint.cc",
+        "src/hb-set.cc",
+        "src/hb-shape-plan.cc",
+        "src/hb-shape.cc",
+        "src/hb-shaper.cc",
+        "src/hb-static.cc",
+        "src/hb-style.cc",
+        "src/hb-ucd.cc",
+        "src/hb-unicode.cc",
+        # "src/hb-uniscribe.cc",
+        # "src/hb-wasm-api.cc",
+        # "src/hb-wasm-shape.cc",
+    ]
+
+    if env["builtin_freetype"]:
+        thirdparty_harfbuzz_sources += ["src/hb-ft.cc"]
+        env_harfbuzz.Append(CPPDEFINES=["HAVE_FREETYPE"])
+        env_harfbuzz.Prepend(CPPPATH=["#thirdparty/freetype/include"])
+
+    thirdparty_harfbuzz_sources = [thirdparty_harfbuzz_dir + file for file in thirdparty_harfbuzz_sources]
+
+    if env["platform"] not in ["windows"]:
+        env_harfbuzz.Append(CCFLAGS=["HAVE_PTHREAD"])
+
+    env_harfbuzz.Prepend(CPPPATH=[thirdparty_harfbuzz_dir])
+
+    env_harfbuzz.Append(
+        CPPDEFINES=[
+            "HB_NO_PAINT",
+            "HB_NO_DRAW",
+        ]
+    )
+
+    lib = env_harfbuzz.add_library("harfbuzz_builtin", thirdparty_harfbuzz_sources)
+    thirdparty_obj += lib
+
+    # Needs to be appended to arrive after libscene in the linker call,
+    # but we don't want it to arrive *after* system libs, so manual hack
+    # LIBS contains first SCons Library objects ("SCons.Node.FS.File object")
+    # and then plain strings for system library. We insert between the two.
+    inserted = False
+    for idx, linklib in enumerate(env["LIBS"]):
+        if isbasestring(linklib):  # first system lib such as "X11", otherwise SCons lib object
+            env["LIBS"].insert(idx, lib)
+            inserted = True
+            break
+    if not inserted:
+        env.Append(LIBS=[lib])
+
+
+env_raqm.Prepend(CPPPATH=["#thirdparty/harfbuzz/src", "#thirdparty/freetype/include"])
+
+thirdparty_sheenbidi_dir = "#thirdparty/sheenbidi/"
+thirdparty_sheenbidi_sources = [
+    "Source/BidiChain.c",
+    "Source/BidiTypeLookup.c",
+    "Source/BracketQueue.c",
+    "Source/GeneralCategoryLookup.c",
+    "Source/IsolatingRun.c",
+    "Source/LevelRun.c",
+    "Source/Object.c",
+    "Source/PairingLookup.c",
+    "Source/RunQueue.c",
+    "Source/SBAlgorithm.c",
+    "Source/SBBase.c",
+    "Source/SBCodepoint.c",
+    "Source/SBCodepointSequence.c",
+    "Source/SBLine.c",
+    "Source/SBLog.c",
+    "Source/SBMirrorLocator.c",
+    "Source/SBParagraph.c",
+    "Source/SBScriptLocator.c",
+    "Source/ScriptLookup.c",
+    "Source/ScriptStack.c",
+    "Source/StatusStack.c",
+]
+thirdparty_sheenbidi_sources = [thirdparty_sheenbidi_dir + file for file in thirdparty_sheenbidi_sources]
+
+env_raqm.Append(CPPDEFINES=["RAQM_SHEENBIDI", "RAQM_SHEENBIDI_GT_2_9"])
+env_raqm.Prepend(CPPPATH=[thirdparty_sheenbidi_dir + "/Headers"])
+env_raqm.add_source_files(thirdparty_obj, thirdparty_sheenbidi_sources)
+
+thirdparty_libraqm_dir = "#thirdparty/libraqm/"
+thirdparty_libraqm_sources = ["raqm.c"]
+thirdparty_libraqm_sources = [thirdparty_libraqm_dir + file for file in thirdparty_libraqm_sources]
+
+env_raqm.Prepend(CPPPATH=[thirdparty_libraqm_dir])
+env_raqm.add_source_files(thirdparty_obj, thirdparty_libraqm_sources)
+
+
+# Godot source files
+
+module_obj = []
+
+env_raqm.add_source_files(module_obj, "*.cpp")
+env.modules_sources += module_obj
+
+# Needed to force rebuilding the module files when the thirdparty library is updated.
+env.Depends(module_obj, thirdparty_obj)

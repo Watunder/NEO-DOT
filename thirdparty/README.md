@@ -120,7 +120,7 @@ comments.
 
 Files extracted from upstream source:
 
-- the `src/` folder, stripped of the `Jamfile` files and the `tools` subfolder
+- the `src/` folder
 - the `include/` folder
 - `docs/{FTL.TXT,LICENSE.TXT}`
 
@@ -131,9 +131,29 @@ Files extracted from upstream source:
 - Version: 2.0.8 (73db193f853e2ee079bf3ca8a64aa2eaf6459043, 2024)
 - License: MIT
 
-The files we package are automatically generated.
-See the header of glad.c for instructions on how to generate them for
-the GLES version Godot targets.
+Files extracted from upstream source:
+
+- `LICENSE`
+
+Files extracted from generated files [upstream web instance](https://gen.glad.sh/):
+
+- All the directories in `include/`
+- All the files in `src/`
+
+
+## harfbuzz
+
+- Upstream: https://github.com/harfbuzz/harfbuzz
+- Version: 11.5.1 (7497c4147469fd4102a7229222586ad5c743c5a1, 2025)
+- License: HarfBuzz
+
+Files extracted from upstream source:
+
+- the `src/` folder, recursively:
+  - All the `.cc`, `.h`, `.hh` files
+  - Except `wasm/*`, `ms-use/*`, `rust/*`, `main.cc`, `harfbuzz*.cc`, `failing-alloc.c`, `test*.cc`, `hb-harfrust.cc`, `hb-coretext*.*`, `hb-directwrite*.*`, `hb-gdi*.*`, `hb-glib*.*`, `hb-uniscribe*.*`, `hb-wasm*.*`
+
+- `AUTHORS`, `COPYING`, `NEWS`, `THANKS`
 
 
 ## jpeg-compressor
@@ -167,6 +187,21 @@ Files extracted from upstream source:
 - `src/*` except from: `lookups.pl`, `Makefile.*`
 - `include/vorbis/*.h` as vorbis/
 - COPYING
+
+
+## libraqm
+
+- Upstream: https://github.com/HOST-Oman/libraqm
+- Version: 0.10.3 (3efba870c8d2775cb3287122f58530c6fbb20f72, 2025)
+- License: MIT
+
+Files extracted from upstream source:
+
+- `raqm*.{c,h}`
+- `AUTHORS`, `COPYING`, `NEWS`
+
+The only modified file is `raqm-version.h`, which was created for Godot
+Bump the version number for libraqm in that file when upgrading.
 
 
 ## libwebp
@@ -386,6 +421,18 @@ Files extracted from upstream source:
 
 - `Recast/` folder without `CMakeLists.txt`
 - License.txt
+
+
+## sheenbidi
+
+- Upstream: https://github.com/Tehreer/SheenBidi
+- Version: 2.9.0 (83f77108a2873600283f6da4b326a2dca7a3a7a6, 2025)
+- License: Apache 2.0
+
+Files extracted from upstream source:
+
+- the `Headers` and `Source` folder
+- `LICENSE`
 
 
 ## squish
