@@ -111,7 +111,7 @@ public:
 		void set_color_regions(const Vector<ColorRegion> *p_regions) { color_regions = p_regions; }
 		int get_line_width(int p_line) const;
 		int get_max_width(bool p_exclude_hidden = false) const;
-		int get_char_width(char32_t c, char32_t next_c, int px) const;
+		int get_char_width(char32_t c, int px) const;
 		void set_line_wrap_amount(int p_line, int p_wrap_amount) const;
 		int get_line_wrap_amount(int p_line) const;
 		const Map<int, ColorRegionInfo> &get_color_region_info(int p_line) const;

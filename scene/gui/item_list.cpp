@@ -1049,7 +1049,7 @@ void ItemList::_notification(int p_what) {
 					float ofs = 0;
 					int line = 0;
 					for (int j = 0; j <= ss; j++) {
-						int cs = j < ss ? font->get_char_size(items[i].text[j], items[i].text[j + 1]).x : 0;
+						int cs = j < ss ? font->get_char_size(items[i].text[j]).x : 0;
 						if (ofs + cs > max_len || j == ss) {
 							line_limit_cache.write[line] = j;
 							line_size_cache.write[line] = ofs;
@@ -1070,7 +1070,6 @@ void ItemList::_notification(int p_what) {
 					text_ofs += base_ofs;
 					text_ofs += items[i].rect_cache.position;
 
-					FontDrawer drawer(font, Color(1, 1, 1));
 					for (int j = 0; j < ss; j++) {
 						if (j == line_limit_cache[line]) {
 							line++;
@@ -1078,7 +1077,7 @@ void ItemList::_notification(int p_what) {
 							if (line >= max_text_lines)
 								break;
 						}
-						ofs += drawer.draw_char(get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], items[i].text[j + 1], modulate);
+						ofs += draw_char(font, text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], modulate);
 					}
 
 					//special multiline mode

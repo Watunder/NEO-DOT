@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Font" inherits="Resource" version="3.3">
+<class name="FreeTypeFont" inherits="Font" version="3.3">
 	<brief_description>
-		Base class for font files.
+		FreeTypeFont contains vector font datas [FreeTypeFontData].
 	</brief_description>
 	<description>
-		Base class for font files.
+		FreeTypeFont contains vector font datas [FreeTypeFontData].
 	</description>
 	<tutorials>
 	</tutorials>

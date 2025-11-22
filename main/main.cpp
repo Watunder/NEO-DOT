@@ -64,6 +64,7 @@
 #include "scene/resources/packed_scene.h"
 #include "servers/audio_server.h"
 #include "servers/camera_server.h"
+#include "servers/font_server.h"
 #include "servers/physics_2d_server.h"
 #include "servers/physics_server.h"
 #include "servers/register_server_types.h"
@@ -95,6 +96,7 @@ static MessageQueue *message_queue = NULL;
 // Initialized in setup2()
 static AudioServer *audio_server = NULL;
 static CameraServer *camera_server = NULL;
+static FontServer *font_server = NULL;
 static PhysicsServer *physics_server = NULL;
 static Physics2DServer *physics_2d_server = NULL;
 // We error out if setup2() doesn't turn this true
@@ -411,6 +413,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 #ifdef TOOLS_ENABLED
 	bool found_project = false;
 #endif
+
+	font_server = memnew(FontServer);
 
 	packed_data = PackedData::get_singleton();
 	if (!packed_data)
@@ -1005,6 +1009,16 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	GLOBAL_DEF("rendering/quality/driver/fallback_to_gles2", false);
 
+	GLOBAL_DEF("rendering/font/freetype_fonts/use_oversampling", true);
+	GLOBAL_DEF("rendering/font/freetype_fonts/antialiasing", 1);
+	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/antialiasing", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/antialiasing", PROPERTY_HINT_ENUM, "None,Normal", PROPERTY_USAGE_DEFAULT));
+	GLOBAL_DEF("rendering/font/freetype_fonts/hinting", 0);
+#if defined(PLATFORM_APPLE) && TARGET_OSX
+	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/hinting", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/hinting", PROPERTY_HINT_ENUM, "Auto (None),None,Light,Normal", PROPERTY_USAGE_DEFAULT));
+#else
+	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/hinting", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/hinting", PROPERTY_HINT_ENUM, "Auto (Light),None,Light,Normal", PROPERTY_USAGE_DEFAULT));
+#endif
+
 	// Assigning here, to be sure that it appears in docs
 	GLOBAL_DEF("rendering/2d/options/use_nvidia_rect_flicker_workaround", false);
 
@@ -1226,6 +1240,8 @@ error:
 		memdelete(packed_data);
 	if (file_access_network_client)
 		memdelete(file_access_network_client);
+	if (font_server)
+		memdelete(font_server);
 
 	unregister_module_types(MODULE_LEVEL_CORE);
 	unregister_core_driver_types();
@@ -1738,7 +1754,7 @@ bool Main::start() {
 			bool snap_controls = GLOBAL_DEF("gui/common/snap_controls_to_pixels", true);
 			sml->get_root()->set_snap_controls_to_pixels(snap_controls);
 
-			bool font_oversampling = GLOBAL_DEF("rendering/quality/dynamic_fonts/use_oversampling", true);
+			bool font_oversampling = GLOBAL_GET("rendering/font/freetype_fonts/use_oversampling");
 			sml->set_use_font_oversampling(font_oversampling);
 
 		} else {
@@ -1751,7 +1767,6 @@ bool Main::start() {
 			sml->set_auto_accept_quit(GLOBAL_DEF("application/config/auto_accept_quit", true));
 			sml->set_quit_on_go_back(GLOBAL_DEF("application/config/quit_on_go_back", true));
 			GLOBAL_DEF("gui/common/snap_controls_to_pixels", true);
-			GLOBAL_DEF("rendering/quality/dynamic_fonts/use_oversampling", true);
 		}
 
 		String local_game_path;
@@ -2099,6 +2114,10 @@ void Main::cleanup(bool p_force) {
 
 	if (camera_server) {
 		memdelete(camera_server);
+	}
+
+	if (font_server) {
+		memdelete(font_server);
 	}
 
 	OS::get_singleton()->finalize();
