@@ -30,20 +30,14 @@
 
 #include "editor_fonts.h"
 
-#include "builtin_fonts.gen.h"
-#include "core/os/dir_access.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
-#include "scene/resources/default_theme/default_theme.h"
-#include "scene/resources/dynamic_font.h"
 
-#define MAKE_FALLBACKS(m_name)          \
-	m_name->add_fallback(FontArabic);   \
-	m_name->add_fallback(FontHebrew);   \
-	m_name->add_fallback(FontThai);     \
-	m_name->add_fallback(FontHindi);    \
-	m_name->add_fallback(FontJapanese); \
-	m_name->add_fallback(FontFallback);
+#include "core/os/dir_access.h"
+#include "core/project_settings.h"
+#include "scene/resources/default_theme/default_theme.h"
+#include "scene/resources/freetype_font.h"
+#include "servers/font/builtin_fonts.gen.h"
 
 // Enable filtering and mipmaps on the editor fonts to improve text appearance
 // in editors that are zoomed in/out without having dedicated fonts to generate.
@@ -52,62 +46,56 @@
 
 // the custom spacings might only work with Noto Sans
 #define MAKE_DEFAULT_FONT(m_name, m_size)                       \
-	Ref<DynamicFont> m_name;                                    \
+	Ref<FreeTypeFont> m_name;                                   \
 	m_name.instance();                                          \
-	m_name->set_size(m_size);                                   \
-	m_name->set_use_filter(true);                               \
-	m_name->set_use_mipmaps(true);                              \
 	if (CustomFont.is_valid()) {                                \
-		m_name->set_font_data(CustomFont);                      \
-		m_name->add_fallback(DefaultFont);                      \
+		m_name->set_data(CustomFont->duplicate());              \
 	} else {                                                    \
-		m_name->set_font_data(DefaultFont);                     \
+		m_name->set_data(DefaultFont->get_data()->duplicate()); \
 	}                                                           \
-	m_name->set_spacing(DynamicFont::SPACING_TOP, -EDSCALE);    \
-	m_name->set_spacing(DynamicFont::SPACING_BOTTOM, -EDSCALE); \
-	MAKE_FALLBACKS(m_name);
-
-#define MAKE_BOLD_FONT(m_name, m_size)                          \
-	Ref<DynamicFont> m_name;                                    \
-	m_name.instance();                                          \
 	m_name->set_size(m_size);                                   \
 	m_name->set_use_filter(true);                               \
 	m_name->set_use_mipmaps(true);                              \
-	if (CustomFontBold.is_valid()) {                            \
-		m_name->set_font_data(CustomFontBold);                  \
-		m_name->add_fallback(DefaultFontBold);                  \
-	} else {                                                    \
-		m_name->set_font_data(DefaultFontBold);                 \
-	}                                                           \
-	m_name->set_spacing(DynamicFont::SPACING_TOP, -EDSCALE);    \
-	m_name->set_spacing(DynamicFont::SPACING_BOTTOM, -EDSCALE); \
-	MAKE_FALLBACKS(m_name);
+	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE);   \
+	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
 
-#define MAKE_SOURCE_FONT(m_name, m_size)                        \
-	Ref<DynamicFont> m_name;                                    \
-	m_name.instance();                                          \
-	m_name->set_size(m_size);                                   \
-	m_name->set_use_filter(true);                               \
-	m_name->set_use_mipmaps(true);                              \
-	if (CustomFontSource.is_valid()) {                          \
-		m_name->set_font_data(CustomFontSource);                \
-		m_name->add_fallback(dfmono);                           \
-	} else {                                                    \
-		m_name->set_font_data(dfmono);                          \
-	}                                                           \
-	m_name->set_spacing(DynamicFont::SPACING_TOP, -EDSCALE);    \
-	m_name->set_spacing(DynamicFont::SPACING_BOTTOM, -EDSCALE); \
-	MAKE_FALLBACKS(m_name);
+#define MAKE_BOLD_FONT(m_name, m_size)                        \
+	Ref<FreeTypeFont> m_name;                                 \
+	m_name.instance();                                        \
+	if (CustomFontBold.is_valid()) {                          \
+		m_name->set_data(CustomFontBold->duplicate());        \
+	} else {                                                  \
+		m_name->set_data(NotoSansUI_Bold->duplicate());       \
+	}                                                         \
+	m_name->set_size(m_size);                                 \
+	m_name->set_use_filter(true);                             \
+	m_name->set_use_mipmaps(true);                            \
+	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE); \
+	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
+
+#define MAKE_SOURCE_FONT(m_name, m_size)                      \
+	Ref<FreeTypeFont> m_name;                                 \
+	m_name.instance();                                        \
+	if (CustomFontSource.is_valid()) {                        \
+		m_name->set_data(CustomFontSource->duplicate());      \
+	} else {                                                  \
+		m_name->set_data(Hack_Regular->duplicate());          \
+	}                                                         \
+	m_name->set_size(m_size);                                 \
+	m_name->set_use_filter(true);                             \
+	m_name->set_use_mipmaps(true);                            \
+	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE); \
+	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
 
 void editor_register_fonts(Ref<Theme> p_theme) {
 	DirAccess *dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 
 	/* Custom font */
 
-	bool font_antialiased = (bool)EditorSettings::get_singleton()->get("interface/editor/font_antialiased");
-	int font_hinting_setting = (int)EditorSettings::get_singleton()->get("interface/editor/font_hinting");
+	int font_hinting_setting = GLOBAL_GET("rendering/font/freetype_fonts/hinting");
+	int font_antialiasing_setting = GLOBAL_GET("rendering/font/freetype_fonts/antialiasing");
 
-	DynamicFontData::Hinting font_hinting;
+	FreeTypeFont::Hinting font_hinting;
 	switch (font_hinting_setting) {
 		case 0:
 			// The "Auto" setting uses the setting that best matches the OS' font rendering:
@@ -115,30 +103,37 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 			// - Windows uses ClearType, which is in between "Light" and "Normal" hinting.
 			// - Linux has configurable font hinting, but most distributions including Ubuntu default to "Light".
 #if defined(PLATFORM_APPLE) && TARGET_OSX
-			font_hinting = DynamicFontData::HINTING_NONE;
+			font_hinting = FreeTypeFont::HINTING_NONE;
 #else
-			font_hinting = DynamicFontData::HINTING_LIGHT;
+			font_hinting = FreeTypeFont::HINTING_LIGHT;
 #endif
 			break;
 		case 1:
-			font_hinting = DynamicFontData::HINTING_NONE;
+			font_hinting = FreeTypeFont::HINTING_NONE;
 			break;
 		case 2:
-			font_hinting = DynamicFontData::HINTING_LIGHT;
+			font_hinting = FreeTypeFont::HINTING_LIGHT;
 			break;
 		default:
-			font_hinting = DynamicFontData::HINTING_NORMAL;
+			font_hinting = FreeTypeFont::HINTING_NORMAL;
+			break;
+	}
+
+	FreeTypeFont::Antialiasing font_antialiasing;
+	switch (font_antialiasing_setting) {
+		case 0:
+			font_antialiasing = FreeTypeFont::ANTIALIASING_NONE;
+			break;
+		default:
+			font_antialiasing = FreeTypeFont::ANTIALIASING_NORMAL;
 			break;
 	}
 
 	String custom_font_path = EditorSettings::get_singleton()->get("interface/editor/main_font");
-	Ref<DynamicFontData> CustomFont;
+	Ref<FreeTypeFontData> CustomFont;
 	if (custom_font_path.length() > 0 && dir->file_exists(custom_font_path)) {
 		CustomFont.instance();
-		CustomFont->set_antialiased(font_antialiased);
-		CustomFont->set_hinting(font_hinting);
-		CustomFont->set_font_path(custom_font_path);
-		CustomFont->set_force_autohinter(true); //just looks better..i think?
+		CustomFont->load_from_file(custom_font_path);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/main_font", "");
 	}
@@ -146,13 +141,10 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	/* Custom Bold font */
 
 	String custom_font_path_bold = EditorSettings::get_singleton()->get("interface/editor/main_font_bold");
-	Ref<DynamicFontData> CustomFontBold;
+	Ref<FreeTypeFontData> CustomFontBold;
 	if (custom_font_path_bold.length() > 0 && dir->file_exists(custom_font_path_bold)) {
 		CustomFontBold.instance();
-		CustomFontBold->set_antialiased(font_antialiased);
-		CustomFontBold->set_hinting(font_hinting);
-		CustomFontBold->set_font_path(custom_font_path_bold);
-		CustomFontBold->set_force_autohinter(true); //just looks better..i think?
+		CustomFontBold->load_from_file(custom_font_path_bold);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/main_font_bold", "");
 	}
@@ -160,83 +152,25 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	/* Custom source code font */
 
 	String custom_font_path_source = EditorSettings::get_singleton()->get("interface/editor/code_font");
-	Ref<DynamicFontData> CustomFontSource;
+	Ref<FreeTypeFontData> CustomFontSource;
 	if (custom_font_path_source.length() > 0 && dir->file_exists(custom_font_path_source)) {
 		CustomFontSource.instance();
-		CustomFontSource->set_antialiased(font_antialiased);
-		CustomFontSource->set_hinting(font_hinting);
-		CustomFontSource->set_font_path(custom_font_path_source);
+		CustomFontSource->load_from_file(custom_font_path_source);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/code_font", "");
 	}
 
 	memdelete(dir);
 
-	/* Droid Sans */
+	Ref<FreeTypeFontData> NotoSansUI_Bold;
+	NotoSansUI_Bold.instance();
+	NotoSansUI_Bold->load_from_memory(_font_NotoSansUI_Bold, _font_NotoSansUI_Bold_size);
 
-	Ref<DynamicFontData> DefaultFont;
-	DefaultFont.instance();
-	DefaultFont->set_antialiased(font_antialiased);
-	DefaultFont->set_hinting(font_hinting);
-	DefaultFont->set_font_ptr(_font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
-	DefaultFont->set_force_autohinter(true); //just looks better..i think?
+	Ref<FreeTypeFontData> Hack_Regular;
+	Hack_Regular.instance();
+	Hack_Regular->load_from_memory(_font_Hack_Regular, _font_Hack_Regular_size);
 
-	Ref<DynamicFontData> DefaultFontBold;
-	DefaultFontBold.instance();
-	DefaultFontBold->set_antialiased(font_antialiased);
-	DefaultFontBold->set_hinting(font_hinting);
-	DefaultFontBold->set_font_ptr(_font_NotoSansUI_Bold, _font_NotoSansUI_Bold_size);
-	DefaultFontBold->set_force_autohinter(true); // just looks better..i think?
-
-	Ref<DynamicFontData> FontFallback;
-	FontFallback.instance();
-	FontFallback->set_antialiased(font_antialiased);
-	FontFallback->set_hinting(font_hinting);
-	FontFallback->set_font_ptr(_font_DroidSansFallback, _font_DroidSansFallback_size);
-	FontFallback->set_force_autohinter(true); //just looks better..i think?
-
-	Ref<DynamicFontData> FontJapanese;
-	FontJapanese.instance();
-	FontJapanese->set_antialiased(font_antialiased);
-	FontJapanese->set_hinting(font_hinting);
-	FontJapanese->set_font_ptr(_font_DroidSansJapanese, _font_DroidSansJapanese_size);
-	FontJapanese->set_force_autohinter(true); //just looks better..i think?
-
-	Ref<DynamicFontData> FontArabic;
-	FontArabic.instance();
-	FontArabic->set_antialiased(font_antialiased);
-	FontArabic->set_hinting(font_hinting);
-	FontArabic->set_font_ptr(_font_NotoNaskhArabicUI_Regular, _font_NotoNaskhArabicUI_Regular_size);
-	FontArabic->set_force_autohinter(true); //just looks better..i think?
-
-	Ref<DynamicFontData> FontHebrew;
-	FontHebrew.instance();
-	FontHebrew->set_antialiased(font_antialiased);
-	FontHebrew->set_hinting(font_hinting);
-	FontHebrew->set_font_ptr(_font_NotoSansHebrew_Regular, _font_NotoSansHebrew_Regular_size);
-	FontHebrew->set_force_autohinter(true); //just looks better..i think?
-
-	Ref<DynamicFontData> FontThai;
-	FontThai.instance();
-	FontThai->set_antialiased(font_antialiased);
-	FontThai->set_hinting(font_hinting);
-	FontThai->set_font_ptr(_font_NotoSansThaiUI_Regular, _font_NotoSansThaiUI_Regular_size);
-	FontThai->set_force_autohinter(true); //just looks better..i think?
-
-	Ref<DynamicFontData> FontHindi;
-	FontHindi.instance();
-	FontHindi->set_antialiased(font_antialiased);
-	FontHindi->set_hinting(font_hinting);
-	FontHindi->set_font_ptr(_font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
-	FontHindi->set_force_autohinter(true); //just looks better..i think?
-
-	/* Hack */
-
-	Ref<DynamicFontData> dfmono;
-	dfmono.instance();
-	dfmono->set_antialiased(font_antialiased);
-	dfmono->set_hinting(font_hinting);
-	dfmono->set_font_ptr(_font_Hack_Regular, _font_Hack_Regular_size);
+	Ref<FreeTypeFont> DefaultFont = p_theme->get_font("", "");
 
 	int default_font_size = int(EDITOR_GET("interface/editor/main_font_size")) * EDSCALE;
 

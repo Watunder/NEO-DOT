@@ -37,10 +37,11 @@
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "scene/resources/bit_map.h"
-#include "scene/resources/dynamic_font.h"
+#include "scene/resources/freetype_font.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
 #include "servers/audio/audio_stream.h"
+#include "servers/font_server.h"
 
 void post_process_preview(Ref<Image> p_image) {
 	if (p_image->get_format() != Image::FORMAT_RGBA8)
@@ -791,25 +792,18 @@ void EditorFontPreviewPlugin::_bind_methods() {
 }
 
 bool EditorFontPreviewPlugin::handles(const String &p_type) const {
-	return ClassDB::is_parent_class(p_type, "DynamicFontData") || ClassDB::is_parent_class(p_type, "DynamicFont");
+	return ClassDB::is_parent_class(p_type, "FreeTypeFontData");
 }
 
 Ref<Texture> EditorFontPreviewPlugin::generate_from_path(const String &p_path, const Size2 &p_size) const {
 	Ref<ResourceInteractiveLoader> ril = ResourceLoader::load_interactive(p_path);
 	ril.ptr()->wait();
 	Ref<Resource> res = ril.ptr()->get_resource();
-	Ref<DynamicFont> sampled_font;
+	Ref<FreeTypeFont> sampled_font;
 	sampled_font.instance();
-	if (res->is_class("DynamicFont")) {
-		Ref<DynamicFont> font = res;
-		if (font->get_font_data().is_valid()) {
-			sampled_font->set_font_data(font->get_font_data()->duplicate());
-		}
-		for (int i = 0; i < font->get_fallback_count(); i++) {
-			sampled_font->add_fallback(font->get_fallback(i)->duplicate());
-		}
-	} else if (res->is_class("DynamicFontData")) {
-		sampled_font->set_font_data(res->duplicate());
+	Ref<FreeTypeFontData> font_data = res;
+	if (font_data.is_valid()) {
+		sampled_font->set_data(font_data->duplicate());
 	}
 	sampled_font->set_size(50);
 
@@ -821,9 +815,7 @@ Ref<Texture> EditorFontPreviewPlugin::generate_from_path(const String &p_path, c
 	pos.x = 64 - size.x / 2;
 	pos.y = 80;
 
-	Ref<Font> font = sampled_font;
-
-	font->draw(canvas_item, pos, sampled_text);
+	FontServer::get_singleton()->draw_string(canvas_item, sampled_font, pos, sampled_text);
 
 	preview_done.clear();
 	VS::get_singleton()->viewport_set_update_mode(viewport, VS::VIEWPORT_UPDATE_ONCE); //once used for capture

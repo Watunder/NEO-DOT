@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+Import("env")
+
+import os
+import os.path
+import glob
+from compat import open_utf8, byte_to_str
+
+
+path = env.Dir(".").abspath
+flist = glob.glob(path + "/../../thirdparty/fonts/*.ttf")
+flist.extend(glob.glob(path + "/../../thirdparty/fonts/*.otf"))
+flist.sort()
+
+builtin_fonts_h = open_utf8("builtin_fonts.gen.h", "w")
+builtin_fonts_h.write("/* THIS FILE IS GENERATED DO NOT EDIT */\n")
+builtin_fonts_h.write("#ifndef _BUILTIN_FONTS_H\n")
+builtin_fonts_h.write("#define _BUILTIN_FONTS_H\n")
+
+builtin_fonts_cpp = open_utf8("builtin_fonts.gen.cpp", "w")
+builtin_fonts_cpp.write("/* THIS FILE IS GENERATED DO NOT EDIT */\n")
+builtin_fonts_cpp.write('#include "builtin_fonts.gen.h"\n')
+
+# saving uncompressed, since freetype will reference from memory pointer
+for i in range(len(flist)):
+    with open(flist[i], "rb") as f:
+        buf = f.read()
+
+    name = os.path.splitext(os.path.basename(flist[i]))[0]
+
+    builtin_fonts_h.write("extern const int _font_" + name + "_size;\n")
+    builtin_fonts_h.write("extern const unsigned char _font_" + name + "[];\n")
+
+    builtin_fonts_cpp.write("static const int _font_" + name + "_size = " + str(len(buf)) + ";\n")
+    builtin_fonts_cpp.write("static const unsigned char _font_" + name + "[] = {\n")
+    for j in range(len(buf)):
+        builtin_fonts_cpp.write("\t" + byte_to_str(buf[j]) + ",\n")
+    builtin_fonts_cpp.write("};\n")
+
+builtin_fonts_h.write("#endif")
+builtin_fonts_h.close()
+
+builtin_fonts_cpp.close()
+
+
+env.add_source_files(env.servers_sources, "*.cpp")

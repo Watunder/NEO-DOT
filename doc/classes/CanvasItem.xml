@@ -41,11 +41,10 @@
 			<return type="float" />
 			<argument index="0" name="font" type="Font" />
 			<argument index="1" name="position" type="Vector2" />
-			<argument index="2" name="char" type="String" />
-			<argument index="3" name="next" type="String" />
-			<argument index="4" name="modulate" type="Color" default="Color( 1, 1, 1, 1 )" />
+			<argument index="2" name="char" type="int" />
+			<argument index="3" name="modulate" type="Color" default="Color( 1, 1, 1, 1 )" />
 			<description>
-				Draws a string character using a custom font. Returns the advance, depending on the character width and kerning with an optional next character.
+				Draws a string character using a custom font. Returns the advance.
 			</description>
 		</method>
 		<method name="draw_circle">
@@ -211,7 +210,6 @@
 				var default_font = Control.new().get_font("font")
 				draw_string(default_font, Vector2(64, 64), "Hello world")
 				[/codeblock]
-				See also [method Font.draw].
 			</description>
 		</method>
 		<method name="draw_style_box">

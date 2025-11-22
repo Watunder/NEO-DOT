@@ -1015,7 +1015,7 @@ void EditorPropertyEasing::_draw_easing() {
 	} else {
 		decimals = 1;
 	}
-	f->draw(ci, Point2(10, 10 + f->get_ascent()), rtos(exp).pad_decimals(decimals), font_color);
+	easing_draw->draw_string(f, Point2(10, 10 + f->get_ascent()), rtos(exp).pad_decimals(decimals), font_color);
 }
 
 void EditorPropertyEasing::update_property() {

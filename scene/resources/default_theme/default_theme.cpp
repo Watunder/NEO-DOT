@@ -30,13 +30,13 @@
 
 #include "default_theme.h"
 
-#include "scene/resources/theme.h"
-
-#include "core/os/os.h"
 #include "theme_data.h"
 
-#include "font_hidpi.inc"
-#include "font_lodpi.inc"
+#include "core/os/os.h"
+#include "core/project_settings.h"
+#include "scene/resources/freetype_font.h"
+#include "scene/resources/theme.h"
+#include "servers/font/builtin_fonts.gen.h"
 
 typedef Map<const void *, Ref<ImageTexture>> TexCacheMap;
 
@@ -145,40 +145,6 @@ static Ref<Texture> flip_icon(Ref<Texture> p_texture, bool p_flip_y = false, boo
 
 	texture->create_from_image(img);
 	return texture;
-}
-
-static Ref<BitmapFont> make_font(int p_height, int p_ascent, int p_charcount, const int *p_char_rects, int p_kerning_count, const int *p_kernings, int p_w, int p_h, const unsigned char *p_img) {
-	Ref<BitmapFont> font(memnew(BitmapFont));
-
-	Ref<Image> image = memnew(Image(p_img));
-	Ref<ImageTexture> tex = memnew(ImageTexture);
-	tex->create_from_image(image);
-
-	font->add_texture(tex);
-
-	for (int i = 0; i < p_charcount; i++) {
-		const int *c = &p_char_rects[i * 8];
-
-		int chr = c[0];
-		Rect2 frect;
-		frect.position.x = c[1];
-		frect.position.y = c[2];
-		frect.size.x = c[3];
-		frect.size.y = c[4];
-		Point2 align(c[6], c[5]);
-		int advance = c[7];
-
-		font->add_char(chr, 0, frect, align, advance);
-	}
-
-	for (int i = 0; i < p_kerning_count; i++) {
-		font->add_kerning_pair(p_kernings[i * 3 + 0], p_kernings[i * 3 + 1], p_kernings[i * 3 + 2]);
-	}
-
-	font->set_height(p_height);
-	font->set_ascent(p_ascent);
-
-	return font;
 }
 
 static Ref<StyleBox> make_empty_stylebox(float p_margin_left = -1, float p_margin_top = -1, float p_margin_right = -1, float p_margin_bottom = -1) {
@@ -908,6 +874,90 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	memdelete(tex_cache);
 }
 
+static Ref<Font> make_default_font() {
+	int font_hinting_setting = GLOBAL_GET("rendering/font/freetype_fonts/hinting");
+	int font_antialiasing_setting = GLOBAL_GET("rendering/font/freetype_fonts/antialiasing");
+
+	FreeTypeFont::Hinting font_hinting;
+	switch (font_hinting_setting) {
+		case 0:
+			// The "Auto" setting uses the setting that best matches the OS' font rendering:
+			// - macOS doesn't use font hinting.
+			// - Windows uses ClearType, which is in between "Light" and "Normal" hinting.
+			// - Linux has configurable font hinting, but most distributions including Ubuntu default to "Light".
+#if defined(PLATFORM_APPLE) && TARGET_OSX
+			font_hinting = FreeTypeFont::HINTING_NONE;
+#else
+			font_hinting = FreeTypeFont::HINTING_LIGHT;
+#endif
+			break;
+		case 1:
+			font_hinting = FreeTypeFont::HINTING_NONE;
+			break;
+		case 2:
+			font_hinting = FreeTypeFont::HINTING_LIGHT;
+			break;
+		default:
+			font_hinting = FreeTypeFont::HINTING_NORMAL;
+			break;
+	}
+
+	FreeTypeFont::Antialiasing font_antialiasing;
+	switch (font_antialiasing_setting) {
+		case 0:
+			font_antialiasing = FreeTypeFont::ANTIALIASING_NONE;
+			break;
+		default:
+			font_antialiasing = FreeTypeFont::ANTIALIASING_NORMAL;
+			break;
+	}
+
+	/* Droid Sans */
+
+	Ref<FreeTypeFontData> NotoSansUI_Regular;
+	NotoSansUI_Regular.instance();
+	NotoSansUI_Regular->load_from_memory(_font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
+
+	Ref<FreeTypeFontData> DroidSansFallback;
+	DroidSansFallback.instance();
+	DroidSansFallback->load_from_memory(_font_DroidSansFallback, _font_DroidSansFallback_size);
+
+	Ref<FreeTypeFontData> DroidSansJapanese;
+	DroidSansJapanese.instance();
+	DroidSansJapanese->load_from_memory(_font_DroidSansJapanese, _font_DroidSansJapanese_size);
+
+	Ref<FreeTypeFontData> NotoNaskhArabicUI_Regular;
+	NotoNaskhArabicUI_Regular.instance();
+	NotoNaskhArabicUI_Regular->load_from_memory(_font_NotoNaskhArabicUI_Regular, _font_NotoNaskhArabicUI_Regular_size);
+
+	Ref<FreeTypeFontData> NotoSansHebrew_Regular;
+	NotoSansHebrew_Regular.instance();
+	NotoSansHebrew_Regular->load_from_memory(_font_NotoSansHebrew_Regular, _font_NotoSansHebrew_Regular_size);
+
+	Ref<FreeTypeFontData> NotoSansThaiUI_Regular;
+	NotoSansThaiUI_Regular.instance();
+	NotoSansThaiUI_Regular->load_from_memory(_font_NotoSansThaiUI_Regular, _font_NotoSansThaiUI_Regular_size);
+
+	Ref<FreeTypeFontData> NotoSansDevanagariUI_Regular;
+	NotoSansDevanagariUI_Regular.instance();
+	NotoSansDevanagariUI_Regular->load_from_memory(_font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
+
+	Ref<FreeTypeFont> font;
+	font.instance();
+	font->set_use_filter(true);
+	font->set_use_mipmaps(true);
+
+	font->set_data(NotoSansUI_Regular);
+	// NotoNaskhArabicUI_Regular;
+	// NotoSansHebrew_Regular;
+	// NotoSansThaiUI_Regular;
+	// NotoSansDevanagariUI_Regular;
+	// DroidSansJapanese;
+	// DroidSansFallback;
+
+	return font;
+}
+
 void make_default_theme(bool p_hidpi, Ref<Font> p_font) {
 	Ref<Theme> t;
 	t.instance();
@@ -917,10 +967,8 @@ void make_default_theme(bool p_hidpi, Ref<Font> p_font) {
 	Ref<Font> default_font;
 	if (p_font.is_valid()) {
 		default_font = p_font;
-	} else if (p_hidpi) {
-		default_font = make_font(_hidpi_font_height, _hidpi_font_ascent, _hidpi_font_charcount, &_hidpi_font_charrects[0][0], _hidpi_font_kerning_pair_count, &_hidpi_font_kerning_pairs[0][0], _hidpi_font_img_width, _hidpi_font_img_height, _hidpi_font_img_data);
 	} else {
-		default_font = make_font(_lodpi_font_height, _lodpi_font_ascent, _lodpi_font_charcount, &_lodpi_font_charrects[0][0], _lodpi_font_kerning_pair_count, &_lodpi_font_kerning_pairs[0][0], _lodpi_font_img_width, _lodpi_font_img_height, _lodpi_font_img_data);
+		default_font = make_default_font();
 	}
 	Ref<Font> large_font = default_font;
 	fill_default_theme(t, default_font, large_font, default_icon, default_style, p_hidpi ? 2.0 : 1.0);
