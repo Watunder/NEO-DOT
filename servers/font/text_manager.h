@@ -40,6 +40,7 @@
 
 class TextManger {
 public:
+#ifdef MODULE_RAQM_ENABLED
 	struct ShapedResult {
 		uint32_t index = 0;
 		uint32_t cluster = 0;
@@ -47,6 +48,7 @@ public:
 		Vector2 advance;
 		FT_Face face = NULL;
 	};
+#endif
 };
 
 #endif

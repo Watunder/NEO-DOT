@@ -45,23 +45,16 @@
 class FreeTypeFontHandle : public FontHandle {
 	GDCLASS(FreeTypeFontHandle, FontHandle);
 
-	PoolVector<uint8_t> buffer;
-
-	FT_Face face = NULL;
-
 	friend class FreeTypeFont;
 
+	FT_Face ft_face = NULL;
+	FT_Size ft_size = NULL;
+
 public:
-	FT_Face get_face() const;
+	FT_Face get_ft_face() const;
+	FT_Size get_ft_size() const;
 
-	int get_face_count() const;
-
-	Error update_size(int p_size);
-
-	void update_oversampling(float p_ratio);
-
-	FreeTypeFontHandle();
-	~FreeTypeFontHandle();
+	virtual Error update_cache(int p_size, float p_oversampling = 1);
 };
 
 /*************************************************************************/
@@ -98,25 +91,35 @@ public:
 		HINTING_NORMAL,
 	};
 
-	enum Antialiasing {
-		ANTIALIASING_NONE,
-		ANTIALIASING_NORMAL,
-	};
-
 private:
-	int size;
+	Ref<FreeTypeFontData> data;
+	Ref<FreeTypeFontHandle> handle;
 
+	int size;
 	Hinting hinting;
-	Antialiasing antialiasing;
 	bool force_autohinter;
 
 protected:
 	static void _bind_methods();
 
 public:
+	virtual Ref<FontData> get_data() const;
 	virtual void set_data(const Ref<FontData> &p_data);
 
 	virtual Ref<FontHandle> get_handle() const;
+
+	virtual Size2 get_char_size(char32_t p_char) const;
+	virtual Size2 get_string_size(const String &p_string) const;
+
+	virtual bool get_use_mipmaps() const;
+	virtual void set_use_mipmaps(bool p_enable);
+
+	virtual bool get_use_filter() const;
+	virtual void set_use_filter(bool p_enable);
+
+	virtual float get_height() const;
+	virtual float get_ascent() const;
+	virtual float get_descent() const;
 
 	int get_size() const;
 	void set_size(int p_size);
@@ -127,25 +130,9 @@ public:
 	Hinting get_hinting() const;
 	void set_hinting(Hinting p_hinting);
 
-	Antialiasing get_antialiasing() const;
-	void set_antialiasing(Antialiasing p_antialiasing);
-
-	SelfList<FreeTypeFont> font_list;
-
-	static Mutex font_mutex;
-	static SelfList<FreeTypeFont>::List *fonts;
-
-	static FT_Library library;
-
-	static void initialize_fonts();
-	static void finish_fonts();
-	static void update_oversampling(float p_ratio);
-
 	FreeTypeFont();
-	~FreeTypeFont();
 };
 
-VARIANT_ENUM_CAST(FreeTypeFont::Antialiasing);
 VARIANT_ENUM_CAST(FreeTypeFont::Hinting);
 
 /*************************************************************************/

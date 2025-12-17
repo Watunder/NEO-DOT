@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font_server.h                                                        */
+/*  freetype_wrapper.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,64 +28,48 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef FONT_SERVER_H
-#define FONT_SERVER_H
+#ifndef freetype_wrapper_H
+#define freetype_wrapper_H
 
 #include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
+
+#include "core/hash_map.h"
+#include "core/pool_vector.h"
+#include "scene/resources/freetype_font.h"
+
+#include "font_cache_key.h"
+
 #include <ft2build.h>
+#include FT_CACHE_H
 #include FT_FREETYPE_H
-#include "font/freetype_wrapper.h"
-#endif
 
-#include "core/os/thread_safe.h"
-#include "scene/resources/font.h"
+class FreeTypeFontData;
 
-#include "font/font_cache_key.h"
-#include "font/glyph_manager.h"
-#include "font/text_manager.h"
+struct FontDataID {
+	uint32_t font_hash = 0;
+	uint32_t font_face_index = 0;
+};
 
-class FontServer : public Object {
-	GDCLASS(FontServer, Object);
+class FreeTypeWrapper {
+	FT_Library ft_library;
 
-	_THREAD_SAFE_CLASS_
+	FTC_Manager ftc_manager;
 
-private:
-	static FontServer *singleton;
-
-	Vector<Font *> fonts;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FreeTypeWrapper *freetype_wrapper = NULL;
-#endif
-
-	GlyphManager *glyph_manager = NULL;
-	TextManger *text_manager = NULL;
-
-protected:
-	static void _bind_methods();
+	mutable HashMap<uint32_t, FontDataID *> font_id_map;
+	FontDataID *_get_font_data_id(uint32_t p_font_hash, uint32_t p_font_face_index = 0) const;
 
 public:
-	static FontServer *get_singleton();
+	static HashMap<uint32_t, Ref<FreeTypeFontData>> font_data_map;
+	static void store_font_data(uint32_t p_font_hash, Ref<FreeTypeFontData> p_font_data);
 
-	void add_font(Font *p_font);
-	void remove_font(Font *p_font);
-	void update_oversampling(float p_ratio);
-
-	Size2 get_char_size(const Ref<Font> &p_font, char32_t p_char) const;
-
-	float draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
-	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	void store_font_data(uint32_t p_font_hash, const Ref<FontData> &p_font_data);
 	FT_Face lookup_face(uint32_t p_font_hash) const;
 	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const;
-#endif
 
-	FontServer();
-	~FontServer();
+	FreeTypeWrapper();
+	~FreeTypeWrapper();
 };
+
+#endif
 
 #endif

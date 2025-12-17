@@ -56,78 +56,41 @@
 	m_name->set_size(m_size);                                   \
 	m_name->set_use_filter(true);                               \
 	m_name->set_use_mipmaps(true);                              \
-	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE);   \
-	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
+	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);           \
+	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
 
-#define MAKE_BOLD_FONT(m_name, m_size)                        \
-	Ref<FreeTypeFont> m_name;                                 \
-	m_name.instance();                                        \
-	if (CustomFontBold.is_valid()) {                          \
-		m_name->set_data(CustomFontBold->duplicate());        \
-	} else {                                                  \
-		m_name->set_data(NotoSansUI_Bold->duplicate());       \
-	}                                                         \
-	m_name->set_size(m_size);                                 \
-	m_name->set_use_filter(true);                             \
-	m_name->set_use_mipmaps(true);                            \
-	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE); \
-	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
+#define MAKE_BOLD_FONT(m_name, m_size)                  \
+	Ref<FreeTypeFont> m_name;                           \
+	m_name.instance();                                  \
+	if (CustomFontBold.is_valid()) {                    \
+		m_name->set_data(CustomFontBold->duplicate());  \
+	} else {                                            \
+		m_name->set_data(NotoSansUI_Bold->duplicate()); \
+	}                                                   \
+	m_name->set_size(m_size);                           \
+	m_name->set_use_filter(true);                       \
+	m_name->set_use_mipmaps(true);                      \
+	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);   \
+	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
 
-#define MAKE_SOURCE_FONT(m_name, m_size)                      \
-	Ref<FreeTypeFont> m_name;                                 \
-	m_name.instance();                                        \
-	if (CustomFontSource.is_valid()) {                        \
-		m_name->set_data(CustomFontSource->duplicate());      \
-	} else {                                                  \
-		m_name->set_data(Hack_Regular->duplicate());          \
-	}                                                         \
-	m_name->set_size(m_size);                                 \
-	m_name->set_use_filter(true);                             \
-	m_name->set_use_mipmaps(true);                            \
-	m_name->set_spacing(FreeTypeFont::SPACING_TOP, -EDSCALE); \
-	m_name->set_spacing(FreeTypeFont::SPACING_BOTTOM, -EDSCALE);
+#define MAKE_SOURCE_FONT(m_name, m_size)                 \
+	Ref<FreeTypeFont> m_name;                            \
+	m_name.instance();                                   \
+	if (CustomFontSource.is_valid()) {                   \
+		m_name->set_data(CustomFontSource->duplicate()); \
+	} else {                                             \
+		m_name->set_data(Hack_Regular->duplicate());     \
+	}                                                    \
+	m_name->set_size(m_size);                            \
+	m_name->set_use_filter(true);                        \
+	m_name->set_use_mipmaps(true);                       \
+	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);    \
+	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
 
 void editor_register_fonts(Ref<Theme> p_theme) {
 	DirAccess *dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 
 	/* Custom font */
-
-	int font_hinting_setting = GLOBAL_GET("rendering/font/freetype_fonts/hinting");
-	int font_antialiasing_setting = GLOBAL_GET("rendering/font/freetype_fonts/antialiasing");
-
-	FreeTypeFont::Hinting font_hinting;
-	switch (font_hinting_setting) {
-		case 0:
-			// The "Auto" setting uses the setting that best matches the OS' font rendering:
-			// - macOS doesn't use font hinting.
-			// - Windows uses ClearType, which is in between "Light" and "Normal" hinting.
-			// - Linux has configurable font hinting, but most distributions including Ubuntu default to "Light".
-#if defined(PLATFORM_APPLE) && TARGET_OSX
-			font_hinting = FreeTypeFont::HINTING_NONE;
-#else
-			font_hinting = FreeTypeFont::HINTING_LIGHT;
-#endif
-			break;
-		case 1:
-			font_hinting = FreeTypeFont::HINTING_NONE;
-			break;
-		case 2:
-			font_hinting = FreeTypeFont::HINTING_LIGHT;
-			break;
-		default:
-			font_hinting = FreeTypeFont::HINTING_NORMAL;
-			break;
-	}
-
-	FreeTypeFont::Antialiasing font_antialiasing;
-	switch (font_antialiasing_setting) {
-		case 0:
-			font_antialiasing = FreeTypeFont::ANTIALIASING_NONE;
-			break;
-		default:
-			font_antialiasing = FreeTypeFont::ANTIALIASING_NORMAL;
-			break;
-	}
 
 	String custom_font_path = EditorSettings::get_singleton()->get("interface/editor/main_font");
 	Ref<FreeTypeFontData> CustomFont;
@@ -170,7 +133,7 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	Hack_Regular.instance();
 	Hack_Regular->load_from_memory(_font_Hack_Regular, _font_Hack_Regular_size);
 
-	Ref<FreeTypeFont> DefaultFont = p_theme->get_font("", "");
+	Ref<Font> DefaultFont = p_theme->get_font("", "");
 
 	int default_font_size = int(EDITOR_GET("interface/editor/main_font_size")) * EDSCALE;
 

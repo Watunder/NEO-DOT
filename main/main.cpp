@@ -1009,15 +1009,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	GLOBAL_DEF("rendering/quality/driver/fallback_to_gles2", false);
 
-	GLOBAL_DEF("rendering/font/freetype_fonts/use_oversampling", true);
-	GLOBAL_DEF("rendering/font/freetype_fonts/antialiasing", 1);
-	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/antialiasing", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/antialiasing", PROPERTY_HINT_ENUM, "None,Normal", PROPERTY_USAGE_DEFAULT));
-	GLOBAL_DEF("rendering/font/freetype_fonts/hinting", 0);
-#if defined(PLATFORM_APPLE) && TARGET_OSX
-	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/hinting", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/hinting", PROPERTY_HINT_ENUM, "Auto (None),None,Light,Normal", PROPERTY_USAGE_DEFAULT));
-#else
-	ProjectSettings::get_singleton()->set_custom_property_info("rendering/font/freetype_fonts/hinting", PropertyInfo(Variant::INT, "rendering/font/freetype_fonts/hinting", PROPERTY_HINT_ENUM, "Auto (Light),None,Light,Normal", PROPERTY_USAGE_DEFAULT));
-#endif
+	GLOBAL_DEF("rendering/font/use_oversampling", true);
 
 	// Assigning here, to be sure that it appears in docs
 	GLOBAL_DEF("rendering/2d/options/use_nvidia_rect_flicker_workaround", false);
@@ -1754,7 +1746,7 @@ bool Main::start() {
 			bool snap_controls = GLOBAL_DEF("gui/common/snap_controls_to_pixels", true);
 			sml->get_root()->set_snap_controls_to_pixels(snap_controls);
 
-			bool font_oversampling = GLOBAL_GET("rendering/font/freetype_fonts/use_oversampling");
+			bool font_oversampling = GLOBAL_GET("rendering/font/use_oversampling");
 			sml->set_use_font_oversampling(font_oversampling);
 
 		} else {

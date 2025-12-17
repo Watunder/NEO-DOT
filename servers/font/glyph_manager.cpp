@@ -98,7 +98,7 @@ _FORCE_INLINE_ ShelfPackTexture::Position GlyphManager::_find_texture_pos(int p_
 }
 
 #ifdef MODULE_FREETYPE_ENABLED
-_FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_bitmap_left, int p_bitmap_top, int p_rect_range) {
+_FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range) {
 	GlyphInfo glyph_info{};
 
 	int rect_range = p_rect_range;
@@ -170,7 +170,6 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 	}
 
 	glyph_info.found = true;
-	glyph_info.offset = Vector2(p_bitmap_left, -p_bitmap_top);
 	glyph_info.texture_rect_uv = Rect2(tex_pos.x + rect_range, tex_pos.y + rect_range, w, h);
 	glyph_info.texture_size = glyph_info.texture_rect_uv.size;
 	if (current_cache_key.font_use_mipmaps) {
@@ -184,7 +183,7 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 }
 #endif
 
-void GlyphManager::update_glyph_cache(const FontHandle::CacheKey &p_cache_key) {
+void GlyphManager::update_glyph_cache(const FontCacheKey &p_cache_key) {
 	if (current_cache_key == p_cache_key) {
 		return;
 	}
@@ -199,7 +198,7 @@ void GlyphManager::update_glyph_cache(const FontHandle::CacheKey &p_cache_key) {
 	}
 }
 
-void GlyphManager::clear_glyph_cache(const FontHandle::CacheKey &p_cache_key) {
+void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
 	if (glyph_map.has(p_cache_key)) {
 		glyph_map[p_cache_key].clear();
 	}
@@ -215,30 +214,44 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const Ref<FontHandle> &p_ha
 	ERR_FAIL_COND_V(p_handle.is_null(), glyph_info);
 	ERR_FAIL_COND_V(p_index == 0, glyph_info);
 
-	update_glyph_cache(p_handle->get_cache_key());
+	FontCacheKey cache_key = p_handle->get_cache_key();
+	update_glyph_cache(cache_key);
 
 	if (glyph_map[current_cache_key].has(p_index)) {
 		return glyph_map[current_cache_key][p_index];
 	}
 
 #ifdef MODULE_FREETYPE_ENABLED
-	const Ref<FreeTypeFontHandle> &font_handle = p_handle;
+	Ref<FreeTypeFontHandle> font_handle = p_handle;
 	if (font_handle.is_valid()) {
-		bool antialiased = true;
-		bool force_autohinter = false;
-		int hinting = FT_LOAD_TARGET_NORMAL;
+		int load_flags = FT_LOAD_TARGET_NORMAL;
+		switch (cache_key.font_hinting) {
+			case FreeTypeFont::HINTING_NONE:
+				load_flags = FT_LOAD_NO_HINTING;
+				break;
+			case FreeTypeFont::HINTING_LIGHT:
+				load_flags = FT_LOAD_TARGET_LIGHT;
+				break;
+			case FreeTypeFont::HINTING_NORMAL:
+				load_flags = FT_LOAD_TARGET_NORMAL;
+			default:
+				load_flags = FT_LOAD_TARGET_NORMAL;
+				break;
+		}
 
-		FT_Face face = font_handle->get_face();
-		uint32_t glyph_index = FT_Get_Char_Index(face, p_index);
-
-		if (face) {
-			int error = FT_Load_Glyph(face, glyph_index, FT_HAS_COLOR(face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | hinting);
+		font_handle->update_cache(current_cache_key.font_size, font_handle->get_oversampling());
+		FT_Size size = font_handle->get_ft_size();
+		if (size && size->face) {
+			uint32_t glyph_index = FT_Get_Char_Index(size->face, p_index);
+			int error = FT_Load_Glyph(size->face, glyph_index, FT_HAS_COLOR(size->face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
 			if (!error) {
-				FT_GlyphSlot slot = face->glyph;
+				FT_GlyphSlot slot = size->face->glyph;
 
-				error = FT_Render_Glyph(slot, antialiased ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO);
+				error = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
 				if (!error) {
-					glyph_info = _rasterize_bitmap(slot->bitmap, slot->bitmap_left, slot->bitmap_top);
+					glyph_info = _rasterize_bitmap(slot->bitmap);
+					glyph_info.offset = Vector2(slot->bitmap_left, -slot->bitmap_top);
+					glyph_info.advance = Vector2(slot->advance.x / 64.0, slot->advance.y / 64.0);
 				}
 			}
 		}

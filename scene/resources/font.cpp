@@ -34,7 +34,7 @@
 
 #include "servers/font_server.h"
 
-FontHandle::CacheKey FontHandle::get_cache_key() const {
+FontCacheKey FontHandle::get_cache_key() const {
 	return cache_key;
 };
 
@@ -55,6 +55,13 @@ float FontHandle::get_oversampling() const {
 }
 
 FontHandle::FontHandle() {
+	cache_key.font_size = 16;
+	cache_key.font_use_mipmaps = 1;
+	cache_key.font_use_filter = 1;
+	cache_key.font_force_autohinter = 0;
+	cache_key.font_hinting = 2;
+	cache_key.font_hash = 0;
+
 	ascent = 0;
 	descent = 1;
 	oversampling = 1;
@@ -63,81 +70,10 @@ FontHandle::FontHandle() {
 /*************************************************************************/
 
 void FontData::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("load"), &FontData::load_from_file);
 }
 
 /*************************************************************************/
-
-Ref<FontHandle> Font::get_handle() const {
-	return handle;
-}
-
-Ref<FontData> Font::get_data() const {
-	return data;
-}
-
-void Font::set_data(const Ref<FontData> &p_data) {
-	data = p_data;
-
-	emit_changed();
-	_change_notify();
-}
-
-Size2 Font::get_char_size(char32_t p_char) const {
-	if (handle.is_valid()) {
-		return Size2(handle->get_height() / 2, handle->get_height() / 2);
-	} else {
-		return Size2(1, 1);
-	}
-}
-
-Size2 Font::get_string_size(const String &p_string) const {
-	if (p_string.length() == 0) {
-		return Size2(0, get_height());
-	}
-
-	float width = 0;
-
-	const char32_t *sptr = &p_string[0];
-	for (int i = 0; i < p_string.length(); i++) {
-		width += get_char_size(sptr[i]).width;
-	}
-
-	return Size2(width, get_height());
-}
-
-bool Font::get_use_mipmaps() const {
-	return use_mipmaps;
-}
-
-void Font::set_use_mipmaps(bool p_enable) {
-	if (use_mipmaps == p_enable)
-		return;
-	use_mipmaps = p_enable;
-
-	if (handle.is_valid()) {
-		handle->cache_key.font_use_mipmaps = use_mipmaps;
-	}
-
-	emit_changed();
-	_change_notify();
-}
-
-bool Font::get_use_filter() const {
-	return use_filter;
-}
-
-void Font::set_use_filter(bool p_enable) {
-	if (use_filter == p_enable)
-		return;
-	use_filter = p_enable;
-
-	if (handle.is_valid()) {
-		handle->cache_key.font_use_filter = use_filter;
-	}
-
-	emit_changed();
-	_change_notify();
-}
 
 int Font::get_spacing(int p_type) const {
 	if (p_type == SPACING_TOP) {
@@ -166,31 +102,6 @@ void Font::set_spacing(int p_type, int p_value) {
 
 	emit_changed();
 	_change_notify();
-}
-
-float Font::get_height() const {
-	if (!handle.is_valid())
-		return 1;
-
-	return handle->get_height() + spacing_top + spacing_bottom;
-};
-
-float Font::get_ascent() const {
-	if (!handle.is_valid())
-		return 0;
-
-	return handle->get_ascent() + spacing_top;
-};
-
-float Font::get_descent() const {
-	if (!handle.is_valid())
-		return 1;
-
-	return handle->get_descent() + spacing_bottom;
-};
-
-bool Font::is_distance_field_hint() const {
-	return false;
 }
 
 void Font::_bind_methods() {
@@ -240,4 +151,10 @@ Font::Font() {
 	spacing_bottom = 0;
 	spacing_char = 0;
 	spacing_space = 0;
+
+	FontServer::get_singleton()->add_font(this);
+}
+
+Font::~Font() {
+	FontServer::get_singleton()->remove_font(this);
 }

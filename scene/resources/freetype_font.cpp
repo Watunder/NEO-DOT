@@ -40,64 +40,36 @@
 
 #include "thirdparty/zstd/common/xxhash.h"
 
-FT_Face FreeTypeFontHandle::get_face() const {
-	return face;
+FT_Face FreeTypeFontHandle::get_ft_face() const {
+	return ft_face;
 }
 
-int FreeTypeFontHandle::get_face_count() const {
-	return (face && face->num_faces || 0);
+FT_Size FreeTypeFontHandle::get_ft_size() const {
+	return ft_size;
 }
 
-Error FreeTypeFontHandle::update_size(int p_size) {
-	ERR_FAIL_COND_V(!(face && face->size), ERR_UNAVAILABLE);
-
-	int error = FT_Err_Ok;
-
-	int color_font_scale = 1;
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		int best_match = 0;
-		int diff = ABS(p_size - ((int64_t)face->available_sizes[0].width));
-		color_font_scale = float(p_size * oversampling) / face->available_sizes[0].width;
-		for (int i = 1; i < face->num_fixed_sizes; i++) {
-			int ndiff = ABS(p_size - ((int64_t)face->available_sizes[i].width));
-			if (ndiff < diff) {
-				best_match = i;
-				diff = ndiff;
-				color_font_scale = float(p_size * oversampling) / face->available_sizes[i].width;
-			}
-		}
-		error = FT_Select_Size(face, best_match);
-	} else {
-		error = FT_Set_Pixel_Sizes(face, 0, p_size * oversampling);
+Error FreeTypeFontHandle::update_cache(int p_size, float p_oversampling) {
+	if (!cache_key.font_hash) {
+		return ERR_UNCONFIGURED;
 	}
 
-	ERR_FAIL_COND_V(error != FT_Err_Ok, ERR_UNCONFIGURED);
+	if (oversampling != p_oversampling) {
+		oversampling = p_oversampling;
+	}
 
-	ascent = (face->size->metrics.ascender / 64.0) / oversampling * color_font_scale;
-	descent = (-face->size->metrics.descender / 64.0) / oversampling * color_font_scale;
+	if (!ft_face) {
+		ft_face = FontServer::get_singleton()->lookup_face(cache_key.font_hash);
+	}
 
-	cache_key.font_size = p_size;
+	if (ft_face) {
+		ft_size = FontServer::get_singleton()->lookup_size(cache_key.font_hash, p_size, oversampling);
+		ascent = (ft_size->metrics.ascender / 64.0) / oversampling;
+		descent = (-ft_size->metrics.descender / 64.0) / oversampling;
+	}
+
+	ERR_FAIL_COND_V(!(ft_face && ft_size), ERR_UNCONFIGURED);
 
 	return OK;
-}
-
-void FreeTypeFontHandle::update_oversampling(float p_ratio) {
-	if (oversampling == p_ratio)
-		return;
-	oversampling = p_ratio;
-
-	if (update_size(cache_key.font_size) == OK) {
-		FontServer::get_singleton()->clear_glyph_cache(cache_key);
-	}
-}
-
-FreeTypeFontHandle::FreeTypeFontHandle() {
-}
-
-FreeTypeFontHandle::~FreeTypeFontHandle() {
-	if (face) {
-		FT_Done_Face(face);
-	}
 }
 
 /*************************************************************************/
@@ -152,24 +124,20 @@ void FreeTypeFont::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_hinting", "mode"), &FreeTypeFont::set_hinting);
 	ClassDB::bind_method(D_METHOD("get_hinting"), &FreeTypeFont::get_hinting);
 
-	ClassDB::bind_method(D_METHOD("set_antialiasing", "antialiasing"), &FreeTypeFont::set_antialiasing);
-	ClassDB::bind_method(D_METHOD("get_antialiasing"), &FreeTypeFont::get_antialiasing);
-
-	ADD_GROUP("Font", "");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "data", PROPERTY_HINT_RESOURCE_TYPE, "FreeTypeFontData"), "set_data", "get_data");
 
 	ADD_GROUP("Settings", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "size", PROPERTY_HINT_RANGE, "1,1024,1"), "set_size", "get_size");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "force_autohinter"), "set_force_autohinter", "is_force_autohinter");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hinting", PROPERTY_HINT_ENUM, "None,Light,Normal"), "set_hinting", "get_hinting");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "antialiasing", PROPERTY_HINT_ENUM, "None,Normal"), "set_antialiasing", "get_antialiasing");
-
-	BIND_ENUM_CONSTANT(ANTIALIASING_NONE);
-	BIND_ENUM_CONSTANT(ANTIALIASING_NORMAL);
 
 	BIND_ENUM_CONSTANT(HINTING_NONE);
 	BIND_ENUM_CONSTANT(HINTING_LIGHT);
 	BIND_ENUM_CONSTANT(HINTING_NORMAL);
+}
+
+Ref<FontData> FreeTypeFont::get_data() const {
+	return data;
 }
 
 void FreeTypeFont::set_data(const Ref<FontData> &p_data) {
@@ -178,19 +146,24 @@ void FreeTypeFont::set_data(const Ref<FontData> &p_data) {
 	Ref<FreeTypeFontHandle> font_handle;
 	font_handle.instance();
 
-	Ref<FreeTypeFontData> font_data = data;
-	if (font_data.is_valid()) {
-		PoolVector<uint8_t> buffer = font_data->get_buffer();
+	font_handle->cache_key.font_size = size;
+	font_handle->cache_key.font_use_mipmaps = use_mipmaps;
+	font_handle->cache_key.font_use_filter = use_filter;
+	font_handle->cache_key.font_force_autohinter = force_autohinter;
+	font_handle->cache_key.font_hinting = hinting;
+
+	if (data.is_valid()) {
+		PoolVector<uint8_t> buffer = data->get_buffer();
 		if (buffer.size()) {
-			font_handle->buffer = buffer;
-			font_handle->cache_key.font_hash = XXH32(font_handle->buffer.read().ptr(), font_handle->buffer.size(), 0);
+			font_handle->cache_key.font_hash = XXH32(buffer.read().ptr(), buffer.size(), 0);
+			FontServer::get_singleton()->store_font_data(font_handle->cache_key.font_hash, data);
 
-			FT_New_Memory_Face(library, font_handle->buffer.read().ptr(), font_handle->buffer.size(), 0, &font_handle->face);
-			font_handle->update_size(size);
+			font_handle->update_cache(size);
+			handle = font_handle;
 		}
+	} else if (handle.is_valid()) {
+		handle.unref();
 	}
-
-	handle = font_handle;
 
 	emit_changed();
 	_change_notify();
@@ -209,9 +182,87 @@ void FreeTypeFont::set_size(int p_size) {
 		return;
 	size = p_size;
 
-	Ref<FreeTypeFontHandle> font_handle = handle;
-	if (font_handle.is_valid()) {
-		font_handle->update_size(size);
+	if (handle.is_valid()) {
+		handle->cache_key.font_size = p_size;
+		handle->update_cache(size);
+	}
+
+	emit_changed();
+	_change_notify();
+}
+
+float FreeTypeFont::get_height() const {
+	if (!handle.is_valid())
+		return 1;
+
+	return handle->get_height() + spacing_top + spacing_bottom;
+};
+
+float FreeTypeFont::get_ascent() const {
+	if (!handle.is_valid())
+		return 0;
+
+	return handle->get_ascent() + spacing_top;
+};
+
+float FreeTypeFont::get_descent() const {
+	if (!handle.is_valid())
+		return 1;
+
+	return handle->get_descent() + spacing_bottom;
+};
+
+Size2 FreeTypeFont::get_char_size(char32_t p_char) const {
+	if (handle.is_valid()) {
+		return FontServer::get_singleton()->get_char_size(Ref<Font>(this), p_char);
+	} else {
+		return Size2(1, 1);
+	}
+}
+
+Size2 FreeTypeFont::get_string_size(const String &p_string) const {
+	if (p_string.length() == 0) {
+		return Size2(0, get_height());
+	}
+
+	float width = 0;
+
+	const char32_t *sptr = &p_string[0];
+	for (int i = 0; i < p_string.length(); i++) {
+		width += get_char_size(sptr[i]).width;
+	}
+
+	return Size2(width, get_height());
+}
+
+bool FreeTypeFont::get_use_mipmaps() const {
+	return use_mipmaps;
+}
+
+void FreeTypeFont::set_use_mipmaps(bool p_enable) {
+	if (use_mipmaps == p_enable)
+		return;
+	use_mipmaps = p_enable;
+
+	if (handle.is_valid()) {
+		handle->cache_key.font_use_mipmaps = use_mipmaps;
+	}
+
+	emit_changed();
+	_change_notify();
+}
+
+bool FreeTypeFont::get_use_filter() const {
+	return use_filter;
+}
+
+void FreeTypeFont::set_use_filter(bool p_enable) {
+	if (use_filter == p_enable)
+		return;
+	use_filter = p_enable;
+
+	if (handle.is_valid()) {
+		handle->cache_key.font_use_filter = use_filter;
 	}
 
 	emit_changed();
@@ -227,6 +278,13 @@ void FreeTypeFont::set_force_autohinter(bool p_force_autohinter) {
 		return;
 
 	force_autohinter = p_force_autohinter;
+
+	if (handle.is_valid()) {
+		handle->cache_key.font_force_autohinter = force_autohinter ? 1 : 0;
+	}
+
+	emit_changed();
+	_change_notify();
 }
 
 FreeTypeFont::Hinting FreeTypeFont::get_hinting() const {
@@ -237,78 +295,19 @@ void FreeTypeFont::set_hinting(Hinting p_hinting) {
 	if (hinting == p_hinting)
 		return;
 	hinting = p_hinting;
+
+	if (handle.is_valid()) {
+		handle->cache_key.font_hinting = hinting;
+	}
+
+	emit_changed();
+	_change_notify();
 }
 
-FreeTypeFont::Antialiasing FreeTypeFont::get_antialiasing() const {
-	return antialiasing;
-}
-
-void FreeTypeFont::set_antialiasing(Antialiasing p_antialiasing) {
-	if (antialiasing == p_antialiasing)
-		return;
-	antialiasing = p_antialiasing;
-}
-
-Mutex FreeTypeFont::font_mutex;
-
-SelfList<FreeTypeFont>::List *FreeTypeFont::fonts = NULL;
-
-FT_Library FreeTypeFont::library = NULL;
-
-FreeTypeFont::FreeTypeFont() :
-		font_list(this) {
-	font_mutex.lock();
-	fonts->add(&font_list);
-	font_mutex.unlock();
-
-	size = 1;
-
-	antialiasing = FreeTypeFont::ANTIALIASING_NORMAL;
+FreeTypeFont::FreeTypeFont() {
+	size = 16;
 	hinting = FreeTypeFont::HINTING_NORMAL;
 	force_autohinter = false;
-}
-
-FreeTypeFont::~FreeTypeFont() {
-	font_mutex.lock();
-	fonts->remove(&font_list);
-	font_mutex.unlock();
-}
-
-void FreeTypeFont::initialize_fonts() {
-	fonts = memnew(SelfList<FreeTypeFont>::List());
-
-	FT_Init_FreeType(&library);
-}
-
-void FreeTypeFont::finish_fonts() {
-	memdelete(fonts);
-	fonts = NULL;
-}
-
-void FreeTypeFont::update_oversampling(float p_ratio) {
-	Vector<Ref<FreeTypeFont>> changed;
-
-	font_mutex.lock();
-
-	SelfList<FreeTypeFont> *E = fonts->first();
-	while (E) {
-		if (E->self()->handle.is_valid()) {
-			Ref<FreeTypeFontHandle> font_hanlde = E->self()->handle;
-			if (font_hanlde.is_valid()) {
-				font_hanlde->update_oversampling(p_ratio);
-			}
-
-			changed.push_back(Ref<FreeTypeFont>(E->self()));
-		}
-
-		E = E->next();
-	}
-
-	font_mutex.unlock();
-
-	for (int i = 0; i < changed.size(); i++) {
-		changed.write[i]->emit_changed();
-	}
 }
 
 /*************************************************************************/
