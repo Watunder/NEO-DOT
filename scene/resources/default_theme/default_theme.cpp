@@ -34,9 +34,14 @@
 
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "scene/resources/font.h"
 #include "scene/resources/freetype_font.h"
 #include "scene/resources/theme.h"
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
 #include "servers/font/builtin_fonts.gen.h"
+#endif
 
 typedef Map<const void *, Ref<ImageTexture>> TexCacheMap;
 
@@ -875,44 +880,13 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 }
 
 static Ref<Font> make_default_font() {
-	int font_hinting_setting = GLOBAL_GET("rendering/font/freetype_fonts/hinting");
-	int font_antialiasing_setting = GLOBAL_GET("rendering/font/freetype_fonts/antialiasing");
+	Ref<Font> default_font;
 
-	FreeTypeFont::Hinting font_hinting;
-	switch (font_hinting_setting) {
-		case 0:
-			// The "Auto" setting uses the setting that best matches the OS' font rendering:
-			// - macOS doesn't use font hinting.
-			// - Windows uses ClearType, which is in between "Light" and "Normal" hinting.
-			// - Linux has configurable font hinting, but most distributions including Ubuntu default to "Light".
-#if defined(PLATFORM_APPLE) && TARGET_OSX
-			font_hinting = FreeTypeFont::HINTING_NONE;
-#else
-			font_hinting = FreeTypeFont::HINTING_LIGHT;
-#endif
-			break;
-		case 1:
-			font_hinting = FreeTypeFont::HINTING_NONE;
-			break;
-		case 2:
-			font_hinting = FreeTypeFont::HINTING_LIGHT;
-			break;
-		default:
-			font_hinting = FreeTypeFont::HINTING_NORMAL;
-			break;
-	}
-
-	FreeTypeFont::Antialiasing font_antialiasing;
-	switch (font_antialiasing_setting) {
-		case 0:
-			font_antialiasing = FreeTypeFont::ANTIALIASING_NONE;
-			break;
-		default:
-			font_antialiasing = FreeTypeFont::ANTIALIASING_NORMAL;
-			break;
-	}
-
-	/* Droid Sans */
+#ifdef MODULE_FREETYPE_ENABLED
+	Ref<FreeTypeFont> font;
+	font.instance();
+	font->set_use_filter(true);
+	font->set_use_mipmaps(true);
 
 	Ref<FreeTypeFontData> NotoSansUI_Regular;
 	NotoSansUI_Regular.instance();
@@ -942,11 +916,6 @@ static Ref<Font> make_default_font() {
 	NotoSansDevanagariUI_Regular.instance();
 	NotoSansDevanagariUI_Regular->load_from_memory(_font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
 
-	Ref<FreeTypeFont> font;
-	font.instance();
-	font->set_use_filter(true);
-	font->set_use_mipmaps(true);
-
 	font->set_data(NotoSansUI_Regular);
 	// NotoNaskhArabicUI_Regular;
 	// NotoSansHebrew_Regular;
@@ -955,7 +924,10 @@ static Ref<Font> make_default_font() {
 	// DroidSansJapanese;
 	// DroidSansFallback;
 
-	return font;
+	default_font = font;
+#endif
+
+	return default_font;
 }
 
 void make_default_theme(bool p_hidpi, Ref<Font> p_font) {

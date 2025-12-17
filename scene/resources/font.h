@@ -33,44 +33,22 @@
 
 #include "core/reference.h"
 #include "core/resource.h"
+#include "servers/font/font_cache_key.h"
 
 /*************************************************************************/
 
 class FontHandle : public Reference {
 	GDCLASS(FontHandle, Reference);
 
-	friend class Font;
-
-public:
-	struct CacheKey {
-		union {
-			struct {
-				uint64_t font_size : 10;
-				uint64_t font_use_mipmaps : 1;
-				uint64_t font_use_filter : 1;
-				uint64_t reserved : 20;
-				uint64_t font_hash : 32;
-			};
-			uint64_t key;
-		};
-
-		CacheKey() { key = 1; }
-		bool CacheKey::operator==(const CacheKey &p_key) const { return key == p_key.key; }
-	};
-
-	struct CacheKeyHasher {
-		static _FORCE_INLINE_ uint32_t hash(const CacheKey &p_key) { return HashMapHasherDefault::hash(p_key.key); }
-	};
-
 protected:
-	CacheKey cache_key;
+	FontCacheKey cache_key;
 
 	float ascent;
 	float descent;
 	float oversampling;
 
 public:
-	virtual CacheKey get_cache_key() const;
+	virtual FontCacheKey get_cache_key() const;
 
 	virtual float get_height() const;
 
@@ -78,6 +56,8 @@ public:
 	virtual float get_descent() const;
 
 	virtual float get_oversampling() const;
+
+	virtual Error update_cache(int p_size, float p_oversampling = 1) = 0;
 
 	FontHandle();
 };
@@ -100,13 +80,6 @@ public:
 class Font : public Resource {
 	GDCLASS(Font, Resource);
 
-	friend class FontHandle;
-
-	int spacing_top;
-	int spacing_bottom;
-	int spacing_char;
-	int spacing_space;
-
 public:
 	enum SpacingType {
 		SPACING_TOP,
@@ -116,40 +89,43 @@ public:
 	};
 
 protected:
+	int spacing_top;
+	int spacing_bottom;
+	int spacing_char;
+	int spacing_space;
+
 	bool use_mipmaps;
 	bool use_filter;
-
-	Ref<FontData> data;
-	Ref<FontHandle> handle;
 
 	static void _bind_methods();
 
 public:
-	virtual Ref<FontData> get_data() const;
-	virtual void set_data(const Ref<FontData> &p_data);
+	virtual Ref<FontData> get_data() const { return Ref<FontData>(); };
+	virtual void set_data(const Ref<FontData> &p_data) = 0;
 
-	virtual Ref<FontHandle> get_handle() const;
+	virtual Ref<FontHandle> get_handle() const { return Ref<FontHandle>(); };
 
-	virtual Size2 get_char_size(char32_t p_char) const;
-	virtual Size2 get_string_size(const String &p_string) const;
+	virtual Size2 get_char_size(char32_t p_char) const = 0;
+	virtual Size2 get_string_size(const String &p_string) const = 0;
 
-	virtual bool get_use_mipmaps() const;
-	virtual void set_use_mipmaps(bool p_enable);
+	virtual bool get_use_mipmaps() const = 0;
+	virtual void set_use_mipmaps(bool p_enable) = 0;
 
-	virtual bool get_use_filter() const;
-	virtual void set_use_filter(bool p_enable);
+	virtual bool get_use_filter() const = 0;
+	virtual void set_use_filter(bool p_enable) = 0;
 
 	virtual int get_spacing(int p_type) const;
 	virtual void set_spacing(int p_type, int p_value);
 
-	virtual float get_height() const;
+	virtual float get_height() const = 0;
 
-	virtual float get_ascent() const;
-	virtual float get_descent() const;
+	virtual float get_ascent() const = 0;
+	virtual float get_descent() const = 0;
 
-	virtual bool is_distance_field_hint() const;
+	virtual bool is_distance_field_hint() const { return false; };
 
 	Font();
+	~Font();
 };
 
 VARIANT_ENUM_CAST(Font::SpacingType);

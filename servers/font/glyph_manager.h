@@ -38,6 +38,7 @@
 #endif
 
 #include "scene/resources/font.h"
+#include "servers/font/font_cache_key.h"
 
 #include "shelf_pack_texture.h"
 
@@ -47,6 +48,7 @@ public:
 		bool found = false;
 
 		Vector2 offset;
+		Vector2 advance;
 
 		int texture_index = -1;
 		Size2 texture_size;
@@ -56,19 +58,19 @@ public:
 	};
 
 private:
-	FontHandle::CacheKey current_cache_key;
+	FontCacheKey current_cache_key;
 
-	HashMap<FontHandle::CacheKey, Vector<ShelfPackTexture>, FontHandle::CacheKeyHasher> texture_map;
-	HashMap<FontHandle::CacheKey, HashMap<uint32_t, GlyphInfo>, FontHandle::CacheKeyHasher> glyph_map;
+	HashMap<FontCacheKey, Vector<ShelfPackTexture>, FontCacheKeyHasher> texture_map;
+	HashMap<FontCacheKey, HashMap<uint32_t, GlyphInfo>, FontCacheKeyHasher> glyph_map;
 
 	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
 #ifdef MODULE_FREETYPE_ENABLED
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_bitmap_left, int p_bitmap_top, int p_rect_range = 1);
+	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range = 1);
 #endif
 
 public:
-	void update_glyph_cache(const FontHandle::CacheKey &p_cache_key);
-	void clear_glyph_cache(const FontHandle::CacheKey &p_cache_key);
+	void update_glyph_cache(const FontCacheKey &p_cache_key);
+	void clear_glyph_cache(const FontCacheKey &p_cache_key);
 
 	GlyphInfo get_glyph_info(const Ref<FontHandle> &p_handle, uint32_t p_index);
 

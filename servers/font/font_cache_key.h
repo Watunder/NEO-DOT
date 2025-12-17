@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font_server.h                                                        */
+/*  font_cache_key.h                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,64 +28,32 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef FONT_SERVER_H
-#define FONT_SERVER_H
+#ifndef FONT_CACHE_KEY_H
+#define FONT_CACHE_KEY_H
 
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include "font/freetype_wrapper.h"
-#endif
+#include "core/hashfuncs.h"
 
-#include "core/os/thread_safe.h"
-#include "scene/resources/font.h"
+struct FontCacheKey {
+	union {
+		struct {
+			uint64_t font_size : 10;
+			uint64_t font_use_mipmaps : 1;
+			uint64_t font_use_filter : 1;
+			uint64_t font_hinting : 2;
+			uint64_t font_force_autohinter : 1;
+			uint64_t font_face_index : 1;
+			uint64_t reserved : 16;
+			uint64_t font_hash : 32;
+		};
+		uint64_t key;
+	};
 
-#include "font/font_cache_key.h"
-#include "font/glyph_manager.h"
-#include "font/text_manager.h"
+	FontCacheKey() { key = 0; }
+	bool FontCacheKey::operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
+};
 
-class FontServer : public Object {
-	GDCLASS(FontServer, Object);
-
-	_THREAD_SAFE_CLASS_
-
-private:
-	static FontServer *singleton;
-
-	Vector<Font *> fonts;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FreeTypeWrapper *freetype_wrapper = NULL;
-#endif
-
-	GlyphManager *glyph_manager = NULL;
-	TextManger *text_manager = NULL;
-
-protected:
-	static void _bind_methods();
-
-public:
-	static FontServer *get_singleton();
-
-	void add_font(Font *p_font);
-	void remove_font(Font *p_font);
-	void update_oversampling(float p_ratio);
-
-	Size2 get_char_size(const Ref<Font> &p_font, char32_t p_char) const;
-
-	float draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
-	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	void store_font_data(uint32_t p_font_hash, const Ref<FontData> &p_font_data);
-	FT_Face lookup_face(uint32_t p_font_hash) const;
-	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const;
-#endif
-
-	FontServer();
-	~FontServer();
+struct FontCacheKeyHasher {
+	static _FORCE_INLINE_ uint32_t hash(const FontCacheKey &p_key) { return HashMapHasherDefault::hash(p_key.key); }
 };
 
 #endif

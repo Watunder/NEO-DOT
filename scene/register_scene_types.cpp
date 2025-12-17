@@ -30,6 +30,7 @@
 
 #include "register_scene_types.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/class_db.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
@@ -213,7 +214,9 @@
 static Ref<ResourceFormatSaverText> resource_saver_text;
 static Ref<ResourceFormatLoaderText> resource_loader_text;
 
+#ifdef MODULE_FREETYPE_ENABLED
 static Ref<ResourceFormatLoaderFreeTypeFont> resource_loader_freetype_font;
+#endif
 
 static Ref<ResourceFormatLoaderStreamTexture> resource_loader_stream_texture;
 static Ref<ResourceFormatLoaderTextureLayered> resource_loader_texture_layered;
@@ -228,8 +231,10 @@ void register_scene_types() {
 
 	Node::init_node_hrcr();
 
+#ifdef MODULE_FREETYPE_ENABLED
 	resource_loader_freetype_font.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_freetype_font);
+#endif
 
 	resource_loader_stream_texture.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_stream_texture);
@@ -661,11 +666,11 @@ void register_scene_types() {
 	ClassDB::register_class<TextFile>();
 
 	ClassDB::register_virtual_class<FontData>();
-	ClassDB::register_class<FreeTypeFontData>();
 	ClassDB::register_virtual_class<Font>();
+#ifdef MODULE_FREETYPE_ENABLED
+	ClassDB::register_class<FreeTypeFontData>();
 	ClassDB::register_class<FreeTypeFont>();
-
-	FreeTypeFont::initialize_fonts();
+#endif
 
 	ClassDB::register_virtual_class<StyleBox>();
 	ClassDB::register_class<StyleBoxEmpty>();
@@ -741,12 +746,16 @@ void register_scene_types() {
 	Ref<Font> custom_font;
 
 	if (custom_font_path != String()) {
-		Ref<FreeTypeFont> font = ResourceLoader::load(custom_font_path);
-		if (!font.is_valid()) {
+#ifdef MODULE_FREETYPE_ENABLED
+		Ref<FreeTypeFontData> font_data = ResourceLoader::load(custom_font_path);
+		if (!font_data.is_valid()) {
 			ERR_PRINTS("Error loading custom font '" + custom_font_path + "'");
 		}
-
+		Ref<FreeTypeFont> font;
+		font.instance();
+		font->set_data(font_data);
 		custom_font = font;
+#endif
 	}
 
 	// Always make the default theme to avoid invalid default font/icon/style in the given theme
@@ -768,16 +777,16 @@ void register_scene_types() {
 void unregister_scene_types() {
 	clear_default_theme();
 
+#ifdef MODULE_FREETYPE_ENABLED
 	ResourceLoader::remove_resource_format_loader(resource_loader_freetype_font);
 	resource_loader_freetype_font.unref();
+#endif
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);
 	resource_loader_texture_layered.unref();
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_stream_texture);
 	resource_loader_stream_texture.unref();
-
-	FreeTypeFont::finish_fonts();
 
 	ResourceSaver::remove_resource_format_saver(resource_saver_text);
 	resource_saver_text.unref();
