@@ -48,7 +48,7 @@ protected:
 	float oversampling;
 
 public:
-	virtual FontCacheKey get_cache_key() const;
+	virtual const FontCacheKey &get_cache_key() const;
 
 	virtual float get_height() const;
 
@@ -57,7 +57,7 @@ public:
 
 	virtual float get_oversampling() const;
 
-	virtual Error update_cache(int p_size, float p_oversampling = 1) = 0;
+	virtual void update_metrics(Size2 p_size, float p_oversampling = 1) = 0;
 
 	FontHandle();
 };

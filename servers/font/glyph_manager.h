@@ -60,8 +60,8 @@ public:
 private:
 	FontCacheKey current_cache_key;
 
-	HashMap<FontCacheKey, Vector<ShelfPackTexture>, FontCacheKeyHasher> texture_map;
-	HashMap<FontCacheKey, HashMap<uint32_t, GlyphInfo>, FontCacheKeyHasher> glyph_map;
+	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
+	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_map;
 
 	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
 #ifdef MODULE_FREETYPE_ENABLED
@@ -72,7 +72,9 @@ public:
 	void update_glyph_cache(const FontCacheKey &p_cache_key);
 	void clear_glyph_cache(const FontCacheKey &p_cache_key);
 
-	GlyphInfo get_glyph_info(const Ref<FontHandle> &p_handle, uint32_t p_index);
+#ifdef MODULE_FREETYPE_ENABLED
+	GlyphInfo get_glyph_info(const FT_Size &p_ft_size, uint32_t p_index);
+#endif
 
 	Ref<ImageTexture> get_texture(const GlyphInfo &p_glyph_info);
 };

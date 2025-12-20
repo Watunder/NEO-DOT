@@ -34,7 +34,7 @@
 
 #include "servers/font_server.h"
 
-FontCacheKey FontHandle::get_cache_key() const {
+const FontCacheKey &FontHandle::get_cache_key() const {
 	return cache_key;
 };
 

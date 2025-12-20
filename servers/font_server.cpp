@@ -62,10 +62,16 @@ void FontServer::update_oversampling(float p_ratio) {
 		Ref<FontHandle> handle = fonts[i]->get_handle();
 		if (handle.is_valid()) {
 			const FontCacheKey &cache_key = handle->get_cache_key();
-			handle->update_cache(cache_key.font_size, p_ratio);
-			glyph_manager->clear_glyph_cache(cache_key);
 
-			changed_fonts.push_back(fonts[i]);
+#ifdef MODULE_FREETYPE_ENABLED
+			FT_Size ft_size = freetype_wrapper->lookup_size(cache_key.font_hash, cache_key.font_size, p_ratio);
+			if (ft_size) {
+				handle->update_metrics(Vector2(ft_size->metrics.ascender, ft_size->metrics.descender), p_ratio);
+				glyph_manager->clear_glyph_cache(cache_key);
+
+				changed_fonts.push_back(fonts[i]);
+			}
+#endif
 		}
 	}
 
@@ -83,7 +89,17 @@ Size2 FontServer::get_char_size(const Ref<Font> &p_font, char32_t p_char) const 
 
 	Ref<FontHandle> font_handle = p_font->get_handle();
 
-	GlyphManager::GlyphInfo glyph_info = glyph_manager->get_glyph_info(font_handle, p_char);
+	const FontCacheKey &cache_key = font_handle->get_cache_key();
+
+	glyph_manager->update_glyph_cache(cache_key);
+
+	GlyphManager::GlyphInfo glyph_info{};
+
+#ifdef MODULE_FREETYPE_ENABLED
+	FT_Size ft_size = FontServer::get_singleton()->lookup_size(cache_key.font_hash, cache_key.font_size, font_handle->get_oversampling());
+	glyph_info = glyph_manager->get_glyph_info(ft_size, p_char);
+#endif
+
 	if (glyph_info.found) {
 		Size2 glyph_advance(glyph_info.advance / font_handle->get_oversampling());
 		return glyph_advance;
@@ -102,7 +118,17 @@ float FontServer::draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Po
 		return 0;
 	}
 
-	GlyphManager::GlyphInfo glyph_info = glyph_manager->get_glyph_info(font_handle, p_char);
+	const FontCacheKey &cache_key = font_handle->get_cache_key();
+
+	glyph_manager->update_glyph_cache(cache_key);
+
+	GlyphManager::GlyphInfo glyph_info{};
+
+#ifdef MODULE_FREETYPE_ENABLED
+	FT_Size ft_size = FontServer::get_singleton()->lookup_size(cache_key.font_hash, cache_key.font_size, font_handle->get_oversampling());
+	glyph_info = glyph_manager->get_glyph_info(ft_size, p_char);
+#endif
+
 	if (glyph_info.found) {
 		Ref<ImageTexture> texture = glyph_manager->get_texture(glyph_info);
 		if (texture.is_valid()) {
@@ -168,12 +194,8 @@ void FontServer::draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font,
 }
 
 #ifdef MODULE_FREETYPE_ENABLED
-void FontServer::store_font_data(uint32_t p_font_hash, const Ref<FontData> &p_font_data) {
-	freetype_wrapper->store_font_data(p_font_hash, p_font_data);
-}
-
-FT_Face FontServer::lookup_face(uint32_t p_font_hash) const {
-	return freetype_wrapper->lookup_face(p_font_hash);
+FT_Face FontServer::lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer) const {
+	return freetype_wrapper->lookup_face(p_font_hash, p_font_buffer);
 }
 
 FT_Size FontServer::lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const {
