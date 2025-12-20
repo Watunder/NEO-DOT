@@ -33,13 +33,13 @@
 #include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
 
-FontDataID *FreeTypeWrapper::_get_font_data_id(uint32_t p_font_hash, uint32_t p_font_face_index) const {
+FontID *FreeTypeWrapper::_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) const {
 	uint32_t key = HashMapHasherDefault::hash(((uint64_t)p_font_hash << 32) | p_font_face_index);
 	if (font_id_map.has(key)) {
 		return font_id_map.get(key);
 	}
 
-	FontDataID *font_id = memnew(FontDataID);
+	FontID *font_id = memnew(FontID);
 	font_id->font_hash = p_font_hash;
 	font_id->font_face_index = p_font_face_index;
 
@@ -47,18 +47,40 @@ FontDataID *FreeTypeWrapper::_get_font_data_id(uint32_t p_font_hash, uint32_t p_
 	return font_id;
 }
 
-FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash) const {
-	FontDataID *font_id = _get_font_data_id(p_font_hash);
+static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
+	FontID *font_id = (FontID *)p_font_id;
 
-	FT_Face face = NULL;
-	FT_Error error = FTC_Manager_LookupFace(ftc_manager, (FTC_FaceID)font_id, &face);
-	ERR_FAIL_COND_V_MSG(error, face, FT_Error_String(error));
+	FreeTypeWrapper *freetype_wrapper = static_cast<FreeTypeWrapper *>(p_request_data);
 
-	return face;
+	PoolVector<uint8_t> buffer;
+	if (freetype_wrapper->font_buffer_map.has(font_id->font_hash)) {
+		buffer = freetype_wrapper->font_buffer_map[font_id->font_hash];
+	}
+
+	ERR_FAIL_COND_V(buffer.empty(), FT_Err_Invalid_File_Format);
+
+	FT_Error error = FT_New_Memory_Face(p_library, buffer.read().ptr(), buffer.size(), font_id->font_face_index, r_face);
+
+	return error;
 }
 
-FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const {
-	FontDataID *font_id = _get_font_data_id(p_font_hash);
+FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer) {
+	FontID *font_id = _get_font_id(p_font_hash);
+
+	if (!font_buffer_map.has(p_font_hash)) {
+		font_buffer_map[p_font_hash] = p_font_buffer;
+	}
+
+	FT_Face ft_face = NULL;
+	FT_Error error = FTC_Manager_LookupFace(ftc_manager, (FTC_FaceID)font_id, &ft_face);
+
+	ERR_FAIL_COND_V_MSG(error, ft_face, FT_Error_String(error));
+
+	return ft_face;
+}
+
+FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) {
+	FontID *font_id = _get_font_id(p_font_hash);
 
 	FTC_ScalerRec scaler;
 	scaler.face_id = (FTC_FaceID)font_id;
@@ -68,39 +90,18 @@ FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, int p_size, float p_o
 	scaler.x_res = 0;
 	scaler.y_res = 0;
 
-	FT_Size size = NULL;
-	FT_Error error = FTC_Manager_LookupSize(ftc_manager, &scaler, &size);
-	ERR_FAIL_COND_V_MSG(error, size, FT_Error_String(error));
+	FT_Size ft_size = NULL;
+	FT_Error error = FTC_Manager_LookupSize(ftc_manager, &scaler, &ft_size);
+	ERR_FAIL_COND_V_MSG(error, ft_size, FT_Error_String(error));
 
-	return size;
-}
-
-HashMap<uint32_t, Ref<FreeTypeFontData>> FreeTypeWrapper::font_data_map;
-
-void FreeTypeWrapper::store_font_data(uint32_t p_font_hash, Ref<FreeTypeFontData> p_font_data) {
-	if (!font_data_map.has(p_font_hash)) {
-		font_data_map[p_font_hash] = p_font_data;
-	}
-}
-
-static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
-	FontDataID *font_id = (FontDataID *)p_font_id;
-
-	ERR_FAIL_COND_V(!FreeTypeWrapper::font_data_map.has(font_id->font_hash), FT_Err_Invalid_File_Format);
-
-	Ref<FreeTypeFontData> font_data = FreeTypeWrapper::font_data_map[font_id->font_hash];
-	const PoolVector<uint8_t> buffer = font_data->get_buffer();
-
-	FT_Error error = FT_New_Memory_Face(p_library, buffer.read().ptr(), buffer.size(), font_id->font_face_index, r_face);
-
-	return error;
+	return ft_size;
 }
 
 FreeTypeWrapper::FreeTypeWrapper() {
 	FT_Error error = FT_Init_FreeType(&ft_library);
 
 	if (!error) {
-		error = FTC_Manager_New(ft_library, 16, 32, 4 * 1024 * 1024, &_ftc_manager_requester, NULL, &ftc_manager);
+		error = FTC_Manager_New(ft_library, 16, 32, 4 * 1024 * 1024, &_ftc_manager_requester, (FT_Pointer)this, &ftc_manager);
 	}
 
 	if (error) {
@@ -119,9 +120,6 @@ FreeTypeWrapper::~FreeTypeWrapper() {
 	const uint32_t *k = NULL;
 	while ((k = font_id_map.next(k))) {
 		memdelete(font_id_map[*k]);
-	}
-	while ((k = font_data_map.next(k))) {
-		font_data_map[*k].unref();
 	}
 }
 

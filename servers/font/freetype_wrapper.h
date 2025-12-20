@@ -28,43 +28,38 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef freetype_wrapper_H
-#define freetype_wrapper_H
+#ifndef FREETYPE_WRAPPER_H
+#define FREETYPE_WRAPPER_H
 
 #include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
 
 #include "core/hash_map.h"
 #include "core/pool_vector.h"
-#include "scene/resources/freetype_font.h"
-
-#include "font_cache_key.h"
 
 #include <ft2build.h>
 #include FT_CACHE_H
 #include FT_FREETYPE_H
 
-class FreeTypeFontData;
-
-struct FontDataID {
+struct FontID {
 	uint32_t font_hash = 0;
 	uint32_t font_face_index = 0;
 };
 
 class FreeTypeWrapper {
 	FT_Library ft_library;
-
 	FTC_Manager ftc_manager;
 
-	mutable HashMap<uint32_t, FontDataID *> font_id_map;
-	FontDataID *_get_font_data_id(uint32_t p_font_hash, uint32_t p_font_face_index = 0) const;
+	mutable HashMap<uint32_t, FontID *> font_id_map;
+	HashMap<uint32_t, PoolVector<uint8_t>> font_buffer_map;
+
+	FontID *_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index = 0) const;
 
 public:
-	static HashMap<uint32_t, Ref<FreeTypeFontData>> font_data_map;
-	static void store_font_data(uint32_t p_font_hash, Ref<FreeTypeFontData> p_font_data);
+	friend FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
 
-	FT_Face lookup_face(uint32_t p_font_hash) const;
-	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const;
+	FT_Face lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer);
+	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling);
 
 	FreeTypeWrapper();
 	~FreeTypeWrapper();

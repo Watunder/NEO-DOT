@@ -39,8 +39,8 @@ struct FontCacheKey {
 			uint64_t font_size : 10;
 			uint64_t font_use_mipmaps : 1;
 			uint64_t font_use_filter : 1;
-			uint64_t font_hinting : 2;
 			uint64_t font_force_autohinter : 1;
+			uint64_t font_hinting : 2;
 			uint64_t font_face_index : 1;
 			uint64_t reserved : 16;
 			uint64_t font_hash : 32;
@@ -48,12 +48,11 @@ struct FontCacheKey {
 		uint64_t key;
 	};
 
+	FontCacheKey(const FontCacheKey &) = delete;
+	FontCacheKey &operator=(const FontCacheKey &) = delete;
+
 	FontCacheKey() { key = 0; }
 	bool FontCacheKey::operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
-};
-
-struct FontCacheKeyHasher {
-	static _FORCE_INLINE_ uint32_t hash(const FontCacheKey &p_key) { return HashMapHasherDefault::hash(p_key.key); }
 };
 
 #endif

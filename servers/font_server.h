@@ -79,8 +79,7 @@ public:
 	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
 
 #ifdef MODULE_FREETYPE_ENABLED
-	void store_font_data(uint32_t p_font_hash, const Ref<FontData> &p_font_data);
-	FT_Face lookup_face(uint32_t p_font_hash) const;
+	FT_Face lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer) const;
 	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const;
 #endif
 

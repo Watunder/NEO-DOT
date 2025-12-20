@@ -47,14 +47,8 @@ class FreeTypeFontHandle : public FontHandle {
 
 	friend class FreeTypeFont;
 
-	FT_Face ft_face = NULL;
-	FT_Size ft_size = NULL;
-
 public:
-	FT_Face get_ft_face() const;
-	FT_Size get_ft_size() const;
-
-	virtual Error update_cache(int p_size, float p_oversampling = 1);
+	virtual void update_metrics(Size2 p_size, float p_oversampling = 1);
 };
 
 /*************************************************************************/

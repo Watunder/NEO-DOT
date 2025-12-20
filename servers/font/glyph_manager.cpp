@@ -35,8 +35,8 @@
 _FORCE_INLINE_ ShelfPackTexture::Position GlyphManager::_find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range) {
 	ShelfPackTexture::Position tex_pos{};
 
-	ShelfPackTexture *glyph_texture = texture_map[current_cache_key].ptrw();
-	for (int i = 0; i < texture_map[current_cache_key].size(); i++) {
+	ShelfPackTexture *glyph_texture = texture_map[current_cache_key.key].ptrw();
+	for (int i = 0; i < texture_map[current_cache_key.key].size(); i++) {
 		if (glyph_texture[i].image_format != p_image_format)
 			continue;
 
@@ -89,9 +89,9 @@ _FORCE_INLINE_ ShelfPackTexture::Position GlyphManager::_find_texture_pos(int p_
 			}
 		}
 
-		texture_map[current_cache_key].push_back(tex);
-		int texture_index = texture_map[current_cache_key].size() - 1;
-		tex_pos = texture_map[current_cache_key].write[texture_index].pack_rect(texture_index, p_width, p_height);
+		texture_map[current_cache_key.key].push_back(tex);
+		int texture_index = texture_map[current_cache_key.key].size() - 1;
+		tex_pos = texture_map[current_cache_key.key].write[texture_index].pack_rect(texture_index, p_width, p_height);
 	}
 
 	return tex_pos;
@@ -133,7 +133,7 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 	// fit glyph_info
 
 	glyph_info.texture_index = tex_pos.index;
-	ShelfPackTexture &tex = texture_map[current_cache_key].write[tex_pos.index];
+	ShelfPackTexture &tex = texture_map[current_cache_key.key].write[tex_pos.index];
 	tex.dirty = true;
 
 	{
@@ -187,93 +187,84 @@ void GlyphManager::update_glyph_cache(const FontCacheKey &p_cache_key) {
 	if (current_cache_key == p_cache_key) {
 		return;
 	}
-	current_cache_key = p_cache_key;
 
-	if (!glyph_map.has(current_cache_key)) {
-		glyph_map[current_cache_key] = HashMap<uint32_t, GlyphInfo>();
+	current_cache_key.key = p_cache_key.key;
+
+	if (!glyph_map.has(current_cache_key.key)) {
+		glyph_map[current_cache_key.key] = HashMap<uint32_t, GlyphInfo>();
 	}
 
-	if (!texture_map.has(current_cache_key)) {
-		texture_map[current_cache_key] = Vector<ShelfPackTexture>();
+	if (!texture_map.has(current_cache_key.key)) {
+		texture_map[current_cache_key.key] = Vector<ShelfPackTexture>();
 	}
 }
 
 void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
-	if (glyph_map.has(p_cache_key)) {
-		glyph_map[p_cache_key].clear();
+	if (glyph_map.has(p_cache_key.key)) {
+		glyph_map[p_cache_key.key].clear();
 	}
 
-	if (texture_map.has(p_cache_key)) {
-		texture_map[p_cache_key].clear();
+	if (texture_map.has(p_cache_key.key)) {
+		texture_map[p_cache_key.key].clear();
 	}
 }
 
-GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const Ref<FontHandle> &p_handle, uint32_t p_index) {
+#ifdef MODULE_FREETYPE_ENABLED
+GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Size &p_ft_size, uint32_t p_index) {
 	GlyphInfo glyph_info{};
 
-	ERR_FAIL_COND_V(p_handle.is_null(), glyph_info);
+	FT_Face ft_face = p_ft_size->face;
+
+	ERR_FAIL_COND_V(!ft_face, glyph_info);
 	ERR_FAIL_COND_V(p_index == 0, glyph_info);
 
-	FontCacheKey cache_key = p_handle->get_cache_key();
-	update_glyph_cache(cache_key);
-
-	if (glyph_map[current_cache_key].has(p_index)) {
-		return glyph_map[current_cache_key][p_index];
+	if (glyph_map[current_cache_key.key].has(p_index)) {
+		return glyph_map[current_cache_key.key][p_index];
 	}
 
-#ifdef MODULE_FREETYPE_ENABLED
-	Ref<FreeTypeFontHandle> font_handle = p_handle;
-	if (font_handle.is_valid()) {
-		int load_flags = FT_LOAD_TARGET_NORMAL;
-		switch (cache_key.font_hinting) {
-			case FreeTypeFont::HINTING_NONE:
-				load_flags = FT_LOAD_NO_HINTING;
-				break;
-			case FreeTypeFont::HINTING_LIGHT:
-				load_flags = FT_LOAD_TARGET_LIGHT;
-				break;
-			case FreeTypeFont::HINTING_NORMAL:
-				load_flags = FT_LOAD_TARGET_NORMAL;
-			default:
-				load_flags = FT_LOAD_TARGET_NORMAL;
-				break;
+	int load_flags = FT_LOAD_TARGET_NORMAL;
+	switch (current_cache_key.font_hinting) {
+		case FreeTypeFont::HINTING_NONE:
+			load_flags = FT_LOAD_NO_HINTING;
+			break;
+		case FreeTypeFont::HINTING_LIGHT:
+			load_flags = FT_LOAD_TARGET_LIGHT;
+			break;
+		case FreeTypeFont::HINTING_NORMAL:
+			load_flags = FT_LOAD_TARGET_NORMAL;
+		default:
+			load_flags = FT_LOAD_TARGET_NORMAL;
+			break;
+	}
+
+	if (ft_face) {
+		uint32_t glyph_index = FT_Get_Char_Index(ft_face, p_index);
+		int error = FT_Load_Glyph(ft_face, glyph_index, FT_HAS_COLOR(ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
+
+		FT_GlyphSlot ft_glyph_slot = ft_face->glyph;
+		if (!error) {
+			error = FT_Render_Glyph(ft_glyph_slot, FT_RENDER_MODE_NORMAL);
 		}
-
-		font_handle->update_cache(current_cache_key.font_size, font_handle->get_oversampling());
-		FT_Size size = font_handle->get_ft_size();
-		if (size && size->face) {
-			uint32_t glyph_index = FT_Get_Char_Index(size->face, p_index);
-			int error = FT_Load_Glyph(size->face, glyph_index, FT_HAS_COLOR(size->face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
-			if (!error) {
-				FT_GlyphSlot slot = size->face->glyph;
-
-				error = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
-				if (!error) {
-					glyph_info = _rasterize_bitmap(slot->bitmap);
-					glyph_info.offset = Vector2(slot->bitmap_left, -slot->bitmap_top);
-					glyph_info.advance = Vector2(slot->advance.x / 64.0, slot->advance.y / 64.0);
-				}
-			}
+		if (!error) {
+			glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
+			glyph_info.offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
+			glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
 		}
-
-	} else
-#endif
-	{
-		// TODO: BitmapFont
 	}
 
 	if (glyph_info.found) {
-		glyph_map[current_cache_key][p_index] = glyph_info;
+		glyph_map[current_cache_key.key][p_index] = glyph_info;
 	}
 
 	return glyph_info;
 }
+#endif
 
 Ref<ImageTexture> GlyphManager::get_texture(const GlyphInfo &p_glyph_info) {
-	ERR_FAIL_COND_V(!texture_map.has(current_cache_key), Ref<ImageTexture>());
-	ERR_FAIL_INDEX_V(p_glyph_info.texture_index, texture_map[current_cache_key].size(), Ref<ImageTexture>());
-	if (texture_map[current_cache_key][p_glyph_info.texture_index].dirty) {
-		ShelfPackTexture &tex = texture_map[current_cache_key].write[p_glyph_info.texture_index];
+	ERR_FAIL_COND_V(!texture_map.has(current_cache_key.key), Ref<ImageTexture>());
+	ERR_FAIL_INDEX_V(p_glyph_info.texture_index, texture_map[current_cache_key.key].size(), Ref<ImageTexture>());
+	if (texture_map[current_cache_key.key][p_glyph_info.texture_index].dirty) {
+		ShelfPackTexture &tex = texture_map[current_cache_key.key].write[p_glyph_info.texture_index];
 		tex.dirty = false;
 		Ref<Image> img = memnew(Image(tex.texture_size, tex.texture_size, 0, tex.image_format, tex.image_data));
 		if (tex.texture.is_null()) {
@@ -283,5 +274,5 @@ Ref<ImageTexture> GlyphManager::get_texture(const GlyphInfo &p_glyph_info) {
 			tex.texture->set_data(img); // update
 		}
 	}
-	return texture_map[current_cache_key][p_glyph_info.texture_index].texture;
+	return texture_map[current_cache_key.key][p_glyph_info.texture_index].texture;
 }
