@@ -32,43 +32,6 @@
 
 #include "core/method_bind_ext.gen.inc"
 
-#include "servers/font_server.h"
-
-const FontCacheKey &FontHandle::get_cache_key() const {
-	return cache_key;
-};
-
-float FontHandle::get_height() const {
-	return ascent + descent;
-}
-
-float FontHandle::get_ascent() const {
-	return ascent;
-}
-
-float FontHandle::get_descent() const {
-	return descent;
-}
-
-float FontHandle::get_oversampling() const {
-	return oversampling;
-}
-
-FontHandle::FontHandle() {
-	cache_key.font_size = 16;
-	cache_key.font_use_mipmaps = 1;
-	cache_key.font_use_filter = 1;
-	cache_key.font_force_autohinter = 0;
-	cache_key.font_hinting = 2;
-	cache_key.font_hash = 0;
-
-	ascent = 0;
-	descent = 1;
-	oversampling = 1;
-}
-
-/*************************************************************************/
-
 void FontData::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load"), &FontData::load_from_file);
 }
@@ -80,10 +43,10 @@ int Font::get_spacing(int p_type) const {
 		return spacing_top;
 	} else if (p_type == SPACING_BOTTOM) {
 		return spacing_bottom;
-	} else if (p_type == SPACING_CHAR) {
-		return spacing_char;
-	} else if (p_type == SPACING_SPACE) {
-		return spacing_space;
+	} else if (p_type == SPACING_GLYPH) {
+		return spacing_glyph;
+	} else if (p_type == SPACING_SPACE_CHAR) {
+		return spacing_space_char;
 	}
 
 	return 0;
@@ -94,10 +57,10 @@ void Font::set_spacing(int p_type, int p_value) {
 		spacing_top = p_value;
 	} else if (p_type == SPACING_BOTTOM) {
 		spacing_bottom = p_value;
-	} else if (p_type == SPACING_CHAR) {
-		spacing_char = p_value;
-	} else if (p_type == SPACING_SPACE) {
-		spacing_space = p_value;
+	} else if (p_type == SPACING_GLYPH) {
+		spacing_glyph = p_value;
+	} else if (p_type == SPACING_SPACE_CHAR) {
+		spacing_space_char = p_value;
 	}
 
 	emit_changed();
@@ -134,13 +97,13 @@ void Font::_bind_methods() {
 	ADD_GROUP("Extra Spacing", "extra_spacing");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_top"), "set_spacing", "get_spacing", SPACING_TOP);
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_bottom"), "set_spacing", "get_spacing", SPACING_BOTTOM);
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_char"), "set_spacing", "get_spacing", SPACING_CHAR);
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_space"), "set_spacing", "get_spacing", SPACING_SPACE);
+	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_glyph"), "set_spacing", "get_spacing", SPACING_GLYPH);
+	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_space_char"), "set_spacing", "get_spacing", SPACING_SPACE_CHAR);
 
 	BIND_ENUM_CONSTANT(SPACING_TOP);
 	BIND_ENUM_CONSTANT(SPACING_BOTTOM);
-	BIND_ENUM_CONSTANT(SPACING_CHAR);
-	BIND_ENUM_CONSTANT(SPACING_SPACE);
+	BIND_ENUM_CONSTANT(SPACING_GLYPH);
+	BIND_ENUM_CONSTANT(SPACING_SPACE_CHAR);
 }
 
 Font::Font() {
@@ -149,12 +112,9 @@ Font::Font() {
 
 	spacing_top = 0;
 	spacing_bottom = 0;
-	spacing_char = 0;
-	spacing_space = 0;
-
-	FontServer::get_singleton()->add_font(this);
+	spacing_glyph = 0;
+	spacing_space_char = 0;
 }
 
 Font::~Font() {
-	FontServer::get_singleton()->remove_font(this);
 }

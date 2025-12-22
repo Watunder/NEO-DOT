@@ -33,7 +33,9 @@
 #include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
 
-FontID *FreeTypeWrapper::_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) const {
+#include "thirdparty/zstd/common/xxhash.h"
+
+FreeTypeWrapper::FontID *FreeTypeWrapper::_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) const {
 	uint32_t key = HashMapHasherDefault::hash(((uint64_t)p_font_hash << 32) | p_font_face_index);
 	if (font_id_map.has(key)) {
 		return font_id_map.get(key);
@@ -48,7 +50,7 @@ FontID *FreeTypeWrapper::_get_font_id(uint32_t p_font_hash, uint32_t p_font_face
 }
 
 static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
-	FontID *font_id = (FontID *)p_font_id;
+	FreeTypeWrapper::FontID *font_id = (FreeTypeWrapper::FontID *)p_font_id;
 
 	FreeTypeWrapper *freetype_wrapper = static_cast<FreeTypeWrapper *>(p_request_data);
 
@@ -64,12 +66,8 @@ static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_L
 	return error;
 }
 
-FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer) {
-	FontID *font_id = _get_font_id(p_font_hash);
-
-	if (!font_buffer_map.has(p_font_hash)) {
-		font_buffer_map[p_font_hash] = p_font_buffer;
-	}
+FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash, uint32_t p_font_face_index) {
+	FontID *font_id = _get_font_id(p_font_hash, p_font_face_index);
 
 	FT_Face ft_face = NULL;
 	FT_Error error = FTC_Manager_LookupFace(ftc_manager, (FTC_FaceID)font_id, &ft_face);
@@ -79,8 +77,18 @@ FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash, const PoolVector<uint
 	return ft_face;
 }
 
-FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) {
-	FontID *font_id = _get_font_id(p_font_hash);
+uint32_t FreeTypeWrapper::store_buffer(const PoolVector<uint8_t> &p_font_buffer) {
+	uint32_t font_hash = XXH32(p_font_buffer.read().ptr(), p_font_buffer.size(), 0);
+
+	if (!font_buffer_map.has(font_hash)) {
+		font_buffer_map[font_hash] = p_font_buffer;
+	}
+
+	return font_hash;
+}
+
+FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, uint32_t p_font_face_index, int p_size, float p_oversampling) {
+	FontID *font_id = _get_font_id(p_font_hash, p_font_face_index);
 
 	FTC_ScalerRec scaler;
 	scaler.face_id = (FTC_FaceID)font_id;
@@ -117,10 +125,7 @@ FreeTypeWrapper::~FreeTypeWrapper() {
 		FT_Done_FreeType(ft_library);
 	}
 
-	const uint32_t *k = NULL;
-	while ((k = font_id_map.next(k))) {
-		memdelete(font_id_map[*k]);
-	}
+	font_id_map.clear();
 }
 
 #endif

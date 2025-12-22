@@ -210,12 +210,10 @@ void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
 }
 
 #ifdef MODULE_FREETYPE_ENABLED
-GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Size &p_ft_size, uint32_t p_index) {
+GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, uint32_t p_index) {
 	GlyphInfo glyph_info{};
 
-	FT_Face ft_face = p_ft_size->face;
-
-	ERR_FAIL_COND_V(!ft_face, glyph_info);
+	ERR_FAIL_COND_V(!p_ft_face, glyph_info);
 	ERR_FAIL_COND_V(p_index == 0, glyph_info);
 
 	if (glyph_map[current_cache_key.key].has(p_index)) {
@@ -237,19 +235,17 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Size &p_ft_size, u
 			break;
 	}
 
-	if (ft_face) {
-		uint32_t glyph_index = FT_Get_Char_Index(ft_face, p_index);
-		int error = FT_Load_Glyph(ft_face, glyph_index, FT_HAS_COLOR(ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
+	uint32_t glyph_index = FT_Get_Char_Index(p_ft_face, p_index);
+	int error = FT_Load_Glyph(p_ft_face, glyph_index, FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
 
-		FT_GlyphSlot ft_glyph_slot = ft_face->glyph;
-		if (!error) {
-			error = FT_Render_Glyph(ft_glyph_slot, FT_RENDER_MODE_NORMAL);
-		}
-		if (!error) {
-			glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
-			glyph_info.offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
-			glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
-		}
+	FT_GlyphSlot ft_glyph_slot = p_ft_face->glyph;
+	if (!error) {
+		error = FT_Render_Glyph(ft_glyph_slot, FT_RENDER_MODE_NORMAL);
+	}
+	if (!error) {
+		glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
+		glyph_info.offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
+		glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
 	}
 
 	if (glyph_info.found) {

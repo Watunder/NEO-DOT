@@ -469,7 +469,7 @@ bool SceneTree::iteration(float p_time) {
 
 void SceneTree::_update_font_oversampling(float p_ratio) {
 	if (use_font_oversampling) {
-		FontServer::get_singleton()->update_oversampling(p_ratio);
+		// FontServer::get_singleton()->update_oversampling(p_ratio);
 	}
 }
 
