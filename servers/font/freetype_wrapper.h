@@ -41,25 +41,28 @@
 #include FT_CACHE_H
 #include FT_FREETYPE_H
 
-struct FontID {
-	uint32_t font_hash = 0;
-	uint32_t font_face_index = 0;
-};
-
 class FreeTypeWrapper {
+public:
+	struct FontID {
+		uint32_t font_hash = 0;
+		uint32_t font_face_index = 0;
+	};
+
+private:
 	FT_Library ft_library;
 	FTC_Manager ftc_manager;
 
 	mutable HashMap<uint32_t, FontID *> font_id_map;
 	HashMap<uint32_t, PoolVector<uint8_t>> font_buffer_map;
 
-	FontID *_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index = 0) const;
+	FontID *_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) const;
 
 public:
 	friend FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
 
-	FT_Face lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer);
-	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling);
+	uint32_t store_buffer(const PoolVector<uint8_t> &p_font_buffer);
+	FT_Face lookup_face(uint32_t p_font_hash, uint32_t p_font_face_index);
+	FT_Size lookup_size(uint32_t p_font_hash, uint32_t p_font_face_index, int p_size, float p_oversampling);
 
 	FreeTypeWrapper();
 	~FreeTypeWrapper();

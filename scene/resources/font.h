@@ -33,36 +33,6 @@
 
 #include "core/reference.h"
 #include "core/resource.h"
-#include "servers/font/font_cache_key.h"
-
-/*************************************************************************/
-
-class FontHandle : public Reference {
-	GDCLASS(FontHandle, Reference);
-
-protected:
-	FontCacheKey cache_key;
-
-	float ascent;
-	float descent;
-	float oversampling;
-
-public:
-	virtual const FontCacheKey &get_cache_key() const;
-
-	virtual float get_height() const;
-
-	virtual float get_ascent() const;
-	virtual float get_descent() const;
-
-	virtual float get_oversampling() const;
-
-	virtual void update_metrics(Size2 p_size, float p_oversampling = 1) = 0;
-
-	FontHandle();
-};
-
-/*************************************************************************/
 
 class FontData : public Resource {
 	GDCLASS(FontData, Resource);
@@ -84,15 +54,15 @@ public:
 	enum SpacingType {
 		SPACING_TOP,
 		SPACING_BOTTOM,
-		SPACING_CHAR,
-		SPACING_SPACE
+		SPACING_GLYPH,
+		SPACING_SPACE_CHAR,
 	};
 
 protected:
 	int spacing_top;
 	int spacing_bottom;
-	int spacing_char;
-	int spacing_space;
+	int spacing_glyph;
+	int spacing_space_char;
 
 	bool use_mipmaps;
 	bool use_filter;
@@ -103,7 +73,7 @@ public:
 	virtual Ref<FontData> get_data() const { return Ref<FontData>(); };
 	virtual void set_data(const Ref<FontData> &p_data) = 0;
 
-	virtual Ref<FontHandle> get_handle() const { return Ref<FontHandle>(); };
+	virtual RID get_rid() const { return RID(); };
 
 	virtual Size2 get_char_size(char32_t p_char) const = 0;
 	virtual Size2 get_string_size(const String &p_string) const = 0;

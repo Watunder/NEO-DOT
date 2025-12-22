@@ -37,9 +37,7 @@
 #include FT_FREETYPE_H
 #endif
 
-#include "scene/resources/font.h"
-#include "servers/font/font_cache_key.h"
-
+#include "font_cache_key.h"
 #include "shelf_pack_texture.h"
 
 class GlyphManager {
@@ -73,7 +71,7 @@ public:
 	void clear_glyph_cache(const FontCacheKey &p_cache_key);
 
 #ifdef MODULE_FREETYPE_ENABLED
-	GlyphInfo get_glyph_info(const FT_Size &p_ft_size, uint32_t p_index);
+	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_index);
 #endif
 
 	Ref<ImageTexture> get_texture(const GlyphInfo &p_glyph_info);

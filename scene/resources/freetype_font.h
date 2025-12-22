@@ -31,27 +31,10 @@
 #ifndef FREETYPE_FONT_H
 #define FREETYPE_FONT_H
 
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-
 #include "core/io/resource_loader.h"
 #include "core/os/mutex.h"
 #include "core/os/thread_safe.h"
 #include "scene/resources/font.h"
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-class FreeTypeFontHandle : public FontHandle {
-	GDCLASS(FreeTypeFontHandle, FontHandle);
-
-	friend class FreeTypeFont;
-
-public:
-	virtual void update_metrics(Size2 p_size, float p_oversampling = 1);
-};
-
-/*************************************************************************/
 
 class FreeTypeFontData : public FontData {
 	GDCLASS(FreeTypeFontData, FontData);
@@ -87,7 +70,8 @@ public:
 
 private:
 	Ref<FreeTypeFontData> data;
-	Ref<FreeTypeFontHandle> handle;
+
+	RID font_rid;
 
 	int size;
 	Hinting hinting;
@@ -100,7 +84,7 @@ public:
 	virtual Ref<FontData> get_data() const;
 	virtual void set_data(const Ref<FontData> &p_data);
 
-	virtual Ref<FontHandle> get_handle() const;
+	virtual RID get_rid() const;
 
 	virtual Size2 get_char_size(char32_t p_char) const;
 	virtual Size2 get_string_size(const String &p_string) const;
@@ -125,6 +109,7 @@ public:
 	void set_hinting(Hinting p_hinting);
 
 	FreeTypeFont();
+	~FreeTypeFont();
 };
 
 VARIANT_ENUM_CAST(FreeTypeFont::Hinting);
@@ -138,7 +123,5 @@ public:
 	virtual bool handles_type(const String &p_type) const;
 	virtual String get_resource_type(const String &p_path) const;
 };
-
-#endif
 
 #endif

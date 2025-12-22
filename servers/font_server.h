@@ -53,7 +53,28 @@ class FontServer : public Object {
 private:
 	static FontServer *singleton;
 
-	Vector<Font *> fonts;
+	struct FontInfo : RID_Data {
+		FontCacheKey cache_key;
+
+		float ascent;
+		float descent;
+		float oversampling;
+
+		FontInfo() {
+			cache_key.font_size = 16;
+			cache_key.font_use_mipmaps = 1;
+			cache_key.font_use_filter = 1;
+			cache_key.font_force_autohinter = 0;
+			cache_key.font_hinting = 2;
+			cache_key.font_hash = 0;
+
+			ascent = 0;
+			descent = 1;
+			oversampling = 1;
+		}
+	};
+
+	mutable RID_Owner<FontInfo> font_info_owner;
 
 #ifdef MODULE_FREETYPE_ENABLED
 	FreeTypeWrapper *freetype_wrapper = NULL;
@@ -68,20 +89,25 @@ protected:
 public:
 	static FontServer *get_singleton();
 
-	void add_font(Font *p_font);
-	void remove_font(Font *p_font);
-	void update_oversampling(float p_ratio);
+	RID font_create();
+	void font_free(RID p_font_rid);
+	void font_set_size(RID p_font_rid, int p_size);
+	void font_set_use_mipmaps(RID p_font_rid, bool p_use_mipmaps);
+	void font_set_use_filter(RID p_font_rid, bool p_use_filter);
+	void font_set_force_autohinter(RID p_font_rid, bool p_force_autohinter);
+	void font_set_hinting(RID p_font_rid, int p_hinting);
+	void font_set_face_index(RID p_font_rid, int p_face_index);
+	void font_set_data(RID p_font_rid, const PoolVector<uint8_t> &p_font_buffer);
+	void font_update_metrics(RID p_font_rid, float p_oversampling = 1);
+	float font_get_ascent(RID p_font_rid) const;
+	float font_get_descent(RID p_font_rid) const;
+	float font_get_oversampling(RID p_font_rid) const;
+	const FontCacheKey &font_get_cache_key(RID p_font_rid) const;
 
-	Size2 get_char_size(const Ref<Font> &p_font, char32_t p_char) const;
-
-	float draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
-	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FT_Face lookup_face(uint32_t p_font_hash, const PoolVector<uint8_t> &p_font_buffer) const;
-	FT_Size lookup_size(uint32_t p_font_hash, int p_size, float p_oversampling) const;
-#endif
+	Size2 get_char_size(const Ref<Font> &pFontCache, char32_t p_char) const;
+	float draw_char(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
+	void draw_string(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
+	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
 
 	FontServer();
 	~FontServer();

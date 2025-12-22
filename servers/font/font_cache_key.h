@@ -31,7 +31,7 @@
 #ifndef FONT_CACHE_KEY_H
 #define FONT_CACHE_KEY_H
 
-#include "core/hashfuncs.h"
+#include "core/typedefs.h"
 
 struct FontCacheKey {
 	union {
