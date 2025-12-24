@@ -59,7 +59,7 @@ struct ShelfPackTexture {
 
 	int texture_size = MIN_TEXTURE_SIZE;
 	PoolVector<uint8_t> image_data;
-	Ref<ImageTexture> texture;
+	RID texture_rid;
 	Image::Format image_format;
 
 	Position pack_rect(int p_index, int p_w, int p_h);

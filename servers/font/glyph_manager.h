@@ -51,6 +51,7 @@ public:
 		int texture_index = -1;
 		Size2 texture_size;
 		Rect2 texture_rect_uv;
+		Image::Format texture_format;
 
 		int texture_flags = 0;
 	};
@@ -74,7 +75,7 @@ public:
 	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_index);
 #endif
 
-	Ref<ImageTexture> get_texture(const GlyphInfo &p_glyph_info);
+	RID get_texture_rid(const GlyphInfo &p_glyph_info);
 };
 
 #endif
