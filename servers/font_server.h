@@ -98,6 +98,7 @@ public:
 	void font_set_hinting(RID p_font_rid, int p_hinting);
 	void font_set_face_index(RID p_font_rid, int p_face_index);
 	void font_set_data(RID p_font_rid, const PoolVector<uint8_t> &p_font_buffer);
+	void font_clear_glyph_cache(RID p_font_rid);
 	void font_update_metrics(RID p_font_rid, float p_oversampling = 1);
 	float font_get_ascent(RID p_font_rid) const;
 	float font_get_descent(RID p_font_rid) const;

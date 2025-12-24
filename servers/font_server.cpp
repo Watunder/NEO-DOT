@@ -108,6 +108,13 @@ void FontServer::font_set_data(RID p_font_rid, const PoolVector<uint8_t> &p_font
 #endif
 }
 
+void FontServer::font_clear_glyph_cache(RID p_font_rid) {
+	FontInfo *font_info = font_info_owner.getornull(p_font_rid);
+	ERR_FAIL_COND(!font_info);
+
+	glyph_manager->clear_glyph_cache(font_info->cache_key);
+}
+
 void FontServer::font_update_metrics(RID p_font_rid, float p_oversampling) {
 	FontInfo *font_info = font_info_owner.getornull(p_font_rid);
 	ERR_FAIL_COND(!font_info);
@@ -209,14 +216,12 @@ float FontServer::draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Po
 #endif
 
 	if (glyph_info.found) {
-		Ref<ImageTexture> texture = glyph_manager->get_texture(glyph_info);
-		if (texture.is_valid()) {
+		RID texture_rid = glyph_manager->get_texture_rid(glyph_info);
+		if (texture_rid.is_valid()) {
 			Color modulate = p_modulate;
-			if (texture->get_format() == Image::FORMAT_RGBA8) {
+			if (glyph_info.texture_format == Image::FORMAT_RGBA8) {
 				modulate.r = modulate.g = modulate.b = 1.0;
 			}
-
-			RID texture_rid = texture->get_rid();
 
 			Point2 texture_pos = p_pos + glyph_info.offset / font_oversampling;
 			Rect2 texture_rect(texture_pos, glyph_info.texture_size / font_oversampling);

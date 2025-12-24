@@ -170,6 +170,7 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 	}
 
 	glyph_info.found = true;
+	glyph_info.texture_format = image_format;
 	glyph_info.texture_rect_uv = Rect2(tex_pos.x + rect_range, tex_pos.y + rect_range, w, h);
 	glyph_info.texture_size = glyph_info.texture_rect_uv.size;
 	if (current_cache_key.font_use_mipmaps) {
@@ -256,19 +257,18 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 }
 #endif
 
-Ref<ImageTexture> GlyphManager::get_texture(const GlyphInfo &p_glyph_info) {
-	ERR_FAIL_COND_V(!texture_map.has(current_cache_key.key), Ref<ImageTexture>());
-	ERR_FAIL_INDEX_V(p_glyph_info.texture_index, texture_map[current_cache_key.key].size(), Ref<ImageTexture>());
+RID GlyphManager::get_texture_rid(const GlyphInfo &p_glyph_info) {
+	ERR_FAIL_COND_V(!texture_map.has(current_cache_key.key), RID());
+	ERR_FAIL_INDEX_V(p_glyph_info.texture_index, texture_map[current_cache_key.key].size(), RID());
 	if (texture_map[current_cache_key.key][p_glyph_info.texture_index].dirty) {
 		ShelfPackTexture &tex = texture_map[current_cache_key.key].write[p_glyph_info.texture_index];
 		tex.dirty = false;
 		Ref<Image> img = memnew(Image(tex.texture_size, tex.texture_size, 0, tex.image_format, tex.image_data));
-		if (tex.texture.is_null()) {
-			tex.texture.instance();
-			tex.texture->create_from_image(img, Texture::FLAG_VIDEO_SURFACE | p_glyph_info.texture_flags);
+		if (!tex.texture_rid.is_valid()) {
+			tex.texture_rid = VisualServer::get_singleton()->texture_create_from_image(img, Texture::FLAG_VIDEO_SURFACE | p_glyph_info.texture_flags);
 		} else {
-			tex.texture->set_data(img); // update
+			VisualServer::get_singleton()->texture_set_data(tex.texture_rid, img);
 		}
 	}
-	return texture_map[current_cache_key.key][p_glyph_info.texture_index].texture;
+	return texture_map[current_cache_key.key][p_glyph_info.texture_index].texture_rid;
 }

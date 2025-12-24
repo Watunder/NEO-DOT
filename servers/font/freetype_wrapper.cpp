@@ -125,7 +125,10 @@ FreeTypeWrapper::~FreeTypeWrapper() {
 		FT_Done_FreeType(ft_library);
 	}
 
-	font_id_map.clear();
+	const uint32_t *k = NULL;
+	while ((k = font_id_map.next(k))) {
+		memdelete(font_id_map[*k]);
+	}
 }
 
 #endif
