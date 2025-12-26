@@ -32,10 +32,14 @@
 #define FONT_SERVER_H
 
 #include "configs/modules_enabled.gen.h"
+
 #ifdef MODULE_FREETYPE_ENABLED
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "font/freetype_wrapper.h"
+#endif
+#ifdef MODULE_RAQM_ENABLED
+#include "font/raqm_wrapper.h"
 #endif
 
 #include "core/os/thread_safe.h"
@@ -43,7 +47,6 @@
 
 #include "font/font_cache_key.h"
 #include "font/glyph_manager.h"
-#include "font/text_manager.h"
 
 class FontServer : public Object {
 	GDCLASS(FontServer, Object);
@@ -79,9 +82,17 @@ private:
 #ifdef MODULE_FREETYPE_ENABLED
 	FreeTypeWrapper *freetype_wrapper = NULL;
 #endif
-
+#ifdef MODULE_RAQM_ENABLED
+	RaqmWrapper *raqm_wrapper = NULL;
+#endif
 	GlyphManager *glyph_manager = NULL;
-	TextManger *text_manager = NULL;
+
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(RID p_font_rid, char32_t p_char, Vector<RID> p_fallback_font_rids = Vector<RID>()) const;
+	_FORCE_INLINE_ Vector2 _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Point2 &p_pos, const Color &p_modulate = Color(1, 1, 1)) const;
+
+#ifdef MODULE_RAQM_ENABLED
+	Vector2 _draw_shaped_string(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
+#endif
 
 protected:
 	static void _bind_methods();
@@ -98,17 +109,17 @@ public:
 	void font_set_hinting(RID p_font_rid, int p_hinting);
 	void font_set_face_index(RID p_font_rid, int p_face_index);
 	void font_set_data(RID p_font_rid, const PoolVector<uint8_t> &p_font_buffer);
-	void font_clear_glyph_cache(RID p_font_rid);
+	void font_clear_caches(RID p_font_rid);
 	void font_update_metrics(RID p_font_rid, float p_oversampling = 1);
 	float font_get_ascent(RID p_font_rid) const;
 	float font_get_descent(RID p_font_rid) const;
 	float font_get_oversampling(RID p_font_rid) const;
 	const FontCacheKey &font_get_cache_key(RID p_font_rid) const;
 
-	Size2 get_char_size(const Ref<Font> &pFontCache, char32_t p_char) const;
-	float draw_char(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
-	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &pFontCache, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
+	Size2 get_char_size(const Ref<Font> &p_font, char32_t p_char) const;
+	float draw_char(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
+	void draw_string(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
+	void draw_string_aligned(RID p_canvas_item, const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
 
 	FontServer();
 	~FontServer();

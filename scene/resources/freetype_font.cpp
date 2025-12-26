@@ -102,11 +102,13 @@ Ref<FontData> FreeTypeFont::get_data() const {
 }
 
 void FreeTypeFont::set_data(const Ref<FontData> &p_data) {
+	if (data == p_data)
+		return;
 	data = p_data;
 
 	float oversampling = 1;
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		oversampling = FontServer::get_singleton()->font_get_oversampling(font_rid);
 		FontServer::get_singleton()->font_free(font_rid);
 	}
@@ -138,6 +140,10 @@ RID FreeTypeFont::get_rid() const {
 	return font_rid;
 }
 
+Vector<RID> FreeTypeFont::get_fallback_rids() const {
+	return fallback_font_rids;
+}
+
 int FreeTypeFont::get_size() const {
 	return size;
 }
@@ -148,7 +154,7 @@ void FreeTypeFont::set_size(int p_size) {
 	size = p_size;
 
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		FontServer::get_singleton()->font_set_size(font_rid, size);
 		float oversampling = FontServer::get_singleton()->font_get_oversampling(font_rid);
 		FontServer::get_singleton()->font_update_metrics(font_rid, oversampling);
@@ -212,7 +218,7 @@ void FreeTypeFont::set_use_mipmaps(bool p_enable) {
 	use_mipmaps = p_enable;
 
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		FontServer::get_singleton()->font_set_use_mipmaps(font_rid, use_mipmaps);
 	}
 
@@ -230,7 +236,7 @@ void FreeTypeFont::set_use_filter(bool p_enable) {
 	use_filter = p_enable;
 
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		FontServer::get_singleton()->font_set_use_filter(font_rid, use_filter);
 	}
 
@@ -248,7 +254,7 @@ void FreeTypeFont::set_force_autohinter(bool p_force_autohinter) {
 	force_autohinter = p_force_autohinter;
 
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		FontServer::get_singleton()->font_set_force_autohinter(font_rid, force_autohinter);
 	}
 
@@ -266,7 +272,7 @@ void FreeTypeFont::set_hinting(Hinting p_hinting) {
 	hinting = p_hinting;
 
 	if (font_rid.is_valid()) {
-		FontServer::get_singleton()->font_clear_glyph_cache(font_rid);
+		FontServer::get_singleton()->font_clear_caches(font_rid);
 		FontServer::get_singleton()->font_set_hinting(font_rid, hinting);
 	}
 

@@ -13,7 +13,6 @@ thirdparty_obj = []
 
 if env["builtin_harfbuzz"]:
     env_harfbuzz = env_modules.Clone()
-    env_harfbuzz.disable_warnings()
 
     thirdparty_harfbuzz_dir = "#thirdparty/harfbuzz/"
     thirdparty_harfbuzz_sources = [
@@ -106,8 +105,10 @@ if env["builtin_harfbuzz"]:
         ]
     )
 
-    lib = env_harfbuzz.add_library("harfbuzz_builtin", thirdparty_harfbuzz_sources)
-    thirdparty_obj += lib
+    env_thirdparty = env_harfbuzz.Clone()
+    env_thirdparty.disable_warnings()
+    lib = env_thirdparty.add_library("harfbuzz_builtin", thirdparty_harfbuzz_sources)
+    # thirdparty_obj += lib
 
     # Needs to be appended to arrive after libscene in the linker call,
     # but we don't want it to arrive *after* system libs, so manual hack
@@ -151,17 +152,20 @@ thirdparty_sheenbidi_sources = [
 ]
 thirdparty_sheenbidi_sources = [thirdparty_sheenbidi_dir + file for file in thirdparty_sheenbidi_sources]
 
-env_raqm.Append(CPPDEFINES=["RAQM_SHEENBIDI", "RAQM_SHEENBIDI_GT_2_9"])
 env_raqm.Prepend(CPPPATH=[thirdparty_sheenbidi_dir + "/Headers"])
-env_raqm.add_source_files(thirdparty_obj, thirdparty_sheenbidi_sources)
 
 thirdparty_libraqm_dir = "#thirdparty/libraqm/"
 thirdparty_libraqm_sources = ["raqm.c"]
 thirdparty_libraqm_sources = [thirdparty_libraqm_dir + file for file in thirdparty_libraqm_sources]
 
+env_raqm.Append(CPPDEFINES=["RAQM_SHEENBIDI", "RAQM_SHEENBIDI_GT_2_9"])
 env_raqm.Prepend(CPPPATH=[thirdparty_libraqm_dir])
-env_raqm.add_source_files(thirdparty_obj, thirdparty_libraqm_sources)
 
+env_thirdparty = env_raqm.Clone()
+env_thirdparty.disable_warnings()
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sheenbidi_sources)
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_libraqm_sources)
+env.modules_sources += thirdparty_obj
 
 # Godot source files
 

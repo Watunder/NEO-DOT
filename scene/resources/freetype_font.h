@@ -72,6 +72,7 @@ private:
 	Ref<FreeTypeFontData> data;
 
 	RID font_rid;
+	Vector<RID> fallback_font_rids;
 
 	int size;
 	Hinting hinting;
@@ -85,6 +86,7 @@ public:
 	virtual void set_data(const Ref<FontData> &p_data);
 
 	virtual RID get_rid() const;
+	virtual Vector<RID> get_fallback_rids() const;
 
 	virtual Size2 get_char_size(char32_t p_char) const;
 	virtual Size2 get_string_size(const String &p_string) const;

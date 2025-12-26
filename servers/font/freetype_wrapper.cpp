@@ -30,7 +30,6 @@
 
 #include "freetype_wrapper.h"
 
-#include "configs/modules_enabled.gen.h"
 #ifdef MODULE_FREETYPE_ENABLED
 
 #include "thirdparty/zstd/common/xxhash.h"
