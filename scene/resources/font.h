@@ -74,6 +74,7 @@ public:
 	virtual void set_data(const Ref<FontData> &p_data) = 0;
 
 	virtual RID get_rid() const { return RID(); };
+	virtual Vector<RID> get_fallback_rids() const { return Vector<RID>(); };
 
 	virtual Size2 get_char_size(char32_t p_char) const = 0;
 	virtual Size2 get_string_size(const String &p_string) const = 0;

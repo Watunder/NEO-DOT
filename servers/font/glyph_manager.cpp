@@ -211,14 +211,13 @@ void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
 }
 
 #ifdef MODULE_FREETYPE_ENABLED
-GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, uint32_t p_index) {
+GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index) {
 	GlyphInfo glyph_info{};
 
 	ERR_FAIL_COND_V(!p_ft_face, glyph_info);
-	ERR_FAIL_COND_V(p_index == 0, glyph_info);
 
-	if (glyph_map[current_cache_key.key].has(p_index)) {
-		return glyph_map[current_cache_key.key][p_index];
+	if (glyph_map[current_cache_key.key].has(p_glyph_index)) {
+		return glyph_map[current_cache_key.key][p_glyph_index];
 	}
 
 	int load_flags = FT_LOAD_TARGET_NORMAL;
@@ -236,8 +235,7 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 			break;
 	}
 
-	uint32_t glyph_index = FT_Get_Char_Index(p_ft_face, p_index);
-	int error = FT_Load_Glyph(p_ft_face, glyph_index, FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
+	int error = FT_Load_Glyph(p_ft_face, p_glyph_index, FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
 
 	FT_GlyphSlot ft_glyph_slot = p_ft_face->glyph;
 	if (!error) {
@@ -245,12 +243,12 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 	}
 	if (!error) {
 		glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
-		glyph_info.offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
+		glyph_info.texture_offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
 		glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
 	}
 
 	if (glyph_info.found) {
-		glyph_map[current_cache_key.key][p_index] = glyph_info;
+		glyph_map[current_cache_key.key][p_glyph_index] = glyph_info;
 	}
 
 	return glyph_info;

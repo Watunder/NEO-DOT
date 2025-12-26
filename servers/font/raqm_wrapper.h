@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  text_manager.cpp                                                     */
+/*  raqm_wrapper.h                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,4 +28,47 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "text_manager.h"
+#ifndef RAQM_WRAPPER_H
+#define RAQM_WRAPPER_H
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_RAQM_ENABLED
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+#include "core/hash_map.h"
+#include "core/math/vector2.h"
+#include "core/ustring.h"
+#include "core/vector.h"
+
+#include "font_cache_key.h"
+
+class RaqmWrapper {
+	struct TextCache {
+		String text_line;
+	};
+
+public:
+	struct ShapedInfo {
+		uint32_t index = 0;
+		uint32_t cluster = 0;
+		Vector2 offset;
+		Vector2 advance;
+		FT_Face ft_face = NULL;
+	};
+
+private:
+	FontCacheKey current_cache_key;
+
+	HashMap<uint64_t, HashMap<String, Vector<ShapedInfo>>> shaped_map;
+
+public:
+	void update_shaped_cache(const FontCacheKey &p_cache_key);
+	void clear_shaped_cache(const FontCacheKey &p_cache_key);
+
+	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, Vector<FT_Face> p_fallback_ft_faces = Vector<FT_Face>());
+};
+
+#endif
+
+#endif

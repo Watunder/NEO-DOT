@@ -45,7 +45,7 @@ public:
 	struct GlyphInfo {
 		bool found = false;
 
-		Vector2 offset;
+		Vector2 texture_offset;
 		Vector2 advance;
 
 		int texture_index = -1;
@@ -72,7 +72,7 @@ public:
 	void clear_glyph_cache(const FontCacheKey &p_cache_key);
 
 #ifdef MODULE_FREETYPE_ENABLED
-	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_index);
+	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);
 #endif
 
 	RID get_texture_rid(const GlyphInfo &p_glyph_info);
