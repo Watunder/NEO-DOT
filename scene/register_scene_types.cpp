@@ -780,6 +780,8 @@ void unregister_scene_types() {
 #ifdef MODULE_FREETYPE_ENABLED
 	ResourceLoader::remove_resource_format_loader(resource_loader_freetype_font);
 	resource_loader_freetype_font.unref();
+
+	FreeTypeFontData::clear_default();
 #endif
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);

@@ -50,31 +50,14 @@ public:
 class Font : public Resource {
 	GDCLASS(Font, Resource);
 
-public:
-	enum SpacingType {
-		SPACING_TOP,
-		SPACING_BOTTOM,
-		SPACING_GLYPH,
-		SPACING_SPACE_CHAR,
-	};
-
 protected:
-	int spacing_top;
-	int spacing_bottom;
-	int spacing_glyph;
-	int spacing_space_char;
-
 	bool use_mipmaps;
 	bool use_filter;
 
 	static void _bind_methods();
 
 public:
-	virtual Ref<FontData> get_data() const { return Ref<FontData>(); };
-	virtual void set_data(const Ref<FontData> &p_data) = 0;
-
-	virtual RID get_rid() const { return RID(); };
-	virtual Vector<RID> get_fallback_rids() const { return Vector<RID>(); };
+	virtual RID get_rid() const = 0;
 
 	virtual Size2 get_char_size(char32_t p_char) const = 0;
 	virtual Size2 get_string_size(const String &p_string) const = 0;
@@ -85,8 +68,8 @@ public:
 	virtual bool get_use_filter() const = 0;
 	virtual void set_use_filter(bool p_enable) = 0;
 
-	virtual int get_spacing(int p_type) const;
-	virtual void set_spacing(int p_type, int p_value);
+	virtual int get_spacing(int p_type) const = 0;
+	virtual void set_spacing(int p_type, int p_value) = 0;
 
 	virtual float get_height() const = 0;
 
@@ -98,7 +81,5 @@ public:
 	Font();
 	~Font();
 };
-
-VARIANT_ENUM_CAST(Font::SpacingType);
 
 #endif

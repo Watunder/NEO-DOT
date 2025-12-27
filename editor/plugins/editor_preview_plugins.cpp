@@ -799,9 +799,13 @@ Ref<Texture> EditorFontPreviewPlugin::generate_from_path(const String &p_path, c
 	Ref<ResourceInteractiveLoader> ril = ResourceLoader::load_interactive(p_path);
 	ril.ptr()->wait();
 	Ref<Resource> res = ril.ptr()->get_resource();
+	return generate(res, p_size);
+}
+
+Ref<Texture> EditorFontPreviewPlugin::generate(const Ref<Resource> &p_from, const Size2 &p_size) const {
 	Ref<FreeTypeFont> sampled_font;
 	sampled_font.instance();
-	Ref<FreeTypeFontData> font_data = res;
+	Ref<FreeTypeFontData> font_data = p_from;
 	if (font_data.is_valid()) {
 		sampled_font->set_data(font_data->duplicate());
 	}
@@ -815,7 +819,7 @@ Ref<Texture> EditorFontPreviewPlugin::generate_from_path(const String &p_path, c
 	pos.x = 64 - size.x / 2;
 	pos.y = 80;
 
-	FontServer::get_singleton()->draw_string(canvas_item, sampled_font, pos, sampled_text);
+	FontServer::get_singleton()->draw_string(canvas_item, sampled_font->get_rid(), pos, sampled_text);
 
 	preview_done.clear();
 	VS::get_singleton()->viewport_set_update_mode(viewport, VS::VIEWPORT_UPDATE_ONCE); //once used for capture
@@ -847,14 +851,6 @@ Ref<Texture> EditorFontPreviewPlugin::generate_from_path(const String &p_path, c
 	ptex->create_from_image(img, 0);
 
 	return ptex;
-}
-
-Ref<Texture> EditorFontPreviewPlugin::generate(const Ref<Resource> &p_from, const Size2 &p_size) const {
-	String path = p_from->get_path();
-	if (!FileAccess::exists(path)) {
-		return Ref<Texture>();
-	}
-	return generate_from_path(path, p_size);
 }
 
 EditorFontPreviewPlugin::EditorFontPreviewPlugin() {

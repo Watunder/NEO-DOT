@@ -32,16 +32,12 @@
 
 #include "theme_data.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
 #include "scene/resources/font.h"
 #include "scene/resources/freetype_font.h"
 #include "scene/resources/theme.h"
-
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-#include "servers/font/builtin_fonts.gen.h"
-#endif
 
 typedef Map<const void *, Ref<ImageTexture>> TexCacheMap;
 
@@ -886,42 +882,6 @@ static Ref<Font> make_default_font() {
 	font.instance();
 	font->set_use_filter(true);
 	font->set_use_mipmaps(true);
-
-	Ref<FreeTypeFontData> NotoSansUI_Regular;
-	NotoSansUI_Regular.instance();
-	NotoSansUI_Regular->load_from_memory(_font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
-
-	Ref<FreeTypeFontData> DroidSansFallback;
-	DroidSansFallback.instance();
-	DroidSansFallback->load_from_memory(_font_DroidSansFallback, _font_DroidSansFallback_size);
-
-	Ref<FreeTypeFontData> DroidSansJapanese;
-	DroidSansJapanese.instance();
-	DroidSansJapanese->load_from_memory(_font_DroidSansJapanese, _font_DroidSansJapanese_size);
-
-	Ref<FreeTypeFontData> NotoNaskhArabicUI_Regular;
-	NotoNaskhArabicUI_Regular.instance();
-	NotoNaskhArabicUI_Regular->load_from_memory(_font_NotoNaskhArabicUI_Regular, _font_NotoNaskhArabicUI_Regular_size);
-
-	Ref<FreeTypeFontData> NotoSansHebrew_Regular;
-	NotoSansHebrew_Regular.instance();
-	NotoSansHebrew_Regular->load_from_memory(_font_NotoSansHebrew_Regular, _font_NotoSansHebrew_Regular_size);
-
-	Ref<FreeTypeFontData> NotoSansThaiUI_Regular;
-	NotoSansThaiUI_Regular.instance();
-	NotoSansThaiUI_Regular->load_from_memory(_font_NotoSansThaiUI_Regular, _font_NotoSansThaiUI_Regular_size);
-
-	Ref<FreeTypeFontData> NotoSansDevanagariUI_Regular;
-	NotoSansDevanagariUI_Regular.instance();
-	NotoSansDevanagariUI_Regular->load_from_memory(_font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
-
-	font->set_data(NotoSansUI_Regular);
-	// NotoNaskhArabicUI_Regular;
-	// NotoSansHebrew_Regular;
-	// NotoSansThaiUI_Regular;
-	// NotoSansDevanagariUI_Regular;
-	// DroidSansJapanese;
-	// DroidSansFallback;
 
 	default_font = font;
 #endif
