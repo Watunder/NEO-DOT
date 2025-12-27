@@ -37,6 +37,8 @@
 #include "core/project_settings.h"
 #include "scene/resources/default_theme/default_theme.h"
 #include "scene/resources/freetype_font.h"
+#include "servers/font_server.h"
+
 #include "servers/font/builtin_fonts.gen.h"
 
 // Enable filtering and mipmaps on the editor fonts to improve text appearance
@@ -45,47 +47,45 @@
 // visual shader editors.
 
 // the custom spacings might only work with Noto Sans
-#define MAKE_DEFAULT_FONT(m_name, m_size)                       \
-	Ref<FreeTypeFont> m_name;                                   \
-	m_name.instance();                                          \
-	if (CustomFont.is_valid()) {                                \
-		m_name->set_data(CustomFont->duplicate());              \
-	} else {                                                    \
-		m_name->set_data(DefaultFont->get_data()->duplicate()); \
-	}                                                           \
-	m_name->set_size(m_size);                                   \
-	m_name->set_use_filter(true);                               \
-	m_name->set_use_mipmaps(true);                              \
-	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);           \
-	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
+#define MAKE_DEFAULT_FONT(m_name, m_size)                   \
+	Ref<FreeTypeFont> m_name;                               \
+	m_name.instance();                                      \
+	if (CustomFont.is_valid()) {                            \
+		m_name->set_data(CustomFont);                       \
+	}                                                       \
+	m_name->set_size(m_size);                               \
+	m_name->set_use_filter(true);                           \
+	m_name->set_use_mipmaps(true);                          \
+	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \
+	m_name->set_spacing(FontServer::SPACING_BOTTOM, -EDSCALE);
 
-#define MAKE_BOLD_FONT(m_name, m_size)                  \
-	Ref<FreeTypeFont> m_name;                           \
-	m_name.instance();                                  \
-	if (CustomFontBold.is_valid()) {                    \
-		m_name->set_data(CustomFontBold->duplicate());  \
-	} else {                                            \
-		m_name->set_data(NotoSansUI_Bold->duplicate()); \
-	}                                                   \
-	m_name->set_size(m_size);                           \
-	m_name->set_use_filter(true);                       \
-	m_name->set_use_mipmaps(true);                      \
-	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);   \
-	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
+#define MAKE_BOLD_FONT(m_name, m_size)                      \
+	Ref<FreeTypeFont> m_name;                               \
+	m_name.instance();                                      \
+	if (CustomFontBold.is_valid()) {                        \
+		m_name->set_data(CustomFontBold);                   \
+	} else {                                                \
+		m_name->set_data(NotoSansUI_Bold);                  \
+	}                                                       \
+	m_name->set_size(m_size);                               \
+	m_name->set_use_filter(true);                           \
+	m_name->set_use_mipmaps(true);                          \
+	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \
+	m_name->set_spacing(FontServer::SPACING_BOTTOM, -EDSCALE);
 
-#define MAKE_SOURCE_FONT(m_name, m_size)                 \
-	Ref<FreeTypeFont> m_name;                            \
-	m_name.instance();                                   \
-	if (CustomFontSource.is_valid()) {                   \
-		m_name->set_data(CustomFontSource->duplicate()); \
-	} else {                                             \
-		m_name->set_data(Hack_Regular->duplicate());     \
-	}                                                    \
-	m_name->set_size(m_size);                            \
-	m_name->set_use_filter(true);                        \
-	m_name->set_use_mipmaps(true);                       \
-	m_name->set_spacing(Font::SPACING_TOP, -EDSCALE);    \
-	m_name->set_spacing(Font::SPACING_BOTTOM, -EDSCALE);
+#define MAKE_SOURCE_FONT(m_name, m_size)                    \
+	Ref<FreeTypeFont> m_name;                               \
+	m_name.instance();                                      \
+	if (CustomFontSource.is_valid()) {                      \
+		m_name->set_data(CustomFontSource);                 \
+	} else {                                                \
+		m_name->set_data(Hack_Regular);                     \
+	}                                                       \
+	m_name->set_size(m_size);                               \
+	m_name->set_use_filter(true);                           \
+	m_name->set_use_mipmaps(true);                          \
+	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \
+	m_name->set_spacing(FontServer::SPACING_BOTTOM, -EDSCALE);
 
 void editor_register_fonts(Ref<Theme> p_theme) {
 	DirAccess *dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
@@ -132,8 +132,6 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	Ref<FreeTypeFontData> Hack_Regular;
 	Hack_Regular.instance();
 	Hack_Regular->load_from_memory(_font_Hack_Regular, _font_Hack_Regular_size);
-
-	Ref<Font> DefaultFont = p_theme->get_font("", "");
 
 	int default_font_size = int(EDITOR_GET("interface/editor/main_font_size")) * EDSCALE;
 

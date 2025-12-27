@@ -41,7 +41,12 @@ class FreeTypeFontData : public FontData {
 
 	PoolVector<uint8_t> buffer;
 
+	static Ref<FreeTypeFontData> default_font_data;
+
 public:
+	static Ref<FreeTypeFontData> get_default();
+	static void clear_default();
+
 	void _copy_internals_from(const FreeTypeFontData &p_font_data) {
 		buffer = p_font_data.buffer;
 	}
@@ -51,6 +56,7 @@ public:
 	virtual Error load_from_file(String p_path);
 	virtual Error load_from_memory(const uint8_t *p_buffer, int p_size);
 
+	bool empty() const;
 	PoolVector<uint8_t> get_buffer() const;
 };
 
@@ -58,8 +64,6 @@ public:
 
 class FreeTypeFont : public Font {
 	GDCLASS(FreeTypeFont, Font);
-
-	friend class FreeTypeFontHandle;
 
 public:
 	enum Hinting {
@@ -71,8 +75,7 @@ public:
 private:
 	Ref<FreeTypeFontData> data;
 
-	RID font_rid;
-	Vector<RID> fallback_font_rids;
+	RID font;
 
 	int size;
 	Hinting hinting;
@@ -81,12 +84,13 @@ private:
 protected:
 	static void _bind_methods();
 
+	void _data_changed();
+
 public:
-	virtual Ref<FontData> get_data() const;
-	virtual void set_data(const Ref<FontData> &p_data);
+	Ref<FreeTypeFontData> get_data() const;
+	void set_data(const Ref<FreeTypeFontData> &p_data);
 
 	virtual RID get_rid() const;
-	virtual Vector<RID> get_fallback_rids() const;
 
 	virtual Size2 get_char_size(char32_t p_char) const;
 	virtual Size2 get_string_size(const String &p_string) const;
@@ -96,6 +100,9 @@ public:
 
 	virtual bool get_use_filter() const;
 	virtual void set_use_filter(bool p_enable);
+
+	virtual int get_spacing(int p_type) const;
+	virtual void set_spacing(int p_type, int p_value);
 
 	virtual float get_height() const;
 	virtual float get_ascent() const;
