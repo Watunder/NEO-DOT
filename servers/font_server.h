@@ -73,12 +73,17 @@ private:
 		int spacing_glyph;
 		int spacing_space_char;
 
+#ifdef MODULE_FREETYPE_ENABLED
+		FT_Face ft_face = NULL;
+#endif
+
 		Font() {
 			cache_key.font_size = 16;
 			cache_key.font_use_mipmaps = 1;
 			cache_key.font_use_filter = 1;
 			cache_key.font_force_autohinter = 0;
 			cache_key.font_hinting = 2;
+			cache_key.font_face_index = 0;
 			cache_key.font_hash = 0;
 
 			ascent = 0;
@@ -105,13 +110,15 @@ private:
 #ifdef MODULE_RAQM_ENABLED
 	RaqmWrapper *raqm_wrapper = NULL;
 
-	_FORCE_INLINE_ Vector2 _draw_shaped_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1, Vector<RID> p_fallback_fonts = Vector<RID>()) const;
+	_FORCE_INLINE_ Vector<RaqmWrapper::ShapedInfo> _get_shaped_infos(RID p_font, const String &p_text, const Vector<RID> &p_fallback_fonts) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(RID p_font, const RaqmWrapper::ShapedInfo &p_shaped_info) const;
+	Vector2 _draw_shaped_info(RID p_canvas_item, RID p_font, const Point2 &p_pos, const RaqmWrapper::ShapedInfo &p_shaped_info, const Color &p_modulate) const;
 #endif
 
 	GlyphManager *glyph_manager = NULL;
 
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(RID p_font, char32_t p_char, Vector<RID> p_fallback_fonts = Vector<RID>()) const;
-	_FORCE_INLINE_ Vector2 _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Point2 &p_pos, const Color &p_modulate = Color(1, 1, 1)) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(RID p_font, char32_t p_char, const Vector<RID> &p_fallback_fonts) const;
+	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Point2 &p_pos, const Color &p_modulate) const;
 
 protected:
 	static void _bind_methods();

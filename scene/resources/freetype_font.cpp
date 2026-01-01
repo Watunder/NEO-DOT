@@ -132,10 +132,6 @@ void FreeTypeFont::_bind_methods() {
 }
 
 void FreeTypeFont::_data_changed() {
-	if (!data.is_valid() || data->empty()) {
-		return;
-	}
-
 	FontServer::get_singleton()->font_clear_caches(font);
 	FontServer::get_singleton()->font_set_data(font, data->get_buffer());
 	float oversampling = FontServer::get_singleton()->font_get_oversampling(font);
@@ -150,6 +146,8 @@ Ref<FreeTypeFontData> FreeTypeFont::get_data() const {
 }
 
 void FreeTypeFont::set_data(const Ref<FreeTypeFontData> &p_data) {
+	ERR_FAIL_COND(!p_data.is_valid() || p_data->empty());
+
 	if (data == p_data)
 		return;
 
@@ -164,9 +162,6 @@ void FreeTypeFont::set_data(const Ref<FreeTypeFontData> &p_data) {
 	}
 
 	_data_changed();
-
-	emit_changed();
-	_change_notify();
 }
 
 RID FreeTypeFont::get_rid() const {

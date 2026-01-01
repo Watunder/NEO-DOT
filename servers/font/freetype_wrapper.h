@@ -35,6 +35,7 @@
 #ifdef MODULE_FREETYPE_ENABLED
 
 #include "core/hash_map.h"
+#include "core/map.h"
 #include "core/pool_vector.h"
 
 #include <ft2build.h>
@@ -49,16 +50,17 @@ public:
 	};
 
 private:
-	FT_Library ft_library;
-	FTC_Manager ftc_manager;
+	FT_Library ft_library = NULL;
 
-	mutable HashMap<uint32_t, FontID *> font_id_map;
 	HashMap<uint32_t, PoolVector<uint8_t>> font_buffer_map;
+	HashMap<uint64_t, FontID *> font_id_map;
+	Map<FT_Face, FontID *> face_to_font_id;
+	Map<FontID *, FT_Face> font_id_to_face;
 
-	FontID *_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) const;
+	FontID *_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index);
 
 public:
-	friend FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
+	FontID *get_font_id(const FT_Face &p_ft_face) const;
 
 	uint32_t store_buffer(const PoolVector<uint8_t> &p_font_buffer);
 	FT_Face lookup_face(uint32_t p_font_hash, uint32_t p_font_face_index);
