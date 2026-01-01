@@ -44,10 +44,6 @@
 #include "font_cache_key.h"
 
 class RaqmWrapper {
-	struct TextCache {
-		String text_line;
-	};
-
 public:
 	struct ShapedInfo {
 		uint32_t index = 0;
@@ -58,15 +54,10 @@ public:
 	};
 
 private:
-	FontCacheKey current_cache_key;
-
 	HashMap<uint64_t, HashMap<String, Vector<ShapedInfo>>> shaped_map;
 
 public:
-	void update_shaped_cache(const FontCacheKey &p_cache_key);
-	void clear_shaped_cache(const FontCacheKey &p_cache_key);
-
-	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, Vector<FT_Face> p_fallback_ft_faces = Vector<FT_Face>());
+	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) const;
 };
 
 #endif

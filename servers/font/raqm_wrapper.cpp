@@ -34,7 +34,7 @@
 
 #include "thirdparty/libraqm/raqm.h"
 
-static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, Vector<FT_Face> p_fallback_ft_faces, raqm_t *p_raqm_context, raqm_glyph_t **r_glyphs, size_t *r_glyph_count, const uint32_t *p_text, int p_text_len) {
+static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, const Vector<FT_Face> &p_fallback_ft_faces, raqm_t *p_raqm_context, raqm_glyph_t **r_glyphs, size_t *r_glyph_count, const uint32_t *p_text, int p_text_len) {
 	struct Range {
 		uint32_t start;
 		uint32_t len;
@@ -89,29 +89,7 @@ static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, Vector<FT_
 	}
 }
 
-void RaqmWrapper::update_shaped_cache(const FontCacheKey &p_cache_key) {
-	if (current_cache_key == p_cache_key) {
-		return;
-	}
-
-	current_cache_key.key = p_cache_key.key;
-
-	if (!shaped_map.has(current_cache_key.key)) {
-		shaped_map[current_cache_key.key] = HashMap<String, Vector<ShapedInfo>>();
-	}
-}
-
-void RaqmWrapper::clear_shaped_cache(const FontCacheKey &p_cache_key) {
-	if (shaped_map.has(p_cache_key.key)) {
-		shaped_map[p_cache_key.key].clear();
-	}
-}
-
-Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_ft_face, const String &p_text, Vector<FT_Face> p_fallback_ft_faces) {
-	if (shaped_map[current_cache_key.key].has(p_text)) {
-		return shaped_map[current_cache_key.key][p_text];
-	}
-
+Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) const {
 	Vector<ShapedInfo> shaped_infos;
 
 	ERR_FAIL_COND_V(!p_ft_face, shaped_infos);
@@ -154,8 +132,6 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_
 	}
 
 	raqm_clear_contents(raqm_context);
-
-	shaped_map[current_cache_key.key][p_text] = shaped_infos;
 
 	return shaped_infos;
 }
