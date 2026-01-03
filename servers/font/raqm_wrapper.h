@@ -57,7 +57,7 @@ private:
 	HashMap<uint64_t, HashMap<String, Vector<ShapedInfo>>> shaped_map;
 
 public:
-	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) const;
+	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces);
 };
 
 #endif

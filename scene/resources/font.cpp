@@ -64,8 +64,8 @@ void Font::_bind_methods() {
 }
 
 Font::Font() {
-	use_filter = true;
-	use_mipmaps = true;
+	use_filter = false;
+	use_mipmaps = false;
 }
 
 Font::~Font() {

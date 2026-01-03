@@ -323,8 +323,8 @@ public:
 	void draw_mesh(const Ref<Mesh> &p_mesh, const Ref<Texture> &p_texture, const Ref<Texture> &p_normal_map, const Transform2D &p_transform = Transform2D(), const Color &p_modulate = Color(1, 1, 1));
 	void draw_multimesh(const Ref<MultiMesh> &p_multimesh, const Ref<Texture> &p_texture, const Ref<Texture> &p_normal_map);
 
-	void draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1);
-	void draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1);
+	void draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0);
+	void draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1));
 	float draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1));
 
 	void draw_set_transform(const Point2 &p_offset, float p_rot, const Size2 &p_scale);

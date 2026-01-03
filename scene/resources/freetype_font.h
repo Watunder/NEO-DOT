@@ -54,7 +54,7 @@ public:
 	virtual Ref<Resource> duplicate(bool p_subresources = false) const;
 
 	virtual Error load_from_file(String p_path);
-	virtual Error load_from_memory(const uint8_t *p_buffer, int p_size);
+	virtual Error load_from_memory(const uint8_t *p_buffer, int p_len);
 
 	bool empty() const;
 	PoolVector<uint8_t> get_buffer() const;
@@ -68,6 +68,7 @@ class FreeTypeFont : public Font {
 public:
 	enum Hinting {
 		HINTING_NONE,
+		HINTING_AUTO,
 		HINTING_LIGHT,
 		HINTING_NORMAL,
 	};
@@ -77,9 +78,9 @@ private:
 
 	RID font;
 
-	int size;
+	int face_index;
+	int face_size;
 	Hinting hinting;
-	bool force_autohinter;
 
 protected:
 	static void _bind_methods();
@@ -108,11 +109,11 @@ public:
 	virtual float get_ascent() const;
 	virtual float get_descent() const;
 
-	int get_size() const;
-	void set_size(int p_size);
+	int get_face_index() const;
+	void set_face_index(int p_index);
 
-	bool is_force_autohinter();
-	void set_force_autohinter(bool p_force_autohinter);
+	int get_face_size() const;
+	void set_face_size(int p_size);
 
 	Hinting get_hinting() const;
 	void set_hinting(Hinting p_hinting);

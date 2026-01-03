@@ -89,7 +89,7 @@ static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, const Vect
 	}
 }
 
-Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) const {
+Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) {
 	Vector<ShapedInfo> shaped_infos;
 
 	ERR_FAIL_COND_V(!p_ft_face, shaped_infos);

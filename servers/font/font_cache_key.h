@@ -31,28 +31,62 @@
 #ifndef FONT_CACHE_KEY_H
 #define FONT_CACHE_KEY_H
 
+#include "core/hashfuncs.h"
 #include "core/typedefs.h"
+
+struct FontID {
+	uint32_t font_hash = 0;
+	uint8_t font_index = 0;
+
+	bool operator==(const FontID &p_id) const {
+		return (p_id.font_hash == font_hash &&
+				p_id.font_index == font_index);
+	}
+
+	uint32_t hash() const {
+		uint32_t h = font_hash;
+		h = h * 31 + font_index;
+		return h;
+	}
+};
+
+struct FontIDHasher {
+	static _FORCE_INLINE_ uint32_t hash(const FontID &p_id) { return p_id.hash(); }
+};
 
 struct FontCacheKey {
 	union {
 		struct {
-			uint64_t font_size : 10;
-			uint64_t font_use_mipmaps : 1;
-			uint64_t font_use_filter : 1;
-			uint64_t font_force_autohinter : 1;
-			uint64_t font_hinting : 2;
-			uint64_t font_face_index : 1;
-			uint64_t reserved : 16;
 			uint64_t font_hash : 32;
+			uint64_t font_index : 8;
+			uint64_t font_size : 16;
+			uint64_t font_texture_flags : 3;
+			uint64_t font_custom_flags : 3;
+			uint64_t reserved : 2;
 		};
+
 		uint64_t key;
 	};
 
-	FontCacheKey(const FontCacheKey &) = delete;
-	FontCacheKey &operator=(const FontCacheKey &) = delete;
+	FontCacheKey() :
+			key(0) {}
 
-	FontCacheKey() { key = 0; }
-	bool FontCacheKey::operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
+	bool operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
+
+	_FORCE_INLINE_ FontID get_font_id() const {
+		FontID font_id;
+		font_id.font_hash = font_hash;
+		font_id.font_index = font_index;
+		return font_id;
+	}
+
+	_FORCE_INLINE_ FontCacheKey create_temp_key(const FontID &p_font_id) const {
+		FontCacheKey temp_cache_key;
+		temp_cache_key.key = key;
+		temp_cache_key.font_hash = p_font_id.font_hash;
+		temp_cache_key.font_index = p_font_id.font_index;
+		return temp_cache_key;
+	}
 };
 
 #endif
