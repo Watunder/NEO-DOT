@@ -856,7 +856,7 @@ void CanvasItem::draw_multimesh(const Ref<MultiMesh> &p_multimesh, const Ref<Tex
 	VisualServer::get_singleton()->canvas_item_add_multimesh(canvas_item, p_multimesh->get_rid(), texture_rid, normal_map_rid);
 }
 
-void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate, int p_clip_w) {
+void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate, float p_clip_w) {
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND(p_font.is_null());
@@ -864,7 +864,7 @@ void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const
 	return FontServer::get_singleton()->draw_string(canvas_item, p_font->get_rid(), p_pos, p_text, p_modulate, p_clip_w);
 }
 
-void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate, int p_clip_w) {
+void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate) {
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND(p_font.is_null());
@@ -1100,7 +1100,7 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("draw_primitive", "points", "colors", "uvs", "texture", "width", "normal_map"), &CanvasItem::draw_primitive, DEFVAL(Variant()), DEFVAL(1.0), DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("draw_polygon", "points", "colors", "uvs", "texture", "normal_map", "antialiased"), &CanvasItem::draw_polygon, DEFVAL(PoolVector2Array()), DEFVAL(Variant()), DEFVAL(Variant()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("draw_colored_polygon", "points", "color", "uvs", "texture", "normal_map", "antialiased"), &CanvasItem::draw_colored_polygon, DEFVAL(PoolVector2Array()), DEFVAL(Variant()), DEFVAL(Variant()), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("draw_string", "font", "position", "text", "modulate", "clip_w"), &CanvasItem::draw_string, DEFVAL(Color(1, 1, 1)), DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("draw_string", "font", "position", "text", "modulate", "clip_w"), &CanvasItem::draw_string, DEFVAL(Color(1, 1, 1)), DEFVAL(0.0));
 	ClassDB::bind_method(D_METHOD("draw_char", "font", "position", "char", "modulate"), &CanvasItem::draw_char, DEFVAL(Color(1, 1, 1)));
 	ClassDB::bind_method(D_METHOD("draw_mesh", "mesh", "texture", "normal_map", "transform", "modulate"), &CanvasItem::draw_mesh, DEFVAL(Ref<Texture>()), DEFVAL(Transform2D()), DEFVAL(Color(1, 1, 1)));
 	ClassDB::bind_method(D_METHOD("draw_multimesh", "multimesh", "texture", "normal_map"), &CanvasItem::draw_multimesh, DEFVAL(Ref<Texture>()));

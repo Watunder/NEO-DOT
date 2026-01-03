@@ -32,6 +32,7 @@
 #define FONT_SERVER_H
 
 #include "configs/modules_enabled.gen.h"
+#include "core/os/thread_safe.h"
 
 #ifdef MODULE_FREETYPE_ENABLED
 #include "font/freetype_wrapper.h"
@@ -39,8 +40,6 @@
 #ifdef MODULE_RAQM_ENABLED
 #include "font/raqm_wrapper.h"
 #endif
-
-#include "core/os/thread_safe.h"
 
 #include "font/font_cache_key.h"
 #include "font/glyph_manager.h"
@@ -63,6 +62,7 @@ private:
 
 	struct Font : RID_Data {
 		FontCacheKey cache_key;
+		Vector<FontCacheKey> temp_cache_keys;
 
 		float ascent;
 		float descent;
@@ -78,14 +78,6 @@ private:
 #endif
 
 		Font() {
-			cache_key.font_size = 16;
-			cache_key.font_use_mipmaps = 1;
-			cache_key.font_use_filter = 1;
-			cache_key.font_force_autohinter = 0;
-			cache_key.font_hinting = 2;
-			cache_key.font_face_index = 0;
-			cache_key.font_hash = 0;
-
 			ascent = 0;
 			descent = 1;
 			oversampling = 1;
@@ -126,21 +118,20 @@ protected:
 public:
 	static FontServer *get_singleton();
 
-	RID font_create();
+	RID font_create(int p_size = 1, int p_texture_flags = 0, int p_custom_flags = 0);
 	void font_free(RID p_font);
 	void font_set_size(RID p_font, int p_size);
+	void font_set_texture_flags(RID p_font, int p_texture_flags);
 	void font_set_use_mipmaps(RID p_font, bool p_use_mipmaps);
 	void font_set_use_filter(RID p_font, bool p_use_filter);
-	void font_set_force_autohinter(RID p_font, bool p_force_autohinter);
-	void font_set_hinting(RID p_font, int p_hinting);
-	void font_set_face_index(RID p_font, int p_face_index);
-	void font_set_data(RID p_font, const PoolVector<uint8_t> &p_font_buffer);
+	void font_set_custom_flags(RID p_font, int p_custom_flags);
+	bool font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_buffer, int p_font_index = 0);
+	bool font_update_metrics(RID p_font, float p_oversampling = -1);
 	void font_clear_caches(RID p_font);
-	void font_update_metrics(RID p_font, float p_oversampling = 1);
 	float font_get_ascent(RID p_font) const;
 	float font_get_descent(RID p_font) const;
 	float font_get_oversampling(RID p_font) const;
-	const FontCacheKey &font_get_cache_key(RID p_font) const;
+	FontCacheKey font_get_cache_key(RID p_font) const;
 
 	void font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing);
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
@@ -154,7 +145,7 @@ public:
 	RID get_fallback_font(int p_idx) const;
 
 	float draw_char(RID p_canvas_item, RID p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1) const;
+	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
 	void draw_string_aligned(RID p_canvas_item, RID p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
 
 	FontServer();

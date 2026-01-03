@@ -173,12 +173,7 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 	glyph_info.texture_format = image_format;
 	glyph_info.texture_rect_uv = Rect2(tex_pos.x + rect_range, tex_pos.y + rect_range, w, h);
 	glyph_info.texture_size = glyph_info.texture_rect_uv.size;
-	if (current_cache_key.font_use_mipmaps) {
-		glyph_info.texture_flags |= Texture::FLAG_MIPMAPS;
-	}
-	if (current_cache_key.font_use_filter) {
-		glyph_info.texture_flags |= Texture::FLAG_FILTER;
-	}
+	glyph_info.texture_flags |= current_cache_key.font_texture_flags;
 
 	return glyph_info;
 }
@@ -220,22 +215,23 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 		return glyph_map[current_cache_key.key][p_glyph_index];
 	}
 
-	int load_flags = FT_LOAD_TARGET_NORMAL;
-	switch (current_cache_key.font_hinting) {
+	int load_flags = FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT;
+	switch (current_cache_key.font_custom_flags) {
 		case FreeTypeFont::HINTING_NONE:
-			load_flags = FT_LOAD_NO_HINTING;
+			load_flags |= FT_LOAD_NO_HINTING;
+			break;
+		case FreeTypeFont::HINTING_AUTO:
+			load_flags |= FT_LOAD_FORCE_AUTOHINT;
 			break;
 		case FreeTypeFont::HINTING_LIGHT:
-			load_flags = FT_LOAD_TARGET_LIGHT;
+			load_flags |= FT_LOAD_TARGET_LIGHT;
 			break;
-		case FreeTypeFont::HINTING_NORMAL:
-			load_flags = FT_LOAD_TARGET_NORMAL;
 		default:
-			load_flags = FT_LOAD_TARGET_NORMAL;
+			load_flags |= FT_LOAD_TARGET_NORMAL;
 			break;
 	}
 
-	int error = FT_Load_Glyph(p_ft_face, p_glyph_index, FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT | (current_cache_key.font_force_autohinter ? FT_LOAD_FORCE_AUTOHINT : 0) | load_flags);
+	int error = FT_Load_Glyph(p_ft_face, p_glyph_index, load_flags);
 
 	FT_GlyphSlot ft_glyph_slot = p_ft_face->glyph;
 	if (!error) {

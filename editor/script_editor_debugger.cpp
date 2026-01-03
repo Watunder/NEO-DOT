@@ -2504,7 +2504,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		error_tree->set_columns(2);
 
 		error_tree->set_column_expand(0, false);
-		error_tree->set_column_min_width(0, 140);
+		error_tree->set_column_min_width(0, 140 * EDSCALE);
 
 		error_tree->set_column_expand(1, true);
 

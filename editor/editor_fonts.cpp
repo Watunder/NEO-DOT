@@ -53,7 +53,7 @@
 	if (CustomFont.is_valid()) {                            \
 		m_name->set_data(CustomFont);                       \
 	}                                                       \
-	m_name->set_size(m_size);                               \
+	m_name->set_face_size(m_size);                          \
 	m_name->set_use_filter(true);                           \
 	m_name->set_use_mipmaps(true);                          \
 	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \
@@ -67,7 +67,7 @@
 	} else {                                                \
 		m_name->set_data(NotoSansUI_Bold);                  \
 	}                                                       \
-	m_name->set_size(m_size);                               \
+	m_name->set_face_size(m_size);                          \
 	m_name->set_use_filter(true);                           \
 	m_name->set_use_mipmaps(true);                          \
 	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \
@@ -81,7 +81,7 @@
 	} else {                                                \
 		m_name->set_data(Hack_Regular);                     \
 	}                                                       \
-	m_name->set_size(m_size);                               \
+	m_name->set_face_size(m_size);                          \
 	m_name->set_use_filter(true);                           \
 	m_name->set_use_mipmaps(true);                          \
 	m_name->set_spacing(FontServer::SPACING_TOP, -EDSCALE); \

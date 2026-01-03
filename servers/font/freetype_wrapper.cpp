@@ -34,59 +34,7 @@
 
 #include "thirdparty/zstd/common/xxhash.h"
 
-FreeTypeWrapper::FontID *FreeTypeWrapper::_get_font_id(uint32_t p_font_hash, uint32_t p_font_face_index) {
-	uint64_t key = ((uint64_t)p_font_hash << 32) | p_font_face_index;
-	if (font_id_map.has(key)) {
-		return font_id_map[key];
-	}
-
-	FontID *font_id = memnew(FontID);
-	font_id->font_hash = p_font_hash;
-	font_id->font_face_index = p_font_face_index;
-
-	font_id_map[key] = font_id;
-	return font_id;
-}
-
-FT_Face FreeTypeWrapper::lookup_face(uint32_t p_font_hash, uint32_t p_font_face_index) {
-	FontID *font_id = _get_font_id(p_font_hash, p_font_face_index);
-
-	FT_Face ft_face = NULL;
-
-	if (font_id_to_face.has(font_id)) {
-		ft_face = font_id_to_face[font_id];
-		if (ft_face) {
-			return ft_face;
-		}
-	}
-
-	PoolVector<uint8_t> buffer;
-	if (font_buffer_map.has(font_id->font_hash)) {
-		buffer = font_buffer_map[font_id->font_hash];
-	}
-
-	ERR_FAIL_COND_V_MSG(buffer.empty(), ft_face, FT_Error_String(FT_Err_Invalid_File_Format));
-
-	FT_Error error = FT_New_Memory_Face(ft_library, buffer.read().ptr(), buffer.size(), font_id->font_face_index, &ft_face);
-	if (!error) {
-		face_to_font_id[ft_face] = font_id;
-		font_id_to_face[font_id] = ft_face;
-	}
-
-	ERR_FAIL_COND_V_MSG(error, ft_face, FT_Error_String(error));
-
-	return ft_face;
-}
-
-FreeTypeWrapper::FontID *FreeTypeWrapper::get_font_id(const FT_Face &p_ft_face) const {
-	if (face_to_font_id.has(p_ft_face)) {
-		return face_to_font_id[p_ft_face];
-	}
-
-	return NULL;
-}
-
-uint32_t FreeTypeWrapper::store_buffer(const PoolVector<uint8_t> &p_font_buffer) {
+uint32_t FreeTypeWrapper::store_font_buffer(const PoolVector<uint8_t> &p_font_buffer) {
 	uint32_t font_hash = XXH32(p_font_buffer.read().ptr(), p_font_buffer.size(), 0);
 
 	if (!font_buffer_map.has(font_hash)) {
@@ -96,18 +44,49 @@ uint32_t FreeTypeWrapper::store_buffer(const PoolVector<uint8_t> &p_font_buffer)
 	return font_hash;
 }
 
-FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, uint32_t p_font_face_index, int p_size, float p_oversampling) {
-	FontID *font_id = _get_font_id(p_font_hash, p_font_face_index);
+FT_Face FreeTypeWrapper::get_ft_face(const FontID &p_font_id) {
+	FT_Face ft_face = NULL;
 
+	if (ft_face_map.has(p_font_id)) {
+		ft_face = ft_face_map[p_font_id];
+		ERR_FAIL_COND_V(!ft_face, NULL);
+
+		return ft_face;
+	}
+
+	PoolVector<uint8_t> buffer;
+	if (font_buffer_map.has(p_font_id.font_hash)) {
+		buffer = font_buffer_map[p_font_id.font_hash];
+	}
+
+	ERR_FAIL_COND_V_MSG(buffer.empty(), ft_face, FT_Error_String(FT_Err_Invalid_File_Format));
+
+	FT_Error error = FT_New_Memory_Face(ft_library, buffer.read().ptr(), buffer.size(), p_font_id.font_index, &ft_face);
+	if (!error) {
+		ft_face_map[p_font_id] = ft_face;
+
+		FontInfo font_info{};
+		font_info.id = p_font_id;
+		font_info.face_count = ft_face->num_faces;
+
+		font_infos[ft_face] = font_info;
+	}
+
+	ERR_FAIL_COND_V_MSG(error, NULL, FT_Error_String(error));
+
+	return ft_face;
+}
+
+FT_Size FreeTypeWrapper::get_ft_size(const FontID &p_font_id, int p_size, float p_oversampling) {
 	FT_Size ft_size = NULL;
 	FT_Face ft_face = NULL;
 
-	if (font_id_to_face.has(font_id)) {
-		ft_face = font_id_to_face[font_id];
-		if (ft_face) {
-			ft_size = ft_face->size;
-		}
+	if (ft_face_map.has(p_font_id)) {
+		ft_face = ft_face_map[p_font_id];
 	}
+
+	ERR_FAIL_COND_V(!ft_face, ft_size);
+	ft_size = ft_face->size;
 
 	FT_Error error = FT_Err_Ok;
 
@@ -134,9 +113,15 @@ FT_Size FreeTypeWrapper::lookup_size(uint32_t p_font_hash, uint32_t p_font_face_
 		error = FT_Request_Size(ft_face, &req);
 	}
 
-	ERR_FAIL_COND_V_MSG(error, ft_size, FT_Error_String(error));
+	ERR_FAIL_COND_V_MSG(error, NULL, FT_Error_String(error));
 
 	return ft_size;
+}
+
+FreeTypeWrapper::FontInfo FreeTypeWrapper::get_font_info(const FT_Face &p_ft_face) const {
+	ERR_FAIL_COND_V(!font_infos.has(p_ft_face), FontInfo{});
+
+	return font_infos[p_ft_face];
 }
 
 FreeTypeWrapper::FreeTypeWrapper() {
@@ -149,11 +134,6 @@ FreeTypeWrapper::FreeTypeWrapper() {
 FreeTypeWrapper::~FreeTypeWrapper() {
 	if (ft_library) {
 		FT_Done_FreeType(ft_library);
-	}
-
-	const uint64_t *k = NULL;
-	while ((k = font_id_map.next(k))) {
-		memdelete(font_id_map[*k]);
 	}
 }
 
