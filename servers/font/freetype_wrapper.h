@@ -37,6 +37,7 @@
 #include "core/hash_map.h"
 #include "core/map.h"
 #include "core/pool_vector.h"
+#include "core/reference.h"
 
 #include "font_cache_key.h"
 
@@ -46,25 +47,32 @@
 
 class FreeTypeWrapper {
 public:
-	struct FontInfo {
+	struct FontInfo : Reference {
 		FontID id;
 		uint8_t face_count = 0;
+
+		PoolVector<uint8_t> data;
 	};
 
 private:
-	FT_Library ft_library = NULL;
+	FT_Library ft_library;
+	FTC_Manager ftc_manager;
 
-	HashMap<uint32_t, PoolVector<uint8_t>> font_buffer_map;
-	HashMap<FontID, FT_Face, FontIDHasher> ft_face_map;
-	Map<FT_Face, FontInfo> font_infos;
+	mutable HashMap<FontID, Ref<FontInfo>, FontIDHasher> font_infos;
+	Map<FT_Face, Ref<FontInfo>> face_to_font_info;
+
+	Ref<FontInfo> _get_font_info(const FontID &p_font_id) const;
 
 public:
-	uint32_t store_font_buffer(const PoolVector<uint8_t> &p_font_buffer);
+	friend FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
+
+	void update_font_data(const FontID &p_font_id, const PoolVector<uint8_t> &p_font_data);
 
 	FT_Face get_ft_face(const FontID &p_font_id);
 	FT_Size get_ft_size(const FontID &p_font_id, int p_size, float p_oversampling);
 
-	FontInfo get_font_info(const FT_Face &p_ft_face) const;
+	Ref<FontInfo> get_font_info(const FT_Face &p_ft_face) const;
+	Ref<FontInfo> get_font_info(const FontID &p_font_id) const;
 
 	FreeTypeWrapper();
 	~FreeTypeWrapper();

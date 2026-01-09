@@ -54,10 +54,14 @@ public:
 	};
 
 private:
+	uint64_t current_cache_key = 0;
+
 	HashMap<uint64_t, HashMap<String, Vector<ShapedInfo>>> shaped_map;
 
 public:
-	Vector<ShapedInfo> shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces);
+	void update_shaped_cache(uint64_t p_cache_key);
+
+	Vector<ShapedInfo> shape_single_line(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
 };
 
 #endif

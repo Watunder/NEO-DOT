@@ -32,109 +32,107 @@
 
 #ifdef MODULE_FREETYPE_ENABLED
 
-#include "thirdparty/zstd/common/xxhash.h"
+static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
+	FreeTypeWrapper::FontInfo *font_info = (FreeTypeWrapper::FontInfo *)p_font_id;
+	ERR_FAIL_COND_V(font_info->data.empty(), FT_Err_Invalid_File_Format);
 
-uint32_t FreeTypeWrapper::store_font_buffer(const PoolVector<uint8_t> &p_font_buffer) {
-	uint32_t font_hash = XXH32(p_font_buffer.read().ptr(), p_font_buffer.size(), 0);
+	FreeTypeWrapper *freetype_wrapper = static_cast<FreeTypeWrapper *>(p_request_data);
+	CRASH_COND(!freetype_wrapper);
 
-	if (!font_buffer_map.has(font_hash)) {
-		font_buffer_map[font_hash] = p_font_buffer;
+	FT_Error error = FT_New_Memory_Face(p_library, font_info->data.read().ptr(), font_info->data.size(), font_info->id.font_index, r_face);
+	if (!error) {
+		font_info->face_count = (*r_face)->num_faces;
+
+		freetype_wrapper->face_to_font_info[*r_face] = Ref<FreeTypeWrapper::FontInfo>(font_info);
 	}
 
-	return font_hash;
+	return error;
+}
+
+Ref<FreeTypeWrapper::FontInfo> FreeTypeWrapper::_get_font_info(const FontID &p_font_id) const {
+	if (font_infos.has(p_font_id)) {
+		return font_infos[p_font_id];
+	}
+
+	Ref<FontInfo> new_font_info;
+	new_font_info.instance();
+	new_font_info->id = p_font_id;
+
+	font_infos[p_font_id] = new_font_info;
+
+	return new_font_info;
+}
+
+void FreeTypeWrapper::update_font_data(const FontID &p_font_id, const PoolVector<uint8_t> &p_font_data) {
+	Ref<FontInfo> font_info = _get_font_info(p_font_id);
+
+	if (font_info->data.empty()) {
+		font_info->data = p_font_data;
+	}
 }
 
 FT_Face FreeTypeWrapper::get_ft_face(const FontID &p_font_id) {
+	Ref<FontInfo> font_info = _get_font_info(p_font_id);
+
 	FT_Face ft_face = NULL;
+	FT_Error error = FTC_Manager_LookupFace(ftc_manager, (FTC_FaceID)font_info.ptr(), &ft_face);
 
-	if (ft_face_map.has(p_font_id)) {
-		ft_face = ft_face_map[p_font_id];
-		ERR_FAIL_COND_V(!ft_face, NULL);
-
-		return ft_face;
-	}
-
-	PoolVector<uint8_t> buffer;
-	if (font_buffer_map.has(p_font_id.font_hash)) {
-		buffer = font_buffer_map[p_font_id.font_hash];
-	}
-
-	ERR_FAIL_COND_V_MSG(buffer.empty(), ft_face, FT_Error_String(FT_Err_Invalid_File_Format));
-
-	FT_Error error = FT_New_Memory_Face(ft_library, buffer.read().ptr(), buffer.size(), p_font_id.font_index, &ft_face);
-	if (!error) {
-		ft_face_map[p_font_id] = ft_face;
-
-		FontInfo font_info{};
-		font_info.id = p_font_id;
-		font_info.face_count = ft_face->num_faces;
-
-		font_infos[ft_face] = font_info;
-	}
-
-	ERR_FAIL_COND_V_MSG(error, NULL, FT_Error_String(error));
+	ERR_FAIL_COND_V_MSG(error, ft_face, FT_Error_String(error));
 
 	return ft_face;
 }
 
 FT_Size FreeTypeWrapper::get_ft_size(const FontID &p_font_id, int p_size, float p_oversampling) {
+	Ref<FontInfo> font_info = _get_font_info(p_font_id);
+
+	FTC_ScalerRec scaler;
+	scaler.face_id = (FTC_FaceID)font_info.ptr();
+	scaler.width = p_size * 64.0 * p_oversampling;
+	scaler.height = p_size * 64.0 * p_oversampling;
+	scaler.pixel = 0;
+	scaler.x_res = 0;
+	scaler.y_res = 0;
+
 	FT_Size ft_size = NULL;
-	FT_Face ft_face = NULL;
-
-	if (ft_face_map.has(p_font_id)) {
-		ft_face = ft_face_map[p_font_id];
-	}
-
-	ERR_FAIL_COND_V(!ft_face, ft_size);
-	ft_size = ft_face->size;
-
-	FT_Error error = FT_Err_Ok;
-
-	if (FT_HAS_COLOR(ft_face) && ft_face->num_fixed_sizes > 0) {
-		int best_match = 0;
-		int diff = ABS(p_size - ((int64_t)ft_face->available_sizes[0].width));
-		for (int i = 1; i < ft_face->num_fixed_sizes; i++) {
-			int ndiff = ABS(p_size - ((int64_t)ft_face->available_sizes[i].width));
-			if (ndiff < diff) {
-				best_match = i;
-				diff = ndiff;
-			}
-		}
-
-		error = FT_Select_Size(ft_face, best_match);
-	} else {
-		FT_Size_RequestRec req;
-		req.type = FT_SIZE_REQUEST_TYPE_NOMINAL;
-		req.width = p_size * 64.0 * p_oversampling;
-		req.height = p_size * 64.0 * p_oversampling;
-		req.horiResolution = 0;
-		req.vertResolution = 0;
-
-		error = FT_Request_Size(ft_face, &req);
-	}
-
-	ERR_FAIL_COND_V_MSG(error, NULL, FT_Error_String(error));
+	FT_Error error = FTC_Manager_LookupSize(ftc_manager, &scaler, &ft_size);
+	ERR_FAIL_COND_V_MSG(error, ft_size, FT_Error_String(error));
 
 	return ft_size;
 }
 
-FreeTypeWrapper::FontInfo FreeTypeWrapper::get_font_info(const FT_Face &p_ft_face) const {
-	ERR_FAIL_COND_V(!font_infos.has(p_ft_face), FontInfo{});
+Ref<FreeTypeWrapper::FontInfo> FreeTypeWrapper::get_font_info(const FT_Face &p_ft_face) const {
+	ERR_FAIL_COND_V(!face_to_font_info.has(p_ft_face), Ref<FontInfo>());
 
-	return font_infos[p_ft_face];
+	return face_to_font_info[p_ft_face];
+}
+
+Ref<FreeTypeWrapper::FontInfo> FreeTypeWrapper::get_font_info(const FontID &p_font_id) const {
+	ERR_FAIL_COND_V(!font_infos.has(p_font_id), Ref<FontInfo>());
+
+	return font_infos[p_font_id];
 }
 
 FreeTypeWrapper::FreeTypeWrapper() {
 	FT_Error error = FT_Init_FreeType(&ft_library);
+
+	if (!error) {
+		error = FTC_Manager_New(ft_library, 16, 32, 4 * 1024 * 1024, &_ftc_manager_requester, (FT_Pointer)this, &ftc_manager);
+	}
+
 	if (error) {
 		ERR_PRINT("[FreeType] Failed to initialize: '" + String(FT_Error_String(error)) + "'.");
 	}
 }
 
 FreeTypeWrapper::~FreeTypeWrapper() {
+	if (ftc_manager) {
+		FTC_Manager_Done(ftc_manager);
+	}
 	if (ft_library) {
 		FT_Done_FreeType(ft_library);
 	}
+
+	font_infos.clear();
 }
 
 #endif

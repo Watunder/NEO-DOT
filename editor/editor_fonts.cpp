@@ -51,7 +51,7 @@
 	Ref<FreeTypeFont> m_name;                               \
 	m_name.instance();                                      \
 	if (CustomFont.is_valid()) {                            \
-		m_name->set_data(CustomFont);                       \
+		m_name->set_data(CustomFont->get_data());           \
 	}                                                       \
 	m_name->set_face_size(m_size);                          \
 	m_name->set_use_filter(true);                           \
@@ -63,7 +63,7 @@
 	Ref<FreeTypeFont> m_name;                               \
 	m_name.instance();                                      \
 	if (CustomFontBold.is_valid()) {                        \
-		m_name->set_data(CustomFontBold);                   \
+		m_name->set_data(CustomFontBold->get_data());       \
 	} else {                                                \
 		m_name->set_data(NotoSansUI_Bold);                  \
 	}                                                       \
@@ -77,7 +77,7 @@
 	Ref<FreeTypeFont> m_name;                               \
 	m_name.instance();                                      \
 	if (CustomFontSource.is_valid()) {                      \
-		m_name->set_data(CustomFontSource);                 \
+		m_name->set_data(CustomFontSource->get_data());     \
 	} else {                                                \
 		m_name->set_data(Hack_Regular);                     \
 	}                                                       \
@@ -93,10 +93,10 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	/* Custom font */
 
 	String custom_font_path = EditorSettings::get_singleton()->get("interface/editor/main_font");
-	Ref<FreeTypeFontData> CustomFont;
+	Ref<FreeTypeFont> CustomFont;
 	if (custom_font_path.length() > 0 && dir->file_exists(custom_font_path)) {
 		CustomFont.instance();
-		CustomFont->load_from_file(custom_font_path);
+		CustomFont->load(custom_font_path);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/main_font", "");
 	}
@@ -104,10 +104,10 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	/* Custom Bold font */
 
 	String custom_font_path_bold = EditorSettings::get_singleton()->get("interface/editor/main_font_bold");
-	Ref<FreeTypeFontData> CustomFontBold;
+	Ref<FreeTypeFont> CustomFontBold;
 	if (custom_font_path_bold.length() > 0 && dir->file_exists(custom_font_path_bold)) {
 		CustomFontBold.instance();
-		CustomFontBold->load_from_file(custom_font_path_bold);
+		CustomFontBold->load(custom_font_path_bold);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/main_font_bold", "");
 	}
@@ -115,23 +115,23 @@ void editor_register_fonts(Ref<Theme> p_theme) {
 	/* Custom source code font */
 
 	String custom_font_path_source = EditorSettings::get_singleton()->get("interface/editor/code_font");
-	Ref<FreeTypeFontData> CustomFontSource;
+	Ref<FreeTypeFont> CustomFontSource;
 	if (custom_font_path_source.length() > 0 && dir->file_exists(custom_font_path_source)) {
 		CustomFontSource.instance();
-		CustomFontSource->load_from_file(custom_font_path_source);
+		CustomFontSource->load(custom_font_path_source);
 	} else {
 		EditorSettings::get_singleton()->set_manually("interface/editor/code_font", "");
 	}
 
 	memdelete(dir);
 
-	Ref<FreeTypeFontData> NotoSansUI_Bold;
-	NotoSansUI_Bold.instance();
-	NotoSansUI_Bold->load_from_memory(_font_NotoSansUI_Bold, _font_NotoSansUI_Bold_size);
+	PoolVector<uint8_t> NotoSansUI_Bold;
+	NotoSansUI_Bold.resize(_font_NotoSansUI_Bold_size);
+	copymem(NotoSansUI_Bold.write().ptr(), _font_NotoSansUI_Bold, _font_NotoSansUI_Bold_size);
 
-	Ref<FreeTypeFontData> Hack_Regular;
-	Hack_Regular.instance();
-	Hack_Regular->load_from_memory(_font_Hack_Regular, _font_Hack_Regular_size);
+	PoolVector<uint8_t> Hack_Regular;
+	Hack_Regular.resize(_font_Hack_Regular_size);
+	copymem(Hack_Regular.write().ptr(), _font_Hack_Regular, _font_Hack_Regular_size);
 
 	int default_font_size = int(EDITOR_GET("interface/editor/main_font_size")) * EDSCALE;
 

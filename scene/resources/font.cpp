@@ -32,12 +32,6 @@
 
 #include "core/method_bind_ext.gen.inc"
 
-void FontData::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("load"), &FontData::load_from_file);
-}
-
-/*************************************************************************/
-
 void Font::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
 
@@ -61,12 +55,4 @@ void Font::_bind_methods() {
 	ADD_GROUP("Settings", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
-
-Font::Font() {
-	use_filter = false;
-	use_mipmaps = false;
-}
-
-Font::~Font() {
 }
