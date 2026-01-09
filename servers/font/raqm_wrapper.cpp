@@ -32,9 +32,11 @@
 
 #ifdef MODULE_RAQM_ENABLED
 
+#include "core/print_string.h"
+
 #include "thirdparty/libraqm/raqm.h"
 
-static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, const Vector<FT_Face> &p_fallback_ft_faces, raqm_t *p_raqm_context, raqm_glyph_t **r_glyphs, size_t *r_glyph_count, const uint32_t *p_text, int p_text_len) {
+static _FORCE_INLINE_ void do_font_fallback(const Vector<FT_Size> &p_ft_sizes, raqm_t *p_raqm_context, raqm_glyph_t **r_glyphs, size_t *r_glyph_count, const uint32_t *p_text, int p_text_len) {
 	struct Range {
 		uint32_t start;
 		uint32_t len;
@@ -68,14 +70,14 @@ static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, const Vect
 	raqm_clear_contents(p_raqm_context);
 	if (!p_raqm_context ||
 			!raqm_set_text(p_raqm_context, p_text, p_text_len) ||
-			!raqm_set_freetype_face(p_raqm_context, p_ft_face) ||
+			!raqm_set_freetype_face(p_raqm_context, p_ft_sizes[0]->face) ||
 			!raqm_set_par_direction(p_raqm_context, RAQM_DIRECTION_DEFAULT)) {
 		return;
 	}
 
 	for (int i = 0; i < ranges.size(); i++) {
-		for (int j = 0; j < p_fallback_ft_faces.size(); j++) {
-			const FT_Face &ft_face = p_fallback_ft_faces[j];
+		for (int j = 1; j < p_ft_sizes.size(); j++) {
+			const FT_Face &ft_face = p_ft_sizes[j]->face;
 			uint32_t glyph_index = FT_Get_Char_Index(ft_face, p_text[ranges[i].start]);
 			if (glyph_index &&
 					raqm_set_freetype_face_range(p_raqm_context, ft_face, ranges[i].start, ranges[i].len)) {
@@ -89,10 +91,22 @@ static _FORCE_INLINE_ void do_font_fallback(const FT_Face &p_ft_face, const Vect
 	}
 }
 
-Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_ft_face, const String &p_text, const Vector<FT_Face> &p_fallback_ft_faces) {
-	Vector<ShapedInfo> shaped_infos;
+void RaqmWrapper::update_shaped_cache(uint64_t p_cache_key) {
+	if (current_cache_key != p_cache_key) {
+		current_cache_key = p_cache_key;
+	}
 
-	ERR_FAIL_COND_V(!p_ft_face, shaped_infos);
+	if (!shaped_map.has(current_cache_key)) {
+		shaped_map[current_cache_key] = HashMap<String, Vector<ShapedInfo>>();
+	}
+}
+
+Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
+	if (shaped_map[current_cache_key].has(p_text)) {
+		return shaped_map[current_cache_key][p_text];
+	}
+
+	Vector<ShapedInfo> shaped_infos;
 
 	if (p_text.empty()) {
 		return shaped_infos;
@@ -105,7 +119,7 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_
 
 	if (!raqm_context ||
 			!raqm_set_text(raqm_context, text, text_len) ||
-			!raqm_set_freetype_face(raqm_context, p_ft_face) ||
+			!raqm_set_freetype_face(raqm_context, p_ft_sizes[0]->face) ||
 			!raqm_set_par_direction(raqm_context, RAQM_DIRECTION_DEFAULT)) {
 		return shaped_infos;
 	}
@@ -116,8 +130,8 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_
 		glyphs = raqm_get_glyphs(raqm_context, &glyph_count);
 	}
 
-	if (!p_fallback_ft_faces.empty()) {
-		do_font_fallback(p_ft_face, p_fallback_ft_faces, raqm_context, &glyphs, &glyph_count, text, text_len);
+	if (p_ft_sizes.size() > 1) {
+		do_font_fallback(p_ft_sizes, raqm_context, &glyphs, &glyph_count, text, text_len);
 	}
 
 	for (int i = 0; i < glyph_count; i++) {
@@ -132,6 +146,8 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const FT_Face &p_
 	}
 
 	raqm_clear_contents(raqm_context);
+
+	shaped_map[current_cache_key][p_text] = shaped_infos;
 
 	return shaped_infos;
 }

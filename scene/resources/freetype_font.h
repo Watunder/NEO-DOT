@@ -32,35 +32,7 @@
 #define FREETYPE_FONT_H
 
 #include "core/io/resource_loader.h"
-#include "core/os/mutex.h"
-#include "core/os/thread_safe.h"
 #include "scene/resources/font.h"
-
-class FreeTypeFontData : public FontData {
-	GDCLASS(FreeTypeFontData, FontData);
-
-	PoolVector<uint8_t> buffer;
-
-	static Ref<FreeTypeFontData> default_font_data;
-
-public:
-	static Ref<FreeTypeFontData> get_default();
-	static void clear_default();
-
-	void _copy_internals_from(const FreeTypeFontData &p_font_data) {
-		buffer = p_font_data.buffer;
-	}
-
-	virtual Ref<Resource> duplicate(bool p_subresources = false) const;
-
-	virtual Error load_from_file(String p_path);
-	virtual Error load_from_memory(const uint8_t *p_buffer, int p_len);
-
-	bool empty() const;
-	PoolVector<uint8_t> get_buffer() const;
-};
-
-/*************************************************************************/
 
 class FreeTypeFont : public Font {
 	GDCLASS(FreeTypeFont, Font);
@@ -74,10 +46,12 @@ public:
 	};
 
 private:
-	Ref<FreeTypeFontData> data;
-
 	RID font;
 
+	String path_to_file;
+
+	bool use_mipmaps;
+	bool use_filter;
 	int face_index;
 	int face_size;
 	Hinting hinting;
@@ -85,13 +59,26 @@ private:
 protected:
 	static void _bind_methods();
 
-	void _data_changed();
+	bool _update_data(const PoolVector<uint8_t> &p_data);
 
 public:
-	Ref<FreeTypeFontData> get_data() const;
-	void set_data(const Ref<FreeTypeFontData> &p_data);
-
+	virtual void reload_from_file();
 	virtual RID get_rid() const;
+
+	void set_data(const PoolVector<uint8_t> &p_data);
+	PoolVector<uint8_t> get_data() const;
+
+	Error load(String p_path);
+	String get_load_path() const;
+
+	int get_face_index() const;
+	void set_face_index(int p_index);
+
+	int get_face_size() const;
+	void set_face_size(int p_size);
+
+	Hinting get_hinting() const;
+	void set_hinting(Hinting p_hinting);
 
 	virtual Size2 get_char_size(char32_t p_char) const;
 	virtual Size2 get_string_size(const String &p_string) const;
@@ -108,15 +95,6 @@ public:
 	virtual float get_height() const;
 	virtual float get_ascent() const;
 	virtual float get_descent() const;
-
-	int get_face_index() const;
-	void set_face_index(int p_index);
-
-	int get_face_size() const;
-	void set_face_size(int p_size);
-
-	Hinting get_hinting() const;
-	void set_hinting(Hinting p_hinting);
 
 	FreeTypeFont();
 	~FreeTypeFont();

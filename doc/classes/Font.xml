@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="Font" inherits="Resource" version="3.3">
 	<brief_description>
-		Base class for font files.
+		Base class for font.
 	</brief_description>
 	<description>
-		Base class for font files.
+		Base class for font.
 	</description>
 	<tutorials>
 	</tutorials>

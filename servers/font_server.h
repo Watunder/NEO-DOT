@@ -40,7 +40,6 @@
 #ifdef MODULE_RAQM_ENABLED
 #include "font/raqm_wrapper.h"
 #endif
-
 #include "font/font_cache_key.h"
 #include "font/glyph_manager.h"
 
@@ -60,6 +59,9 @@ public:
 private:
 	static FontServer *singleton;
 
+	Vector<FontID> builtin_font_ids;
+	FontID default_font_id;
+
 	struct Font : RID_Data {
 		FontCacheKey cache_key;
 		Vector<FontCacheKey> temp_cache_keys;
@@ -72,10 +74,6 @@ private:
 		int spacing_bottom;
 		int spacing_glyph;
 		int spacing_space_char;
-
-#ifdef MODULE_FREETYPE_ENABLED
-		FT_Face ft_face = NULL;
-#endif
 
 		Font() {
 			ascent = 0;
@@ -91,25 +89,22 @@ private:
 
 	mutable RID_Owner<Font> font_owner;
 
-	Vector<RID> fallback_fonts;
-
 #ifdef MODULE_FREETYPE_ENABLED
 	FreeTypeWrapper *freetype_wrapper = NULL;
 
-	_FORCE_INLINE_ void _setup_fallback_fonts();
+	_FORCE_INLINE_ void _setup_builtin_fonts();
 #endif
 
 #ifdef MODULE_RAQM_ENABLED
 	RaqmWrapper *raqm_wrapper = NULL;
 
-	_FORCE_INLINE_ Vector<RaqmWrapper::ShapedInfo> _get_shaped_infos(RID p_font, const String &p_text, const Vector<RID> &p_fallback_fonts) const;
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(RID p_font, const RaqmWrapper::ShapedInfo &p_shaped_info) const;
-	Vector2 _draw_shaped_info(RID p_canvas_item, RID p_font, const Point2 &p_pos, const RaqmWrapper::ShapedInfo &p_shaped_info, const Color &p_modulate) const;
+	_FORCE_INLINE_ Vector<RaqmWrapper::ShapedInfo> _get_shaped_infos(Font *p_font, const String &p_text) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, const RaqmWrapper::ShapedInfo &p_shaped_info) const;
 #endif
 
 	GlyphManager *glyph_manager = NULL;
 
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(RID p_font, char32_t p_char, const Vector<RID> &p_fallback_fonts) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(Font *p_font, char32_t p_char) const;
 	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Point2 &p_pos, const Color &p_modulate) const;
 
 protected:
@@ -118,31 +113,28 @@ protected:
 public:
 	static FontServer *get_singleton();
 
-	RID font_create(int p_size = 1, int p_texture_flags = 0, int p_custom_flags = 0);
+	RID font_create(int p_size = 1, int p_custom_flags = 0, int p_texture_flags = Texture::FLAG_MIPMAPS | Texture::FLAG_FILTER);
 	void font_free(RID p_font);
 	void font_set_size(RID p_font, int p_size);
 	void font_set_texture_flags(RID p_font, int p_texture_flags);
 	void font_set_use_mipmaps(RID p_font, bool p_use_mipmaps);
 	void font_set_use_filter(RID p_font, bool p_use_filter);
 	void font_set_custom_flags(RID p_font, int p_custom_flags);
-	bool font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_buffer, int p_font_index = 0);
+	bool font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_data);
+	bool font_update_index(RID p_font, int p_font_index);
 	bool font_update_metrics(RID p_font, float p_oversampling = -1);
 	void font_clear_caches(RID p_font);
 	float font_get_ascent(RID p_font) const;
 	float font_get_descent(RID p_font) const;
 	float font_get_oversampling(RID p_font) const;
 	FontCacheKey font_get_cache_key(RID p_font) const;
+	PoolVector<uint8_t> font_get_data(RID p_font) const;
 
 	void font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing);
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
 
 	Size2 font_get_char_size(RID p_font, char32_t p_char) const;
 	Size2 font_get_string_size(RID p_font, const String &p_string) const;
-
-	void add_fallback_font(RID p_font);
-	void remove_fallback_font(RID p_font);
-	int get_fallback_font_count() const;
-	RID get_fallback_font(int p_idx) const;
 
 	float draw_char(RID p_canvas_item, RID p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
 	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;

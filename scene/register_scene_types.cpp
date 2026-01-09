@@ -665,10 +665,8 @@ void register_scene_types() {
 
 	ClassDB::register_class<TextFile>();
 
-	ClassDB::register_virtual_class<FontData>();
 	ClassDB::register_virtual_class<Font>();
 #ifdef MODULE_FREETYPE_ENABLED
-	ClassDB::register_class<FreeTypeFontData>();
 	ClassDB::register_class<FreeTypeFont>();
 #endif
 
@@ -741,19 +739,16 @@ void register_scene_types() {
 	String custom_theme_path = GLOBAL_DEF_RST("gui/theme/custom", "");
 	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom", PropertyInfo(Variant::STRING, "gui/theme/custom", PROPERTY_HINT_FILE, "*.tres,*.res,*.theme", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
 	String custom_font_path = GLOBAL_DEF_RST("gui/theme/custom_font", "");
-	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom_font", PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.ttf,*.otf", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
+	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom_font", PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.ttf,*.ttc,*.otf,*.otc", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
 
 	Ref<Font> custom_font;
 
 	if (custom_font_path != String()) {
 #ifdef MODULE_FREETYPE_ENABLED
-		Ref<FreeTypeFontData> font_data = ResourceLoader::load(custom_font_path);
-		if (!font_data.is_valid()) {
+		Ref<FreeTypeFont> font = ResourceLoader::load(custom_font_path);
+		if (!font.is_valid()) {
 			ERR_PRINTS("Error loading custom font '" + custom_font_path + "'");
 		}
-		Ref<FreeTypeFont> font;
-		font.instance();
-		font->set_data(font_data);
 		custom_font = font;
 #endif
 	}
@@ -780,8 +775,6 @@ void unregister_scene_types() {
 #ifdef MODULE_FREETYPE_ENABLED
 	ResourceLoader::remove_resource_format_loader(resource_loader_freetype_font);
 	resource_loader_freetype_font.unref();
-
-	FreeTypeFontData::clear_default();
 #endif
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);

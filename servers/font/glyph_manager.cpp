@@ -197,11 +197,11 @@ void GlyphManager::update_glyph_cache(const FontCacheKey &p_cache_key) {
 
 void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
 	if (glyph_map.has(p_cache_key.key)) {
-		glyph_map[p_cache_key.key].clear();
+		glyph_map.erase(p_cache_key.key);
 	}
 
 	if (texture_map.has(p_cache_key.key)) {
-		texture_map[p_cache_key.key].clear();
+		texture_map.erase(p_cache_key.key);
 	}
 }
 

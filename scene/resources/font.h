@@ -34,26 +34,10 @@
 #include "core/reference.h"
 #include "core/resource.h"
 
-class FontData : public Resource {
-	GDCLASS(FontData, Resource);
-
-protected:
-	static void _bind_methods();
-
-public:
-	virtual Error load_from_file(String p_path) = 0;
-	virtual Error load_from_memory(const uint8_t *p_buffer, int p_size) = 0;
-};
-
-/*************************************************************************/
-
 class Font : public Resource {
 	GDCLASS(Font, Resource);
 
 protected:
-	bool use_mipmaps;
-	bool use_filter;
-
 	static void _bind_methods();
 
 public:
@@ -77,9 +61,6 @@ public:
 	virtual float get_descent() const = 0;
 
 	virtual bool is_distance_field_hint() const { return false; };
-
-	Font();
-	~Font();
 };
 
 #endif

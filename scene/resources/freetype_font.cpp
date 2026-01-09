@@ -32,90 +32,11 @@
 
 #include "core/io/file_access_memory.h"
 #include "core/os/file_access.h"
-#include "core/os/os.h"
 #include "servers/font_server.h"
 
-#include "servers/font/builtin_fonts.gen.h"
-
-Ref<FreeTypeFontData> FreeTypeFontData::default_font_data;
-
-Ref<FreeTypeFontData> FreeTypeFontData::get_default() {
-	if (!default_font_data.is_valid()) {
-		default_font_data.instance();
-		default_font_data->load_from_memory(_font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
-	}
-
-	return default_font_data;
-}
-
-void FreeTypeFontData::clear_default() {
-	default_font_data.unref();
-}
-
-Ref<Resource> FreeTypeFontData::duplicate(bool p_subresources) const {
-	Ref<FreeTypeFontData> copy;
-	copy.instance();
-	copy->_copy_internals_from(*this);
-	return copy;
-}
-
-Error FreeTypeFontData::load_from_file(String p_path) {
-	Error err = OK;
-
-	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
-	ERR_FAIL_COND_V_MSG(err, err, "Cannot open file '" + p_path + "'.");
-
-	int len = f->get_len();
-	err = buffer.resize(len);
-	if (err == OK) {
-		PoolVector<uint8_t>::Write w = buffer.write();
-		int r = f->get_buffer(w.ptr(), len);
-		f->close();
-		memdelete(f);
-		ERR_FAIL_COND_V(r != len, ERR_FILE_CORRUPT);
-	}
-
-	emit_changed();
-
-	return err;
-}
-
-Error FreeTypeFontData::load_from_memory(const uint8_t *p_buffer, int p_len) {
-	Error err = OK;
-
-	FileAccessMemory *f = memnew(FileAccessMemory);
-	err = f->open_custom(p_buffer, p_len);
-	ERR_FAIL_COND_V_MSG(err, err, "Cannot open data.");
-
-	err = buffer.resize(p_len);
-	if (err == OK) {
-		PoolVector<uint8_t>::Write w = buffer.write();
-		int r = f->get_buffer(w.ptr(), p_len);
-		f->close();
-		memdelete(f);
-		ERR_FAIL_COND_V(r != p_len, ERR_FILE_CORRUPT);
-	}
-
-	emit_changed();
-
-	return err;
-}
-
-bool FreeTypeFontData::empty() const {
-	return buffer.size() == 0;
-}
-
-PoolVector<uint8_t> FreeTypeFontData::get_buffer() const {
-	return buffer;
-}
-
-/*************************************************************************/
-
 void FreeTypeFont::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_data_changed"), &FreeTypeFont::_data_changed);
-
-	ClassDB::bind_method(D_METHOD("set_data", "data"), &FreeTypeFont::set_data);
-	ClassDB::bind_method(D_METHOD("get_data"), &FreeTypeFont::get_data);
+	ClassDB::bind_method(D_METHOD("load", "path"), &FreeTypeFont::load);
+	ClassDB::bind_method(D_METHOD("get_load_path"), &FreeTypeFont::get_load_path);
 
 	ClassDB::bind_method(D_METHOD("set_face_index", "index"), &FreeTypeFont::set_face_index);
 	ClassDB::bind_method(D_METHOD("get_face_index"), &FreeTypeFont::get_face_index);
@@ -126,7 +47,7 @@ void FreeTypeFont::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_hinting", "mode"), &FreeTypeFont::set_hinting);
 	ClassDB::bind_method(D_METHOD("get_hinting"), &FreeTypeFont::get_hinting);
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "data", PROPERTY_HINT_RESOURCE_TYPE, "FreeTypeFontData"), "set_data", "get_data");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "load_path", PROPERTY_HINT_FILE, "*.ttf,*.ttc,*.otf,*.otc"), "load", "get_load_path");
 
 	ADD_GROUP("Settings", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "face_index", PROPERTY_HINT_RANGE, "0,255,1"), "set_face_index", "get_face_index");
@@ -145,46 +66,64 @@ void FreeTypeFont::_bind_methods() {
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_space_char"), "set_spacing", "get_spacing", FontServer::SPACING_SPACE_CHAR);
 }
 
-void FreeTypeFont::_data_changed() {
-	face_index = 0;
-
+bool FreeTypeFont::_update_data(const PoolVector<uint8_t> &p_data) {
 	FontServer::get_singleton()->font_clear_caches(font);
-
-	if (!data.is_valid() ||
-			!FontServer::get_singleton()->font_update_data(font, data->get_buffer(), face_index) ||
-			!FontServer::get_singleton()->font_update_metrics(font)) {
-		return;
+	if (!FontServer::get_singleton()->font_update_data(font, p_data)) {
+		return false;
+	}
+	if (!FontServer::get_singleton()->font_update_metrics(font)) {
+		return false;
 	}
 
 	emit_changed();
 	_change_notify();
+
+	return true;
 }
 
-Ref<FreeTypeFontData> FreeTypeFont::get_data() const {
-	return data;
-}
-
-void FreeTypeFont::set_data(const Ref<FreeTypeFontData> &p_data) {
-	ERR_FAIL_COND(!p_data.is_valid() || p_data->empty());
-
-	if (data == p_data)
-		return;
-
-	if (data.is_valid()) {
-		data->disconnect("changed", this, "_data_changed");
-	}
-
-	data = p_data;
-
-	if (data.is_valid()) {
-		data->connect("changed", this, "_data_changed");
-	}
-
-	_data_changed();
+void FreeTypeFont::reload_from_file() {
+	load(path_to_file);
 }
 
 RID FreeTypeFont::get_rid() const {
 	return font;
+}
+
+void FreeTypeFont::set_data(const PoolVector<uint8_t> &p_data) {
+	_update_data(p_data);
+}
+
+PoolVector<uint8_t> FreeTypeFont::get_data() const {
+	return FontServer::get_singleton()->font_get_data(font);
+}
+
+Error FreeTypeFont::load(String p_path) {
+	Error err = OK;
+
+	PoolVector<uint8_t> data;
+
+	if (!p_path.empty()) {
+		FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
+		ERR_FAIL_COND_V_MSG(err, err, "Cannot open file '" + p_path + "'.");
+
+		int len = f->get_len();
+		data.resize(len);
+		PoolVector<uint8_t>::Write w = data.write();
+		int r = f->get_buffer(w.ptr(), len);
+		f->close();
+		memdelete(f);
+		ERR_FAIL_COND_V(r != len, ERR_CANT_OPEN);
+	}
+
+	if (_update_data(data)) {
+		path_to_file = p_path;
+	}
+
+	return err;
+}
+
+String FreeTypeFont::get_load_path() const {
+	return path_to_file;
 }
 
 int FreeTypeFont::get_face_index() const {
@@ -192,14 +131,15 @@ int FreeTypeFont::get_face_index() const {
 }
 
 void FreeTypeFont::set_face_index(int p_index) {
-	if (face_index == p_index)
+	if (face_index == p_index) {
 		return;
+	}
 
 	FontServer::get_singleton()->font_clear_caches(font);
-
-	if (!data.is_valid() ||
-			!FontServer::get_singleton()->font_update_data(font, data->get_buffer(), p_index) ||
-			!FontServer::get_singleton()->font_update_metrics(font)) {
+	if (!FontServer::get_singleton()->font_update_index(font, p_index)) {
+		return;
+	}
+	if (!FontServer::get_singleton()->font_update_metrics(font)) {
 		return;
 	}
 
@@ -214,15 +154,17 @@ int FreeTypeFont::get_face_size() const {
 }
 
 void FreeTypeFont::set_face_size(int p_size) {
-	if (face_size == p_size)
+	if (face_size == p_size) {
 		return;
+	}
 
 	FontServer::get_singleton()->font_clear_caches(font);
 	FontServer::get_singleton()->font_set_size(font, p_size);
-
-	if (FontServer::get_singleton()->font_update_metrics(font)) {
-		face_size = p_size;
+	if (!FontServer::get_singleton()->font_update_metrics(font)) {
+		return;
 	}
+
+	face_size = p_size;
 
 	emit_changed();
 	_change_notify();
@@ -253,8 +195,9 @@ bool FreeTypeFont::get_use_mipmaps() const {
 }
 
 void FreeTypeFont::set_use_mipmaps(bool p_enable) {
-	if (use_mipmaps == p_enable)
+	if (use_mipmaps == p_enable) {
 		return;
+	}
 	use_mipmaps = p_enable;
 
 	FontServer::get_singleton()->font_clear_caches(font);
@@ -269,8 +212,9 @@ bool FreeTypeFont::get_use_filter() const {
 }
 
 void FreeTypeFont::set_use_filter(bool p_enable) {
-	if (use_filter == p_enable)
+	if (use_filter == p_enable) {
 		return;
+	}
 	use_filter = p_enable;
 
 	FontServer::get_singleton()->font_clear_caches(font);
@@ -296,8 +240,9 @@ FreeTypeFont::Hinting FreeTypeFont::get_hinting() const {
 }
 
 void FreeTypeFont::set_hinting(Hinting p_hinting) {
-	if (hinting == p_hinting)
+	if (hinting == p_hinting) {
 		return;
+	}
 	hinting = p_hinting;
 
 	FontServer::get_singleton()->font_clear_caches(font);
@@ -308,13 +253,14 @@ void FreeTypeFont::set_hinting(Hinting p_hinting) {
 }
 
 FreeTypeFont::FreeTypeFont() {
+	use_mipmaps = true;
+	use_filter = true;
 	face_index = 0;
 	face_size = 16;
 	hinting = FreeTypeFont::HINTING_NORMAL;
 
-	font = FontServer::get_singleton()->font_create(face_size, 0, hinting);
-
-	set_data(FreeTypeFontData::get_default());
+	font = FontServer::get_singleton()->font_create(face_size, hinting);
+	FontServer::get_singleton()->font_update_metrics(font);
 }
 
 FreeTypeFont::~FreeTypeFont() {
@@ -327,31 +273,31 @@ Ref<Resource> ResourceFormatLoaderFreeTypeFont::load(const String &p_path, const
 	if (r_error)
 		*r_error = ERR_FILE_CANT_OPEN;
 
-	Ref<FreeTypeFontData> font_data;
-	font_data.instance();
-	Error err = font_data->load_from_file(p_path);
+	Ref<FreeTypeFont> font;
+	font.instance();
+	Error err = font->load(p_path);
 	ERR_FAIL_COND_V(err != OK, Ref<Resource>());
 
 	if (r_error)
 		*r_error = OK;
 
-	return font_data;
+	return font;
 }
 
 void ResourceFormatLoaderFreeTypeFont::get_recognized_extensions(List<String> *p_extensions) const {
-	p_extensions->push_back("ttc");
 	p_extensions->push_back("ttf");
+	p_extensions->push_back("ttc");
 	p_extensions->push_back("otf");
 	p_extensions->push_back("otc");
 }
 
 bool ResourceFormatLoaderFreeTypeFont::handles_type(const String &p_type) const {
-	return (p_type == "FreeTypeFontData");
+	return (p_type == "FreeTypeFont");
 }
 
 String ResourceFormatLoaderFreeTypeFont::get_resource_type(const String &p_path) const {
 	String el = p_path.get_extension().to_lower();
-	if (el == "ttf" || el == "otf")
-		return "FreeTypeFontData";
+	if (el == "ttf" || el == "ttc" || el == "otf" || el == "otc")
+		return "FreeTypeFont";
 	return "";
 }
