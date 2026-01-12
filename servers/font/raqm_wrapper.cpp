@@ -91,25 +91,31 @@ static _FORCE_INLINE_ void do_font_fallback(const Vector<FT_Size> &p_ft_sizes, r
 	}
 }
 
-void RaqmWrapper::update_shaped_cache(uint64_t p_cache_key) {
+void RaqmWrapper::update_cache(uint64_t p_cache_key) {
 	if (current_cache_key != p_cache_key) {
 		current_cache_key = p_cache_key;
 	}
 
-	if (!shaped_map.has(current_cache_key)) {
-		shaped_map[current_cache_key] = HashMap<String, Vector<ShapedInfo>>();
+	if (!char_info_map.has(current_cache_key)) {
+		char_info_map[current_cache_key] = HashMap<String, Vector<CharInfo>>();
 	}
 }
 
-Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
-	if (shaped_map[current_cache_key].has(p_text)) {
-		return shaped_map[current_cache_key][p_text];
+void RaqmWrapper::clear_cache(uint64_t p_cache_key) {
+	if (char_info_map.has(current_cache_key)) {
+		char_info_map.erase(current_cache_key);
+	}
+}
+
+Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
+	if (char_info_map[current_cache_key].has(p_text)) {
+		return char_info_map[current_cache_key][p_text];
 	}
 
-	Vector<ShapedInfo> shaped_infos;
+	Vector<CharInfo> char_infos;
 
 	if (p_text.empty()) {
-		return shaped_infos;
+		return char_infos;
 	}
 
 	raqm_t *raqm_context = raqm_create();
@@ -121,7 +127,7 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const Vector<FT_S
 			!raqm_set_text(raqm_context, text, text_len) ||
 			!raqm_set_freetype_face(raqm_context, p_ft_sizes[0]->face) ||
 			!raqm_set_par_direction(raqm_context, RAQM_DIRECTION_DEFAULT)) {
-		return shaped_infos;
+		return char_infos;
 	}
 
 	size_t glyph_count = 0;
@@ -134,22 +140,44 @@ Vector<RaqmWrapper::ShapedInfo> RaqmWrapper::shape_single_line(const Vector<FT_S
 		do_font_fallback(p_ft_sizes, raqm_context, &glyphs, &glyph_count, text, text_len);
 	}
 
-	for (int i = 0; i < glyph_count; i++) {
-		ShapedInfo shaped_info;
-		shaped_info.index = glyphs[i].index;
-		shaped_info.cluster = glyphs[i].cluster;
-		shaped_info.offset = Vector2(glyphs[i].x_offset / 64.0, glyphs[i].y_offset / 64.0);
-		shaped_info.advance = Vector2(glyphs[i].x_advance / 64.0, glyphs[i].y_advance / 64.0);
-		shaped_info.ft_face = glyphs[i].ftface;
+	char_infos.resize(text_len);
 
-		shaped_infos.push_back(shaped_info);
+	for (int i = 0; i < glyph_count;) {
+		int start = i;
+		uint32_t cluster = glyphs[start].cluster;
+
+		int end = i;
+		while (end < glyph_count && glyphs[end].cluster == cluster) {
+			end++;
+		}
+		i = end;
+
+		uint32_t next_cluster = (end < glyph_count) ? glyphs[end].cluster : text_len;
+
+		for (uint32_t char_index = cluster; char_index < next_cluster; char_index++) {
+			CharInfo span_info;
+			span_info.char_code = text[char_index];
+
+			for (int j = start; j < end; j++) {
+				ShapedGlyph shaped_glyph;
+				shaped_glyph.index = glyphs[j].index;
+				shaped_glyph.cluster = glyphs[j].cluster;
+				shaped_glyph.offset = Vector2(glyphs[j].x_offset / 64.0, glyphs[j].y_offset / 64.0);
+				shaped_glyph.advance = Vector2(glyphs[j].x_advance / 64.0, glyphs[j].y_advance / 64.0);
+				shaped_glyph.ft_face = glyphs[j].ftface;
+
+				span_info.glyphs.push_back(shaped_glyph);
+			}
+
+			char_infos.write[char_index] = span_info;
+		}
 	}
 
 	raqm_clear_contents(raqm_context);
 
-	shaped_map[current_cache_key][p_text] = shaped_infos;
+	char_info_map[current_cache_key][p_text] = char_infos;
 
-	return shaped_infos;
+	return char_infos;
 }
 
 #endif

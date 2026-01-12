@@ -56,12 +56,6 @@ public:
 		SPACING_SPACE_CHAR,
 	};
 
-private:
-	static FontServer *singleton;
-
-	Vector<FontID> builtin_font_ids;
-	FontID default_font_id;
-
 	struct Font : RID_Data {
 		FontCacheKey cache_key;
 		Vector<FontCacheKey> temp_cache_keys;
@@ -89,6 +83,21 @@ private:
 
 	mutable RID_Owner<Font> font_owner;
 
+	struct TextData : Reference {
+		RID font;
+		String original_text;
+
+#ifdef MODULE_RAQM_ENABLED
+		Vector<RaqmWrapper::CharInfo> char_infos;
+#endif
+	};
+
+private:
+	static FontServer *singleton;
+
+	Vector<FontID> builtin_font_ids;
+	FontID default_font_id;
+
 #ifdef MODULE_FREETYPE_ENABLED
 	FreeTypeWrapper *freetype_wrapper = NULL;
 
@@ -98,8 +107,8 @@ private:
 #ifdef MODULE_RAQM_ENABLED
 	RaqmWrapper *raqm_wrapper = NULL;
 
-	_FORCE_INLINE_ Vector<RaqmWrapper::ShapedInfo> _get_shaped_infos(Font *p_font, const String &p_text) const;
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, const RaqmWrapper::ShapedInfo &p_shaped_info) const;
+	_FORCE_INLINE_ Vector<RaqmWrapper::CharInfo> _shape_string(Font *p_font, const String &p_text) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, const RaqmWrapper::ShapedGlyph &p_shaped_glyph) const;
 #endif
 
 	GlyphManager *glyph_manager = NULL;
@@ -134,7 +143,10 @@ public:
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
 
 	Size2 font_get_char_size(RID p_font, char32_t p_char) const;
-	Size2 font_get_string_size(RID p_font, const String &p_string) const;
+	Size2 font_get_string_size(RID p_font, const String &p_text) const;
+
+	Ref<TextData> create_text_data(RID p_font, const String &p_text) const;
+	float draw_text_data(const Ref<TextData> &p_text, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
 
 	float draw_char(RID p_canvas_item, RID p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
 	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;

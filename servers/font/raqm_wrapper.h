@@ -45,7 +45,7 @@
 
 class RaqmWrapper {
 public:
-	struct ShapedInfo {
+	struct ShapedGlyph {
 		uint32_t index = 0;
 		uint32_t cluster = 0;
 		Vector2 offset;
@@ -53,15 +53,21 @@ public:
 		FT_Face ft_face = NULL;
 	};
 
+	struct CharInfo {
+		char32_t char_code = 0;
+		Vector<ShapedGlyph> glyphs;
+	};
+
 private:
 	uint64_t current_cache_key = 0;
 
-	HashMap<uint64_t, HashMap<String, Vector<ShapedInfo>>> shaped_map;
+	HashMap<uint64_t, HashMap<String, Vector<CharInfo>>> char_info_map;
 
 public:
-	void update_shaped_cache(uint64_t p_cache_key);
+	void update_cache(uint64_t p_cache_key);
+	void clear_cache(uint64_t p_cache_key);
 
-	Vector<ShapedInfo> shape_single_line(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
+	Vector<RaqmWrapper::CharInfo> get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
 };
 
 #endif

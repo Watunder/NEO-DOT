@@ -32,6 +32,7 @@
 #include "core/print_string.h"
 #include "core/project_settings.h"
 #include "core/translation.h"
+#include "servers/font_server.h"
 
 void Label::set_autowrap(bool p_autowrap) {
 	if (autowrap == p_autowrap) {
@@ -219,21 +220,23 @@ void Label::_notification(int p_what) {
 					}
 				}
 
+				String sub_xl_text = xl_text.substr(pos, from->word_len);
+				if (uppercase) {
+					sub_xl_text = sub_xl_text.to_upper();
+				}
+				Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), sub_xl_text);
+
 				if (font_color_shadow.a > 0) {
 					int chars_total_shadow = chars_total; //save chars drawn
 					float x_ofs_shadow = x_ofs;
+
 					for (int i = 0; i < from->word_len; i++) {
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
-							char32_t c = xl_text[i + pos];
-							if (uppercase) {
-								c = String::char_uppercase(c);
-							}
-
-							float move = draw_char(font, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, c, font_color_shadow);
+							float move = FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, i, font_color_shadow);
 							if (use_outline) {
-								draw_char(font, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), c, font_color_shadow);
-								draw_char(font, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), c, font_color_shadow);
-								draw_char(font, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), c, font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), i, font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), i, font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), i, font_color_shadow);
 							}
 							x_ofs_shadow += move;
 							chars_total_shadow++;
@@ -242,12 +245,7 @@ void Label::_notification(int p_what) {
 				}
 				for (int i = 0; i < from->word_len; i++) {
 					if (visible_chars < 0 || chars_total < visible_chars) {
-						char32_t c = xl_text[i + pos];
-						if (uppercase) {
-							c = String::char_uppercase(c);
-						}
-
-						x_ofs += draw_char(font, Point2(x_ofs, y_ofs), c, font_color);
+						x_ofs += FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs, y_ofs), i, font_color);
 						chars_total++;
 					}
 				}

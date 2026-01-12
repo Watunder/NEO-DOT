@@ -31,6 +31,7 @@
 #include "item_list.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "servers/font_server.h"
 
 void ItemList::add_item(const String &p_item, const Ref<Texture> &p_texture, bool p_selectable) {
 	Item item;
@@ -1070,6 +1071,7 @@ void ItemList::_notification(int p_what) {
 					text_ofs += base_ofs;
 					text_ofs += items[i].rect_cache.position;
 
+					Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text);
 					for (int j = 0; j < ss; j++) {
 						if (j == line_limit_cache[line]) {
 							line++;
@@ -1077,7 +1079,7 @@ void ItemList::_notification(int p_what) {
 							if (line >= max_text_lines)
 								break;
 						}
-						ofs += draw_char(font, text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], modulate);
+						ofs += FontServer::get_singleton()->draw_text_data(text_data, get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), j, modulate);
 					}
 
 					//special multiline mode
