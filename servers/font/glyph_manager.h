@@ -46,7 +46,7 @@ public:
 		bool found = false;
 
 		Vector2 texture_offset;
-		Vector2 advance;
+		Vector2 glyph_advance;
 
 		int texture_index = -1;
 		Size2 texture_size;
@@ -60,7 +60,7 @@ private:
 	FontCacheKey current_cache_key;
 
 	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
-	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_map;
+	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_info_map;
 
 	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
 #ifdef MODULE_FREETYPE_ENABLED
@@ -68,8 +68,8 @@ private:
 #endif
 
 public:
-	void update_glyph_cache(const FontCacheKey &p_cache_key);
-	void clear_glyph_cache(const FontCacheKey &p_cache_key);
+	void update_cache(const FontCacheKey &p_cache_key);
+	void clear_cache(const FontCacheKey &p_cache_key);
 
 #ifdef MODULE_FREETYPE_ENABLED
 	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);

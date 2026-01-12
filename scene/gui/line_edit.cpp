@@ -785,7 +785,7 @@ void LineEdit::_notification(int p_what) {
 								break;
 
 							char32_t cchar = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs];
-							char32_t next = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs + 1];
+
 							int im_char_width = font->get_char_size(cchar).width;
 
 							if ((x_ofs + im_char_width) > ofs_max)
@@ -807,7 +807,7 @@ void LineEdit::_notification(int p_what) {
 				}
 
 				char32_t cchar = (pass && !text.empty()) ? secret_character[0] : t[char_ofs];
-				char32_t next = (pass && !text.empty()) ? secret_character[0] : t[char_ofs + 1];
+
 				int char_width = font->get_char_size(cchar).width;
 
 				// End of widget, break.
@@ -844,7 +844,7 @@ void LineEdit::_notification(int p_what) {
 							break;
 
 						char32_t cchar = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs];
-						char32_t next = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs + 1];
+
 						int im_char_width = font->get_char_size(cchar).width;
 
 						if ((x_ofs + im_char_width) > ofs_max)

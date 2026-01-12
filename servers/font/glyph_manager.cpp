@@ -179,15 +179,15 @@ _FORCE_INLINE_ GlyphManager::GlyphInfo GlyphManager::_rasterize_bitmap(const FT_
 }
 #endif
 
-void GlyphManager::update_glyph_cache(const FontCacheKey &p_cache_key) {
+void GlyphManager::update_cache(const FontCacheKey &p_cache_key) {
 	if (current_cache_key == p_cache_key) {
 		return;
 	}
 
 	current_cache_key.key = p_cache_key.key;
 
-	if (!glyph_map.has(current_cache_key.key)) {
-		glyph_map[current_cache_key.key] = HashMap<uint32_t, GlyphInfo>();
+	if (!glyph_info_map.has(current_cache_key.key)) {
+		glyph_info_map[current_cache_key.key] = HashMap<uint32_t, GlyphInfo>();
 	}
 
 	if (!texture_map.has(current_cache_key.key)) {
@@ -195,9 +195,9 @@ void GlyphManager::update_glyph_cache(const FontCacheKey &p_cache_key) {
 	}
 }
 
-void GlyphManager::clear_glyph_cache(const FontCacheKey &p_cache_key) {
-	if (glyph_map.has(p_cache_key.key)) {
-		glyph_map.erase(p_cache_key.key);
+void GlyphManager::clear_cache(const FontCacheKey &p_cache_key) {
+	if (glyph_info_map.has(p_cache_key.key)) {
+		glyph_info_map.erase(p_cache_key.key);
 	}
 
 	if (texture_map.has(p_cache_key.key)) {
@@ -211,8 +211,8 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 
 	ERR_FAIL_COND_V(!p_ft_face, glyph_info);
 
-	if (glyph_map[current_cache_key.key].has(p_glyph_index)) {
-		return glyph_map[current_cache_key.key][p_glyph_index];
+	if (glyph_info_map[current_cache_key.key].has(p_glyph_index)) {
+		return glyph_info_map[current_cache_key.key][p_glyph_index];
 	}
 
 	int load_flags = FT_HAS_COLOR(p_ft_face) ? FT_LOAD_COLOR : FT_LOAD_DEFAULT;
@@ -240,11 +240,11 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 	if (!error) {
 		glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
 		glyph_info.texture_offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
-		glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
+		glyph_info.glyph_advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
 	}
 
 	if (glyph_info.found) {
-		glyph_map[current_cache_key.key][p_glyph_index] = glyph_info;
+		glyph_info_map[current_cache_key.key][p_glyph_index] = glyph_info;
 	}
 
 	return glyph_info;

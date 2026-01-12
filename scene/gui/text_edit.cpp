@@ -1392,7 +1392,7 @@ void TextEdit::_notification(int p_what) {
 										break;
 
 									char32_t cchar = ime_text[ofs];
-									char32_t next = ime_text[ofs + 1];
+
 									int im_char_width = cache.font->get_char_size(cchar).width;
 
 									if ((char_ofs + char_margin + im_char_width) >= xmargin_end)
@@ -1489,7 +1489,7 @@ void TextEdit::_notification(int p_what) {
 									break;
 
 								char32_t cchar = ime_text[ofs];
-								char32_t next = ime_text[ofs + 1];
+
 								int im_char_width = cache.font->get_char_size(cchar).width;
 
 								if ((char_ofs + char_margin + im_char_width) >= xmargin_end)
