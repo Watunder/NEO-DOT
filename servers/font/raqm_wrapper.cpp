@@ -32,8 +32,6 @@
 
 #ifdef MODULE_RAQM_ENABLED
 
-#include "core/print_string.h"
-
 #include "thirdparty/libraqm/raqm.h"
 
 static _FORCE_INLINE_ void do_font_fallback(const Vector<FT_Size> &p_ft_sizes, raqm_t *p_raqm_context, raqm_glyph_t **r_glyphs, size_t *r_glyph_count, const uint32_t *p_text, int p_text_len) {
@@ -107,6 +105,12 @@ void RaqmWrapper::clear_cache(uint64_t p_cache_key) {
 	}
 }
 
+static _FORCE_INLINE_ bool have_glyph(char32_t p_char) {
+	bool is_zero_width_char = (p_char == 0X200Cu || p_char == 0X200Du);
+
+	return !is_zero_width_char;
+};
+
 Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
 	if (char_info_map[current_cache_key].has(p_text)) {
 		return char_info_map[current_cache_key][p_text];
@@ -142,38 +146,49 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 
 	char_infos.resize(text_len);
 
+	Vector<ShapedGlyph> shaped_glyphs;
+	shaped_glyphs.resize(glyph_count);
+
 	for (int i = 0; i < glyph_count;) {
 		int start = i;
-		uint32_t cluster = glyphs[start].cluster;
-
 		int end = i;
-		while (end < glyph_count && glyphs[end].cluster == cluster) {
+		while (end < glyph_count && glyphs[end].cluster == glyphs[start].cluster) {
 			end++;
 		}
 		i = end;
+		int part_count = end - start;
 
+		for (int j = 0; j < part_count; j++) {
+			ShapedGlyph shaped_glyph;
+			shaped_glyph.found = true;
+			shaped_glyph.index = glyphs[j + start].index;
+			shaped_glyph.cluster = glyphs[j + start].cluster;
+			shaped_glyph.offset = Vector2(glyphs[j + start].x_offset / 64.0, -glyphs[j + start].y_offset / 64.0);
+			shaped_glyph.advance = Vector2(glyphs[j + start].x_advance / 64.0, glyphs[j + start].y_advance / 64.0);
+			shaped_glyph.ft_face = glyphs[j + start].ftface;
+
+			shaped_glyphs.write[j + start] = shaped_glyph;
+		}
+
+		uint32_t current_cluster = glyphs[start].cluster;
 		uint32_t next_cluster = (end < glyph_count) ? glyphs[end].cluster : text_len;
 
-		for (uint32_t char_index = cluster; char_index < next_cluster; char_index++) {
-			CharInfo span_info;
-			span_info.char_code = text[char_index];
+		for (int part_index = 0, c = current_cluster; c < next_cluster; c++) {
+			CharInfo char_info;
+			char_info.part_count = part_count;
+			char_info.part_index = part_index;
 
-			for (int j = start; j < end; j++) {
-				ShapedGlyph shaped_glyph;
-				shaped_glyph.index = glyphs[j].index;
-				shaped_glyph.cluster = glyphs[j].cluster;
-				shaped_glyph.offset = Vector2(glyphs[j].x_offset / 64.0, glyphs[j].y_offset / 64.0);
-				shaped_glyph.advance = Vector2(glyphs[j].x_advance / 64.0, glyphs[j].y_advance / 64.0);
-				shaped_glyph.ft_face = glyphs[j].ftface;
-
-				span_info.glyphs.push_back(shaped_glyph);
+			if (part_index < part_count && have_glyph(text[c])) {
+				char_info.glyph = shaped_glyphs[part_index + start];
+				part_index++;
 			}
 
-			char_infos.write[char_index] = span_info;
+			char_infos.write[c] = char_info;
 		}
 	}
 
 	raqm_clear_contents(raqm_context);
+	raqm_destroy(raqm_context);
 
 	char_info_map[current_cache_key][p_text] = char_infos;
 

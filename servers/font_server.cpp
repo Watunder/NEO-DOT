@@ -255,7 +255,8 @@ void FontServer::_draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p
 		if (texture_rid.is_valid()) {
 			Color modulate = p_modulate;
 			if (p_glyph_info.texture_format == Image::FORMAT_RGBA8) {
-				modulate.r = modulate.g = modulate.b = 1.0;
+				float v = modulate.get_v();
+				modulate.r = modulate.g = modulate.b = v;
 			}
 
 			Point2 texture_pos = p_pos + p_glyph_info.texture_offset;
@@ -406,7 +407,7 @@ bool FontServer::font_update_index(RID p_font, int p_font_index) {
 	return true;
 }
 
-bool FontServer::font_update_metrics(RID p_font, float p_oversampling) {
+bool FontServer::font_update_metrics(RID p_font, int p_oversampling) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND_V(!font, false);
 
@@ -523,43 +524,36 @@ Size2 FontServer::font_get_string_size(RID p_font, const String &p_text) const {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND_V(!font, Size2(0, 1));
 
-	float height = font->ascent + font->descent;
-
+	Size2 size(0, font->ascent + font->descent);
 	if (p_text.length() == 0) {
-		return Size2(0, height);
+		return size;
 	}
-
-	float width = 0;
 
 #ifdef MODULE_RAQM_ENABLED
 	const Vector<RaqmWrapper::CharInfo> &char_infos = _shape_string(font, p_text);
 	for (int i = 0; i < p_text.length(); i++) {
-		const Vector<RaqmWrapper::ShapedGlyph> &glyphs = char_infos[i].glyphs;
-		for (int j = 0; j < glyphs.size(); j++) {
-			if (glyphs[j].cluster != i) {
-				continue;
-			}
+		const RaqmWrapper::ShapedGlyph &glyph = char_infos[i].glyph;
+		if (!glyph.found || glyph.cluster != i && char_infos[i].part_count == 1) {
+			continue;
+		}
 
-			bool is_cluster_end = (j == 0 || glyphs[j].cluster != glyphs[j - 1].cluster);
+		if (i > 0 && char_infos[i].part_index == 0) {
+			size.width += font->spacing_glyph;
+		}
 
-			width += glyphs[j].advance.width / font->oversampling;
-
-			if (glyphs[j].index == 32) {
-				width += font->spacing_space_char;
-			}
-			if (is_cluster_end) {
-				width += font->spacing_glyph;
-			}
+		size += glyph.advance / font->oversampling;
+		if (glyph.index == 32) {
+			size.width += font->spacing_space_char;
 		}
 	}
 #else
 	const char32_t *sptr = &p_text[0];
 	for (int i = 0; i < p_text.length(); i++) {
-		width += font_get_char_size(p_font, sptr[i]).width;
+		size += font_get_char_size(p_font, sptr[i]);
 	}
 #endif
 
-	return Size2(width, height);
+	return size;
 }
 
 Ref<FontServer::TextData> FontServer::create_text_data(RID p_font, const String &p_text) const {
@@ -579,7 +573,7 @@ Ref<FontServer::TextData> FontServer::create_text_data(RID p_font, const String 
 	return text_data;
 }
 
-float FontServer::draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate, float p_clip_w) const {
+float FontServer::draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate) const {
 	ERR_FAIL_COND_V(!p_text_data.is_valid(), 0);
 	ERR_FAIL_COND_V(!p_text_data->font.is_valid(), 0);
 
@@ -590,37 +584,24 @@ float FontServer::draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_
 	ERR_FAIL_COND_V(!font, 0);
 	ERR_FAIL_INDEX_V(p_char_index, p_text_data->char_infos.size(), 0);
 
-	const Vector<RaqmWrapper::ShapedGlyph> &glyphs = p_text_data->char_infos[p_char_index].glyphs;
-
-	for (int j = 0; j < glyphs.size(); j++) {
-		if (glyphs[j].cluster != p_char_index) {
-			continue;
-		}
-
-		bool is_cluster_end = (j == 0 || glyphs[j].cluster != glyphs[j - 1].cluster);
-		Vector2 advance = glyphs[j].advance / font->oversampling;
-
-		if (is_cluster_end && p_clip_w > 0.0 && (ofs.x + advance.width) > p_clip_w) {
-			break;
-		}
-
-		const GlyphManager::GlyphInfo &glyph_info = _get_shaped_glyph_info(font, glyphs[j]);
-		_draw_glyph(p_canvas_item, glyph_info, p_pos + ofs + glyphs[j].offset / font->oversampling, p_modulate);
-
-		ofs += advance;
-		if (glyphs[j].index == 32) {
-			ofs.width += font->spacing_space_char;
-		}
-		if (is_cluster_end) {
-			ofs.width += font->spacing_glyph;
-		}
-	}
-#else
-	int width = font_get_char_size(p_text_data->font, p_text_data->original_text[p_char_index]).width;
-	if (p_clip_w > 0.0 && (ofs.x + width) > p_clip_w) {
+	const RaqmWrapper::CharInfo &char_info = p_text_data->char_infos[p_char_index];
+	const RaqmWrapper::ShapedGlyph &glyph = char_info.glyph;
+	if (!glyph.found || glyph.cluster != p_char_index && char_info.part_count == 1) {
 		return ofs.width;
 	}
 
+	if (p_char_index > 0 && char_info.part_index == 0) {
+		ofs.width += font->spacing_glyph;
+	}
+
+	const GlyphManager::GlyphInfo &glyph_info = _get_shaped_glyph_info(font, glyph);
+	_draw_glyph(p_canvas_item, glyph_info, p_pos + ofs + glyph.offset / font->oversampling, p_modulate);
+
+	ofs += glyph.advance / font->oversampling;
+	if (glyph.index == 32) {
+		ofs.width += font->spacing_space_char;
+	}
+#else
 	ofs.x += draw_char(p_canvas_item, p_text_data->font, p_pos + ofs, p_text_data->original_text[p_char_index], p_modulate);
 #endif
 
@@ -643,7 +624,10 @@ void FontServer::draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos,
 
 	Vector2 ofs;
 	for (int i = 0; i < p_text.length(); i++) {
-		ofs.x += draw_text_data(text_data, p_canvas_item, p_pos + ofs, i, p_modulate, p_clip_w);
+		if (p_clip_w > 0.0 && ofs.x > p_clip_w) {
+			break;
+		}
+		ofs.x += draw_text_data(text_data, p_canvas_item, p_pos + ofs, i, p_modulate);
 	}
 }
 
