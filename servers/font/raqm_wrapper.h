@@ -46,6 +46,7 @@
 class RaqmWrapper {
 public:
 	struct ShapedGlyph {
+		bool found = false;
 		uint32_t index = 0;
 		uint32_t cluster = 0;
 		Vector2 offset;
@@ -54,8 +55,9 @@ public:
 	};
 
 	struct CharInfo {
-		char32_t char_code = 0;
-		Vector<ShapedGlyph> glyphs;
+		int part_count = -1;
+		int part_index = -1;
+		ShapedGlyph glyph;
 	};
 
 private:

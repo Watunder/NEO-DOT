@@ -62,7 +62,7 @@ public:
 
 		float ascent;
 		float descent;
-		float oversampling;
+		int oversampling;
 
 		int spacing_top;
 		int spacing_bottom;
@@ -131,7 +131,7 @@ public:
 	void font_set_custom_flags(RID p_font, int p_custom_flags);
 	bool font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_data);
 	bool font_update_index(RID p_font, int p_font_index);
-	bool font_update_metrics(RID p_font, float p_oversampling = -1);
+	bool font_update_metrics(RID p_font, int p_oversampling = -1);
 	void font_clear_caches(RID p_font);
 	float font_get_ascent(RID p_font) const;
 	float font_get_descent(RID p_font) const;
@@ -146,7 +146,7 @@ public:
 	Size2 font_get_string_size(RID p_font, const String &p_text) const;
 
 	Ref<TextData> create_text_data(RID p_font, const String &p_text) const;
-	float draw_text_data(const Ref<TextData> &p_text, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
+	float draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate = Color(1, 1, 1)) const;
 
 	float draw_char(RID p_canvas_item, RID p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
 	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
