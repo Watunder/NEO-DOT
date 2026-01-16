@@ -204,6 +204,21 @@ The only modified file is `raqm-version.h`, which was created for Godot
 Bump the version number for libraqm in that file when upgrading.
 
 
+## libunibreak
+
+- Upstream: https://github.com/adah1972/libunibreak
+- Version: 6.1 (304585d8e2d63187507368d612c3d5fff1486368, 2024)
+- License: zlib
+
+Files extracted from upstream source:
+
+- the `src/` folder, recursively:
+  - All the `.c`, `.h` files
+  - Except `test_skips.h`, `tests.c`
+
+- `AUTHORS`, `LICENCE`, `NEWS`
+
+
 ## libwebp
 
 - Upstream: https://chromium.googlesource.com/webm/libwebp/
