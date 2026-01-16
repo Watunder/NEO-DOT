@@ -206,6 +206,11 @@ Copyright: 1995-2019, The PNG Reference Library Authors.
  1995-1996, Guy Eric Schalnat, Group 42, Inc.
 License: Zlib
 
+Files: ./thirdparty/libunibreak/
+Comment: libunibreak
+Copyright: 2008-2024, Wu Yongwei, Tom Hacohen, Petr Filipsky, Andreas Röver.
+License: Zlib
+
 Files: ./thirdparty/libraqm/
 Comment: libraqm
 Copyright: 2015 Information Technology Authority (ITA).

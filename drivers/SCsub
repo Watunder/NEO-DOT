@@ -34,6 +34,9 @@ else:
 # Core dependencies
 SConscript("png/SCsub")
 
+# Unicode dependencies
+SConscript("unicode/SCsub")
+
 env.add_source_files(env.drivers_sources, "*.cpp")
 
 lib = env.add_library("drivers", env.drivers_sources)
