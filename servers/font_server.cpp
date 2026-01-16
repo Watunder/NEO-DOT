@@ -37,6 +37,7 @@
 #endif
 
 #include "thirdparty/zstd/common/xxhash.h"
+#include <graphemebreak.h>
 
 #ifdef MODULE_FREETYPE_ENABLED
 void FontServer::_setup_builtin_fonts() {
@@ -123,8 +124,42 @@ void FontServer::_setup_builtin_fonts() {
 #endif
 
 #ifdef MODULE_RAQM_ENABLED
+static Vector<String> get_graphemes(const String &p_text) {
+	Vector<String> graphemes;
+
+	const uint32_t *text = (const uint32_t *)p_text.c_str();
+	int text_len = p_text.length();
+
+	Vector<char> breaks;
+	breaks.resize(text_len + 1);
+
+	set_graphemebreaks_utf32(text, text_len, "", breaks.ptrw());
+
+	for (int i = 0; i < text_len;) {
+		int start = i;
+		int end = i;
+		while (end < text_len && breaks[end] == GRAPHEMEBREAK_NOBREAK) {
+			end++;
+		}
+		end++;
+		i = end;
+		int len = end - start;
+
+		if (len > 0) {
+			String grapheme = p_text.substr(start, len);
+			graphemes.push_back(grapheme);
+		}
+	}
+
+	return graphemes;
+}
+
 Vector<RaqmWrapper::CharInfo> FontServer::_shape_string(Font *p_font, const String &p_text) const {
 	Vector<RaqmWrapper::CharInfo> char_infos;
+
+	if (p_text.empty()) {
+		return char_infos;
+	}
 
 	ERR_FAIL_COND_V(!p_font, char_infos);
 
@@ -160,7 +195,12 @@ Vector<RaqmWrapper::CharInfo> FontServer::_shape_string(Font *p_font, const Stri
 	}
 
 	raqm_wrapper->update_cache(hash);
-	char_infos = raqm_wrapper->get_char_infos(ft_sizes, p_text);
+
+	const Vector<String> &graphemes = get_graphemes(p_text);
+	for (int i = 0; i < graphemes.size(); i++) {
+		const Vector<RaqmWrapper::CharInfo> &sub_char_infos = raqm_wrapper->get_char_infos(ft_sizes, graphemes[i]);
+		char_infos.append_array(sub_char_infos);
+	}
 
 	return char_infos;
 }
@@ -255,8 +295,7 @@ void FontServer::_draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p
 		if (texture_rid.is_valid()) {
 			Color modulate = p_modulate;
 			if (p_glyph_info.texture_format == Image::FORMAT_RGBA8) {
-				float v = modulate.get_v();
-				modulate.r = modulate.g = modulate.b = v;
+				modulate.r = modulate.g = modulate.b = 1.0;
 			}
 
 			Point2 texture_pos = p_pos + p_glyph_info.texture_offset;
@@ -533,7 +572,7 @@ Size2 FontServer::font_get_string_size(RID p_font, const String &p_text) const {
 	const Vector<RaqmWrapper::CharInfo> &char_infos = _shape_string(font, p_text);
 	for (int i = 0; i < p_text.length(); i++) {
 		const RaqmWrapper::ShapedGlyph &glyph = char_infos[i].glyph;
-		if (!glyph.found || glyph.cluster != i && char_infos[i].part_count == 1) {
+		if (!glyph.found) {
 			continue;
 		}
 
@@ -586,7 +625,7 @@ float FontServer::draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_
 
 	const RaqmWrapper::CharInfo &char_info = p_text_data->char_infos[p_char_index];
 	const RaqmWrapper::ShapedGlyph &glyph = char_info.glyph;
-	if (!glyph.found || glyph.cluster != p_char_index && char_info.part_count == 1) {
+	if (!glyph.found) {
 		return ofs.width;
 	}
 
