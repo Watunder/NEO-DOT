@@ -32,6 +32,8 @@ if env["builtin_libunibreak"]:
     env.Prepend(CPPPATH=[thirdparty_dir + "/src"])
 
     env_thirdparty = env_unicode.Clone()
+    # Include header for libunibreak to use stdint types
+    env_thirdparty.Append(CCFLAGS=["/FI", '"drivers/unicode/unibreak_utf_types.h"'])
     env_thirdparty.disable_warnings()
     env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
 
