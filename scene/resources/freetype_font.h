@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  freetype_font.h                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,88 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef FREETYPE_FONT_H
+#define FREETYPE_FONT_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "core/io/resource_loader.h"
+#include "scene/resources/font.h"
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+class FreeTypeFont : public Font {
+	GDCLASS(FreeTypeFont, Font);
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+public:
+	enum Hinting {
+		HINTING_NONE,
+		HINTING_AUTO,
+		HINTING_LIGHT,
+		HINTING_NORMAL,
+	};
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+private:
+	RID font;
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+	String path_to_file;
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+	bool use_mipmaps;
+	bool use_filter;
+	int face_index;
+	int face_size;
+	Hinting hinting;
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+protected:
+	static void _bind_methods();
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+	bool _update_data(const PoolVector<uint8_t> &p_data);
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+public:
+	virtual void reload_from_file();
+	virtual RID get_rid() const;
+
+	void set_data(const PoolVector<uint8_t> &p_data);
+	PoolVector<uint8_t> get_data() const;
+
+	Error load(String p_path);
+	String get_load_path() const;
+
+	int get_face_index() const;
+	void set_face_index(int p_index);
+
+	int get_face_size() const;
+	void set_face_size(int p_size);
+
+	Hinting get_hinting() const;
+	void set_hinting(Hinting p_hinting);
+
+	virtual Size2 get_char_size(char32_t p_char) const;
+	virtual Size2 get_string_size(const String &p_string) const;
+
+	virtual bool get_use_mipmaps() const;
+	virtual void set_use_mipmaps(bool p_enable);
+
+	virtual bool get_use_filter() const;
+	virtual void set_use_filter(bool p_enable);
+
+	virtual int get_spacing(int p_type) const;
+	virtual void set_spacing(int p_type, int p_value);
+
+	virtual float get_height() const;
+	virtual float get_ascent() const;
+	virtual float get_descent() const;
+
+	FreeTypeFont();
+	~FreeTypeFont();
+};
+
+VARIANT_ENUM_CAST(FreeTypeFont::Hinting);
+
+/*************************************************************************/
+
+class ResourceFormatLoaderFreeTypeFont : public ResourceFormatLoader {
+public:
+	virtual Ref<Resource> load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
+	virtual void get_recognized_extensions(List<String> *p_extensions) const;
+	virtual bool handles_type(const String &p_type) const;
+	virtual String get_resource_type(const String &p_path) const;
+};
+
+#endif

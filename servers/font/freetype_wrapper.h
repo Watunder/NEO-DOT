@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  freetype_wrapper.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,56 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef FREETYPE_WRAPPER_H
+#define FREETYPE_WRAPPER_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+#include "core/hash_map.h"
+#include "core/map.h"
+#include "core/pool_vector.h"
+#include "core/reference.h"
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+#include "font_cache_key.h"
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+#include <ft2build.h>
+#include FT_CACHE_H
+#include FT_FREETYPE_H
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+class FreeTypeWrapper {
+public:
+	struct FontInfo : Reference {
+		FontID id;
+		uint8_t face_count = 0;
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+		PoolVector<uint8_t> data;
+	};
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+private:
+	FT_Library ft_library;
+	FTC_Manager ftc_manager;
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+	mutable HashMap<FontID, Ref<FontInfo>, FontIDHasher> font_infos;
+	Map<FT_Face, Ref<FontInfo>> face_to_font_info;
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+	Ref<FontInfo> _get_font_info(const FontID &p_font_id) const;
+
+public:
+	friend FT_Error _ftc_manager_requester(FTC_FaceID p_font_id, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
+
+	void update_font_data(const FontID &p_font_id, const PoolVector<uint8_t> &p_font_data);
+
+	FT_Face get_ft_face(const FontID &p_font_id);
+	FT_Size get_ft_size(const FontID &p_font_id, int p_size, float p_oversampling);
+
+	Ref<FontInfo> get_font_info(const FT_Face &p_ft_face) const;
+	Ref<FontInfo> get_font_info(const FontID &p_font_id) const;
+
+	FreeTypeWrapper();
+	~FreeTypeWrapper();
+};
+
+#endif
+
+#endif

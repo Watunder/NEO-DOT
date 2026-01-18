@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  shelf_pack_texture.cpp                                               */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,49 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#include "shelf_pack_texture.h"
 
-#include "core/method_bind_ext.gen.inc"
+ShelfPackTexture::Position ShelfPackTexture::Shelf::alloc_shelf(int p_index, int p_w, int p_h) {
+	if (p_w > w || p_h > h) {
+		return ShelfPackTexture::Position{};
+	}
+	int xx = x;
+	x += p_w;
+	w -= p_w;
+	return ShelfPackTexture::Position{ p_index, xx, y };
+}
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+ShelfPackTexture::Position ShelfPackTexture::pack_rect(int p_index, int p_w, int p_h) {
+	int y = 0;
+	int waste = 0;
+	List<Shelf>::Element *best_shelf = nullptr;
+	int best_waste = INT_MAX;
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
-
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
-
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
-
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
-
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
-
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
-
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
+	for (List<Shelf>::Element *E = shelves.front(); E; E = E->next()) {
+		y += E->get().h;
+		if (p_w > E->get().w) {
+			continue;
+		}
+		if (p_h == E->get().h) {
+			return E->get().alloc_shelf(p_index, p_w, p_h);
+		}
+		if (p_h > E->get().h) {
+			continue;
+		}
+		if (p_h < E->get().h) {
+			waste = (E->get().h - p_h) * p_w;
+			if (waste < best_waste) {
+				best_waste = waste;
+				best_shelf = E;
+			}
+		}
+	}
+	if (best_shelf) {
+		return best_shelf->get().alloc_shelf(p_index, p_w, p_h);
+	}
+	if (p_h <= (texture_size - y) && p_w <= texture_size) {
+		List<Shelf>::Element *E = shelves.push_back(Shelf{ 0, y, texture_size, p_h });
+		return E->get().alloc_shelf(p_index, p_w, p_h);
+	}
+	return ShelfPackTexture::Position{};
 }

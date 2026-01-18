@@ -772,7 +772,6 @@ void LineEdit::_notification(int p_what) {
 			}
 
 			int caret_height = font->get_height() > y_area ? y_area : font->get_height();
-			FontDrawer drawer(font, Color(1, 1, 1));
 			while (true) {
 				// End of string, break.
 				if (char_ofs >= t.length())
@@ -786,8 +785,8 @@ void LineEdit::_notification(int p_what) {
 								break;
 
 							char32_t cchar = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs];
-							char32_t next = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs + 1];
-							int im_char_width = font->get_char_size(cchar, next).width;
+
+							int im_char_width = font->get_char_size(cchar).width;
 
 							if ((x_ofs + im_char_width) > ofs_max)
 								break;
@@ -799,7 +798,7 @@ void LineEdit::_notification(int p_what) {
 								VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs + caret_height), Size2(im_char_width, 1)), font_color);
 							}
 
-							drawer.draw_char(ci, Point2(x_ofs, y_ofs + font_ascent), cchar, next, font_color);
+							draw_char(font, Point2(x_ofs, y_ofs + font_ascent), cchar, font_color);
 
 							x_ofs += im_char_width;
 							ofs++;
@@ -808,8 +807,8 @@ void LineEdit::_notification(int p_what) {
 				}
 
 				char32_t cchar = (pass && !text.empty()) ? secret_character[0] : t[char_ofs];
-				char32_t next = (pass && !text.empty()) ? secret_character[0] : t[char_ofs + 1];
-				int char_width = font->get_char_size(cchar, next).width;
+
+				int char_width = font->get_char_size(cchar).width;
 
 				// End of widget, break.
 				if ((x_ofs + char_width) > ofs_max)
@@ -821,7 +820,7 @@ void LineEdit::_notification(int p_what) {
 					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(char_width, caret_height)), selection_color);
 
 				int yofs = y_ofs + (caret_height - font->get_height()) / 2;
-				drawer.draw_char(ci, Point2(x_ofs, yofs + font_ascent), cchar, next, selected ? font_color_selected : font_color);
+				draw_char(font, Point2(x_ofs, yofs + font_ascent), cchar, selected ? font_color_selected : font_color);
 
 				if (char_ofs == cursor_pos && draw_caret && !using_placeholder) {
 					if (ime_text.length() == 0) {
@@ -845,8 +844,8 @@ void LineEdit::_notification(int p_what) {
 							break;
 
 						char32_t cchar = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs];
-						char32_t next = (pass && !text.empty()) ? secret_character[0] : ime_text[ofs + 1];
-						int im_char_width = font->get_char_size(cchar, next).width;
+
+						int im_char_width = font->get_char_size(cchar).width;
 
 						if ((x_ofs + im_char_width) > ofs_max)
 							break;
@@ -858,7 +857,7 @@ void LineEdit::_notification(int p_what) {
 							VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs + caret_height), Size2(im_char_width, 1)), font_color);
 						}
 
-						drawer.draw_char(ci, Point2(x_ofs, y_ofs + font_ascent), cchar, next, font_color);
+						draw_char(font, Point2(x_ofs, y_ofs + font_ascent), cchar, font_color);
 
 						x_ofs += im_char_width;
 						ofs++;
@@ -1311,9 +1310,9 @@ void LineEdit::set_cursor_position(int p_pos) {
 					// accum_width = font->get_char_size(' ').width;
 				} else {
 					if (pass) {
-						accum_width += font->get_char_size(secret_character[0], i + 1 < text.length() ? secret_character[0] : 0).width;
+						accum_width += font->get_char_size(secret_character[0]).width;
 					} else {
-						accum_width += font->get_char_size(text[i], i + 1 < text.length() ? text[i + 1] : 0).width; // Anything should do.
+						accum_width += font->get_char_size(text[i]).width; // Anything should do.
 					}
 				}
 				if (accum_width > window_width)

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  raqm_wrapper.h                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,58 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef RAQM_WRAPPER_H
+#define RAQM_WRAPPER_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_RAQM_ENABLED
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+#include "core/hash_map.h"
+#include "core/math/vector2.h"
+#include "core/ustring.h"
+#include "core/vector.h"
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+#include "font_cache_key.h"
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+class RaqmWrapper {
+public:
+	struct ShapedGlyph {
+		uint32_t index = 0;
+		uint32_t cluster = 0;
+		Vector2 offset;
+		Vector2 advance;
+		FT_Face ft_face = NULL;
+	};
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+	struct CharInfo {
+		uint32_t codepoint = 0;
+		int part_count = -1;
+		int part_index = -1;
+		ShapedGlyph glyph;
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+		_FORCE_INLINE_ bool is_space() const {
+			return (codepoint == 0x0020u);
+		};
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+		_FORCE_INLINE_ bool is_last() const {
+			return (part_index + 1 == part_count);
+		};
+	};
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+private:
+	uint64_t current_cache_key = 0;
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+	HashMap<uint64_t, HashMap<String, Vector<CharInfo>>> char_info_map;
+
+public:
+	void update_cache(uint64_t p_cache_key);
+	void clear_cache(uint64_t p_cache_key);
+
+	Vector<RaqmWrapper::CharInfo> get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
+};
+
+#endif
+
+#endif

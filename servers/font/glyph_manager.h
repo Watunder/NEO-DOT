@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  glyph_manager.h                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,54 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef GLYPH_MANAGER_H
+#define GLYPH_MANAGER_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#endif
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+#include "font_cache_key.h"
+#include "shelf_pack_texture.h"
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+class GlyphManager {
+public:
+	struct GlyphInfo {
+		bool found = false;
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+		Vector2 texture_offset;
+		Vector2 glyph_advance;
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+		int texture_index = -1;
+		Size2 texture_size;
+		Rect2 texture_rect_uv;
+		Image::Format texture_format;
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+		int texture_flags = 0;
+	};
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+private:
+	FontCacheKey current_cache_key;
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
+	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_info_map;
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
+#ifdef MODULE_FREETYPE_ENABLED
+	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range = 1);
+#endif
+
+public:
+	void update_cache(const FontCacheKey &p_cache_key);
+	void clear_cache(const FontCacheKey &p_cache_key);
+
+#ifdef MODULE_FREETYPE_ENABLED
+	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);
+#endif
+
+	RID get_texture_rid(const GlyphInfo &p_glyph_info);
+};
+
+#endif

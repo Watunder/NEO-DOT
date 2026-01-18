@@ -126,7 +126,7 @@ void TextEdit::Text::_update_line_cache(int p_line) const {
 	// Update width.
 
 	for (int i = 0; i < len; i++) {
-		w += get_char_width(str[i], str[i + 1], w);
+		w += get_char_width(str[i], w);
 	}
 
 	text.write[p_line].width_cache = w;
@@ -300,7 +300,7 @@ void TextEdit::Text::remove(int p_at) {
 	text.remove(p_at);
 }
 
-int TextEdit::Text::get_char_width(char32_t c, char32_t next_c, int px) const {
+int TextEdit::Text::get_char_width(char32_t c, int px) const {
 	int tab_w = font->get_char_size(' ').width * indent_size;
 	int w = 0;
 
@@ -311,7 +311,7 @@ int TextEdit::Text::get_char_width(char32_t c, char32_t next_c, int px) const {
 		else
 			w = tab_w - px % tab_w; // Is right.
 	} else {
-		w = font->get_char_size(c, next_c).width;
+		w = font->get_char_size(c).width;
 	}
 	return w;
 }
@@ -861,8 +861,6 @@ void TextEdit::_notification(int p_what) {
 
 			int cursor_wrap_index = get_cursor_wrap_index();
 
-			FontDrawer drawer(cache.font, Color(1, 1, 1));
-
 			int first_visible_line = get_first_visible_line() - 1;
 			int draw_amount = visible_rows + (smooth_scroll_enabled ? 1 : 0);
 			draw_amount += times_line_wraps(first_visible_line + 1);
@@ -1242,7 +1240,7 @@ void TextEdit::_notification(int p_what) {
 								fc = line_num_padding + fc;
 							}
 
-							cache.font->draw(ci, Point2(cache.style_normal->get_margin(MARGIN_LEFT) + cache.breakpoint_gutter_width + cache.info_gutter_width + ofs_x, yofs + cache.font->get_ascent()), fc, text.is_safe(line) ? cache.safe_line_number_color : cache.line_number_color);
+							draw_string(cache.font, Point2(cache.style_normal->get_margin(MARGIN_LEFT) + cache.breakpoint_gutter_width + cache.info_gutter_width + ofs_x, yofs + cache.font->get_ascent()), fc, text.is_safe(line) ? cache.safe_line_number_color : cache.line_number_color);
 						}
 					}
 
@@ -1262,7 +1260,7 @@ void TextEdit::_notification(int p_what) {
 						int char_w;
 
 						// Handle tabulator.
-						char_w = text.get_char_width(str[j], str[j + 1], char_ofs);
+						char_w = text.get_char_width(str[j], char_ofs);
 
 						if ((char_ofs + char_margin) < xmargin_beg) {
 							char_ofs += char_w;
@@ -1365,14 +1363,14 @@ void TextEdit::_notification(int p_what) {
 									(cursor.column == last_wrap_column + j && cursor.line == line && cursor_wrap_index == line_wrap_index && (brace_open_matching || brace_open_mismatch))) {
 								if (brace_open_mismatch)
 									color = cache.brace_mismatch_color;
-								drawer.draw_char(ci, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), '_', str[j + 1], in_selection && override_selected_font_color ? cache.font_color_selected : color);
+								draw_char(cache.font, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), '_', in_selection && override_selected_font_color ? cache.font_color_selected : color);
 							}
 
 							if ((brace_close_match_line == line && brace_close_match_column == last_wrap_column + j) ||
 									(cursor.column == last_wrap_column + j + 1 && cursor.line == line && cursor_wrap_index == line_wrap_index && (brace_close_matching || brace_close_mismatch))) {
 								if (brace_close_mismatch)
 									color = cache.brace_mismatch_color;
-								drawer.draw_char(ci, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), '_', str[j + 1], in_selection && override_selected_font_color ? cache.font_color_selected : color);
+								draw_char(cache.font, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), '_', in_selection && override_selected_font_color ? cache.font_color_selected : color);
 							}
 						}
 
@@ -1394,8 +1392,8 @@ void TextEdit::_notification(int p_what) {
 										break;
 
 									char32_t cchar = ime_text[ofs];
-									char32_t next = ime_text[ofs + 1];
-									int im_char_width = cache.font->get_char_size(cchar, next).width;
+
+									int im_char_width = cache.font->get_char_size(cchar).width;
 
 									if ((char_ofs + char_margin + im_char_width) >= xmargin_end)
 										break;
@@ -1407,7 +1405,7 @@ void TextEdit::_notification(int p_what) {
 										VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(char_ofs + char_margin, ofs_y + get_row_height()), Size2(im_char_width, 1)), color);
 									}
 
-									drawer.draw_char(ci, Point2(char_ofs + char_margin + ofs_x, ofs_y + ascent), cchar, next, color);
+									draw_char(cache.font, Point2(char_ofs + char_margin + ofs_x, ofs_y + ascent), cchar, color);
 
 									char_ofs += im_char_width;
 									ofs++;
@@ -1444,7 +1442,7 @@ void TextEdit::_notification(int p_what) {
 
 							if (str[j] >= 32) {
 								int yofs = ofs_y + (get_row_height() - cache.font->get_height()) / 2;
-								int w = drawer.draw_char(ci, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), str[j], str[j + 1], in_selection && override_selected_font_color ? cache.font_color_selected : color);
+								int w = draw_char(cache.font, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), str[j], in_selection && override_selected_font_color ? cache.font_color_selected : color);
 								if (underlined) {
 									float line_width = 1.0;
 #ifdef TOOLS_ENABLED
@@ -1491,8 +1489,8 @@ void TextEdit::_notification(int p_what) {
 									break;
 
 								char32_t cchar = ime_text[ofs];
-								char32_t next = ime_text[ofs + 1];
-								int im_char_width = cache.font->get_char_size(cchar, next).width;
+
+								int im_char_width = cache.font->get_char_size(cchar).width;
 
 								if ((char_ofs + char_margin + im_char_width) >= xmargin_end)
 									break;
@@ -1504,7 +1502,7 @@ void TextEdit::_notification(int p_what) {
 									VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(char_ofs + char_margin, ofs_y + get_row_height()), Size2(im_char_width, 1)), color);
 								}
 
-								drawer.draw_char(ci, Point2(char_ofs + char_margin + ofs_x, ofs_y + ascent), cchar, next, color);
+								draw_char(cache.font, Point2(char_ofs + char_margin + ofs_x, ofs_y + ascent), cchar, color);
 
 								char_ofs += im_char_width;
 								ofs++;
@@ -4323,7 +4321,7 @@ Vector<String> TextEdit::get_wrap_rows_text(int p_line) const {
 
 	while (col < line_text.length()) {
 		char32_t c = line_text[col];
-		int w = text.get_char_width(c, line_text[col + 1], px + word_px);
+		int w = text.get_char_width(c, px + word_px);
 
 		int indent_ofs = (cur_wrap_index != 0 ? tab_offset_px : 0);
 
@@ -4621,7 +4619,7 @@ int TextEdit::get_char_pos_for(int p_px, String p_str) const {
 	int c = 0;
 
 	while (c < p_str.length()) {
-		int w = text.get_char_width(p_str[c], p_str[c + 1], px);
+		int w = text.get_char_width(p_str[c], px);
 
 		if (p_px < (px + w / 2))
 			break;
@@ -4639,7 +4637,7 @@ int TextEdit::get_column_x_offset(int p_char, String p_str) const {
 		if (i >= p_str.length())
 			break;
 
-		px += text.get_char_width(p_str[i], p_str[i + 1], px);
+		px += text.get_char_width(p_str[i], px);
 	}
 
 	return px;

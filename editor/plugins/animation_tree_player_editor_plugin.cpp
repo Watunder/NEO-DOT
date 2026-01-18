@@ -478,10 +478,10 @@ void AnimationTreePlayerEditor::_draw_node(const StringName &p_node) {
 	Color bx = font_color_title;
 	bx.a *= 0.1;
 	draw_rect(Rect2(ofs, Size2(size.width - style->get_minimum_size().width, font->get_height())), bx);
-	font->draw_halign(ci, ofs + ascofs, HALIGN_CENTER, w, String(_node_type_names[type]), font_color_title);
+	draw_string_aligned(font, ofs + ascofs, HALIGN_CENTER, w, String(_node_type_names[type]), font_color_title);
 
 	ofs.y += h;
-	font->draw_halign(ci, ofs + ascofs, HALIGN_CENTER, w, p_node, font_color);
+	draw_string_aligned(font, ofs + ascofs, HALIGN_CENTER, w, p_node, font_color);
 	ofs.y += h;
 
 	int inputs = anim_tree->node_get_input_count(p_node);
@@ -552,7 +552,7 @@ void AnimationTreePlayerEditor::_draw_node(const StringName &p_node) {
 				default: {
 				}
 			}
-			font->draw(ci, ofs + ascofs + Point2(3, 0), text, font_color);
+			draw_string(font, ofs + ascofs + Point2(3, 0), text, font_color);
 
 			ofs.y += h;
 		}
@@ -576,7 +576,7 @@ void AnimationTreePlayerEditor::_draw_node(const StringName &p_node) {
 			else
 				text = anim->get_name();
 
-			font->draw_halign(ci, ofs + ascofs, HALIGN_CENTER, w, text, font_color_title);
+			draw_string_aligned(font, ofs + ascofs, HALIGN_CENTER, w, text, font_color_title);
 
 		} break;
 		case AnimationTreePlayer::NODE_ONESHOT:
@@ -586,7 +586,7 @@ void AnimationTreePlayerEditor::_draw_node(const StringName &p_node) {
 		case AnimationTreePlayer::NODE_BLEND4:
 		case AnimationTreePlayer::NODE_TIMESCALE:
 		case AnimationTreePlayer::NODE_TRANSITION: {
-			font->draw_halign(ci, ofs + ascofs, HALIGN_CENTER, w, "edit...", font_color_title);
+			draw_string_aligned(font, ofs + ascofs, HALIGN_CENTER, w, "edit...", font_color_title);
 		} break;
 		default:
 			editable = false;
@@ -888,10 +888,10 @@ void AnimationTreePlayerEditor::_notification(int p_what) {
 
 			switch (anim_tree->get_last_error()) {
 				case AnimationTreePlayer::CONNECT_OK: {
-					f->draw(get_canvas_item(), status_offset, TTR("Animation tree is valid."), Color(0, 1, 0.6, 0.8));
+					draw_string(f, status_offset, TTR("Animation tree is valid."), Color(0, 1, 0.6, 0.8));
 				} break;
 				default: {
-					f->draw(get_canvas_item(), status_offset, TTR("Animation tree is invalid."), Color(1, 0.6, 0.0, 0.8));
+					draw_string(f, status_offset, TTR("Animation tree is invalid."), Color(1, 0.6, 0.0, 0.8));
 				} break;
 			}
 

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  shelf_pack_texture.h                                                 */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,41 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef SHELF_PACK_TEXTURE_H
+#define SHELF_PACK_TEXTURE_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "scene/resources/texture.h"
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+struct ShelfPackTexture {
+	enum {
+		MIN_TEXTURE_SIZE = 256,
+		MAX_TEXTURE_SIZE = 4096,
+	};
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+	struct Position {
+		int index = -1;
+		int x = 0;
+		int y = 0;
+	};
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+	struct Shelf {
+		int x = 0;
+		int y = 0;
+		int w = 0;
+		int h = 0;
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+		Position alloc_shelf(int p_index, int p_w, int p_h);
+	};
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+	List<Shelf> shelves;
+	bool dirty = true;
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+	int texture_size = MIN_TEXTURE_SIZE;
+	PoolVector<uint8_t> image_data;
+	RID texture_rid;
+	Image::Format image_format;
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+	Position pack_rect(int p_index, int p_w, int p_h);
+};
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+#endif

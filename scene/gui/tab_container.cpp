@@ -442,7 +442,7 @@ void TabContainer::_draw_tab(Ref<StyleBox> &p_tab_style, Color &p_font_color, in
 
 	// Draw the tab text.
 	Point2i text_pos(x_content, y_center - (font->get_height() / 2) + font->get_ascent());
-	font->draw(canvas, text_pos, text, p_font_color);
+	draw_string(font, text_pos, text, p_font_color);
 }
 
 void TabContainer::_on_theme_changed() {

@@ -36,7 +36,7 @@
 #include "editor_node.h"
 #include "editor_scale.h"
 #include "scene/gui/center_container.h"
-#include "scene/resources/dynamic_font.h"
+#include "scene/resources/freetype_font.h"
 
 void EditorLog::_error_handler(void *p_self, const char *p_func, const char *p_file, int p_line, const char *p_error, const char *p_errorexp, ErrorHandlerType p_type) {
 	EditorLog *self = (EditorLog *)p_self;
@@ -63,7 +63,7 @@ void EditorLog::_notification(int p_what) {
 		log->add_font_override("normal_font", get_font("output_source", "EditorFonts"));
 		log->add_color_override("selection_color", get_color("accent_color", "Editor") * Color(1, 1, 1, 0.4));
 	} else if (p_what == NOTIFICATION_THEME_CHANGED) {
-		Ref<DynamicFont> df_output_code = get_font("output_source", "EditorFonts");
+		Ref<FreeTypeFont> df_output_code = get_font("output_source", "EditorFonts");
 		if (df_output_code.is_valid()) {
 			if (log != NULL) {
 				log->add_font_override("normal_font", get_font("output_source", "EditorFonts"));

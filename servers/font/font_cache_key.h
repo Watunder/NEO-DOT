@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font.cpp                                                             */
+/*  font_cache_key.h                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,31 +28,65 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "font.h"
+#ifndef FONT_CACHE_KEY_H
+#define FONT_CACHE_KEY_H
 
-#include "core/method_bind_ext.gen.inc"
+#include "core/hashfuncs.h"
+#include "core/typedefs.h"
 
-void Font::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
+struct FontID {
+	uint32_t font_hash = 0;
+	uint8_t font_index = 0;
 
-	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
-	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
+	bool operator==(const FontID &p_id) const {
+		return (p_id.font_hash == font_hash &&
+				p_id.font_index == font_index);
+	}
 
-	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
+	uint32_t hash() const {
+		uint32_t h = font_hash;
+		h = h * 31 + font_index;
+		return h;
+	}
+};
 
-	ClassDB::bind_method(D_METHOD("get_char_size", "char"), &Font::get_char_size);
-	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
+struct FontIDHasher {
+	static _FORCE_INLINE_ uint32_t hash(const FontID &p_id) { return p_id.hash(); }
+};
 
-	ClassDB::bind_method(D_METHOD("set_use_mipmaps", "enable"), &Font::set_use_mipmaps);
-	ClassDB::bind_method(D_METHOD("get_use_mipmaps"), &Font::get_use_mipmaps);
+struct FontCacheKey {
+	union {
+		struct {
+			uint64_t font_hash : 32;
+			uint64_t font_index : 8;
+			uint64_t font_size : 16;
+			uint64_t font_texture_flags : 3;
+			uint64_t font_custom_flags : 3;
+			uint64_t reserved : 2;
+		};
 
-	ClassDB::bind_method(D_METHOD("set_use_filter", "enable"), &Font::set_use_filter);
-	ClassDB::bind_method(D_METHOD("get_use_filter"), &Font::get_use_filter);
+		uint64_t key;
+	};
 
-	ClassDB::bind_method(D_METHOD("set_spacing", "type", "value"), &Font::set_spacing);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
+	FontCacheKey() :
+			key(0) {}
 
-	ADD_GROUP("Settings", "");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mipmaps"), "set_use_mipmaps", "get_use_mipmaps");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_filter"), "set_use_filter", "get_use_filter");
-}
+	bool operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
+
+	_FORCE_INLINE_ FontID get_font_id() const {
+		FontID font_id;
+		font_id.font_hash = font_hash;
+		font_id.font_index = font_index;
+		return font_id;
+	}
+
+	_FORCE_INLINE_ FontCacheKey create_temp_key(const FontID &p_font_id) const {
+		FontCacheKey temp_cache_key;
+		temp_cache_key.key = key;
+		temp_cache_key.font_hash = p_font_id.font_hash;
+		temp_cache_key.font_index = p_font_id.font_index;
+		return temp_cache_key;
+	}
+};
+
+#endif

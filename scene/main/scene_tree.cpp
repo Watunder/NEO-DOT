@@ -41,11 +41,12 @@
 #include "main/input_default.h"
 #include "node.h"
 #include "scene/debugger/script_debugger_remote.h"
-#include "scene/resources/dynamic_font.h"
+#include "scene/resources/freetype_font.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
+#include "servers/font_server.h"
 #include "servers/physics_2d_server.h"
 #include "servers/physics_server.h"
 #include "viewport.h"
@@ -468,8 +469,7 @@ bool SceneTree::iteration(float p_time) {
 
 void SceneTree::_update_font_oversampling(float p_ratio) {
 	if (use_font_oversampling) {
-		DynamicFontAtSize::font_oversampling = p_ratio;
-		DynamicFont::update_oversampling();
+		// FontServer::get_singleton()->update_oversampling(p_ratio);
 	}
 }
 
