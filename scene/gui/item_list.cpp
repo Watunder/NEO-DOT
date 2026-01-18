@@ -1049,8 +1049,10 @@ void ItemList::_notification(int p_what) {
 					int ss = items[i].text.length();
 					float ofs = 0;
 					int line = 0;
+
+					Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text, false);
 					for (int j = 0; j <= ss; j++) {
-						int cs = j < ss ? font->get_char_size(items[i].text[j]).x : 0;
+						int cs = j < ss ? FontServer::get_singleton()->get_text_data_size(text_data, j).width : 0;
 						if (ofs + cs > max_len || j == ss) {
 							line_limit_cache.write[line] = j;
 							line_size_cache.write[line] = ofs;
@@ -1071,7 +1073,6 @@ void ItemList::_notification(int p_what) {
 					text_ofs += base_ofs;
 					text_ofs += items[i].rect_cache.position;
 
-					Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text);
 					for (int j = 0; j < ss; j++) {
 						if (j == line_limit_cache[line]) {
 							line++;
@@ -1079,7 +1080,9 @@ void ItemList::_notification(int p_what) {
 							if (line >= max_text_lines)
 								break;
 						}
-						ofs += FontServer::get_singleton()->draw_text_data(text_data, get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), j, modulate);
+						float line_ofs_x = ofs + (max_len - line_size_cache[line]) / 2;
+						float line_ofs_y = line * (font_height + line_separation);
+						ofs += FontServer::get_singleton()->draw_text_data(text_data, j, get_canvas_item(), text_ofs + Vector2(line_ofs_x, line_ofs_y).floor(), modulate).x;
 					}
 
 					//special multiline mode

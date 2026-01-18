@@ -107,14 +107,14 @@ private:
 #ifdef MODULE_RAQM_ENABLED
 	RaqmWrapper *raqm_wrapper = NULL;
 
-	_FORCE_INLINE_ Vector<RaqmWrapper::CharInfo> _shape_string(Font *p_font, const String &p_text) const;
+	_FORCE_INLINE_ Vector<RaqmWrapper::CharInfo> _shape_string(Font *p_font, const String &p_text, bool p_break_graphemes) const;
 	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, const RaqmWrapper::ShapedGlyph &p_shaped_glyph) const;
 #endif
 
 	GlyphManager *glyph_manager = NULL;
 
 	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(Font *p_font, char32_t p_char) const;
-	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Point2 &p_pos, const Color &p_modulate) const;
+	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate) const;
 
 protected:
 	static void _bind_methods();
@@ -142,15 +142,16 @@ public:
 	void font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing);
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
 
-	Size2 font_get_char_size(RID p_font, char32_t p_char) const;
-	Size2 font_get_string_size(RID p_font, const String &p_text) const;
+	Vector2 font_get_char_size(RID p_font, char32_t p_char) const;
+	Vector2 font_get_string_size(RID p_font, const String &p_text) const;
 
-	Ref<TextData> create_text_data(RID p_font, const String &p_text) const;
-	float draw_text_data(const Ref<TextData> &p_text_data, RID p_canvas_item, const Point2 &p_pos, int p_char_index, const Color &p_modulate = Color(1, 1, 1)) const;
+	Ref<TextData> create_text_data(RID p_font, const String &p_text, bool p_break = true) const;
+	Vector2 draw_text_data(const Ref<TextData> &p_text_data, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate = Color(1, 1, 1)) const;
+	Vector2 get_text_data_size(const Ref<TextData> &p_text_data, int p_char_index) const;
 
-	float draw_char(RID p_canvas_item, RID p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, RID p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
-	void draw_string_aligned(RID p_canvas_item, RID p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
+	Vector2 draw_char(RID p_canvas_item, RID p_font, const Vector2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
+	void draw_string(RID p_canvas_item, RID p_font, const Vector2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
+	void draw_string_aligned(RID p_canvas_item, RID p_font, const Vector2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
 
 	FontServer();
 	~FontServer();
