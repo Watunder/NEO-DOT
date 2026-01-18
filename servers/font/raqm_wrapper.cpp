@@ -106,7 +106,7 @@ void RaqmWrapper::clear_cache(uint64_t p_cache_key) {
 }
 
 static _FORCE_INLINE_ bool have_glyph(uint32_t p_codepoint) {
-	return (p_codepoint != 0X200Du);
+	return (p_codepoint != 0x200Cu || p_codepoint != 0x200Du);
 };
 
 Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
@@ -181,7 +181,7 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 			char_info.codepoint = text[c];
 			char_info.part_count = part_count;
 
-			if (part_index < part_count && have_glyph(char_info.codepoint) || invisible_glyphs.find(part_index) != -1) {
+			if (part_index < part_count && have_glyph(char_info.codepoint) || invisible_glyphs.find(part_index + start) != -1) {
 				char_info.glyph = shaped_glyphs[part_index + start];
 				char_info.part_index = part_index;
 				part_index++;
