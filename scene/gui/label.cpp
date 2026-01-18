@@ -232,11 +232,11 @@ void Label::_notification(int p_what) {
 
 					for (int i = 0; i < from->word_len; i++) {
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
-							float move = FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, i, font_color_shadow);
+							float move = FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow).x;
 							if (use_outline) {
-								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), i, font_color_shadow);
-								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), i, font_color_shadow);
-								FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), i, font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
+								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
 							}
 							x_ofs_shadow += move;
 							chars_total_shadow++;
@@ -245,7 +245,9 @@ void Label::_notification(int p_what) {
 				}
 				for (int i = 0; i < from->word_len; i++) {
 					if (visible_chars < 0 || chars_total < visible_chars) {
-						x_ofs += FontServer::get_singleton()->draw_text_data(text_data, ci, Point2(x_ofs, y_ofs), i, font_color);
+						Vector2 ofs = FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs, y_ofs), font_color);
+						x_ofs += ofs.x;
+						y_ofs += ofs.y;
 						chars_total++;
 					}
 				}
@@ -289,11 +291,14 @@ int Label::get_longest_line_width() const {
 	real_t max_line_width = 0;
 	real_t line_width = 0;
 
-	for (int i = 0; i < xl_text.size(); i++) {
-		char32_t current = xl_text[i];
-		if (uppercase)
-			current = String::char_uppercase(current);
+	String current_xl_text = xl_text;
+	if (uppercase) {
+		current_xl_text = current_xl_text.to_upper();
+	}
+	Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
 
+	for (int i = 0; i < current_xl_text.size(); i++) {
+		char32_t current = current_xl_text[i];
 		if (current < 32) {
 			if (current == '\n') {
 				if (line_width > max_line_width)
@@ -301,7 +306,7 @@ int Label::get_longest_line_width() const {
 				line_width = 0;
 			}
 		} else {
-			real_t char_width = font->get_char_size(current).width;
+			real_t char_width = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
 			line_width += char_width;
 		}
 	}
@@ -364,11 +369,14 @@ void Label::regenerate_word_cache() {
 
 	WordCache *last = NULL;
 
-	for (int i = 0; i <= xl_text.length(); i++) {
-		char32_t current = i < xl_text.length() ? xl_text[i] : U' '; //always a space at the end, so the algo works
+	String current_xl_text = xl_text;
+	if (uppercase) {
+		current_xl_text = current_xl_text.to_upper();
+	}
+	Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
 
-		if (uppercase)
-			current = String::char_uppercase(current);
+	for (int i = 0; i <= current_xl_text.length(); i++) {
+		char32_t current = i < current_xl_text.length() ? current_xl_text[i] : U' '; //always a space at the end, so the algo works
 
 		// ranges taken from https://en.wikipedia.org/wiki/Plane_(Unicode)
 		// if your language is not well supported, consider helping improve
@@ -400,7 +408,7 @@ void Label::regenerate_word_cache() {
 				wc->space_count = space_count;
 				current_word_size = 0;
 				space_count = 0;
-			} else if ((i == xl_text.length() || current == '\n') && last != nullptr && space_count != 0) {
+			} else if ((i == current_xl_text.length() || current == '\n') && last != nullptr && space_count != 0) {
 				//in case there are trailing white spaces we add a placeholder word cache with just the spaces
 				WordCache *wc = memnew(WordCache);
 				if (word_cache) {
@@ -424,7 +432,7 @@ void Label::regenerate_word_cache() {
 				total_char_cache++;
 			}
 
-			if (i < xl_text.length() && xl_text[i] == ' ') {
+			if (i < current_xl_text.length() && current_xl_text[i] == ' ') {
 				if (line_width > 0 || last == NULL || last->char_pos != WordCache::CHAR_WRAPLINE) {
 					space_count++;
 					line_width += space_width;
@@ -438,7 +446,7 @@ void Label::regenerate_word_cache() {
 			if (current_word_size == 0) {
 				word_pos = i;
 			}
-			char_width = font->get_char_size(current).width;
+			char_width = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
 			current_word_size += char_width;
 			line_width += char_width;
 			total_char_cache++;

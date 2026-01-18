@@ -877,7 +877,7 @@ float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32
 
 	ERR_FAIL_COND_V(p_font.is_null(), 0);
 
-	return FontServer::get_singleton()->draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate);
+	return FontServer::get_singleton()->draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate).width;
 }
 
 void CanvasItem::_notify_transform(CanvasItem *p_node) {

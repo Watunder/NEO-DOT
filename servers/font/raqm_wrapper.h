@@ -46,7 +46,6 @@
 class RaqmWrapper {
 public:
 	struct ShapedGlyph {
-		bool found = false;
 		uint32_t index = 0;
 		uint32_t cluster = 0;
 		Vector2 offset;
@@ -55,9 +54,18 @@ public:
 	};
 
 	struct CharInfo {
+		uint32_t codepoint = 0;
 		int part_count = -1;
 		int part_index = -1;
 		ShapedGlyph glyph;
+
+		_FORCE_INLINE_ bool is_space() const {
+			return (codepoint == 0x0020u);
+		};
+
+		_FORCE_INLINE_ bool is_last() const {
+			return (part_index + 1 == part_count);
+		};
 	};
 
 private:

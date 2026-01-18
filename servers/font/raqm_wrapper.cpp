@@ -105,10 +105,8 @@ void RaqmWrapper::clear_cache(uint64_t p_cache_key) {
 	}
 }
 
-static _FORCE_INLINE_ bool have_glyph(char32_t p_char) {
-	bool is_zero_width_char = (p_char == 0X200Cu || p_char == 0X200Du);
-
-	return !is_zero_width_char;
+static _FORCE_INLINE_ bool have_glyph(uint32_t p_codepoint) {
+	return (p_codepoint != 0X200Du);
 };
 
 Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
@@ -158,14 +156,19 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 		i = end;
 		int part_count = end - start;
 
+		Vector<int> invisible_glyphs;
+
 		for (int j = 0; j < part_count; j++) {
 			ShapedGlyph shaped_glyph;
-			shaped_glyph.found = true;
 			shaped_glyph.index = glyphs[j + start].index;
 			shaped_glyph.cluster = glyphs[j + start].cluster;
 			shaped_glyph.offset = Vector2(glyphs[j + start].x_offset / 64.0, -glyphs[j + start].y_offset / 64.0);
 			shaped_glyph.advance = Vector2(glyphs[j + start].x_advance / 64.0, glyphs[j + start].y_advance / 64.0);
 			shaped_glyph.ft_face = glyphs[j + start].ftface;
+
+			if (shaped_glyph.offset == Vector2() && shaped_glyph.advance == Vector2()) {
+				invisible_glyphs.push_back(j);
+			}
 
 			shaped_glyphs.write[j + start] = shaped_glyph;
 		}
@@ -175,11 +178,12 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 
 		for (int part_index = 0, c = current_cluster; c < next_cluster; c++) {
 			CharInfo char_info;
+			char_info.codepoint = text[c];
 			char_info.part_count = part_count;
-			char_info.part_index = part_index;
 
-			if (part_index < part_count && have_glyph(text[c])) {
+			if (part_index < part_count && have_glyph(char_info.codepoint) || invisible_glyphs.find(part_index) != -1) {
 				char_info.glyph = shaped_glyphs[part_index + start];
+				char_info.part_index = part_index;
 				part_index++;
 			}
 
@@ -187,7 +191,6 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 		}
 	}
 
-	raqm_clear_contents(raqm_context);
 	raqm_destroy(raqm_context);
 
 	char_info_map[current_cache_key][p_text] = char_infos;

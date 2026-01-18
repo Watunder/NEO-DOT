@@ -34,6 +34,7 @@
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "scene/scene_string_names.h"
+#include "servers/font_server.h"
 
 #include "configs/modules_enabled.gen.h"
 #ifdef MODULE_REGEX_ENABLED
@@ -384,6 +385,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 				bool just_breaked_in_middle = false;
 				rchar = 0;
+				Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c), false);
 				while (*c) {
 					int end = 0;
 					int w = 0;
@@ -569,26 +571,26 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 								if (visible) {
 									if (selected) {
-										cw = font->get_char_size(fx_char).x;
+										cw = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
 										draw_rect(Rect2(p_ofs.x + pofs, p_ofs.y + y, cw, lh), selection_bg);
 									}
 
 									if (p_font_color_shadow.a > 0) {
 										float x_ofs_shadow = align_ofs + pofs;
 										float y_ofs_shadow = y + lh - line_descent;
-										draw_char(font, Point2(x_ofs_shadow, y_ofs_shadow) + shadow_ofs + fx_offset, fx_char, p_font_color_shadow);
+										FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs_shadow) + shadow_ofs + fx_offset, p_font_color_shadow);
 
 										if (p_shadow_as_outline) {
-											draw_char(font, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(-shadow_ofs.x, shadow_ofs.y) + fx_offset, fx_char, p_font_color_shadow);
-											draw_char(font, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(shadow_ofs.x, -shadow_ofs.y) + fx_offset, fx_char, p_font_color_shadow);
-											draw_char(font, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(-shadow_ofs.x, -shadow_ofs.y) + fx_offset, fx_char, p_font_color_shadow);
+											FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(-shadow_ofs.x, shadow_ofs.y) + fx_offset, p_font_color_shadow);
+											FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(shadow_ofs.x, -shadow_ofs.y) + fx_offset, p_font_color_shadow);
+											FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs_shadow) + Vector2(-shadow_ofs.x, -shadow_ofs.y) + fx_offset, p_font_color_shadow);
 										}
 									}
 
 									if (selected) {
-										draw_char(font, p_ofs + Point2(align_ofs + pofs, y + lh - line_descent), fx_char, override_selected_font_color ? selection_fg : fx_color);
+										FontServer::get_singleton()->draw_text_data(text_data, i, ci, p_ofs + Point2(align_ofs + pofs, y + lh - line_descent), override_selected_font_color ? selection_fg : fx_color);
 									} else {
-										cw = draw_char(font, p_ofs + Point2(align_ofs + pofs, y + lh - line_descent) + fx_offset, fx_char, fx_color);
+										cw = FontServer::get_singleton()->draw_text_data(text_data, i, ci, p_ofs + Point2(align_ofs + pofs, y + lh - line_descent) + fx_offset, fx_color).width;
 									}
 								} else if (previously_visible && c[i] != '\t') {
 									backtrack += font->get_char_size(fx_char).x;
@@ -628,6 +630,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					ADVANCE(fw);
 					CHECK_HEIGHT(fh); //must be done somewhere
 					c = &c[end];
+					text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c), false);
 				}
 
 			} break;
