@@ -42,6 +42,8 @@
 #endif
 #include "font/font_cache_key.h"
 #include "font/glyph_manager.h"
+#include "font/text_data.h"
+#include "font/text_manager.h"
 
 class FontServer : public Object {
 	GDCLASS(FontServer, Object);
@@ -57,6 +59,7 @@ public:
 	};
 
 	struct Font : RID_Data {
+		uint64_t font_id_hash;
 		FontCacheKey cache_key;
 		Vector<FontCacheKey> temp_cache_keys;
 
@@ -70,6 +73,8 @@ public:
 		int spacing_space_char;
 
 		Font() {
+			font_id_hash = 0;
+
 			ascent = 0;
 			descent = 1;
 			oversampling = 1;
@@ -82,15 +87,6 @@ public:
 	};
 
 	mutable RID_Owner<Font> font_owner;
-
-	struct TextData : Reference {
-		RID font;
-		String original_text;
-
-#ifdef MODULE_RAQM_ENABLED
-		Vector<RaqmWrapper::CharInfo> char_infos;
-#endif
-	};
 
 private:
 	static FontServer *singleton;
@@ -107,14 +103,16 @@ private:
 #ifdef MODULE_RAQM_ENABLED
 	RaqmWrapper *raqm_wrapper = NULL;
 
-	_FORCE_INLINE_ Vector<RaqmWrapper::CharInfo> _shape_string(Font *p_font, const String &p_text, bool p_break_graphemes) const;
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, const RaqmWrapper::ShapedGlyph &p_shaped_glyph) const;
+	_FORCE_INLINE_ Vector<CharInfo> _shape_string(Font *p_font, const String &p_text) const;
+	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, uint32_t p_glyph_index) const;
 #endif
 
 	GlyphManager *glyph_manager = NULL;
 
 	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(Font *p_font, char32_t p_char) const;
 	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate) const;
+
+	TextManager *text_manager = NULL;
 
 protected:
 	static void _bind_methods();
@@ -145,7 +143,7 @@ public:
 	Vector2 font_get_char_size(RID p_font, char32_t p_char) const;
 	Vector2 font_get_string_size(RID p_font, const String &p_text) const;
 
-	Ref<TextData> create_text_data(RID p_font, const String &p_text, bool p_break = true) const;
+	Ref<TextData> create_text_data(RID p_font, const String &p_text) const;
 	Vector2 draw_text_data(const Ref<TextData> &p_text_data, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate = Color(1, 1, 1)) const;
 	Vector2 get_text_data_size(const Ref<TextData> &p_text_data, int p_char_index) const;
 

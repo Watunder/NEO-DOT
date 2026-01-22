@@ -224,7 +224,7 @@ void Label::_notification(int p_what) {
 				if (uppercase) {
 					sub_xl_text = sub_xl_text.to_upper();
 				}
-				Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), sub_xl_text);
+				Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), sub_xl_text);
 
 				if (font_color_shadow.a > 0) {
 					int chars_total_shadow = chars_total; //save chars drawn
@@ -295,7 +295,7 @@ int Label::get_longest_line_width() const {
 	if (uppercase) {
 		current_xl_text = current_xl_text.to_upper();
 	}
-	Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
+	Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
 
 	for (int i = 0; i < current_xl_text.size(); i++) {
 		char32_t current = current_xl_text[i];
@@ -373,7 +373,7 @@ void Label::regenerate_word_cache() {
 	if (uppercase) {
 		current_xl_text = current_xl_text.to_upper();
 	}
-	Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
+	Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
 
 	for (int i = 0; i <= current_xl_text.length(); i++) {
 		char32_t current = i < current_xl_text.length() ? current_xl_text[i] : U' '; //always a space at the end, so the algo works

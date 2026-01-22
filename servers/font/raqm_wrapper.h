@@ -42,42 +42,21 @@
 #include "core/vector.h"
 
 #include "font_cache_key.h"
+#include "text_data.h"
 
 class RaqmWrapper {
-public:
-	struct ShapedGlyph {
-		uint32_t index = 0;
-		uint32_t cluster = 0;
-		Vector2 offset;
-		Vector2 advance;
-		FT_Face ft_face = NULL;
-	};
-
-	struct CharInfo {
-		uint32_t codepoint = 0;
-		int part_count = -1;
-		int part_index = -1;
-		ShapedGlyph glyph;
-
-		_FORCE_INLINE_ bool is_space() const {
-			return (codepoint == 0x0020u);
-		};
-
-		_FORCE_INLINE_ bool is_last() const {
-			return (part_index + 1 == part_count);
-		};
-	};
-
-private:
 	uint64_t current_cache_key = 0;
 
+	HashMap<uint64_t, HashMap<uint32_t, FT_Face>> index_to_face_map;
 	HashMap<uint64_t, HashMap<String, Vector<CharInfo>>> char_info_map;
 
 public:
 	void update_cache(uint64_t p_cache_key);
 	void clear_cache(uint64_t p_cache_key);
 
-	Vector<RaqmWrapper::CharInfo> get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
+	Vector<CharInfo> get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text);
+
+	FT_Face get_ft_face(uint32_t p_glyph_index);
 };
 
 #endif

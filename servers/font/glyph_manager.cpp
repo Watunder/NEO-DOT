@@ -240,7 +240,7 @@ GlyphManager::GlyphInfo GlyphManager::get_glyph_info(const FT_Face &p_ft_face, u
 	if (!error) {
 		glyph_info = _rasterize_bitmap(ft_glyph_slot->bitmap);
 		glyph_info.texture_offset = Vector2(ft_glyph_slot->bitmap_left, -ft_glyph_slot->bitmap_top);
-		glyph_info.glyph_advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
+		glyph_info.advance = Vector2(ft_glyph_slot->advance.x / 64.0, ft_glyph_slot->advance.y / 64.0);
 	}
 
 	if (glyph_info.found) {

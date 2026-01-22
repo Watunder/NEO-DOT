@@ -385,7 +385,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 				bool just_breaked_in_middle = false;
 				rchar = 0;
-				Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c), false);
+				Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c));
 				while (*c) {
 					int end = 0;
 					int w = 0;
@@ -400,7 +400,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						line_descent = line < l.descent_caches.size() ? l.descent_caches[line] : 1;
 					}
 					while (c[end] != 0 && !(end && c[end - 1] == ' ' && c[end] != ' ')) {
-						int cw = font->get_char_size(c[end]).width;
+						int cw = FontServer::get_singleton()->get_text_data_size(text_data, end).width;
 						if (c[end] == '\t') {
 							cw = tab_size * font->get_char_size(' ').width;
 						}
@@ -459,7 +459,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 							int pofs = wofs + ofs;
 
 							if (p_mode == PROCESS_POINTER && r_click_char && p_click_pos.y >= p_ofs.y + y && p_click_pos.y <= p_ofs.y + y + lh) {
-								int cw = font->get_char_size(c[i]).x;
+								int cw = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
 
 								if (c[i] == '\t') {
 									cw = tab_size * font->get_char_size(' ').width;
@@ -593,7 +593,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 										cw = FontServer::get_singleton()->draw_text_data(text_data, i, ci, p_ofs + Point2(align_ofs + pofs, y + lh - line_descent) + fx_offset, fx_color).width;
 									}
 								} else if (previously_visible && c[i] != '\t') {
-									backtrack += font->get_char_size(fx_char).x;
+									backtrack += FontServer::get_singleton()->get_text_data_size(text_data, i).width;
 								}
 
 								p_char_count++;
@@ -630,7 +630,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					ADVANCE(fw);
 					CHECK_HEIGHT(fh); //must be done somewhere
 					c = &c[end];
-					text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c), false);
+					text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), String(c));
 				}
 
 			} break;

@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  glyph_manager.h                                                      */
+/*  text_manager.h                                                       */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,54 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GLYPH_MANAGER_H
-#define GLYPH_MANAGER_H
+#ifndef TEXT_MANAGER_H
+#define TEXT_MANAGER_H
 
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#endif
+#include "core/ustring.h"
+#include "core/vector.h"
 
-#include "font_cache_key.h"
-#include "shelf_pack_texture.h"
-
-class GlyphManager {
+class TextManager {
 public:
-	struct GlyphInfo {
-		bool found = false;
-
-		Vector2 texture_offset;
-		Vector2 advance;
-
-		int texture_index = -1;
-		Size2 texture_size;
-		Rect2 texture_rect_uv;
-		Image::Format texture_format;
-
-		int texture_flags = 0;
-	};
-
-private:
-	FontCacheKey current_cache_key;
-
-	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
-	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_info_map;
-
-	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
-#ifdef MODULE_FREETYPE_ENABLED
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range = 1);
-#endif
-
-public:
-	void update_cache(const FontCacheKey &p_cache_key);
-	void clear_cache(const FontCacheKey &p_cache_key);
-
-#ifdef MODULE_FREETYPE_ENABLED
-	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);
-#endif
-
-	RID get_texture_rid(const GlyphInfo &p_glyph_info);
+	Vector<String> get_graphemes(const String &p_text) const;
 };
 
 #endif

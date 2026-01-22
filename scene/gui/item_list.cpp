@@ -1050,7 +1050,7 @@ void ItemList::_notification(int p_what) {
 					float ofs = 0;
 					int line = 0;
 
-					Ref<FontServer::TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text, false);
+					Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text);
 					for (int j = 0; j <= ss; j++) {
 						int cs = j < ss ? FontServer::get_singleton()->get_text_data_size(text_data, j).width : 0;
 						if (ofs + cs > max_len || j == ss) {

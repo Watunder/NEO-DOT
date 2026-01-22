@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  glyph_manager.h                                                      */
+/*  text_manager.cpp                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,54 +28,36 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GLYPH_MANAGER_H
-#define GLYPH_MANAGER_H
+#include "text_manager.h"
 
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#endif
+#include <graphemebreak.h>
 
-#include "font_cache_key.h"
-#include "shelf_pack_texture.h"
+Vector<String> TextManager::get_graphemes(const String &p_text) const {
+	Vector<String> graphemes;
 
-class GlyphManager {
-public:
-	struct GlyphInfo {
-		bool found = false;
+	const uint32_t *text = (const uint32_t *)p_text.c_str();
+	int text_len = p_text.length();
 
-		Vector2 texture_offset;
-		Vector2 advance;
+	Vector<char> breaks;
+	breaks.resize(text_len + 1);
 
-		int texture_index = -1;
-		Size2 texture_size;
-		Rect2 texture_rect_uv;
-		Image::Format texture_format;
+	set_graphemebreaks_utf32(text, text_len, "", breaks.ptrw());
 
-		int texture_flags = 0;
-	};
+	for (int i = 0; i < text_len;) {
+		int start = i;
+		int end = i;
+		while (end < text_len && breaks[end] == GRAPHEMEBREAK_NOBREAK) {
+			end++;
+		}
+		end++;
+		i = end;
+		int len = end - start;
 
-private:
-	FontCacheKey current_cache_key;
+		if (len > 0) {
+			String grapheme = p_text.substr(start, len);
+			graphemes.push_back(grapheme);
+		}
+	}
 
-	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
-	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_info_map;
-
-	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
-#ifdef MODULE_FREETYPE_ENABLED
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range = 1);
-#endif
-
-public:
-	void update_cache(const FontCacheKey &p_cache_key);
-	void clear_cache(const FontCacheKey &p_cache_key);
-
-#ifdef MODULE_FREETYPE_ENABLED
-	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);
-#endif
-
-	RID get_texture_rid(const GlyphInfo &p_glyph_info);
-};
-
-#endif
+	return graphemes;
+}

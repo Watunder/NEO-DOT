@@ -94,22 +94,30 @@ void RaqmWrapper::update_cache(uint64_t p_cache_key) {
 		current_cache_key = p_cache_key;
 	}
 
+	if (!index_to_face_map.has(current_cache_key)) {
+		index_to_face_map[current_cache_key] = HashMap<uint32_t, FT_Face>();
+	}
+
 	if (!char_info_map.has(current_cache_key)) {
 		char_info_map[current_cache_key] = HashMap<String, Vector<CharInfo>>();
 	}
 }
 
 void RaqmWrapper::clear_cache(uint64_t p_cache_key) {
+	if (index_to_face_map.has(current_cache_key)) {
+		index_to_face_map.erase(current_cache_key);
+	}
+
 	if (char_info_map.has(current_cache_key)) {
 		char_info_map.erase(current_cache_key);
 	}
 }
 
-static _FORCE_INLINE_ bool have_glyph(uint32_t p_codepoint) {
-	return (p_codepoint != 0x200Cu || p_codepoint != 0x200Du);
+static _FORCE_INLINE_ bool have_glyph(uint32_t p_char_code) {
+	return (p_char_code != 0x200Cu || p_char_code != 0x200Du);
 };
 
-Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
+Vector<CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> &p_ft_sizes, const String &p_text) {
 	if (char_info_map[current_cache_key].has(p_text)) {
 		return char_info_map[current_cache_key][p_text];
 	}
@@ -144,9 +152,6 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 
 	char_infos.resize(text_len);
 
-	Vector<ShapedGlyph> shaped_glyphs;
-	shaped_glyphs.resize(glyph_count);
-
 	for (int i = 0; i < glyph_count;) {
 		int start = i;
 		int end = i;
@@ -159,18 +164,13 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 		Vector<int> invisible_glyphs;
 
 		for (int j = 0; j < part_count; j++) {
-			ShapedGlyph shaped_glyph;
-			shaped_glyph.index = glyphs[j + start].index;
-			shaped_glyph.cluster = glyphs[j + start].cluster;
-			shaped_glyph.offset = Vector2(glyphs[j + start].x_offset / 64.0, -glyphs[j + start].y_offset / 64.0);
-			shaped_glyph.advance = Vector2(glyphs[j + start].x_advance / 64.0, glyphs[j + start].y_advance / 64.0);
-			shaped_glyph.ft_face = glyphs[j + start].ftface;
-
-			if (shaped_glyph.offset == Vector2() && shaped_glyph.advance == Vector2()) {
+			raqm_glyph_t glyph = glyphs[j + start];
+			if (glyph.x_offset == 0 && glyph.y_offset == 0 && glyph.x_advance == 0 && glyph.y_advance == 0) {
 				invisible_glyphs.push_back(j);
 			}
-
-			shaped_glyphs.write[j + start] = shaped_glyph;
+			if (!index_to_face_map[current_cache_key].has(glyph.index)) {
+				index_to_face_map[current_cache_key][glyph.index] = glyph.ftface;
+			}
 		}
 
 		uint32_t current_cluster = glyphs[start].cluster;
@@ -178,12 +178,18 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 
 		for (int part_index = 0, c = current_cluster; c < next_cluster; c++) {
 			CharInfo char_info;
-			char_info.codepoint = text[c];
+			char_info.char_code = text[c];
 			char_info.part_count = part_count;
 
-			if (part_index < part_count && have_glyph(char_info.codepoint) || invisible_glyphs.find(part_index + start) != -1) {
-				char_info.glyph = shaped_glyphs[part_index + start];
+			if (part_index < part_count && have_glyph(char_info.char_code) || invisible_glyphs.find(part_index + start) != -1) {
+				char_info.type = CharInfo::SHAPED;
 				char_info.part_index = part_index;
+
+				raqm_glyph_t glyph = glyphs[part_index + start];
+				char_info.glyph_index = glyph.index;
+				char_info.glyph_offset = Vector2(glyph.x_offset / 64.0, -glyph.y_offset / 64.0);
+				char_info.glyph_advance = Vector2(glyph.x_advance / 64.0, glyph.y_advance / 64.0);
+
 				part_index++;
 			}
 
@@ -196,6 +202,13 @@ Vector<RaqmWrapper::CharInfo> RaqmWrapper::get_char_infos(const Vector<FT_Size> 
 	char_info_map[current_cache_key][p_text] = char_infos;
 
 	return char_infos;
+}
+
+FT_Face RaqmWrapper::get_ft_face(uint32_t p_glyph_index) {
+	ERR_FAIL_COND_V(!index_to_face_map.has(current_cache_key), NULL);
+	ERR_FAIL_COND_V(!index_to_face_map[current_cache_key].has(p_glyph_index), NULL);
+
+	return index_to_face_map[current_cache_key][p_glyph_index];
 }
 
 #endif
