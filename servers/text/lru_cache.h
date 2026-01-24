@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  glyph_manager.h                                                      */
+/*  lru_cache.h                                                          */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,54 +28,114 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef GLYPH_MANAGER_H
-#define GLYPH_MANAGER_H
+#ifndef LRU_CACHE_H
+#define LRU_CACHE_H
 
-#include "configs/modules_enabled.gen.h"
-#ifdef MODULE_FREETYPE_ENABLED
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#endif
+#include "core/hash_map.h"
+#include "core/list.h"
 
-#include "font_cache_key.h"
-#include "shelf_pack_texture.h"
-
-class GlyphManager {
+template <typename TKey, typename TData, typename Hasher = HashMapHasherDefault, typename Comparator = HashMapComparatorDefault<TKey>>
+class LRUCache {
 public:
-	struct GlyphInfo {
-		bool found = false;
+	struct Pair {
+		TKey key;
+		TData data;
 
-		Vector2 texture_offset;
-		Vector2 advance;
-
-		int texture_index = -1;
-		Size2 texture_size;
-		Rect2 texture_rect_uv;
-		Image::Format texture_format;
-
-		int texture_flags = 0;
+		Pair() {}
+		Pair(const TKey &p_key, const TData &p_data) :
+				key(p_key),
+				data(p_data) {
+		}
 	};
 
+	typedef typename List<Pair>::Element *Element;
+
 private:
-	FontCacheKey current_cache_key;
-
-	HashMap<uint64_t, Vector<ShelfPackTexture>> texture_map;
-	HashMap<uint64_t, HashMap<uint32_t, GlyphInfo>> glyph_info_map;
-
-	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
-#ifdef MODULE_FREETYPE_ENABLED
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const FT_Bitmap &p_bitmap, int p_rect_range = 1);
-#endif
+	List<Pair> _list;
+	HashMap<TKey, Element, Hasher, Comparator> _map;
+	size_t capacity;
 
 public:
-	void update_cache(const FontCacheKey &p_cache_key);
-	void clear_cache(const FontCacheKey &p_cache_key);
+	const Pair *insert(const TKey &p_key, const TData &p_value) {
+		Element *e = _map.getptr(p_key);
+		Element n = _list.push_front(Pair(p_key, p_value));
 
-#ifdef MODULE_FREETYPE_ENABLED
-	GlyphInfo get_glyph_info(const FT_Face &p_ft_face, uint32_t p_glyph_index);
-#endif
+		if (e) {
+			_list.erase(*e);
+			_map.erase(p_key);
+		}
+		_map[p_key] = _list.front();
 
-	RID get_texture_rid(const GlyphInfo &p_glyph_info);
+		while (_map.size() > capacity) {
+			Element d = _list.back();
+
+			_map.erase(d->get().key);
+			_list.pop_back();
+		}
+
+		return &n->get();
+	}
+
+	void clear() {
+		_map.clear();
+		_list.clear();
+	}
+
+	bool has(const TKey &p_key) const {
+		return _map.has(p_key);
+	}
+
+	bool erase(const TKey &p_key) {
+		Element *e = _map.getptr(p_key);
+		if (!e) {
+			return false;
+		}
+		_list.move_to_front(*e);
+		_map.erase(p_key);
+		_list.pop_front();
+		return true;
+	}
+
+	const TData &get(const TKey &p_key) {
+		Element *e = _map.getptr(p_key);
+		CRASH_COND(!e);
+		_list.move_to_front(*e);
+		return (*e)->get().data;
+	}
+
+	_FORCE_INLINE_ const TData *getptr(const TKey &p_key) {
+		Element *e = _map.getptr(p_key);
+		if (!e) {
+			return NULL;
+		} else {
+			_list.move_to_front(*e);
+			return &(*e)->get().data;
+		}
+	}
+
+	_FORCE_INLINE_ size_t get_capacity() const { return capacity; }
+	_FORCE_INLINE_ size_t size() const { return _map.size(); }
+	_FORCE_INLINE_ bool empty() const { return _map.empty(); }
+
+	void set_capacity(size_t p_capacity) {
+		if (capacity > 0) {
+			capacity = p_capacity;
+			while (_map.size() > capacity) {
+				Element d = _list.back();
+
+				_map.erase(d->get().key);
+				_list.pop_back();
+			}
+		}
+	}
+
+	LRUCache() {
+		capacity = 64;
+	}
+
+	LRUCache(int p_capacity) {
+		capacity = p_capacity;
+	}
 };
 
 #endif

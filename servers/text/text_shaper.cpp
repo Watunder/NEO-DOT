@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  text_manager.h                                                       */
+/*  text_shaper.cpp                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,15 +28,57 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef TEXT_MANAGER_H
-#define TEXT_MANAGER_H
+#include "text_shaper.h"
 
-#include "core/ustring.h"
-#include "core/vector.h"
+#include "core/error_macros.h"
 
-class TextManager {
-public:
-	Vector<String> get_graphemes(const String &p_text) const;
-};
+TextShaper *TextShaper::singleton = NULL;
 
-#endif
+TextShaper *TextShaper::get_singleton() {
+	return singleton;
+}
+
+void TextShaper::set_singleton() {
+	singleton = this;
+}
+
+TextShaper *TextShaperManager::shapers[MAX_SHAPERS];
+int TextShaperManager::shaper_count = 0;
+
+void TextShaperManager::add_shaper(TextShaper *p_shaper) {
+	ERR_FAIL_COND(shaper_count >= MAX_SHAPERS);
+	shapers[shaper_count++] = p_shaper;
+}
+
+void TextShaperManager::initialize(int p_shaper) {
+	int failed_shaper = -1;
+
+	if (p_shaper >= 0 && p_shaper < shaper_count) {
+		if (shapers[p_shaper]->init() == OK) {
+			shapers[p_shaper]->set_singleton();
+			return;
+		} else {
+			failed_shaper = p_shaper;
+		}
+	}
+
+	for (int i = 0; i < shaper_count; i++) {
+		if (i == failed_shaper) {
+			continue;
+		}
+
+		if (shapers[i]->init() == OK) {
+			shapers[i]->set_singleton();
+			break;
+		}
+	}
+}
+
+int TextShaperManager::get_shaper_count() {
+	return shaper_count;
+}
+
+TextShaper *TextShaperManager::get_shaper(int p_shaper) {
+	ERR_FAIL_INDEX_V(p_shaper, shaper_count, NULL);
+	return shapers[p_shaper];
+}

@@ -3,7 +3,11 @@
 Import("env")
 Import("env_modules")
 
+import glob
 from compat import isbasestring
+
+from platform_methods import run_in_subprocess
+import freetype_builders
 
 env_freetype = env_modules.Clone()
 
@@ -123,7 +127,27 @@ if env["builtin_freetype"]:
 
 module_obj = []
 
+# Find all font files to use as dependencies
+path = env.Dir(".").abspath
+vector_font_files = glob.glob(path + "/../../thirdparty/fonts/*.ttf")
+vector_font_files.extend(glob.glob(path + "/../../thirdparty/fonts/*.otf"))
+vector_font_files.sort()
+
+env_freetype.Depends(
+    ["#modules/freetype/builtin_vector_fonts.gen.h", "#modules/freetype/builtin_vector_fonts.gen.cpp"],
+    vector_font_files,
+)
+env_freetype.CommandNoCache(
+    ["#modules/freetype/builtin_vector_fonts.gen.h", "#modules/freetype/builtin_vector_fonts.gen.cpp"],
+    vector_font_files,
+    run_in_subprocess(freetype_builders.make_builtin_vector_fonts),
+)
+
+
 env_freetype.add_source_files(module_obj, "*.cpp")
+# Don't warn about duplicate entry here, we need it registered manually for first build,
+# even if later builds will pick it up twice due to above *.cpp globbing.
+env_freetype.add_source_files(module_obj, "#modules/freetype/builtin_vector_fonts.gen.cpp", warn_duplicates=False)
 env.modules_sources += module_obj
 
 # Needed to force rebuilding the module files when the thirdparty library is updated.

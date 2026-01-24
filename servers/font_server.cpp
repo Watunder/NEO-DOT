@@ -31,289 +31,79 @@
 #include "font_server.h"
 
 #include "core/method_bind_ext.gen.inc"
-#include "core/pair.h"
+#include "servers/text/text_shaper.h"
 
-#ifdef MODULE_FREETYPE_ENABLED
-#include "font/builtin_fonts.gen.h"
-#endif
-
-#include "thirdparty/zstd/common/xxhash.h"
-
-#ifdef MODULE_FREETYPE_ENABLED
-void FontServer::_setup_builtin_fonts() {
-	{
-		PoolVector<uint8_t> NotoSansUI_Regular;
-		NotoSansUI_Regular.resize(_font_DroidSansFallback_size);
-		copymem(NotoSansUI_Regular.write().ptr(), _font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
-
-		default_font_id.font_hash = XXH32(NotoSansUI_Regular.read().ptr(), NotoSansUI_Regular.size(), 0);
-		freetype_wrapper->update_font_data(default_font_id, NotoSansUI_Regular);
-		builtin_font_ids.push_back(default_font_id);
-	}
-	{
-		PoolVector<uint8_t> NotoEmoji_Regular;
-		NotoEmoji_Regular.resize(_font_NotoEmoji_Regular_size);
-		copymem(NotoEmoji_Regular.write().ptr(), _font_NotoEmoji_Regular, _font_NotoEmoji_Regular_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(NotoEmoji_Regular.read().ptr(), NotoEmoji_Regular.size(), 0);
-		freetype_wrapper->update_font_data(font_id, NotoEmoji_Regular);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> DroidSansFallback;
-		DroidSansFallback.resize(_font_DroidSansFallback_size);
-		copymem(DroidSansFallback.write().ptr(), _font_DroidSansFallback, _font_DroidSansFallback_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(DroidSansFallback.read().ptr(), DroidSansFallback.size(), 0);
-		freetype_wrapper->update_font_data(font_id, DroidSansFallback);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> DroidSansJapanese;
-		DroidSansJapanese.resize(_font_DroidSansJapanese_size);
-		copymem(DroidSansJapanese.write().ptr(), _font_DroidSansJapanese, _font_DroidSansJapanese_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(DroidSansJapanese.read().ptr(), DroidSansJapanese.size(), 0);
-		freetype_wrapper->update_font_data(font_id, DroidSansJapanese);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> NotoNaskhArabicUI_Regular;
-		NotoNaskhArabicUI_Regular.resize(_font_NotoNaskhArabicUI_Regular_size);
-		copymem(NotoNaskhArabicUI_Regular.write().ptr(), _font_NotoNaskhArabicUI_Regular, _font_NotoNaskhArabicUI_Regular_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(NotoNaskhArabicUI_Regular.read().ptr(), NotoNaskhArabicUI_Regular.size(), 0);
-		freetype_wrapper->update_font_data(font_id, NotoNaskhArabicUI_Regular);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> NotoSansHebrew_Regular;
-		NotoSansHebrew_Regular.resize(_font_NotoSansHebrew_Regular_size);
-		copymem(NotoSansHebrew_Regular.write().ptr(), _font_NotoSansHebrew_Regular, _font_NotoSansHebrew_Regular_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(NotoSansHebrew_Regular.read().ptr(), NotoSansHebrew_Regular.size(), 0);
-		freetype_wrapper->update_font_data(font_id, NotoSansHebrew_Regular);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> NotoSansThaiUI_Regular;
-		NotoSansThaiUI_Regular.resize(_font_NotoSansThaiUI_Regular_size);
-		copymem(NotoSansThaiUI_Regular.write().ptr(), _font_NotoSansThaiUI_Regular, _font_NotoSansThaiUI_Regular_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(NotoSansThaiUI_Regular.read().ptr(), NotoSansThaiUI_Regular.size(), 0);
-		freetype_wrapper->update_font_data(font_id, NotoSansThaiUI_Regular);
-		builtin_font_ids.push_back(font_id);
-	}
-	{
-		PoolVector<uint8_t> NotoSansDevanagariUI_Regular;
-		NotoSansDevanagariUI_Regular.resize(_font_NotoSansDevanagariUI_Regular_size);
-		copymem(NotoSansDevanagariUI_Regular.write().ptr(), _font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
-
-		FontID font_id;
-		font_id.font_hash = XXH32(NotoSansDevanagariUI_Regular.read().ptr(), NotoSansDevanagariUI_Regular.size(), 0);
-		freetype_wrapper->update_font_data(font_id, NotoSansDevanagariUI_Regular);
-		builtin_font_ids.push_back(font_id);
-	}
-}
-#endif
-
-#ifdef MODULE_RAQM_ENABLED
-static _FORCE_INLINE_ bool is_simple(const String &p_text) {
-	return (p_text.length() == 1);
+FontDriver *FontDriver::singleton = NULL;
+FontDriver *FontDriver::get_singleton() {
+	return singleton;
 }
 
-Vector<CharInfo> FontServer::_shape_string(Font *p_font, const String &p_text) const {
-	Vector<CharInfo> char_infos;
+void FontDriver::set_singleton() {
+	singleton = this;
+}
 
-	ERR_FAIL_COND_V(!p_font, char_infos);
+FontDriver *FontDriverManager::drivers[MAX_DRIVERS];
+int FontDriverManager::driver_count = 0;
 
-	if (p_text.empty()) {
-		return char_infos;
-	}
+void FontDriverManager::add_driver(FontDriver *p_driver) {
+	ERR_FAIL_COND(driver_count >= MAX_DRIVERS);
+	drivers[driver_count++] = p_driver;
+}
 
-	Vector<String> graphemes;
-	if (is_simple(p_text)) {
-		graphemes.push_back(p_text);
-	} else {
-		graphemes = text_manager->get_graphemes(p_text);
-	}
+void FontDriverManager::initialize(int p_driver) {
+	int failed_driver = -1;
 
-	Vector<Pair<int, int>> indexes;
-	for (int i = 0; i < graphemes.size(); i++) {
-		if (is_simple(graphemes[i])) {
-			CharInfo char_info;
-			char_info.type = CharInfo::SHAPELESS;
-			char_info.char_code = graphemes[i][0];
-
-			char_infos.push_back(char_info);
+	if (p_driver >= 0 && p_driver < driver_count) {
+		if (drivers[p_driver]->init() == OK) {
+			drivers[p_driver]->set_singleton();
+			return;
 		} else {
-			indexes.push_back(Pair<int, int>(i, char_infos.size()));
+			failed_driver = p_driver;
 		}
 	}
 
-	if (indexes.size() == 0) {
-		return char_infos;
-	}
+	for (int i = 0; i < driver_count; i++) {
+		if (i == failed_driver) {
+			continue;
+		}
 
-	FontID font_id = p_font->cache_key.get_font_id();
-
-	FT_Size ft_size = freetype_wrapper->get_ft_size(font_id, p_font->cache_key.font_size, p_font->oversampling);
-	ERR_FAIL_COND_V(!ft_size, char_infos);
-
-	Vector<FT_Size> ft_sizes;
-	ft_sizes.push_back(ft_size);
-
-	uint64_t hash = p_font->cache_key.font_size;
-	hash = hash * 31 + font_id.hash();
-
-	if (!builtin_font_ids.empty()) {
-		for (int i = 0; i < builtin_font_ids.size(); i++) {
-			ERR_CONTINUE(!builtin_font_ids[i].font_hash);
-
-			if (builtin_font_ids[i] == font_id) {
-				continue;
-			}
-
-			FontID fallback_font_id = builtin_font_ids[i];
-			FT_Size fallback_ft_size = freetype_wrapper->get_ft_size(fallback_font_id, p_font->cache_key.font_size, p_font->oversampling);
-			ERR_CONTINUE(!fallback_ft_size);
-
-			if (fallback_ft_size) {
-				ft_sizes.push_back(fallback_ft_size);
-
-				hash = hash * 31 + fallback_font_id.hash();
-			}
+		if (drivers[i]->init() == OK) {
+			drivers[i]->set_singleton();
+			break;
 		}
 	}
-
-	if (p_font->font_id_hash != hash) {
-		p_font->font_id_hash = hash;
-	}
-
-	raqm_wrapper->update_cache(p_font->font_id_hash);
-
-	for (int i = indexes.size() - 1; i >= 0; i--) {
-		int grapheme_index = indexes[i].first;
-		int char_index = indexes[i].second;
-
-		const Vector<CharInfo> &sub_char_infos = raqm_wrapper->get_char_infos(ft_sizes, graphemes[grapheme_index]);
-		for (int j = sub_char_infos.size() - 1; j >= 0; j--) {
-			char_infos.insert(char_index, sub_char_infos[j]);
-		}
-	}
-
-	return char_infos;
 }
 
-GlyphManager::GlyphInfo FontServer::_get_shaped_glyph_info(Font *p_font, uint32_t p_glyph_index) const {
-	_THREAD_SAFE_METHOD_
-
-	GlyphManager::GlyphInfo glyph_info{};
-	ERR_FAIL_COND_V(!p_font, glyph_info);
-
-	raqm_wrapper->update_cache(p_font->font_id_hash);
-	FT_Face ft_face = raqm_wrapper->get_ft_face(p_glyph_index);
-	ERR_FAIL_COND_V(!ft_face, glyph_info);
-
-	Ref<FreeTypeWrapper::FontInfo> font_info = freetype_wrapper->get_font_info(ft_face);
-	ERR_FAIL_COND_V(!font_info.is_valid(), glyph_info);
-
-	const FontCacheKey &temp_cache_key = p_font->cache_key.create_temp_key(font_info->id);
-	if (p_font->temp_cache_keys.find(temp_cache_key) == -1) {
-		p_font->temp_cache_keys.push_back(temp_cache_key);
-	}
-
-	glyph_manager->update_cache(temp_cache_key);
-	glyph_info = glyph_manager->get_glyph_info(ft_face, p_glyph_index);
-
-	glyph_info.texture_offset /= p_font->oversampling;
-	glyph_info.texture_size /= p_font->oversampling;
-	glyph_info.advance /= p_font->oversampling;
-
-	return glyph_info;
-}
-#endif
-
-GlyphManager::GlyphInfo FontServer::_get_simple_glyph_info(Font *p_font, char32_t p_char) const {
-	_THREAD_SAFE_METHOD_
-
-	GlyphManager::GlyphInfo glyph_info{};
-	ERR_FAIL_COND_V(!p_font, glyph_info);
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FontID font_id = p_font->cache_key.get_font_id();
-
-	FT_Size ft_size = freetype_wrapper->get_ft_size(font_id, p_font->cache_key.font_size, p_font->oversampling);
-	ERR_FAIL_COND_V(!ft_size, glyph_info);
-
-	uint32_t glyph_index = FT_Get_Char_Index(ft_size->face, p_char);
-
-	glyph_manager->update_cache(p_font->cache_key);
-	glyph_info = glyph_manager->get_glyph_info(ft_size->face, glyph_index);
-
-	if (!glyph_index && !builtin_font_ids.empty()) {
-		for (int i = 0; i < builtin_font_ids.size(); i++) {
-			ERR_CONTINUE(!builtin_font_ids[i].font_hash);
-
-			if (builtin_font_ids[i] == font_id) {
-				continue;
-			}
-
-			FontID fallback_font_id = builtin_font_ids[i];
-			FT_Size fallback_ft_size = freetype_wrapper->get_ft_size(fallback_font_id, p_font->cache_key.font_size, p_font->oversampling);
-			ERR_CONTINUE(!fallback_ft_size);
-
-			uint32_t fallback_glyph_index = FT_Get_Char_Index(fallback_ft_size->face, p_char);
-
-			if (fallback_glyph_index) {
-				const FontCacheKey &temp_cache_key = p_font->cache_key.create_temp_key(fallback_font_id);
-				if (p_font->temp_cache_keys.find(temp_cache_key) == -1) {
-					p_font->temp_cache_keys.push_back(temp_cache_key);
-				}
-
-				glyph_manager->update_cache(temp_cache_key);
-				glyph_info = glyph_manager->get_glyph_info(fallback_ft_size->face, fallback_glyph_index);
-				break;
-			}
-		}
-	}
-
-	glyph_info.texture_offset /= p_font->oversampling;
-	glyph_info.texture_size /= p_font->oversampling;
-	glyph_info.advance /= p_font->oversampling;
-
-	if (p_char == 0x0020u) {
-		glyph_info.advance.width += p_font->spacing_space_char;
-	}
-	if (glyph_info.found) {
-		glyph_info.advance.width += p_font->spacing_glyph;
-	}
-#endif
-
-	return glyph_info;
+int FontDriverManager::get_driver_count() {
+	return driver_count;
 }
 
-void FontServer::_draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate) const {
-	if (p_glyph_info.found) {
-		RID texture_rid = glyph_manager->get_texture_rid(p_glyph_info);
-		if (texture_rid.is_valid()) {
-			Color modulate = p_modulate;
-			if (p_glyph_info.texture_format == Image::FORMAT_RGBA8) {
-				modulate.r = modulate.g = modulate.b = 1.0;
-			}
+FontDriver *FontDriverManager::get_driver(int p_driver) {
+	ERR_FAIL_INDEX_V(p_driver, driver_count, NULL);
+	return drivers[p_driver];
+}
 
-			Vector2 texture_pos = p_pos + p_glyph_info.texture_offset;
-			Rect2 texture_rect(texture_pos, p_glyph_info.texture_size);
+/*************************************************************************/
 
-			VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, texture_rect, texture_rid, p_glyph_info.texture_rect_uv, modulate, false, RID(), false);
-		}
+_FORCE_INLINE_ void FontServer::_font_clear_caches(Font *p_font) {
+	FontDriver::get_singleton()->clear_glyph_cache(p_font->cache_key);
+
+	for (int i = 0; i < p_font->temp_cache_keys.size(); i++) {
+		FontDriver::get_singleton()->clear_glyph_cache(p_font->temp_cache_keys[i]);
 	}
+	p_font->temp_cache_keys.clear();
+}
+
+_FORCE_INLINE_ bool FontServer::_font_update_metrics(Font *p_font) {
+	float new_ascent = 0.0f;
+	float new_descent = 0.0f;
+
+	ERR_FAIL_COND_V(!FontDriver::get_singleton()->get_font_metrics(p_font->cache_key.get_font_id(), p_font->cache_key.font_size, p_font->cache_key.font_oversampling, new_ascent, new_descent), false);
+
+	p_font->ascent = new_ascent;
+	p_font->descent = new_descent;
+
+	return true;
 }
 
 void FontServer::_bind_methods() {
@@ -329,14 +119,20 @@ FontServer *FontServer::get_singleton() {
 	return singleton;
 }
 
-RID FontServer::font_create(int p_size, int p_custom_flags, int p_texture_flags) {
+RID FontServer::font_create(int p_size, int p_custom_flags, bool p_use_mipmaps, bool p_use_filter) {
 	Font *font = memnew(Font);
 
+	Vector<FontID> builtin_font_ids = FontDriver::get_singleton()->get_builtin_font_ids();
+	ERR_FAIL_COND_V(builtin_font_ids.empty(), RID());
+
 	font->cache_key.font_size = p_size;
-	font->cache_key.font_texture_flags = p_texture_flags;
+	font->cache_key.font_oversampling = 1;
+	font->cache_key.font_use_mipmaps = p_use_mipmaps;
+	font->cache_key.font_use_filter = p_use_filter;
 	font->cache_key.font_custom_flags = p_custom_flags;
-	font->cache_key.font_hash = default_font_id.font_hash;
-	font->cache_key.font_index = default_font_id.font_index;
+	font->cache_key.font_id = builtin_font_ids[0];
+
+	_font_update_metrics(font);
 
 	return font_owner.make_rid(font);
 }
@@ -354,24 +150,20 @@ void FontServer::font_set_size(RID p_font, int p_size) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND(!font);
 
-	font->cache_key.font_size = p_size;
-}
-
-void FontServer::font_set_texture_flags(RID p_font, int p_texture_flags) {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND(!font);
-
-	font->cache_key.font_texture_flags = p_texture_flags;
+	if (font->cache_key.font_size != p_size) {
+		_font_clear_caches(font);
+		font->cache_key.font_size = p_size;
+		_font_update_metrics(font);
+	}
 }
 
 void FontServer::font_set_use_mipmaps(RID p_font, bool p_use_mipmaps) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND(!font);
 
-	if (p_use_mipmaps) {
-		font->cache_key.font_texture_flags |= Texture::FLAG_MIPMAPS;
-	} else {
-		font->cache_key.font_texture_flags &= ~Texture::FLAG_MIPMAPS;
+	if (font->cache_key.font_use_mipmaps != p_use_mipmaps) {
+		_font_clear_caches(font);
+		font->cache_key.font_use_mipmaps = p_use_mipmaps;
 	}
 }
 
@@ -379,10 +171,9 @@ void FontServer::font_set_use_filter(RID p_font, bool p_use_filter) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND(!font);
 
-	if (p_use_filter) {
-		font->cache_key.font_texture_flags |= Texture::FLAG_FILTER;
-	} else {
-		font->cache_key.font_texture_flags &= ~Texture::FLAG_FILTER;
+	if (font->cache_key.font_use_filter != p_use_filter) {
+		_font_clear_caches(font);
+		font->cache_key.font_use_filter = p_use_filter;
 	}
 }
 
@@ -390,101 +181,88 @@ void FontServer::font_set_custom_flags(RID p_font, int p_custom_flags) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND(!font);
 
-	font->cache_key.font_custom_flags = p_custom_flags;
-}
-
-bool FontServer::font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_data) {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, false);
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FontID temp_font_id;
-	if (!p_font_data.empty()) {
-		temp_font_id.font_hash = XXH32(p_font_data.read().ptr(), p_font_data.size(), 0);
-		{
-			temp_font_id.font_index = 0;
-
-			freetype_wrapper->update_font_data(temp_font_id, p_font_data);
-
-			FT_Face ft_face = freetype_wrapper->get_ft_face(temp_font_id);
-			ERR_FAIL_COND_V(!ft_face, false);
-		}
-	} else {
-		temp_font_id = default_font_id;
+	if (font->cache_key.font_custom_flags != p_custom_flags) {
+		_font_clear_caches(font);
+		font->cache_key.font_custom_flags = p_custom_flags;
 	}
-
-	Ref<FreeTypeWrapper::FontInfo> font_info = freetype_wrapper->get_font_info(temp_font_id);
-	ERR_FAIL_COND_V(!font_info.is_valid(), false);
-	ERR_FAIL_INDEX_V(font->cache_key.font_index, font_info->face_count, false);
-
-	temp_font_id.font_index = font->cache_key.font_index;
-
-	freetype_wrapper->update_font_data(temp_font_id, p_font_data);
-
-	FT_Face ft_face = freetype_wrapper->get_ft_face(temp_font_id);
-	ERR_FAIL_COND_V(!ft_face, false);
-#endif
-
-	font->cache_key.font_hash = temp_font_id.font_hash;
-
-	return true;
 }
 
-bool FontServer::font_update_index(RID p_font, int p_font_index) {
+bool FontServer::font_set_data(RID p_font, const PoolVector<uint8_t> &p_font_data) {
+	Font *font = font_owner.getornull(p_font);
+	ERR_FAIL_COND_V(!font, false);
+	ERR_FAIL_COND_V(p_font_data.empty(), false);
+
+	_font_clear_caches(font);
+
+	FontID temp_font_id = FontDriver::get_singleton()->add_font_data(p_font_data);
+	temp_font_id.font_index = font->cache_key.font_id.font_index;
+
+	ERR_FAIL_COND_V(!FontDriver::get_singleton()->validate_font(temp_font_id), false);
+
+	font->cache_key.font_id.font_hash = temp_font_id.font_hash;
+
+	return _font_update_metrics(font);
+}
+
+bool FontServer::font_set_builtin_data(RID p_font, int p_builtin_index) {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND_V(!font, false);
 
-#ifdef MODULE_FREETYPE_ENABLED
-	Ref<FreeTypeWrapper::FontInfo> font_info = freetype_wrapper->get_font_info(font->cache_key.get_font_id());
+	_font_clear_caches(font);
+
+	Vector<FontID> builtin_font_ids = FontDriver::get_singleton()->get_builtin_font_ids();
+	ERR_FAIL_COND_V(builtin_font_ids.empty(), false);
+	ERR_FAIL_INDEX_V(p_builtin_index, builtin_font_ids.size(), false);
+
+	FontID temp_font_id = builtin_font_ids[p_builtin_index];
+	temp_font_id.font_index = font->cache_key.font_id.font_index;
+
+	ERR_FAIL_COND_V(!FontDriver::get_singleton()->validate_font(temp_font_id), false);
+
+	font->cache_key.font_id.font_hash = temp_font_id.font_hash;
+
+	return _font_update_metrics(font);
+}
+
+bool FontServer::font_set_path(RID p_font, const String &p_font_path) {
+	Font *font = font_owner.getornull(p_font);
+	ERR_FAIL_COND_V(!font, false);
+	ERR_FAIL_COND_V(p_font_path.empty(), false);
+
+	_font_clear_caches(font);
+
+	FontID temp_font_id = FontDriver::get_singleton()->add_font_path(p_font_path);
+	temp_font_id.font_index = font->cache_key.font_id.font_index;
+
+	ERR_FAIL_COND_V(!FontDriver::get_singleton()->validate_font(temp_font_id), false);
+
+	font->cache_key.font_id.font_hash = temp_font_id.font_hash;
+
+	return _font_update_metrics(font);
+}
+
+bool FontServer::font_set_index(RID p_font, int p_font_index) {
+	Font *font = font_owner.getornull(p_font);
+	ERR_FAIL_COND_V(!font, false);
+
+	Ref<FontInfo> font_info = FontDriver::get_singleton()->get_font_info(font->cache_key.get_font_id());
 	ERR_FAIL_COND_V(!font_info.is_valid(), false);
 	ERR_FAIL_INDEX_V(p_font_index, font_info->face_count, false);
 
-	FontID temp_font_id;
-	if (font->cache_key.font_index != p_font_index) {
-		temp_font_id.font_hash = font->cache_key.font_hash;
+	if (font->cache_key.font_id.font_index != p_font_index) {
+		_font_clear_caches(font);
+
+		FontID temp_font_id = font->cache_key.font_id;
 		temp_font_id.font_index = p_font_index;
 
-		freetype_wrapper->update_font_data(temp_font_id, font_info->data);
+		ERR_FAIL_COND_V(!FontDriver::get_singleton()->validate_font(temp_font_id), false);
 
-		FT_Face ft_face = freetype_wrapper->get_ft_face(temp_font_id);
-		ERR_FAIL_COND_V(!ft_face, false);
+		font->cache_key.font_id.font_index = p_font_index;
+
+		return _font_update_metrics(font);
 	}
-#endif
-
-	font->cache_key.font_index = temp_font_id.font_index;
 
 	return true;
-}
-
-bool FontServer::font_update_metrics(RID p_font, int p_oversampling) {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, false);
-
-	if (p_oversampling > 0 && font->oversampling != p_oversampling) {
-		font->oversampling = p_oversampling;
-	}
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FT_Size ft_size = freetype_wrapper->get_ft_size(font->cache_key.get_font_id(), font->cache_key.font_size, font->oversampling);
-	ERR_FAIL_COND_V(!ft_size, false);
-
-	font->ascent = (ft_size->metrics.ascender / 64.0) / font->oversampling;
-	font->descent = (-ft_size->metrics.descender / 64.0) / font->oversampling;
-#endif
-
-	return true;
-}
-
-void FontServer::font_clear_caches(RID p_font) {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND(!font);
-
-	glyph_manager->clear_cache(font->cache_key);
-
-	for (int i = 0; i < font->temp_cache_keys.size(); i++) {
-		glyph_manager->clear_cache(font->temp_cache_keys[i]);
-	}
-	font->temp_cache_keys.clear();
 }
 
 void FontServer::font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing) {
@@ -533,16 +311,16 @@ float FontServer::font_get_descent(RID p_font) const {
 	return font->descent + font->spacing_bottom;
 }
 
-float FontServer::font_get_oversampling(RID p_font) const {
+int FontServer::font_get_oversampling(RID p_font) const {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND_V(!font, 1);
 
-	return font->oversampling;
+	return font->cache_key.font_oversampling;
 }
 
-FontCacheKey FontServer::font_get_cache_key(RID p_font) const {
+GlyphCacheKey FontServer::font_get_cache_key(RID p_font) const {
 	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, FontCacheKey{});
+	ERR_FAIL_COND_V(!font, GlyphCacheKey{});
 
 	return font->cache_key;
 }
@@ -551,215 +329,75 @@ PoolVector<uint8_t> FontServer::font_get_data(RID p_font) const {
 	Font *font = font_owner.getornull(p_font);
 	ERR_FAIL_COND_V(!font, PoolVector<uint8_t>());
 
-#ifdef MODULE_FREETYPE_ENABLED
-	Ref<FreeTypeWrapper::FontInfo> font_info = freetype_wrapper->get_font_info(font->cache_key.get_font_id());
+	Ref<FontInfo> font_info = FontDriver::get_singleton()->get_font_info(font->cache_key.get_font_id());
 	ERR_FAIL_COND_V(!font_info.is_valid(), PoolVector<uint8_t>());
 
 	return font_info->data;
-#endif
 }
 
-Vector2 FontServer::font_get_char_size(RID p_font, char32_t p_char) const {
-	ERR_FAIL_COND_V(!p_font.is_valid(), Vector2(1, 1));
-
+GlyphInfo FontServer::font_get_glyph_info(RID p_font, char32_t p_char) const {
 	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, Vector2(1, 1));
+	ERR_FAIL_COND_V(!font, GlyphInfo{});
+	ERR_FAIL_COND_V(!FontDriver::get_singleton(), GlyphInfo{});
 
-	const GlyphManager::GlyphInfo &glyph_info = _get_simple_glyph_info(font, p_char);
-	return glyph_info.advance;
-}
+	FontID font_id = font->cache_key.get_font_id();
 
-Vector2 FontServer::font_get_string_size(RID p_font, const String &p_text) const {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, Vector2(0, 1));
+	uint32_t glyph_index = FontDriver::get_singleton()->get_glyph_index(font_id, p_char);
 
-	Vector2 size(0, font->ascent + font->descent);
-	if (p_text.length() == 0) {
-		return size;
-	}
+	GlyphInfo glyph_info;
 
-	Ref<TextData> text_data = create_text_data(p_font, p_text);
+	if (glyph_index) {
+		glyph_info = FontDriver::get_singleton()->get_glyph_info(font->cache_key, glyph_index);
+	} else {
+		Vector<FontID> builtin_font_ids = FontDriver::get_singleton()->get_builtin_font_ids();
+		for (int i = 0; i < builtin_font_ids.size(); i++) {
+			if (builtin_font_ids[i] == font_id) {
+				continue;
+			}
 
-	for (int i = 0; i < p_text.length(); i++) {
-		size += get_text_data_size(text_data, i);
-	}
+			FontID fallback_font_id = builtin_font_ids[i];
 
-	return size;
-}
+			glyph_index = FontDriver::get_singleton()->get_glyph_index(fallback_font_id, p_char);
 
-Ref<TextData> FontServer::create_text_data(RID p_font, const String &p_text) const {
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, Ref<TextData>());
+			if (glyph_index) {
+				GlyphCacheKey temp_cache_key = font->cache_key.create_temp_key(fallback_font_id);
+				if (font->temp_cache_keys.find(temp_cache_key) == -1) {
+					font->temp_cache_keys.push_back(temp_cache_key);
+				}
 
-	Ref<TextData> text_data;
-	text_data.instance();
-
-	text_data->font = p_font;
-	text_data->original_text = p_text;
-
-#ifdef MODULE_RAQM_ENABLED
-	text_data->char_infos = _shape_string(font, text_data->original_text);
-#endif
-
-	return text_data;
-}
-
-Vector2 FontServer::draw_text_data(const Ref<TextData> &p_text_data, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate) const {
-	Vector2 ofs;
-
-	ERR_FAIL_COND_V(!p_text_data.is_valid(), ofs);
-	ERR_FAIL_COND_V(!p_text_data->font.is_valid(), ofs);
-
-#ifdef MODULE_RAQM_ENABLED
-	Font *font = font_owner.getornull(p_text_data->font);
-	ERR_FAIL_COND_V(!font, ofs);
-	ERR_FAIL_INDEX_V(p_char_index, p_text_data->char_infos.size(), ofs);
-
-	const CharInfo &char_info = p_text_data->char_infos[p_char_index];
-
-	if (char_info.type == CharInfo::SHAPELESS) {
-		const GlyphManager::GlyphInfo &glyph_info = _get_simple_glyph_info(font, char_info.char_code);
-		_draw_glyph(p_canvas_item, glyph_info, p_pos + ofs, p_modulate);
-		ofs += glyph_info.advance;
-	} else if (char_info.type == CharInfo::SHAPED) {
-		const GlyphManager::GlyphInfo &glyph_info = _get_shaped_glyph_info(font, char_info.glyph_index);
-		_draw_glyph(p_canvas_item, glyph_info, p_pos + ofs + char_info.glyph_offset, p_modulate);
-
-		ofs += char_info.glyph_advance;
-		if (char_info.char_code == 0x0020u) {
-			ofs.width += font->spacing_space_char;
-		}
-		if (char_info.is_last_part()) {
-			ofs.width += font->spacing_glyph;
+				glyph_info = FontDriver::get_singleton()->get_glyph_info(temp_cache_key, glyph_index);
+				break;
+			}
 		}
 	}
-#else
-	ofs += draw_char(p_canvas_item, p_text_data->font, p_pos + ofs, p_text_data->original_text[p_char_index], p_modulate);
-#endif
 
-	return ofs;
-}
-
-Vector2 FontServer::get_text_data_size(const Ref<TextData> &p_text_data, int p_char_index) const {
-	Vector2 size;
-
-	ERR_FAIL_COND_V(!p_text_data.is_valid(), size);
-	ERR_FAIL_COND_V(!p_text_data->font.is_valid(), size);
-
-#ifdef MODULE_RAQM_ENABLED
-	Font *font = font_owner.getornull(p_text_data->font);
-	ERR_FAIL_COND_V(!font, size);
-	ERR_FAIL_INDEX_V(p_char_index, p_text_data->char_infos.size(), size);
-
-	const CharInfo &char_info = p_text_data->char_infos[p_char_index];
-
-	if (char_info.type == CharInfo::SHAPELESS) {
-		const GlyphManager::GlyphInfo &glyph_info = _get_simple_glyph_info(font, char_info.char_code);
-		size += glyph_info.advance;
-	} else if (char_info.type == CharInfo::SHAPED) {
-		const GlyphManager::GlyphInfo &glyph_info = _get_shaped_glyph_info(font, char_info.glyph_index);
-
-		size += char_info.glyph_advance;
-		if (char_info.char_code == 0x0020u) {
-			size.width += font->spacing_space_char;
-		}
-		if (char_info.is_last_part()) {
-			size.width += font->spacing_glyph;
-		}
+	if (p_char == 0x0020u) {
+		glyph_info.advance.width += font->spacing_space_char;
 	}
-#else
-	size += font_get_char_size(p_text_data->font, p_text_data->original_text[p_char_index]);
-#endif
-
-	return size;
-}
-
-Vector2 FontServer::draw_char(RID p_canvas_item, RID p_font, const Vector2 &p_pos, char32_t p_char, const Color &p_modulate) const {
-	ERR_FAIL_COND_V(!p_font.is_valid(), Vector2());
-
-	Font *font = font_owner.getornull(p_font);
-	ERR_FAIL_COND_V(!font, Vector2());
-
-	const GlyphManager::GlyphInfo &glyph_info = _get_simple_glyph_info(font, p_char);
-	_draw_glyph(p_canvas_item, glyph_info, p_pos, p_modulate);
-	return glyph_info.advance;
-}
-
-void FontServer::draw_string(RID p_canvas_item, RID p_font, const Vector2 &p_pos, const String &p_text, const Color &p_modulate, float p_clip_w) const {
-	Ref<TextData> text_data = create_text_data(p_font, p_text);
-
-	Vector2 ofs;
-	for (int i = 0; i < p_text.length(); i++) {
-		if (p_clip_w > 0.0 && ofs.x > p_clip_w) {
-			break;
-		}
-		ofs += draw_text_data(text_data, i, p_canvas_item, p_pos + ofs, p_modulate);
-	}
-}
-
-void FontServer::draw_string_aligned(RID p_canvas_item, RID p_font, const Vector2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate) const {
-	float length = font_get_string_size(p_font, p_text).width;
-	if (length >= p_width) {
-		draw_string(p_canvas_item, p_font, p_pos, p_text, p_modulate, p_width);
-		return;
+	if (glyph_info.found) {
+		glyph_info.advance.width += font->spacing_glyph;
 	}
 
-	float ofs = 0.f;
-	switch (p_align) {
-		case HALIGN_LEFT: {
-			ofs = 0;
-		} break;
-		case HALIGN_CENTER: {
-			ofs = Math::floor((p_width - length) / 2.0);
-		} break;
-		case HALIGN_RIGHT: {
-			ofs = p_width - length;
-		} break;
-		default: {
-			ERR_PRINT("Unknown halignment type");
-		} break;
-	}
-	draw_string(p_canvas_item, p_font, p_pos + Vector2(ofs, 0), p_text, p_modulate, p_width);
+	return glyph_info;
+}
+
+RID FontServer::font_get_glyph_texture_rid(RID p_font, const GlyphInfo &p_glyph_info) const {
+	ERR_FAIL_COND_V(!FontDriver::get_singleton(), RID());
+	return FontDriver::get_singleton()->get_glyph_texture_rid(p_glyph_info);
 }
 
 FontServer::FontServer() {
 	singleton = this;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	freetype_wrapper = memnew(FreeTypeWrapper);
-
-	_setup_builtin_fonts();
-#endif
-
-#ifdef MODULE_RAQM_ENABLED
-	raqm_wrapper = memnew(RaqmWrapper);
-#endif
-
-	glyph_manager = memnew(GlyphManager);
-
-	text_manager = memnew(TextManager);
 }
 
 FontServer::~FontServer() {
 	singleton = NULL;
 
-#ifdef MODULE_FREETYPE_ENABLED
-	if (freetype_wrapper) {
-		memdelete(freetype_wrapper);
-	}
-#endif
-
-#ifdef MODULE_RAQM_ENABLED
-	if (raqm_wrapper) {
-		memdelete(raqm_wrapper);
-	}
-#endif
-
-	if (glyph_manager) {
-		memdelete(glyph_manager);
+	for (int i = 0; i < FontDriverManager::get_driver_count(); i++) {
+		memdelete(FontDriverManager::get_driver(i));
 	}
 
-	if (text_manager) {
-		memdelete(text_manager);
+	for (int i = 0; i < TextShaperManager::get_shaper_count(); i++) {
+		memdelete(TextShaperManager::get_shaper(i));
 	}
 }

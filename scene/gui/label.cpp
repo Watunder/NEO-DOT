@@ -32,7 +32,7 @@
 #include "core/print_string.h"
 #include "core/project_settings.h"
 #include "core/translation.h"
-#include "servers/font_server.h"
+#include "servers/text/text_helper.h"
 
 void Label::set_autowrap(bool p_autowrap) {
 	if (autowrap == p_autowrap) {
@@ -224,7 +224,7 @@ void Label::_notification(int p_what) {
 				if (uppercase) {
 					sub_xl_text = sub_xl_text.to_upper();
 				}
-				Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), sub_xl_text);
+				Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), sub_xl_text);
 
 				if (font_color_shadow.a > 0) {
 					int chars_total_shadow = chars_total; //save chars drawn
@@ -232,11 +232,11 @@ void Label::_notification(int p_what) {
 
 					for (int i = 0; i < from->word_len; i++) {
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
-							float move = FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow).x;
+							float move = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow).x;
 							if (use_outline) {
-								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow);
-								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
-								FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
 							}
 							x_ofs_shadow += move;
 							chars_total_shadow++;
@@ -245,7 +245,7 @@ void Label::_notification(int p_what) {
 				}
 				for (int i = 0; i < from->word_len; i++) {
 					if (visible_chars < 0 || chars_total < visible_chars) {
-						Vector2 ofs = FontServer::get_singleton()->draw_text_data(text_data, i, ci, Point2(x_ofs, y_ofs), font_color);
+						Vector2 ofs = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs, y_ofs), font_color);
 						x_ofs += ofs.x;
 						y_ofs += ofs.y;
 						chars_total++;
@@ -295,7 +295,7 @@ int Label::get_longest_line_width() const {
 	if (uppercase) {
 		current_xl_text = current_xl_text.to_upper();
 	}
-	Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
+	Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), current_xl_text);
 
 	for (int i = 0; i < current_xl_text.size(); i++) {
 		char32_t current = current_xl_text[i];
@@ -306,7 +306,7 @@ int Label::get_longest_line_width() const {
 				line_width = 0;
 			}
 		} else {
-			real_t char_width = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
+			real_t char_width = TextHelper::get_char_size_in_text_line(text_line, i).width;
 			line_width += char_width;
 		}
 	}
@@ -373,7 +373,7 @@ void Label::regenerate_word_cache() {
 	if (uppercase) {
 		current_xl_text = current_xl_text.to_upper();
 	}
-	Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), current_xl_text);
+	Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), current_xl_text);
 
 	for (int i = 0; i <= current_xl_text.length(); i++) {
 		char32_t current = i < current_xl_text.length() ? current_xl_text[i] : U' '; //always a space at the end, so the algo works
@@ -446,7 +446,7 @@ void Label::regenerate_word_cache() {
 			if (current_word_size == 0) {
 				word_pos = i;
 			}
-			char_width = FontServer::get_singleton()->get_text_data_size(text_data, i).width;
+			char_width = TextHelper::get_char_size_in_text_line(text_line, i).width;
 			current_word_size += char_width;
 			line_width += char_width;
 			total_char_cache++;

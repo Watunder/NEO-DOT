@@ -64,6 +64,11 @@
 #include "visual/shader_types.h"
 #include "visual_server.h"
 
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include "modules/freetype/font_driver_freetype.h"
+#endif
+
 static void _debugger_get_resource_usage(List<ScriptDebuggerRemote::ResourceUsage> *r_usage) {
 	List<VS::TextureInfo> tinfo;
 	VS::get_singleton()->texture_debug_usage(&tinfo);
@@ -194,6 +199,10 @@ void register_server_types() {
 
 	PhysicsServerManager::register_server("GodotPhysics", &_createGodotPhysicsCallback);
 	PhysicsServerManager::set_default_server("GodotPhysics");
+
+#ifdef MODULE_FREETYPE_ENABLED
+	FontDriverManager::add_driver(memnew(FontDriverFreeType));
+#endif
 }
 
 void unregister_server_types() {

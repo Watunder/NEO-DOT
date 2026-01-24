@@ -59,8 +59,6 @@ private:
 protected:
 	static void _bind_methods();
 
-	bool _update_data(const PoolVector<uint8_t> &p_data);
-
 public:
 	virtual void reload_from_file();
 	virtual RID get_rid() const;

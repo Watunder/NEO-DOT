@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font_cache_key.h                                                     */
+/*  text_shaper_raqm.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,65 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef FONT_CACHE_KEY_H
-#define FONT_CACHE_KEY_H
+#ifndef TEXT_SHAPER_RAQM_H
+#define TEXT_SHAPER_RAQM_H
 
-#include "core/hashfuncs.h"
-#include "core/typedefs.h"
+#include "servers/text/text_shaper.h"
 
-struct FontID {
-	uint32_t font_hash = 0;
-	uint8_t font_index = 0;
+class TextShaperRaqm : public TextShaper {
+public:
+	virtual Error init() { return OK; }
+	virtual const char *get_name() const { return "Raqm"; }
 
-	bool operator==(const FontID &p_id) const {
-		return (p_id.font_hash == font_hash &&
-				p_id.font_index == font_index);
-	}
-
-	uint32_t hash() const {
-		uint32_t h = font_hash;
-		h = h * 31 + font_index;
-		return h;
-	}
-};
-
-struct FontIDHasher {
-	static _FORCE_INLINE_ uint32_t hash(const FontID &p_id) { return p_id.hash(); }
-};
-
-struct FontCacheKey {
-	union {
-		struct {
-			uint64_t font_hash : 32;
-			uint64_t font_index : 8;
-			uint64_t font_size : 16;
-			uint64_t font_texture_flags : 3;
-			uint64_t font_custom_flags : 3;
-			uint64_t reserved : 2;
-		};
-
-		uint64_t key;
-	};
-
-	FontCacheKey() :
-			key(0) {}
-
-	bool operator==(const FontCacheKey &p_key) const { return key == p_key.key; }
-
-	_FORCE_INLINE_ FontID get_font_id() const {
-		FontID font_id;
-		font_id.font_hash = font_hash;
-		font_id.font_index = font_index;
-		return font_id;
-	}
-
-	_FORCE_INLINE_ FontCacheKey create_temp_key(const FontID &p_font_id) const {
-		FontCacheKey temp_cache_key;
-		temp_cache_key.key = key;
-		temp_cache_key.font_hash = p_font_id.font_hash;
-		temp_cache_key.font_index = p_font_id.font_index;
-		return temp_cache_key;
-	}
+	virtual Vector<ShapedData *> shape_text(const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, const String &p_text, int p_font_size, int p_font_oversampling);
 };
 
 #endif

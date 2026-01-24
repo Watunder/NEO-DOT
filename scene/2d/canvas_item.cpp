@@ -38,7 +38,7 @@
 #include "scene/resources/style_box.h"
 #include "scene/resources/texture.h"
 #include "scene/scene_string_names.h"
-#include "servers/font_server.h"
+#include "servers/text/text_helper.h"
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual_server.h"
 
@@ -861,7 +861,8 @@ void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const
 
 	ERR_FAIL_COND(p_font.is_null());
 
-	return FontServer::get_singleton()->draw_string(canvas_item, p_font->get_rid(), p_pos, p_text, p_modulate, p_clip_w);
+	Ref<TextLine> text_line = TextHelper::create_text_line(p_font->get_rid(), p_text);
+	TextHelper::draw_text_line(text_line, canvas_item, p_pos, p_modulate, p_clip_w);
 }
 
 void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate) {
@@ -869,7 +870,8 @@ void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_po
 
 	ERR_FAIL_COND(p_font.is_null());
 
-	return FontServer::get_singleton()->draw_string_aligned(canvas_item, p_font->get_rid(), p_pos, p_align, p_width, p_text, p_modulate);
+	Ref<TextLine> text_line = TextHelper::create_text_line(p_font->get_rid(), p_text);
+	TextHelper::draw_text_line_aligned(text_line, canvas_item, p_pos, p_align, p_width, p_modulate);
 }
 
 float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate) {
@@ -877,7 +879,7 @@ float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32
 
 	ERR_FAIL_COND_V(p_font.is_null(), 0);
 
-	return FontServer::get_singleton()->draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate).width;
+	return TextHelper::draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate).width;
 }
 
 void CanvasItem::_notify_transform(CanvasItem *p_node) {

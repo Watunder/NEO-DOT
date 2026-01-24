@@ -31,24 +31,174 @@
 #ifndef FONT_SERVER_H
 #define FONT_SERVER_H
 
-#include "configs/modules_enabled.gen.h"
-#include "core/os/thread_safe.h"
+#include "core/image.h"
+#include "core/math/vector2.h"
+#include "core/pool_vector.h"
+#include "core/reference.h"
+#include "core/rid.h"
 
-#ifdef MODULE_FREETYPE_ENABLED
-#include "font/freetype_wrapper.h"
-#endif
-#ifdef MODULE_RAQM_ENABLED
-#include "font/raqm_wrapper.h"
-#endif
-#include "font/font_cache_key.h"
-#include "font/glyph_manager.h"
-#include "font/text_data.h"
-#include "font/text_manager.h"
+struct FontID {
+	uint32_t font_hash = 0;
+	uint16_t font_index = 0;
+
+	_FORCE_INLINE_ bool operator==(const FontID &p_id) const {
+		return (p_id.font_hash == font_hash &&
+				p_id.font_index == font_index);
+	}
+
+	_FORCE_INLINE_ bool operator!=(const FontID &p_id) const {
+		return (p_id.font_hash != font_hash ||
+				p_id.font_index != font_index);
+	}
+
+	_FORCE_INLINE_ uint32_t hash() const {
+		uint32_t h = font_hash;
+		h = h * 31 + font_index;
+		return h;
+	}
+};
+
+struct FontIDHasher {
+	static _FORCE_INLINE_ uint32_t hash(const FontID &p_id) {
+		return HashMapHasherDefault::hash(p_id.hash());
+	}
+};
+
+struct GlyphCacheKey {
+	FontID font_id;
+	uint16_t font_size = 0;
+	uint8_t font_oversampling = 1;
+	bool font_use_mipmaps = false;
+	bool font_use_filter = false;
+	uint32_t font_custom_flags = 0;
+
+	_FORCE_INLINE_ bool operator==(const GlyphCacheKey &p_key) const {
+		return (font_id == p_key.font_id &&
+				font_size == p_key.font_size &&
+				font_oversampling == p_key.font_oversampling &&
+				font_use_mipmaps == p_key.font_use_mipmaps &&
+				font_use_filter == p_key.font_use_filter &&
+				font_custom_flags == p_key.font_custom_flags);
+	}
+
+	_FORCE_INLINE_ bool operator!=(const GlyphCacheKey &p_key) const {
+		return (font_id != p_key.font_id ||
+				font_size != p_key.font_size ||
+				font_oversampling != p_key.font_oversampling ||
+				font_use_mipmaps != p_key.font_use_mipmaps ||
+				font_use_filter != p_key.font_use_filter ||
+				font_custom_flags != p_key.font_custom_flags);
+	}
+
+	_FORCE_INLINE_ uint64_t hash() const {
+		uint64_t h = font_id.hash();
+		h = h * 31 + font_size;
+		h = h * 31 + font_oversampling;
+		h = h * 31 + (font_use_mipmaps ? 1 : 0);
+		h = h * 31 + (font_use_filter ? 1 : 0);
+		h = h * 31 + font_custom_flags;
+		return h;
+	}
+
+	_FORCE_INLINE_ FontID get_font_id() const {
+		return font_id;
+	}
+
+	_FORCE_INLINE_ GlyphCacheKey create_temp_key(const FontID &p_font_id) const {
+		GlyphCacheKey temp_cache_key;
+		temp_cache_key.font_id = p_font_id;
+		temp_cache_key.font_size = font_size;
+		temp_cache_key.font_oversampling = font_oversampling;
+		temp_cache_key.font_use_mipmaps = font_use_mipmaps;
+		temp_cache_key.font_use_filter = font_use_filter;
+		temp_cache_key.font_custom_flags = font_custom_flags;
+		return temp_cache_key;
+	}
+};
+
+struct GlyphCacheKeyHasher {
+	static _FORCE_INLINE_ uint32_t hash(const GlyphCacheKey &p_cache_key) {
+		return HashMapHasherDefault::hash(p_cache_key.hash());
+	}
+};
+
+/*************************************************************************/
+
+struct FontInfo : Reference {
+	FontID id;
+
+	String family_name;
+	String style_name;
+	uint16_t face_count = 0;
+
+	String path;
+	PoolVector<uint8_t> data;
+};
+
+struct GlyphInfo {
+	bool found = false;
+
+	Vector2 texture_offset;
+	Vector2 advance;
+
+	int texture_index = -1;
+	Size2 texture_size;
+	Rect2 texture_rect_uv;
+	Image::Format texture_format;
+
+	uint32_t texture_flags = 0;
+
+	GlyphCacheKey cache_key;
+};
+
+/*************************************************************************/
+
+class FontDriver {
+	static FontDriver *singleton;
+
+public:
+	virtual Error init() = 0;
+
+	static FontDriver *get_singleton();
+	void set_singleton();
+
+	virtual const char *get_name() const = 0;
+
+	virtual FontID add_font_data(const PoolVector<uint8_t> &p_font_data) = 0;
+	virtual FontID add_font_path(const String &p_font_path) = 0;
+
+	virtual Vector<FontID> get_builtin_font_ids() const = 0;
+	virtual Ref<FontInfo> get_font_info(const FontID &p_font_id) const = 0;
+
+	virtual uint32_t get_glyph_index(const FontID &p_font_id, char32_t p_char) const = 0;
+	virtual bool get_font_metrics(const FontID &p_font_id, int p_size, int p_oversampling, float &r_ascent, float &r_descent) const = 0;
+	virtual bool validate_font(const FontID &p_font_id) const = 0;
+
+	virtual void clear_glyph_cache(const GlyphCacheKey &p_cache_key) = 0;
+	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index) = 0;
+	virtual RID get_glyph_texture_rid(const GlyphInfo &p_glyph_info) = 0;
+
+	FontDriver() {}
+	virtual ~FontDriver() {}
+};
+
+class FontDriverManager {
+	enum {
+		MAX_DRIVERS = 10
+	};
+
+	static FontDriver *drivers[MAX_DRIVERS];
+	static int driver_count;
+
+public:
+	static void add_driver(FontDriver *p_driver);
+	static void initialize(int p_driver);
+	static int get_driver_count();
+	static FontDriver *get_driver(int p_driver);
+};
 
 class FontServer : public Object {
 	GDCLASS(FontServer, Object);
-
-	_THREAD_SAFE_CLASS_
 
 public:
 	enum SpacingType {
@@ -59,13 +209,11 @@ public:
 	};
 
 	struct Font : RID_Data {
-		uint64_t font_id_hash;
-		FontCacheKey cache_key;
-		Vector<FontCacheKey> temp_cache_keys;
+		GlyphCacheKey cache_key;
+		Vector<GlyphCacheKey> temp_cache_keys;
 
 		float ascent;
 		float descent;
-		int oversampling;
 
 		int spacing_top;
 		int spacing_bottom;
@@ -73,11 +221,8 @@ public:
 		int spacing_space_char;
 
 		Font() {
-			font_id_hash = 0;
-
 			ascent = 0;
 			descent = 1;
-			oversampling = 1;
 
 			spacing_top = 0;
 			spacing_bottom = 0;
@@ -91,28 +236,8 @@ public:
 private:
 	static FontServer *singleton;
 
-	Vector<FontID> builtin_font_ids;
-	FontID default_font_id;
-
-#ifdef MODULE_FREETYPE_ENABLED
-	FreeTypeWrapper *freetype_wrapper = NULL;
-
-	_FORCE_INLINE_ void _setup_builtin_fonts();
-#endif
-
-#ifdef MODULE_RAQM_ENABLED
-	RaqmWrapper *raqm_wrapper = NULL;
-
-	_FORCE_INLINE_ Vector<CharInfo> _shape_string(Font *p_font, const String &p_text) const;
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_shaped_glyph_info(Font *p_font, uint32_t p_glyph_index) const;
-#endif
-
-	GlyphManager *glyph_manager = NULL;
-
-	_FORCE_INLINE_ GlyphManager::GlyphInfo _get_simple_glyph_info(Font *p_font, char32_t p_char) const;
-	_FORCE_INLINE_ void _draw_glyph(RID p_canvas_item, const GlyphManager::GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate) const;
-
-	TextManager *text_manager = NULL;
+	_FORCE_INLINE_ void _font_clear_caches(Font *p_font);
+	_FORCE_INLINE_ bool _font_update_metrics(Font *p_font);
 
 protected:
 	static void _bind_methods();
@@ -120,36 +245,27 @@ protected:
 public:
 	static FontServer *get_singleton();
 
-	RID font_create(int p_size = 1, int p_custom_flags = 0, int p_texture_flags = Texture::FLAG_MIPMAPS | Texture::FLAG_FILTER);
+	RID font_create(int p_size = 1, int p_custom_flags = 0, bool p_use_mipmaps = true, bool p_use_filter = true);
 	void font_free(RID p_font);
 	void font_set_size(RID p_font, int p_size);
-	void font_set_texture_flags(RID p_font, int p_texture_flags);
 	void font_set_use_mipmaps(RID p_font, bool p_use_mipmaps);
 	void font_set_use_filter(RID p_font, bool p_use_filter);
 	void font_set_custom_flags(RID p_font, int p_custom_flags);
-	bool font_update_data(RID p_font, const PoolVector<uint8_t> &p_font_data);
-	bool font_update_index(RID p_font, int p_font_index);
-	bool font_update_metrics(RID p_font, int p_oversampling = -1);
-	void font_clear_caches(RID p_font);
+	bool font_set_data(RID p_font, const PoolVector<uint8_t> &p_font_data);
+	bool font_set_path(RID p_font, const String &p_font_path);
+	bool font_set_builtin_data(RID p_font, int p_builtin_index = 0);
+	bool font_set_index(RID p_font, int p_font_index);
 	float font_get_ascent(RID p_font) const;
 	float font_get_descent(RID p_font) const;
-	float font_get_oversampling(RID p_font) const;
-	FontCacheKey font_get_cache_key(RID p_font) const;
+	int font_get_oversampling(RID p_font) const;
+	GlyphCacheKey font_get_cache_key(RID p_font) const;
 	PoolVector<uint8_t> font_get_data(RID p_font) const;
 
 	void font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing);
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
 
-	Vector2 font_get_char_size(RID p_font, char32_t p_char) const;
-	Vector2 font_get_string_size(RID p_font, const String &p_text) const;
-
-	Ref<TextData> create_text_data(RID p_font, const String &p_text) const;
-	Vector2 draw_text_data(const Ref<TextData> &p_text_data, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate = Color(1, 1, 1)) const;
-	Vector2 get_text_data_size(const Ref<TextData> &p_text_data, int p_char_index) const;
-
-	Vector2 draw_char(RID p_canvas_item, RID p_font, const Vector2 &p_pos, char32_t p_char, const Color &p_modulate = Color(1, 1, 1)) const;
-	void draw_string(RID p_canvas_item, RID p_font, const Vector2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), float p_clip_w = 0.0) const;
-	void draw_string_aligned(RID p_canvas_item, RID p_font, const Vector2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate = Color(1, 1, 1)) const;
+	GlyphInfo font_get_glyph_info(RID p_font, char32_t p_char) const;
+	RID font_get_glyph_texture_rid(RID p_font, const GlyphInfo &p_glyph_info) const;
 
 	FontServer();
 	~FontServer();

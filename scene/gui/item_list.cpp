@@ -31,7 +31,7 @@
 #include "item_list.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
-#include "servers/font_server.h"
+#include "servers/text/text_helper.h"
 
 void ItemList::add_item(const String &p_item, const Ref<Texture> &p_texture, bool p_selectable) {
 	Item item;
@@ -1050,9 +1050,9 @@ void ItemList::_notification(int p_what) {
 					float ofs = 0;
 					int line = 0;
 
-					Ref<TextData> text_data = FontServer::get_singleton()->create_text_data(font->get_rid(), items[i].text);
+					Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), items[i].text);
 					for (int j = 0; j <= ss; j++) {
-						int cs = j < ss ? FontServer::get_singleton()->get_text_data_size(text_data, j).width : 0;
+						int cs = j < ss ? TextHelper::get_char_size_in_text_line(text_line, j).width : 0;
 						if (ofs + cs > max_len || j == ss) {
 							line_limit_cache.write[line] = j;
 							line_size_cache.write[line] = ofs;
@@ -1082,7 +1082,7 @@ void ItemList::_notification(int p_what) {
 						}
 						float line_ofs_x = ofs + (max_len - line_size_cache[line]) / 2;
 						float line_ofs_y = line * (font_height + line_separation);
-						ofs += FontServer::get_singleton()->draw_text_data(text_data, j, get_canvas_item(), text_ofs + Vector2(line_ofs_x, line_ofs_y).floor(), modulate).x;
+						ofs += TextHelper::draw_char_in_text_line(text_line, j, get_canvas_item(), text_ofs + Vector2(line_ofs_x, line_ofs_y).floor(), modulate).x;
 					}
 
 					//special multiline mode

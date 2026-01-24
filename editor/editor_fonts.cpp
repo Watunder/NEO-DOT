@@ -35,11 +35,10 @@
 
 #include "core/os/dir_access.h"
 #include "core/project_settings.h"
+#include "modules/freetype/builtin_vector_fonts.gen.h"
 #include "scene/resources/default_theme/default_theme.h"
 #include "scene/resources/freetype_font.h"
 #include "servers/font_server.h"
-
-#include "servers/font/builtin_fonts.gen.h"
 
 // Enable filtering and mipmaps on the editor fonts to improve text appearance
 // in editors that are zoomed in/out without having dedicated fonts to generate.

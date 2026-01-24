@@ -68,6 +68,7 @@
 #include "servers/physics_2d_server.h"
 #include "servers/physics_server.h"
 #include "servers/register_server_types.h"
+#include "servers/text/text_shaper.h"
 #include "tests/runtime/test_main.h"
 
 #ifdef TOOLS_ENABLED
@@ -413,8 +414,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 #ifdef TOOLS_ENABLED
 	bool found_project = false;
 #endif
-
-	font_server = memnew(FontServer);
 
 	packed_data = PackedData::get_singleton();
 	if (!packed_data)
@@ -1232,8 +1231,6 @@ error:
 		memdelete(packed_data);
 	if (file_access_network_client)
 		memdelete(file_access_network_client);
-	if (font_server)
-		memdelete(font_server);
 
 	unregister_module_types(MODULE_LEVEL_CORE);
 	unregister_core_driver_types();
@@ -1269,6 +1266,8 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	if (init_use_custom_pos) {
 		OS::get_singleton()->set_window_position(init_custom_pos);
 	}
+
+	font_server = memnew(FontServer);
 
 	// right moment to create and initialize the audio server
 
@@ -1398,6 +1397,9 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	ResourceLoader::load_path_remaps();
 
 	MAIN_PRINT("Main: Load Scene Types");
+
+	FontDriverManager::initialize(0);
+	TextShaperManager::initialize(0);
 
 	register_scene_types();
 	register_module_types(MODULE_LEVEL_SCENE);
