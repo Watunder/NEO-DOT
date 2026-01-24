@@ -33,7 +33,10 @@ if env["builtin_libunibreak"]:
 
     env_thirdparty = env_unicode.Clone()
     # Include header for libunibreak to use stdint types
-    env_thirdparty.Append(CCFLAGS=["/FI", '"drivers/unicode/unibreak_utf_types.h"'])
+    if env.msvc:
+        env_thirdparty.Append(CCFLAGS=["/FI" + '"drivers/unicode/unibreak_utf_types.h"'])
+    else:
+        env_thirdparty.Append(CCFLAGS=["-include", '"drivers/unicode/unibreak_utf_types.h"'])
     env_thirdparty.disable_warnings()
     env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
 
