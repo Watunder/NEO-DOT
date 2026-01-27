@@ -30,7 +30,15 @@
 
 #include "register_types.h"
 
+#include "font_driver_freetype.h"
+#include "servers/font_server.h"
+
 void register_freetype_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SERVERS) {
+		return;
+	}
+
+	FontDriverManager::add_driver(memnew(FontDriverFreeType));
 }
 
 void unregister_freetype_types(ModuleLevel p_level) {
