@@ -359,6 +359,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	register_core_settings(); //here globals is present
 
+	register_module_types(MODULE_LEVEL_CORE);
+
 	translation_server = memnew(TranslationServer);
 	performance = memnew(Performance);
 	ClassDB::register_class<Performance>();
@@ -1225,6 +1227,7 @@ error:
 	if (file_access_network_client)
 		memdelete(file_access_network_client);
 
+	unregister_module_types(MODULE_LEVEL_CORE);
 	unregister_core_driver_types();
 	unregister_core_types();
 
@@ -1292,6 +1295,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	}
 
 	register_server_types();
+	register_module_types(MODULE_LEVEL_SERVERS);
 
 	MAIN_PRINT("Main: Load Boot Image");
 
@@ -1388,19 +1392,22 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	MAIN_PRINT("Main: Load Scene Types");
 
 	register_scene_types();
+	register_module_types(MODULE_LEVEL_SCENE);
 
 #ifdef TOOLS_ENABLED
 	ClassDB::set_current_api(ClassDB::API_EDITOR);
 	EditorNode::register_editor_types();
+	register_module_types(MODULE_LEVEL_EDITOR);
 
 	ClassDB::set_current_api(ClassDB::API_CORE);
 
 #endif
 
-	MAIN_PRINT("Main: Load Modules, Physics, Drivers, Scripts");
+	MAIN_PRINT("Main: Load Platforms");
 
 	register_platform_apis();
-	register_module_types();
+
+	register_module_types(MODULE_LEVEL_MISC);
 
 	GLOBAL_DEF("display/mouse_cursor/custom_image", String());
 	GLOBAL_DEF("display/mouse_cursor/custom_image_hotspot", Vector2());
@@ -2069,15 +2076,20 @@ void Main::cleanup(bool p_force) {
 	VisualServer::get_singleton()->sync();
 
 #ifdef TOOLS_ENABLED
+	unregister_module_types(MODULE_LEVEL_EDITOR);
 	EditorNode::unregister_editor_types();
 #endif
 
 	ImageLoader::cleanup();
 
 	unregister_driver_types();
-	unregister_module_types();
+
+	unregister_module_types(MODULE_LEVEL_MISC);
+
 	unregister_platform_apis();
+	unregister_module_types(MODULE_LEVEL_SCENE);
 	unregister_scene_types();
+	unregister_module_types(MODULE_LEVEL_SERVERS);
 	unregister_server_types();
 
 	if (audio_server) {
@@ -2120,6 +2132,7 @@ void Main::cleanup(bool p_force) {
 	message_queue->flush();
 	memdelete(message_queue);
 
+	unregister_module_types(MODULE_LEVEL_CORE);
 	unregister_core_driver_types();
 	unregister_core_types();
 

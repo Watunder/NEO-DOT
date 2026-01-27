@@ -78,10 +78,18 @@ static Vector<Vector<Face3>> convex_decompose(const Vector<Face3> &p_faces) {
 	return ret;
 }
 
-void register_vhacd_types() {
+void register_vhacd_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	Mesh::convex_composition_function = convex_decompose;
 }
 
-void unregister_vhacd_types() {
+void unregister_vhacd_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	Mesh::convex_composition_function = NULL;
 }

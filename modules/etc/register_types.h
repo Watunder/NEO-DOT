@@ -31,7 +31,9 @@
 #ifndef ETC_REGISTER_TYPES_H
 #define ETC_REGISTER_TYPES_H
 
-void register_etc_types();
-void unregister_etc_types();
+#include "modules/register_module_types.h"
+
+void register_etc_types(ModuleLevel p_level);
+void unregister_etc_types(ModuleLevel p_level);
 
 #endif // ETC_REGISTER_TYPES_H

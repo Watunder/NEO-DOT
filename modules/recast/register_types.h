@@ -31,7 +31,9 @@
 #ifndef RECAST_REGISTER_TYPES_H
 #define RECAST_REGISTER_TYPES_H
 
-void register_recast_types();
-void unregister_recast_types();
+#include "modules/register_module_types.h"
+
+void register_recast_types(ModuleLevel p_level);
+void unregister_recast_types(ModuleLevel p_level);
 
 #endif // RECAST_REGISTER_TYPES_H

@@ -31,7 +31,9 @@
 #ifndef WEBP_REGISTER_TYPES_H
 #define WEBP_REGISTER_TYPES_H
 
-void register_webp_types();
-void unregister_webp_types();
+#include "modules/register_module_types.h"
+
+void register_webp_types(ModuleLevel p_level);
+void unregister_webp_types(ModuleLevel p_level);
 
 #endif // WEBP_REGISTER_TYPES_H

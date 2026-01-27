@@ -34,11 +34,19 @@
 
 static ImageLoaderWEBP *image_loader_webp = NULL;
 
-void register_webp_types() {
+void register_webp_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	image_loader_webp = memnew(ImageLoaderWEBP);
 	ImageLoader::add_image_format_loader(image_loader_webp);
 }
 
-void unregister_webp_types() {
+void unregister_webp_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	memdelete(image_loader_webp);
 }

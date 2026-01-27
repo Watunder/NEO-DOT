@@ -31,7 +31,9 @@
 #ifndef PVR_REGISTER_TYPES_H
 #define PVR_REGISTER_TYPES_H
 
-void register_pvr_types();
-void unregister_pvr_types();
+#include "modules/register_module_types.h"
+
+void register_pvr_types(ModuleLevel p_level);
+void unregister_pvr_types(ModuleLevel p_level);
 
 #endif // PVR_REGISTER_TYPES_H

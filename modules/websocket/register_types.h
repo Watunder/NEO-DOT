@@ -31,7 +31,9 @@
 #ifndef WEBSOCKET_REGISTER_TYPES_H
 #define WEBSOCKET_REGISTER_TYPES_H
 
-void register_websocket_types();
-void unregister_websocket_types();
+#include "modules/register_module_types.h"
+
+void register_websocket_types(ModuleLevel p_level);
+void unregister_websocket_types(ModuleLevel p_level);
 
 #endif // WEBSOCKET_REGISTER_TYPES_H

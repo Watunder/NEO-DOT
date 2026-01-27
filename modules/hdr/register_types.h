@@ -31,7 +31,9 @@
 #ifndef HDR_REGISTER_TYPES_H
 #define HDR_REGISTER_TYPES_H
 
-void register_hdr_types();
-void unregister_hdr_types();
+#include "modules/register_module_types.h"
+
+void register_hdr_types(ModuleLevel p_level);
+void unregister_hdr_types(ModuleLevel p_level);
 
 #endif // HDR_REGISTER_TYPES_H

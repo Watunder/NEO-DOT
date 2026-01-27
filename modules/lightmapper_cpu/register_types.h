@@ -31,7 +31,9 @@
 #ifndef LIGHTMAPPER_CPU_REGISTER_TYPES_H
 #define LIGHTMAPPER_CPU_REGISTER_TYPES_H
 
-void register_lightmapper_cpu_types();
-void unregister_lightmapper_cpu_types();
+#include "modules/register_module_types.h"
+
+void register_lightmapper_cpu_types(ModuleLevel p_level);
+void unregister_lightmapper_cpu_types(ModuleLevel p_level);
 
 #endif // LIGHTMAPPER_CPU_REGISTER_TYPES_H

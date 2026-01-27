@@ -144,34 +144,40 @@ static void _editor_init() {
 
 #endif // TOOLS_ENABLED
 
-void register_gdscript_types() {
-	ClassDB::register_class<GDScript>();
-	ClassDB::register_virtual_class<GDScriptFunctionState>();
+void register_gdscript_types(ModuleLevel p_level) {
+	if (p_level == MODULE_LEVEL_SERVERS) {
+		ClassDB::register_class<GDScript>();
+		ClassDB::register_virtual_class<GDScriptFunctionState>();
 
-	script_language_gd = memnew(GDScriptLanguage);
-	ScriptServer::register_language(script_language_gd);
+		script_language_gd = memnew(GDScriptLanguage);
+		ScriptServer::register_language(script_language_gd);
 
-	resource_loader_gd.instance();
-	ResourceLoader::add_resource_format_loader(resource_loader_gd);
+		resource_loader_gd.instance();
+		ResourceLoader::add_resource_format_loader(resource_loader_gd);
 
-	resource_saver_gd.instance();
-	ResourceSaver::add_resource_format_saver(resource_saver_gd);
+		resource_saver_gd.instance();
+		ResourceSaver::add_resource_format_saver(resource_saver_gd);
+	}
 
 #ifdef TOOLS_ENABLED
-	ScriptEditor::register_create_syntax_highlighter_function(GDScriptSyntaxHighlighter::create);
-	EditorNode::add_init_callback(_editor_init);
+	if (p_level == MODULE_LEVEL_EDITOR) {
+		ScriptEditor::register_create_syntax_highlighter_function(GDScriptSyntaxHighlighter::create);
+		EditorNode::add_init_callback(_editor_init);
+	}
 #endif // TOOLS_ENABLED
 }
 
-void unregister_gdscript_types() {
-	ScriptServer::unregister_language(script_language_gd);
+void unregister_gdscript_types(ModuleLevel p_level) {
+	if (p_level == MODULE_LEVEL_SERVERS) {
+		ScriptServer::unregister_language(script_language_gd);
 
-	if (script_language_gd)
-		memdelete(script_language_gd);
+		if (script_language_gd)
+			memdelete(script_language_gd);
 
-	ResourceLoader::remove_resource_format_loader(resource_loader_gd);
-	resource_loader_gd.unref();
+		ResourceLoader::remove_resource_format_loader(resource_loader_gd);
+		resource_loader_gd.unref();
 
-	ResourceSaver::remove_resource_format_saver(resource_saver_gd);
-	resource_saver_gd.unref();
+		ResourceSaver::remove_resource_format_saver(resource_saver_gd);
+		resource_saver_gd.unref();
+	}
 }

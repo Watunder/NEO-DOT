@@ -31,7 +31,9 @@
 #ifndef MBEDTLS_REGISTER_TYPES_H
 #define MBEDTLS_REGISTER_TYPES_H
 
-void register_mbedtls_types();
-void unregister_mbedtls_types();
+#include "modules/register_module_types.h"
+
+void register_mbedtls_types(ModuleLevel p_level);
+void unregister_mbedtls_types(ModuleLevel p_level);
 
 #endif // MBEDTLS_REGISTER_TYPES_H

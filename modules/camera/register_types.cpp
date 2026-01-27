@@ -30,6 +30,8 @@
 
 #include "register_types.h"
 
+#include "configs/platform_defines.h"
+
 #if defined(PLATFORM_WINDOWS)
 #include "camera_win.h"
 #endif
@@ -37,7 +39,11 @@
 #include "camera_osx.h"
 #endif
 
-void register_camera_types() {
+void register_camera_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SERVERS) {
+		return;
+	}
+
 #if defined(PLATFORM_WINDOWS)
 	CameraServer::make_default<CameraWindows>();
 #endif
@@ -46,5 +52,5 @@ void register_camera_types() {
 #endif
 }
 
-void unregister_camera_types() {
+void unregister_camera_types(ModuleLevel p_level) {
 }

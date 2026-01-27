@@ -31,7 +31,9 @@
 #ifndef VISUAL_SCRIPT_REGISTER_TYPES_H
 #define VISUAL_SCRIPT_REGISTER_TYPES_H
 
-void register_visual_script_types();
-void unregister_visual_script_types();
+#include "modules/register_module_types.h"
+
+void register_visual_script_types(ModuleLevel p_level);
+void unregister_visual_script_types(ModuleLevel p_level);
 
 #endif // VISUAL_SCRIPT_REGISTER_TYPES_H

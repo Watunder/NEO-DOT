@@ -32,11 +32,15 @@
 
 #include "embed_window_editor_plugin.h"
 
-void register_embed_window_types() {
+void register_embed_window_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_EDITOR) {
+		return;
+	}
+
 #ifdef TOOLS_ENABLED
 	EditorPlugins::add_by_type<EmbedWindowEditorPlugin>();
 #endif
 }
 
-void unregister_embed_window_types() {
+void unregister_embed_window_types(ModuleLevel p_level) {
 }

@@ -31,7 +31,9 @@
 #ifndef VHACD_REGISTER_TYPES_H
 #define VHACD_REGISTER_TYPES_H
 
-void register_vhacd_types();
-void unregister_vhacd_types();
+#include "modules/register_module_types.h"
+
+void register_vhacd_types(ModuleLevel p_level);
+void unregister_vhacd_types(ModuleLevel p_level);
 
 #endif // VHACD_REGISTER_TYPES_H

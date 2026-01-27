@@ -43,7 +43,11 @@
 #endif
 #include "webrtc_multiplayer.h"
 
-void register_webrtc_types() {
+void register_webrtc_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 #define _SET_HINT(NAME, _VAL_, _MAX_) \
 	GLOBAL_DEF(NAME, _VAL_);          \
 	ProjectSettings::get_singleton()->set_custom_property_info(NAME, PropertyInfo(Variant::INT, NAME, PROPERTY_HINT_RANGE, "2," #_MAX_ ",1,or_greater"));
@@ -65,4 +69,5 @@ void register_webrtc_types() {
 	ClassDB::register_class<WebRTCMultiplayer>();
 }
 
-void unregister_webrtc_types() {}
+void unregister_webrtc_types(ModuleLevel p_level) {
+}

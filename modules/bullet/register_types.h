@@ -34,7 +34,9 @@
 /**
 	@author AndreaCatania
 */
+#include "modules/register_module_types.h"
 
-void register_bullet_types();
-void unregister_bullet_types();
-#endif
+void register_bullet_types(ModuleLevel p_level);
+void unregister_bullet_types(ModuleLevel p_level);
+
+#endif // REGISTER_BULLET_TYPES_H

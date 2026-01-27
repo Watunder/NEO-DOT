@@ -31,10 +31,12 @@
 #ifndef CVTT_REGISTER_TYPES_H
 #define CVTT_REGISTER_TYPES_H
 
+#include "modules/register_module_types.h"
+
 #ifdef TOOLS_ENABLED
 
-void register_cvtt_types();
-void unregister_cvtt_types();
+void register_cvtt_types(ModuleLevel p_level);
+void unregister_cvtt_types(ModuleLevel p_level);
 
 #endif // TOOLS_ENABLED
 

@@ -254,10 +254,10 @@ def write_modules_detected(modules_detected):
             with open(os.path.join(path, "register_types.h")):
                 includes_cpp += '#include "' + path + '/register_types.h"\n'
                 register_cpp += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
-                register_cpp += "\tregister_" + name + "_types();\n"
+                register_cpp += "\tregister_" + name + "_types(p_level);\n"
                 register_cpp += "#endif\n"
                 unregister_cpp += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
-                unregister_cpp += "\tunregister_" + name + "_types();\n"
+                unregister_cpp += "\tunregister_" + name + "_types(p_level);\n"
                 unregister_cpp += "#endif\n"
 
             for header in glob.glob(path + "/tests/*.h"):
@@ -278,13 +278,13 @@ def write_modules_detected(modules_detected):
         + includes_cpp
         + """
 
-void register_module_types() {
+void register_module_types(ModuleLevel p_level) {
 """
         + register_cpp
         + """
 }
 
-void unregister_module_types() {
+void unregister_module_types(ModuleLevel p_level) {
 """
         + unregister_cpp
         + """
