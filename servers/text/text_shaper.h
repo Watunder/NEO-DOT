@@ -32,30 +32,11 @@
 #define TEXT_SHAPER_H
 
 #include "core/error_list.h"
-#include "core/math/vector2.h"
 #include "core/ustring.h"
 #include "core/vector.h"
 #include "servers/font_server.h"
 
-struct ShapedData {
-	FontID glyph_font_id;
-
-	uint32_t glyph_index;
-	Vector2 glyph_offset;
-	Vector2 glyph_advance;
-
-	int cluster_glyph_count;
-	int cluster_glyph_index;
-
-	ShapedData() :
-			glyph_index(0),
-			glyph_offset(0, 0),
-			glyph_advance(0, 0),
-			cluster_glyph_count(0),
-			cluster_glyph_index(-1) {}
-};
-
-/*************************************************************************/
+#include "text_types.h"
 
 class TextShaper {
 	static TextShaper *singleton;
@@ -68,7 +49,7 @@ public:
 
 	virtual const char *get_name() const = 0;
 
-	virtual Vector<ShapedData *> shape_text(const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, const String &p_text, int p_font_size, int p_font_oversampling) = 0;
+	virtual bool shape_text(CharInfo *r_char_infos, const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, const char32_t *p_text, int p_char_count, int p_font_size, int p_font_oversampling) = 0;
 
 	TextShaper() {}
 	virtual ~TextShaper() {}

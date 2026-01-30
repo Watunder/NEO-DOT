@@ -52,7 +52,7 @@
 #include "scene/gui/viewport_container.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/viewport.h"
-#include "scene/resources/freetype_font.h"
+#include "scene/resources/font.h"
 #include "scene/resources/packed_scene.h"
 
 #include <stdlib.h>
@@ -4045,7 +4045,7 @@ void CanvasItemEditor::_notification(int p_what) {
 
 		anchor_mode_button->set_icon(get_icon("Anchor", "EditorIcons"));
 
-		Ref<FreeTypeFont> font = zoom_reset->get_font("font")->duplicate(false);
+		Ref<Font> font = zoom_reset->get_font("font")->duplicate(false);
 
 		zoom_reset->add_font_override("font", font);
 		zoom_reset->add_color_override("font_color", Color(1, 1, 1));

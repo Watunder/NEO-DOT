@@ -38,7 +38,13 @@
 #include "editor_settings.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/separator.h"
-#include "scene/resources/freetype_font.h"
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include "modules/freetype/freetype_font.h"
+#else
+#error "this file requires the freetype module"
+#endif
 
 void GotoLineDialog::popup_find_line(TextEdit *p_edit) {
 	text_editor = p_edit;

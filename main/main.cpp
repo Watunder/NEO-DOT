@@ -64,6 +64,7 @@
 #include "scene/resources/packed_scene.h"
 #include "servers/audio_server.h"
 #include "servers/camera_server.h"
+#include "servers/font/font_driver_bmfont.h"
 #include "servers/font_server.h"
 #include "servers/physics_2d_server.h"
 #include "servers/physics_server.h"
@@ -161,6 +162,19 @@ static String get_full_version_string() {
 	if (hash.length() != 0)
 		hash = "." + hash.left(9);
 	return String(VERSION_FULL_BUILD) + hash;
+}
+
+void initialize_font() {
+	FontDriverBMFont *driver_bm = memnew(FontDriverBMFont);
+	FontDriverManager::add_driver(driver_bm);
+
+	for (int i = 0; i < FontDriverManager::get_driver_count(); i++) {
+		FontDriverManager::initialize(i);
+	}
+
+	for (int i = 0; i < TextShaperManager::get_shaper_count(); i++) {
+		TextShaperManager::initialize(i);
+	}
 }
 
 // FIXME: Could maybe be moved to PhysicsServerManager and Physics2DServerManager directly
@@ -1398,9 +1412,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 	MAIN_PRINT("Main: Load Scene Types");
 
-	FontDriverManager::initialize(0);
-	TextShaperManager::initialize(0);
-
+	initialize_font();
 	register_scene_types();
 	register_module_types(MODULE_LEVEL_SCENE);
 

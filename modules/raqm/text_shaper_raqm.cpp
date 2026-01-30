@@ -33,7 +33,12 @@
 #include "core/os/memory.h"
 #include "servers/font_server.h"
 
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
 #include "modules/freetype/font_driver_freetype.h"
+#else
+#error "this file requires the freetype module"
+#endif
 
 #include <raqm.h>
 
@@ -45,12 +50,13 @@ static _FORCE_INLINE_ bool _have_glyph(char32_t p_char_code) {
 }
 
 static _FORCE_INLINE_ bool _font_covers_all(const FontID &p_font, const char32_t *p_text, int p_len) {
-	if (!FontDriver::get_singleton()) {
+	FontDriver *driver = FontDriverManager::get_driver_for_font(p_font);
+	if (!driver) {
 		return false;
 	}
 
 	for (int i = 0; i < p_len; i++) {
-		if (FontDriver::get_singleton()->get_glyph_index(p_font, p_text[i]) == 0) {
+		if (driver->get_glyph_index(p_font, p_text[i]) == 0) {
 			return false;
 		}
 	}
@@ -72,7 +78,7 @@ static _FORCE_INLINE_ FontID _select_font_for_text(const FontID &p_primary, cons
 	return p_primary;
 }
 
-static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32_t *p_text_ptr, int p_start, int p_end, const FontID &p_run_font, int p_font_size, int p_font_oversampling, Vector<ShapedData *> &r_out) {
+static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32_t *p_text_ptr, int p_start, int p_end, const FontID &p_run_font, int p_font_size, int p_font_oversampling, CharInfo *r_char_infos) {
 	const int run_len = p_end - p_start;
 	if (run_len <= 0) {
 		return;
@@ -146,6 +152,7 @@ static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32
 
 		int cluster_glyph_index = 0;
 		for (int c = (int)cluster; c < (int)next_cluster; c++) {
+			const int out_idx = c - p_start;
 			if (cluster_glyph_index < cluster_glyph_count &&
 					(_have_glyph(p_text_ptr[p_start + c]) || (invisible_mask[cluster_glyph_index] != 0))) {
 				const raqm_glyph_t &glyph = glyphs[i + cluster_glyph_index];
@@ -158,10 +165,12 @@ static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32
 				sd->cluster_glyph_count = cluster_glyph_count;
 				sd->cluster_glyph_index = cluster_glyph_index;
 
-				r_out.write[p_start + c] = sd;
+				r_char_infos[out_idx].set_shaped_data(sd);
+				r_char_infos[out_idx].set_char_code(p_text_ptr[p_start + c]);
 				cluster_glyph_index++;
 			} else {
-				r_out.write[p_start + c] = NULL;
+				r_char_infos[out_idx].set_type(CharInfo::INVISIBLE);
+				r_char_infos[out_idx].set_char_code(p_text_ptr[p_start + c]);
 			}
 		}
 
@@ -171,23 +180,22 @@ static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32
 	raqm_destroy(rq);
 }
 
-Vector<ShapedData *> TextShaperRaqm::shape_text(const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, const String &p_text, int p_font_size, int p_font_oversampling) {
-	Vector<ShapedData *> out;
-	const int len = p_text.length();
-	out.resize(len);
-
-	if (len == 0) {
-		return out;
+bool TextShaperRaqm::shape_text(CharInfo *r_char_infos, const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, const char32_t *p_text, int p_char_count, int p_font_size, int p_font_oversampling) {
+	if (p_char_count <= 0) {
+		return false;
 	}
 
-	FontDriverFreeType *driver = dynamic_cast<FontDriverFreeType *>(FontDriver::get_singleton());
-	ERR_FAIL_COND_V(!driver, out);
+	FontID run_font = _select_font_for_text(p_font_id, p_fallback_font_ids, p_text, p_char_count);
 
-	const char32_t *text_ptr = p_text.ptr();
+	FontDriver *driver = FontDriverManager::get_driver_for_font(run_font);
+	ERR_FAIL_COND_V(!driver, false);
 
-	FontID run_font = _select_font_for_text(p_font_id, p_fallback_font_ids, text_ptr, len);
+	FontDriverFreeType *driver_ft = dynamic_cast<FontDriverFreeType *>(driver);
+	if (driver_ft && driver_ft->owns_font(run_font)) {
+		_shape_run(driver_ft, p_text, 0, p_char_count, run_font, p_font_size, p_font_oversampling, r_char_infos);
+	} else {
+		return false;
+	}
 
-	_shape_run(driver, text_ptr, 0, len, run_font, p_font_size, p_font_oversampling, out);
-
-	return out;
+	return true;
 }

@@ -41,7 +41,6 @@
 #include "main/input_default.h"
 #include "node.h"
 #include "scene/debugger/script_debugger_remote.h"
-#include "scene/resources/freetype_font.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/packed_scene.h"
@@ -469,7 +468,7 @@ bool SceneTree::iteration(float p_time) {
 
 void SceneTree::_update_font_oversampling(float p_ratio) {
 	if (use_font_oversampling) {
-		// FontServer::get_singleton()->update_oversampling(p_ratio);
+		// TODO: Implement the FontServer API
 	}
 }
 

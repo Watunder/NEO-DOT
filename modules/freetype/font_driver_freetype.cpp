@@ -30,19 +30,39 @@
 
 #include "font_driver_freetype.h"
 
+#include "freetype_font.h"
+
 #include "core/error_macros.h"
 #include "core/hash_map.h"
 #include "core/map.h"
 #include "core/math/vector2.h"
 #include "core/os/file_access.h"
 #include "core/os/memory.h"
-#include "scene/resources/freetype_font.h"
 #include "scene/resources/texture.h"
 #include "servers/visual_server.h"
 
 #include "builtin_vector_fonts.gen.h"
 
+#include FT_TRUETYPE_TAGS_H
+
 #include "thirdparty/zstd/common/xxhash.h"
+
+static _FORCE_INLINE_ bool _is_sfnt_data(const PoolVector<uint8_t> &p_data) {
+	if (p_data.size() < 4) {
+		return false;
+	}
+
+	PoolVector<uint8_t>::Read r = p_data.read();
+	uint32_t tag = (uint32_t)r[0] << 24 | (uint32_t)r[1] << 16 | (uint32_t)r[2] << 8 | (uint32_t)r[3];
+	if (tag == 0x00010000UL) {
+		return true;
+	}
+	if (tag == TTAG_OTTO || tag == TTAG_ttcf || tag == TTAG_true || tag == TTAG_typ1) {
+		return true;
+	}
+
+	return false;
+}
 
 _FORCE_INLINE_ ShelfPackTexture::Position FontDriverFreeType::_find_texture_pos(const GlyphCacheKey &p_cache_key, int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range) {
 	ShelfPackTexture::Position tex_pos{};
@@ -268,64 +288,80 @@ _FORCE_INLINE_ void FontDriverFreeType::_setup_builtin_fonts() {
 		NotoSansUI_Regular.resize(_font_NotoSansUI_Regular_size);
 		copymem(NotoSansUI_Regular.write().ptr(), _font_NotoSansUI_Regular, _font_NotoSansUI_Regular_size);
 
-		FontID font_id = add_font_data(NotoSansUI_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoSansUI_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> NotoEmoji_Regular;
 		NotoEmoji_Regular.resize(_font_NotoEmoji_Regular_size);
 		copymem(NotoEmoji_Regular.write().ptr(), _font_NotoEmoji_Regular, _font_NotoEmoji_Regular_size);
 
-		FontID font_id = add_font_data(NotoEmoji_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoEmoji_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> DroidSansFallback;
 		DroidSansFallback.resize(_font_DroidSansFallback_size);
 		copymem(DroidSansFallback.write().ptr(), _font_DroidSansFallback, _font_DroidSansFallback_size);
 
-		FontID font_id = add_font_data(DroidSansFallback);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, DroidSansFallback) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> DroidSansJapanese;
 		DroidSansJapanese.resize(_font_DroidSansJapanese_size);
 		copymem(DroidSansJapanese.write().ptr(), _font_DroidSansJapanese, _font_DroidSansJapanese_size);
 
-		FontID font_id = add_font_data(DroidSansJapanese);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, DroidSansJapanese) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> NotoNaskhArabicUI_Regular;
 		NotoNaskhArabicUI_Regular.resize(_font_NotoNaskhArabicUI_Regular_size);
 		copymem(NotoNaskhArabicUI_Regular.write().ptr(), _font_NotoNaskhArabicUI_Regular, _font_NotoNaskhArabicUI_Regular_size);
 
-		FontID font_id = add_font_data(NotoNaskhArabicUI_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoNaskhArabicUI_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> NotoSansHebrew_Regular;
 		NotoSansHebrew_Regular.resize(_font_NotoSansHebrew_Regular_size);
 		copymem(NotoSansHebrew_Regular.write().ptr(), _font_NotoSansHebrew_Regular, _font_NotoSansHebrew_Regular_size);
 
-		FontID font_id = add_font_data(NotoSansHebrew_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoSansHebrew_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> NotoSansThaiUI_Regular;
 		NotoSansThaiUI_Regular.resize(_font_NotoSansThaiUI_Regular_size);
 		copymem(NotoSansThaiUI_Regular.write().ptr(), _font_NotoSansThaiUI_Regular, _font_NotoSansThaiUI_Regular_size);
 
-		FontID font_id = add_font_data(NotoSansThaiUI_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoSansThaiUI_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 	{
 		PoolVector<uint8_t> NotoSansDevanagariUI_Regular;
 		NotoSansDevanagariUI_Regular.resize(_font_NotoSansDevanagariUI_Regular_size);
 		copymem(NotoSansDevanagariUI_Regular.write().ptr(), _font_NotoSansDevanagariUI_Regular, _font_NotoSansDevanagariUI_Regular_size);
 
-		FontID font_id = add_font_data(NotoSansDevanagariUI_Regular);
-		builtin_font_ids.push_back(font_id);
+		FontID font_id;
+		if (load_font_data(font_id, NotoSansDevanagariUI_Regular) == OK) {
+			builtin_font_ids.push_back(font_id);
+		}
 	}
 }
 
@@ -343,35 +379,39 @@ Error FontDriverFreeType::init() {
 	return OK;
 }
 
-FontID FontDriverFreeType::add_font_data(const PoolVector<uint8_t> &p_font_data) {
-	ERR_FAIL_COND_V(p_font_data.empty(), FontID{});
+Error FontDriverFreeType::load_font_data(FontID &r_font_id, const PoolVector<uint8_t> &p_font_data) {
+	r_font_id = FontID();
 
-	FontID font_id;
-	font_id.font_hash = XXH32(p_font_data.read().ptr(), p_font_data.size(), 0);
+	ERR_FAIL_COND_V(p_font_data.empty(), ERR_FILE_NOT_FOUND);
+	if (!_is_sfnt_data(p_font_data)) {
+		return ERR_FILE_UNRECOGNIZED;
+	}
 
-	Ref<FontInfo> *font_info = font_id_to_info.getptr(font_id);
+	r_font_id.font_hash = XXH32(p_font_data.read().ptr(), p_font_data.size(), 0);
+
+	Ref<FontInfo> *font_info = font_id_to_info.getptr(r_font_id);
 	if (!font_info) {
 		Ref<FontInfo> new_font_info;
 		new_font_info.instance();
-		new_font_info->id = font_id;
+		new_font_info->id = r_font_id;
 		new_font_info->data = p_font_data;
 
-		font_id_to_info[font_id] = new_font_info;
+		font_id_to_info[r_font_id] = new_font_info;
 	} else {
 		if ((*font_info)->data.empty()) {
 			(*font_info)->data = p_font_data;
 		}
 	}
 
-	return font_id;
+	return OK;
 }
 
-FontID FontDriverFreeType::add_font_path(const String &p_font_path) {
-	ERR_FAIL_COND_V(p_font_path.empty(), FontID{});
+Error FontDriverFreeType::load_font_file(FontID &r_font_id, const String &p_font_path) {
+	r_font_id = FontID();
 
 	Error err;
 	FileAccess *f = FileAccess::open(p_font_path, FileAccess::READ, &err);
-	ERR_FAIL_COND_V_MSG(err != OK, FontID{}, "Cannot open font file '" + p_font_path + "'.");
+	ERR_FAIL_COND_V_MSG(err != OK, err, "Cannot open font file '" + p_font_path + "'.");
 
 	int len = f->get_len();
 	PoolVector<uint8_t> font_data;
@@ -380,30 +420,35 @@ FontID FontDriverFreeType::add_font_path(const String &p_font_path) {
 	int r = f->get_buffer(w.ptr(), len);
 	f->close();
 	memdelete(f);
-	ERR_FAIL_COND_V_MSG(r != len, FontID{}, "Failed to read font file '" + p_font_path + "'.");
+	ERR_FAIL_COND_V_MSG(r != len, ERR_FILE_UNRECOGNIZED, "Failed to read font file '" + p_font_path + "'.");
 
-	FontID font_id;
-	font_id.font_hash = XXH32(font_data.read().ptr(), font_data.size(), 0);
+	if (!_is_sfnt_data(font_data)) {
+		return ERR_FILE_UNRECOGNIZED;
+	}
 
-	Ref<FontInfo> *font_info = font_id_to_info.getptr(font_id);
+	r_font_id.font_hash = XXH32(font_data.read().ptr(), font_data.size(), 0);
+
+	Ref<FontInfo> *font_info = font_id_to_info.getptr(r_font_id);
 	if (!font_info) {
 		Ref<FontInfo> new_font_info;
 		new_font_info.instance();
-		new_font_info->id = font_id;
+		new_font_info->id = r_font_id;
 		new_font_info->data = font_data;
 		new_font_info->path = p_font_path;
 
-		font_id_to_info[font_id] = new_font_info;
+		font_id_to_info[r_font_id] = new_font_info;
 	} else {
 		if ((*font_info)->path.empty()) {
 			(*font_info)->path = p_font_path;
 		}
 	}
 
-	return font_id;
+	return OK;
 }
 
 FT_Face FontDriverFreeType::get_ft_face(const FontID &p_font_id) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), NULL);
+
 	Ref<FontInfo> *font_info = font_id_to_info.getptr(p_font_id);
 	ERR_FAIL_COND_V(!font_info, NULL);
 
@@ -415,6 +460,8 @@ FT_Face FontDriverFreeType::get_ft_face(const FontID &p_font_id) const {
 }
 
 FT_Size FontDriverFreeType::get_ft_size(const FontID &p_font_id, int p_size, int p_oversampling) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), NULL);
+
 	Ref<FontInfo> *font_info = font_id_to_info.getptr(p_font_id);
 	ERR_FAIL_COND_V(!font_info, NULL);
 
@@ -438,6 +485,7 @@ Vector<FontID> FontDriverFreeType::get_builtin_font_ids() const {
 }
 
 Ref<FontInfo> FontDriverFreeType::get_font_info(const FontID &p_font_id) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), Ref<FontInfo>());
 	ERR_FAIL_COND_V(!font_id_to_info.has(p_font_id), Ref<FontInfo>());
 
 	return font_id_to_info[p_font_id];
@@ -531,27 +579,15 @@ RID FontDriverFreeType::get_glyph_texture_rid(const GlyphInfo &p_glyph_info) {
 	return (*textures)[p_glyph_info.texture_index].texture_rid;
 }
 
-uint32_t FontDriverFreeType::get_glyph_index(const FontID &p_font_id, char32_t p_char) const {
-	FT_Face ft_face = get_ft_face(p_font_id);
-	if (!ft_face) {
-		return 0;
-	}
+bool FontDriverFreeType::owns_font(const FontID &p_font_id) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), false);
 
-	return FT_Get_Char_Index(ft_face, p_char);
-}
-
-bool FontDriverFreeType::get_font_metrics(const FontID &p_font_id, int p_size, int p_oversampling, float &r_ascent, float &r_descent) const {
-	FT_Size ft_size = get_ft_size(p_font_id, p_size, p_oversampling);
-	if (!ft_size) {
-		return false;
-	}
-
-	r_ascent = (ft_size->metrics.ascender / 64.0) / p_oversampling;
-	r_descent = (-ft_size->metrics.descender / 64.0) / p_oversampling;
-	return true;
+	return font_id_to_info.has(p_font_id);
 }
 
 bool FontDriverFreeType::validate_font(const FontID &p_font_id) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), false);
+
 	if (!font_id_to_info.has(p_font_id)) {
 		Ref<FontInfo> *base_font_info = font_id_to_info.getptr(FontID{ p_font_id.font_hash, 0 });
 		if (!base_font_info) {
@@ -574,6 +610,45 @@ bool FontDriverFreeType::validate_font(const FontID &p_font_id) const {
 
 	FT_Face ft_face = get_ft_face(p_font_id);
 	return (ft_face != NULL);
+}
+
+uint32_t FontDriverFreeType::get_glyph_index(const FontID &p_font_id, char32_t p_char) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), 0);
+
+	FT_Face ft_face = get_ft_face(p_font_id);
+	ERR_FAIL_COND_V(!ft_face, false);
+
+	return FT_Get_Char_Index(ft_face, p_char);
+}
+
+bool FontDriverFreeType::get_font_metrics(float &r_ascent, float &r_descent, const FontID &p_font_id, int p_size, int p_oversampling) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), false);
+
+	FT_Size ft_size = get_ft_size(p_font_id, p_size, p_oversampling);
+	ERR_FAIL_COND_V(!ft_size, false);
+
+	r_ascent = (ft_size->metrics.ascender / 64.0) / p_oversampling;
+	r_descent = (-ft_size->metrics.descender / 64.0) / p_oversampling;
+	return true;
+}
+
+Vector2 FontDriverFreeType::get_font_kerning(const FontID &p_font_id, char32_t p_char, char32_t p_next_char, int p_size, int p_oversampling) const {
+	ERR_FAIL_COND_V(!p_font_id.is_valid(), Vector2());
+
+	FT_Face ft_face = get_ft_face(p_font_id);
+	ERR_FAIL_COND_V(!ft_face, Vector2());
+
+	FT_Size ft_size = get_ft_size(p_font_id, p_size, p_oversampling);
+	ERR_FAIL_COND_V(!ft_size, Vector2());
+
+	uint32_t glyph_index = FT_Get_Char_Index(ft_face, p_char);
+	uint32_t next_glyph_index = FT_Get_Char_Index(ft_face, p_next_char);
+
+	FT_Vector kerning;
+	FT_Error error = FT_Get_Kerning(ft_face, glyph_index, next_glyph_index, FT_KERNING_DEFAULT, &kerning);
+	ERR_FAIL_COND_V_MSG(error, Vector2(), FT_Error_String(error));
+
+	return Vector2(kerning.x / 64.0, kerning.y / 64.0) / p_oversampling;
 }
 
 FontDriverFreeType::FontDriverFreeType() {

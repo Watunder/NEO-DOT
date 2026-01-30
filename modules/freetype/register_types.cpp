@@ -31,15 +31,30 @@
 #include "register_types.h"
 
 #include "font_driver_freetype.h"
+#include "freetype_font.h"
+
 #include "servers/font_server.h"
 
+static FontDriverFreeType *freetype_driver = NULL;
+static Ref<ResourceFormatLoaderFreeTypeFont> resource_loader_freetype;
+
 void register_freetype_types(ModuleLevel p_level) {
-	if (p_level != MODULE_LEVEL_SERVERS) {
-		return;
+	if (p_level == MODULE_LEVEL_SERVERS) {
+		freetype_driver = memnew(FontDriverFreeType);
+		FontDriverManager::add_driver(freetype_driver);
 	}
 
-	FontDriverManager::add_driver(memnew(FontDriverFreeType));
+	if (p_level == MODULE_LEVEL_SCENE) {
+		ClassDB::register_class<FreeTypeFont>();
+
+		resource_loader_freetype.instance();
+		ResourceLoader::add_resource_format_loader(resource_loader_freetype);
+	}
 }
 
 void unregister_freetype_types(ModuleLevel p_level) {
+	if (p_level == MODULE_LEVEL_SCENE) {
+		ResourceLoader::remove_resource_format_loader(resource_loader_freetype);
+		resource_loader_freetype.unref();
+	}
 }

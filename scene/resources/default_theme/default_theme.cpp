@@ -32,12 +32,17 @@
 
 #include "theme_data.h"
 
-#include "configs/modules_enabled.gen.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
 #include "scene/resources/font.h"
-#include "scene/resources/freetype_font.h"
 #include "scene/resources/theme.h"
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include "modules/freetype/freetype_font.h"
+#else
+#include "scene/resources/bitmap_font.h"
+#endif
 
 typedef Map<const void *, Ref<ImageTexture>> TexCacheMap;
 
@@ -879,6 +884,13 @@ static Ref<Font> make_default_font() {
 
 #ifdef MODULE_FREETYPE_ENABLED
 	Ref<FreeTypeFont> font;
+	font.instance();
+	font->set_use_filter(true);
+	font->set_use_mipmaps(true);
+
+	default_font = font;
+#else
+	Ref<BitmapFont> font;
 	font.instance();
 	font->set_use_filter(true);
 	font->set_use_mipmaps(true);

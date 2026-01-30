@@ -57,12 +57,6 @@ void FreeTypeFont::_bind_methods() {
 	BIND_ENUM_CONSTANT(HINTING_AUTO);
 	BIND_ENUM_CONSTANT(HINTING_LIGHT);
 	BIND_ENUM_CONSTANT(HINTING_NORMAL);
-
-	ADD_GROUP("Extra Spacing", "extra_spacing");
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_top"), "set_spacing", "get_spacing", FontServer::SPACING_TOP);
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_bottom"), "set_spacing", "get_spacing", FontServer::SPACING_BOTTOM);
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_glyph"), "set_spacing", "get_spacing", FontServer::SPACING_GLYPH);
-	ADD_PROPERTYI(PropertyInfo(Variant::INT, "extra_spacing_space_char"), "set_spacing", "get_spacing", FontServer::SPACING_SPACE_CHAR);
 }
 
 void FreeTypeFont::reload_from_file() {
@@ -89,17 +83,10 @@ PoolVector<uint8_t> FreeTypeFont::get_data() const {
 Error FreeTypeFont::load(String p_path) {
 	Error err = OK;
 
-	if (!p_path.empty()) {
-		if (!FontServer::get_singleton()->font_set_path(font, p_path)) {
-			return ERR_FILE_CANT_OPEN;
-		}
-		path_to_file = p_path;
-	} else {
-		if (!FontServer::get_singleton()->font_set_builtin_data(font)) {
-			return ERR_INVALID_DATA;
-		}
-		path_to_file = String();
+	if (!FontServer::get_singleton()->font_set_path(font, p_path)) {
+		return ERR_FILE_CANT_OPEN;
 	}
+	path_to_file = p_path;
 
 	emit_changed();
 	_change_notify();
@@ -233,7 +220,7 @@ FreeTypeFont::FreeTypeFont() {
 	face_size = 16;
 	hinting = FreeTypeFont::HINTING_NORMAL;
 
-	font = FontServer::get_singleton()->font_create(face_size, hinting);
+	font = FontServer::get_singleton()->font_create(face_size, use_mipmaps, use_filter, hinting);
 }
 
 FreeTypeFont::~FreeTypeFont() {
@@ -265,7 +252,7 @@ void ResourceFormatLoaderFreeTypeFont::get_recognized_extensions(List<String> *p
 }
 
 bool ResourceFormatLoaderFreeTypeFont::handles_type(const String &p_type) const {
-	return (p_type == "FreeTypeFont");
+	return ClassDB::is_parent_class(p_type, "Font");
 }
 
 String ResourceFormatLoaderFreeTypeFont::get_resource_type(const String &p_path) const {

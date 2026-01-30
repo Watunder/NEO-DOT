@@ -130,6 +130,7 @@
 #include "scene/main/viewport.h"
 #include "scene/resources/audio_stream_sample.h"
 #include "scene/resources/bit_map.h"
+#include "scene/resources/bitmap_font.h"
 #include "scene/resources/box_shape.h"
 #include "scene/resources/capsule_shape.h"
 #include "scene/resources/capsule_shape_2d.h"
@@ -140,7 +141,6 @@
 #include "scene/resources/convex_polygon_shape_2d.h"
 #include "scene/resources/cylinder_shape.h"
 #include "scene/resources/default_theme/default_theme.h"
-#include "scene/resources/freetype_font.h"
 #include "scene/resources/gradient.h"
 #include "scene/resources/height_map_shape.h"
 #include "scene/resources/immediate_mesh.h"
@@ -214,9 +214,7 @@
 static Ref<ResourceFormatSaverText> resource_saver_text;
 static Ref<ResourceFormatLoaderText> resource_loader_text;
 
-#ifdef MODULE_FREETYPE_ENABLED
-static Ref<ResourceFormatLoaderFreeTypeFont> resource_loader_freetype_font;
-#endif
+static Ref<ResourceFormatLoaderBitmapFont> resource_loader_bitmap_font;
 
 static Ref<ResourceFormatLoaderStreamTexture> resource_loader_stream_texture;
 static Ref<ResourceFormatLoaderTextureLayered> resource_loader_texture_layered;
@@ -231,10 +229,8 @@ void register_scene_types() {
 
 	Node::init_node_hrcr();
 
-#ifdef MODULE_FREETYPE_ENABLED
-	resource_loader_freetype_font.instance();
-	ResourceLoader::add_resource_format_loader(resource_loader_freetype_font);
-#endif
+	resource_loader_bitmap_font.instance();
+	ResourceLoader::add_resource_format_loader(resource_loader_bitmap_font);
 
 	resource_loader_stream_texture.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_stream_texture);
@@ -666,9 +662,7 @@ void register_scene_types() {
 	ClassDB::register_class<TextFile>();
 
 	ClassDB::register_virtual_class<Font>();
-#ifdef MODULE_FREETYPE_ENABLED
-	ClassDB::register_class<FreeTypeFont>();
-#endif
+	ClassDB::register_class<BitmapFont>();
 
 	ClassDB::register_virtual_class<StyleBox>();
 	ClassDB::register_class<StyleBoxEmpty>();
@@ -744,13 +738,10 @@ void register_scene_types() {
 	Ref<Font> custom_font;
 
 	if (custom_font_path != String()) {
-#ifdef MODULE_FREETYPE_ENABLED
-		Ref<FreeTypeFont> font = ResourceLoader::load(custom_font_path);
-		if (!font.is_valid()) {
+		custom_font = ResourceLoader::load(custom_font_path);
+		if (!custom_font.is_valid()) {
 			ERR_PRINTS("Error loading custom font '" + custom_font_path + "'");
 		}
-		custom_font = font;
-#endif
 	}
 
 	// Always make the default theme to avoid invalid default font/icon/style in the given theme
@@ -772,10 +763,8 @@ void register_scene_types() {
 void unregister_scene_types() {
 	clear_default_theme();
 
-#ifdef MODULE_FREETYPE_ENABLED
-	ResourceLoader::remove_resource_format_loader(resource_loader_freetype_font);
-	resource_loader_freetype_font.unref();
-#endif
+	ResourceLoader::remove_resource_format_loader(resource_loader_bitmap_font);
+	resource_loader_bitmap_font.unref();
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);
 	resource_loader_texture_layered.unref();

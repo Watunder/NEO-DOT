@@ -856,30 +856,30 @@ void CanvasItem::draw_multimesh(const Ref<MultiMesh> &p_multimesh, const Ref<Tex
 	VisualServer::get_singleton()->canvas_item_add_multimesh(canvas_item, p_multimesh->get_rid(), texture_rid, normal_map_rid);
 }
 
-void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate, float p_clip_w) {
+void CanvasItem::draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate, float p_clip_w, bool p_preserve_color) {
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND(p_font.is_null());
 
 	Ref<TextLine> text_line = TextHelper::create_text_line(p_font->get_rid(), p_text);
-	TextHelper::draw_text_line(text_line, canvas_item, p_pos, p_modulate, p_clip_w);
+	TextHelper::draw_text_line(text_line, canvas_item, p_pos, p_modulate, p_clip_w, p_preserve_color);
 }
 
-void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate) {
+void CanvasItem::draw_string_aligned(const Ref<Font> &p_font, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate, bool p_preserve_color) {
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND(p_font.is_null());
 
 	Ref<TextLine> text_line = TextHelper::create_text_line(p_font->get_rid(), p_text);
-	TextHelper::draw_text_line_aligned(text_line, canvas_item, p_pos, p_align, p_width, p_modulate);
+	TextHelper::draw_text_line_aligned(text_line, canvas_item, p_pos, p_align, p_width, p_modulate, p_preserve_color);
 }
 
-float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate) {
+float CanvasItem::draw_char(const Ref<Font> &p_font, const Point2 &p_pos, char32_t p_char, const Color &p_modulate, bool p_preserve_color) {
 	ERR_FAIL_COND_V_MSG(!drawing, 0, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
 	ERR_FAIL_COND_V(p_font.is_null(), 0);
 
-	return TextHelper::draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate).width;
+	return TextHelper::draw_char(canvas_item, p_font->get_rid(), p_pos, p_char, p_modulate, p_preserve_color).width;
 }
 
 void CanvasItem::_notify_transform(CanvasItem *p_node) {
@@ -1102,8 +1102,8 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("draw_primitive", "points", "colors", "uvs", "texture", "width", "normal_map"), &CanvasItem::draw_primitive, DEFVAL(Variant()), DEFVAL(1.0), DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("draw_polygon", "points", "colors", "uvs", "texture", "normal_map", "antialiased"), &CanvasItem::draw_polygon, DEFVAL(PoolVector2Array()), DEFVAL(Variant()), DEFVAL(Variant()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("draw_colored_polygon", "points", "color", "uvs", "texture", "normal_map", "antialiased"), &CanvasItem::draw_colored_polygon, DEFVAL(PoolVector2Array()), DEFVAL(Variant()), DEFVAL(Variant()), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("draw_string", "font", "position", "text", "modulate", "clip_w"), &CanvasItem::draw_string, DEFVAL(Color(1, 1, 1)), DEFVAL(0.0));
-	ClassDB::bind_method(D_METHOD("draw_char", "font", "position", "char", "modulate"), &CanvasItem::draw_char, DEFVAL(Color(1, 1, 1)));
+	ClassDB::bind_method(D_METHOD("draw_string", "font", "position", "text", "modulate", "clip_w", "preserve_color"), &CanvasItem::draw_string, DEFVAL(Color(1, 1, 1)), DEFVAL(0.0), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("draw_char", "font", "position", "char", "modulate", "preserve_color"), &CanvasItem::draw_char, DEFVAL(Color(1, 1, 1)), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("draw_mesh", "mesh", "texture", "normal_map", "transform", "modulate"), &CanvasItem::draw_mesh, DEFVAL(Ref<Texture>()), DEFVAL(Transform2D()), DEFVAL(Color(1, 1, 1)));
 	ClassDB::bind_method(D_METHOD("draw_multimesh", "multimesh", "texture", "normal_map"), &CanvasItem::draw_multimesh, DEFVAL(Ref<Texture>()));
 

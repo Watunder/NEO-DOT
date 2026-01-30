@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  font_driver_freetype.h                                               */
+/*  font_driver_bmfont.h                                                 */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,55 +28,77 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef FONT_DRIVER_FREETYPE_H
-#define FONT_DRIVER_FREETYPE_H
+#ifndef FONT_DRIVER_BMFONT_H
+#define FONT_DRIVER_BMFONT_H
 
 #include "core/hash_map.h"
-#include "core/map.h"
-#include "core/pool_vector.h"
+#include "core/image.h"
+#include "core/math/vector2.h"
 #include "core/reference.h"
+#include "core/rid.h"
+#include "core/ustring.h"
+#include "core/vector.h"
 #include "servers/font_server.h"
 
-#include "shelf_pack_texture.h"
+struct BMFontChar {
+	int x = 0;
+	int y = 0;
+	int width = 0;
+	int height = 0;
+	int xoffset = 0;
+	int yoffset = 0;
+	int xadvance = 0;
+	int page = 0;
+};
 
-#include <ft2build.h>
-#include FT_CACHE_H
-#include FT_FREETYPE_H
+struct BMFontKerning {
+	int first = 0;
+	int second = 0;
+	int amount = 0;
+};
 
-class FontDriverFreeType : public FontDriver {
-	FT_Library ft_library;
-	FTC_Manager ftc_manager;
+class BMFontData : public Reference {
+public:
+	int line_height = 0;
+	int base = 0;
+	int scale_w = 0;
+	int scale_h = 0;
+	int pages_count = 0;
 
-	Vector<FontID> builtin_font_ids;
+	Vector<String> page_files;
+	HashMap<uint32_t, BMFontChar> chars;
+	HashMap<uint32_t, int> kernings;
 
-	mutable HashMap<FontID, Ref<FontInfo>, FontIDHasher> font_id_to_info;
-	Map<FT_Face, Ref<FontInfo>> face_to_info;
+	static Ref<BMFontData> load_from_buffer(const PoolVector<uint8_t> &p_data, const String &p_base_path, Error *r_error = NULL);
+};
 
-	HashMap<GlyphCacheKey, Vector<ShelfPackTexture>, GlyphCacheKeyHasher> texture_map;
+/*************************************************************************/
+
+struct BMFontInstance {
+	Ref<BMFontData> data;
+	Vector<Ref<Image>> page_images;
+};
+
+class FontDriverBMFont : public FontDriver {
+	HashMap<FontID, BMFontInstance, FontIDHasher> fonts;
+	HashMap<GlyphCacheKey, Vector<RID>, GlyphCacheKeyHasher> texture_map;
 	HashMap<GlyphCacheKey, HashMap<uint32_t, GlyphInfo>, GlyphCacheKeyHasher> glyph_info_map;
 
-	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(const GlyphCacheKey &p_cache_key, int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const GlyphCacheKey &p_cache_key, const FT_Bitmap &p_bitmap, int p_rect_range = 1);
-
-	friend _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_info_ptr, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
-	friend _FORCE_INLINE_ void _ft_face_finalizer(void *p_ft_face);
+	Vector<FontID> builtin_font_ids;
 
 	_FORCE_INLINE_ void _setup_builtin_fonts();
 
 public:
 	virtual Error init();
 
-	virtual const char *get_name() const { return "FreeType"; }
+	virtual const char *get_name() const { return "BMFont"; }
 
+	Error load_font_data(FontID &r_font_id, const PoolVector<uint8_t> &p_font_data, const Vector<PoolVector<uint8_t>> &p_page_data);
 	virtual Error load_font_data(FontID &r_font_id, const PoolVector<uint8_t> &p_font_data);
 	virtual Error load_font_file(FontID &r_font_id, const String &p_font_path);
 
-	FT_Face get_ft_face(const FontID &p_font_id) const;
-	FT_Size get_ft_size(const FontID &p_font_id, int p_size, int p_oversampling) const;
-
 	virtual Vector<FontID> get_builtin_font_ids() const;
 	virtual Ref<FontInfo> get_font_info(const FontID &p_font_id) const;
-	Ref<FontInfo> get_font_info(const FT_Face &p_ft_face) const;
 
 	virtual bool owns_font(const FontID &p_font_id) const;
 	virtual bool validate_font(const FontID &p_font_id) const;
@@ -89,8 +111,8 @@ public:
 	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index);
 	virtual RID get_glyph_texture_rid(const GlyphInfo &p_glyph_info);
 
-	FontDriverFreeType();
-	virtual ~FontDriverFreeType();
+	FontDriverBMFont();
+	virtual ~FontDriverBMFont();
 };
 
 #endif

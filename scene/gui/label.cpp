@@ -232,11 +232,11 @@ void Label::_notification(int p_what) {
 
 					for (int i = 0; i < from->word_len; i++) {
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
-							float move = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow).x;
+							float move = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow, false).x;
 							if (use_outline) {
-								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow);
-								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
-								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow, false);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow, false);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow, false);
 							}
 							x_ofs_shadow += move;
 							chars_total_shadow++;

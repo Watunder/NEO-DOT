@@ -45,42 +45,19 @@ _FORCE_INLINE_ void TextHelper::_process_shapeless_grapheme(CharInfo *p_char_inf
 	p_char_info->set_char_code(p_char);
 }
 
-_FORCE_INLINE_ int TextHelper::_process_shaped_grapheme(CharInfo *p_char_infos, const char32_t *p_text_ptr, int p_start_idx, const String &p_grapheme, const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, int p_font_size, int p_font_oversampling) {
+_FORCE_INLINE_ void TextHelper::_process_shaped_grapheme(CharInfo *p_char_infos, const char32_t *p_text_ptr, int p_start_idx, const String &p_grapheme, const FontID &p_font_id, const Vector<FontID> &p_fallback_font_ids, int p_font_size, int p_font_oversampling) {
 	int grapheme_len = p_grapheme.length();
 
-	if (!TextShaper::get_singleton()) {
+	bool shaped = TextShaper::get_singleton()->shape_text(p_char_infos, p_font_id, p_fallback_font_ids, p_text_ptr + p_start_idx, grapheme_len, p_font_size, p_font_oversampling);
+	if (!shaped) {
 		for (int i = 0; i < grapheme_len; i++) {
 			p_char_infos[i].set_type(CharInfo::SHAPELESS);
 			p_char_infos[i].set_char_code(p_text_ptr[p_start_idx + i]);
 		}
-		return grapheme_len;
 	}
-
-	Vector<ShapedData *> shaped_datas = TextShaper::get_singleton()->shape_text(
-			p_font_id, p_fallback_font_ids, p_grapheme, p_font_size, p_font_oversampling);
-
-	int shaped_count = shaped_datas.size();
-
-	for (int i = 0; i < grapheme_len; i++) {
-		if (i < shaped_count && shaped_datas[i]) {
-			p_char_infos[i].set_shaped_data(shaped_datas[i]);
-			p_char_infos[i].set_char_code(p_text_ptr[p_start_idx + i]);
-		} else {
-			p_char_infos[i].set_type(CharInfo::INVISIBLE);
-			p_char_infos[i].set_char_code(p_text_ptr[p_start_idx + i]);
-		}
-	}
-
-	for (int i = grapheme_len; i < shaped_count; i++) {
-		if (shaped_datas[i]) {
-			memdelete(shaped_datas[i]);
-		}
-	}
-
-	return grapheme_len;
 }
 
-_FORCE_INLINE_ void TextHelper::_draw_glyph(RID p_canvas_item, RID p_font, const GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate) {
+_FORCE_INLINE_ void TextHelper::_draw_glyph(RID p_canvas_item, RID p_font, const GlyphInfo &p_glyph_info, const Vector2 &p_pos, const Color &p_modulate, bool p_preserve_color) {
 	if (!p_glyph_info.found) {
 		return;
 	}
@@ -91,7 +68,7 @@ _FORCE_INLINE_ void TextHelper::_draw_glyph(RID p_canvas_item, RID p_font, const
 	}
 
 	Color modulate = p_modulate;
-	if (p_glyph_info.texture_format == Image::FORMAT_RGBA8) {
+	if (p_preserve_color && p_glyph_info.texture_format == Image::FORMAT_RGBA8) {
 		modulate.r = modulate.g = modulate.b = 1.0;
 	}
 
@@ -182,17 +159,19 @@ Vector<CharInfo> TextHelper::get_char_infos(const Ref<TextLine> &p_text_line) {
 			}
 			char_idx += grapheme_len;
 		} else {
-			int processed = 0;
 			if (grapheme_len == 1) {
 				_process_shapeless_grapheme(&char_infos_ptr[char_idx], line_ptr[char_idx]);
-				processed = 1;
-			} else {
-				processed = _process_shaped_grapheme(
+			} else if (TextShaper::get_singleton()) {
+				_process_shaped_grapheme(
 						&char_infos_ptr[char_idx], line_ptr, char_idx, grapheme,
 						p_text_line->font_id, p_text_line->fallback_font_ids,
 						p_text_line->font_size, p_text_line->font_oversampling);
+			} else {
+				for (int j = 0; j < grapheme_len; j++) {
+					_process_shapeless_grapheme(&char_infos_ptr[char_idx + j], line_ptr[char_idx + j]);
+				}
 			}
-			char_idx += processed;
+			char_idx += grapheme_len;
 
 			Vector<CharInfo> sub_char_infos;
 			sub_char_infos.resize(grapheme_len);
@@ -227,12 +206,7 @@ Ref<TextLine> TextHelper::create_text_line(RID p_font, const String &p_line) {
 	text_line->font_size = cache_key.font_size;
 	text_line->font_oversampling = cache_key.font_oversampling;
 
-	Vector<FontID> builtin_font_ids = FontDriver::get_singleton()->get_builtin_font_ids();
-	for (int i = 0; i < builtin_font_ids.size(); i++) {
-		if (builtin_font_ids[i] != text_line->font_id) {
-			text_line->fallback_font_ids.push_back(builtin_font_ids[i]);
-		}
-	}
+	text_line->fallback_font_ids = FontServer::get_singleton()->font_get_fallback_font_ids(p_font);
 
 	uint64_t h = text_line->font_id.hash();
 	for (int i = 0; i < text_line->fallback_font_ids.size(); i++) {
@@ -290,7 +264,7 @@ Vector<Ref<TextLine>> TextHelper::create_text_lines(RID p_font, const String &p_
 	return text_lines;
 }
 
-Vector2 TextHelper::draw_char_in_text_line(const Ref<TextLine> &p_text_line, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate) {
+Vector2 TextHelper::draw_char_in_text_line(const Ref<TextLine> &p_text_line, int p_char_index, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate, bool p_preserve_color) {
 	Vector2 ofs;
 
 	ERR_FAIL_COND_V(!p_text_line.is_valid(), ofs);
@@ -301,15 +275,20 @@ Vector2 TextHelper::draw_char_in_text_line(const Ref<TextLine> &p_text_line, int
 
 	if (char_info.get_type() == CharInfo::SHAPELESS) {
 		const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(p_text_line->font, char_info.get_char_code());
-		_draw_glyph(p_canvas_item, p_text_line->font, glyph_info, p_pos + ofs, p_modulate);
+		_draw_glyph(p_canvas_item, p_text_line->font, glyph_info, p_pos + ofs, p_modulate, p_preserve_color);
 
 		ofs += glyph_info.advance;
+
+		if (p_char_index + 1 < p_text_line->char_infos.size()) {
+			const CharInfo &next_info = p_text_line->char_infos[p_char_index + 1];
+			ofs += FontServer::get_singleton()->font_get_kerning(p_text_line->font, char_info.get_char_code(), next_info.get_char_code());
+		}
 	} else if (char_info.get_type() == CharInfo::SHAPED) {
 		GlyphCacheKey cache_key = FontServer::get_singleton()->font_get_cache_key(p_text_line->font);
 		GlyphCacheKey temp_cache_key = cache_key.create_temp_key(char_info.get_glyph_font_id());
 
-		const GlyphInfo &glyph_info = FontDriver::get_singleton()->get_glyph_info(temp_cache_key, char_info.get_glyph_index());
-		_draw_glyph(p_canvas_item, p_text_line->font, glyph_info, p_pos + ofs + char_info.get_glyph_offset(), p_modulate);
+		const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(temp_cache_key, char_info.get_glyph_index());
+		_draw_glyph(p_canvas_item, p_text_line->font, glyph_info, p_pos + ofs + char_info.get_glyph_offset(), p_modulate, p_preserve_color);
 
 		ofs += char_info.get_glyph_advance();
 		if (char_info.get_char_code() == 0x0020u) {
@@ -335,6 +314,11 @@ Vector2 TextHelper::get_char_size_in_text_line(const Ref<TextLine> &p_text_line,
 	if (char_info.get_type() == CharInfo::SHAPELESS) {
 		const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(p_text_line->font, char_info.get_char_code());
 		size.x += glyph_info.advance.x;
+
+		if (p_char_index + 1 < p_text_line->char_infos.size()) {
+			const CharInfo &next_info = p_text_line->char_infos[p_char_index + 1];
+			size += FontServer::get_singleton()->font_get_kerning(p_text_line->font, char_info.get_char_code(), next_info.get_char_code());
+		}
 	} else if (char_info.get_type() == CharInfo::SHAPED) {
 		size.x += char_info.get_glyph_advance().x;
 
@@ -349,7 +333,7 @@ Vector2 TextHelper::get_char_size_in_text_line(const Ref<TextLine> &p_text_line,
 	return size;
 }
 
-Vector2 TextHelper::draw_text_line(const Ref<TextLine> &p_text_line, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate, float p_clip_w) {
+Vector2 TextHelper::draw_text_line(const Ref<TextLine> &p_text_line, RID p_canvas_item, const Vector2 &p_pos, const Color &p_modulate, float p_clip_w, bool p_preserve_color) {
 	ERR_FAIL_COND_V(!p_text_line.is_valid(), Vector2());
 	ERR_FAIL_COND_V(!p_text_line->font.is_valid(), Vector2());
 
@@ -361,7 +345,7 @@ Vector2 TextHelper::draw_text_line(const Ref<TextLine> &p_text_line, RID p_canva
 				break;
 			}
 		}
-		ofs += draw_char_in_text_line(p_text_line, i, p_canvas_item, p_pos + ofs, p_modulate);
+		ofs += draw_char_in_text_line(p_text_line, i, p_canvas_item, p_pos + ofs, p_modulate, p_preserve_color);
 	}
 
 	return ofs;
@@ -381,13 +365,13 @@ Vector2 TextHelper::get_text_line_size(const Ref<TextLine> &p_text_line) {
 	return size;
 }
 
-Vector2 TextHelper::draw_text_line_aligned(const Ref<TextLine> &p_text_line, RID p_canvas_item, const Vector2 &p_pos, HAlign p_align, float p_width, const Color &p_modulate) {
+Vector2 TextHelper::draw_text_line_aligned(const Ref<TextLine> &p_text_line, RID p_canvas_item, const Vector2 &p_pos, HAlign p_align, float p_width, const Color &p_modulate, bool p_preserve_color) {
 	ERR_FAIL_COND_V(!p_text_line.is_valid(), Vector2());
 	ERR_FAIL_COND_V(!p_text_line->font.is_valid(), Vector2());
 
 	float length = get_text_line_size(p_text_line).width;
 	if (length >= p_width) {
-		return draw_text_line(p_text_line, p_canvas_item, p_pos, p_modulate, p_width);
+		return draw_text_line(p_text_line, p_canvas_item, p_pos, p_modulate, p_width, p_preserve_color);
 	}
 
 	float ofs = 0.0f;
@@ -403,7 +387,14 @@ Vector2 TextHelper::draw_text_line_aligned(const Ref<TextLine> &p_text_line, RID
 			break;
 	}
 
-	return draw_text_line(p_text_line, p_canvas_item, p_pos + Vector2(ofs, 0), p_modulate, p_width);
+	return draw_text_line(p_text_line, p_canvas_item, p_pos + Vector2(ofs, 0), p_modulate, p_width, p_preserve_color);
+}
+
+Vector2 TextHelper::get_string_size(RID p_font, const String &p_text) {
+	ERR_FAIL_COND_V(!p_font.is_valid(), Vector2());
+
+	Ref<TextLine> text_line = create_text_line(p_font, p_text);
+	return get_text_line_size(text_line);
 }
 
 Vector2 TextHelper::get_char_size(RID p_font, char32_t p_char) {
@@ -414,22 +405,11 @@ Vector2 TextHelper::get_char_size(RID p_font, char32_t p_char) {
 	return Vector2(glyph_info.advance.x, height);
 }
 
-Vector2 TextHelper::get_string_size(RID p_font, const String &p_text) {
-	ERR_FAIL_COND_V(!p_font.is_valid(), Vector2());
-
-	float width = 0.0f;
-	for (int i = 0; i < p_text.length(); i++) {
-		width += get_char_size(p_font, p_text[i]).x;
-	}
-	float height = FontServer::get_singleton()->font_get_ascent(p_font) + FontServer::get_singleton()->font_get_descent(p_font);
-	return Vector2(width, height);
-}
-
-Vector2 TextHelper::draw_char(RID p_canvas_item, RID p_font, const Vector2 &p_pos, char32_t p_char, const Color &p_modulate) {
+Vector2 TextHelper::draw_char(RID p_canvas_item, RID p_font, const Vector2 &p_pos, char32_t p_char, const Color &p_modulate, bool p_preserve_color) {
 	ERR_FAIL_COND_V(!p_font.is_valid(), Vector2());
 
 	const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(p_font, p_char);
-	_draw_glyph(p_canvas_item, p_font, glyph_info, p_pos, p_modulate);
+	_draw_glyph(p_canvas_item, p_font, glyph_info, p_pos, p_modulate, p_preserve_color);
 
 	return glyph_info.advance;
 }

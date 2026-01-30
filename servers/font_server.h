@@ -32,6 +32,7 @@
 #define FONT_SERVER_H
 
 #include "core/image.h"
+#include "core/io/resource_loader.h"
 #include "core/math/vector2.h"
 #include "core/pool_vector.h"
 #include "core/reference.h"
@@ -55,6 +56,10 @@ struct FontID {
 		uint32_t h = font_hash;
 		h = h * 31 + font_index;
 		return h;
+	}
+
+	_FORCE_INLINE_ bool is_valid() const {
+		return (font_hash != 0);
 	}
 };
 
@@ -164,15 +169,18 @@ public:
 
 	virtual const char *get_name() const = 0;
 
-	virtual FontID add_font_data(const PoolVector<uint8_t> &p_font_data) = 0;
-	virtual FontID add_font_path(const String &p_font_path) = 0;
+	virtual Error load_font_data(FontID &r_font_id, const PoolVector<uint8_t> &p_font_data) = 0;
+	virtual Error load_font_file(FontID &r_font_id, const String &p_font_path) = 0;
 
 	virtual Vector<FontID> get_builtin_font_ids() const = 0;
 	virtual Ref<FontInfo> get_font_info(const FontID &p_font_id) const = 0;
 
-	virtual uint32_t get_glyph_index(const FontID &p_font_id, char32_t p_char) const = 0;
-	virtual bool get_font_metrics(const FontID &p_font_id, int p_size, int p_oversampling, float &r_ascent, float &r_descent) const = 0;
+	virtual bool owns_font(const FontID &p_font_id) const = 0;
 	virtual bool validate_font(const FontID &p_font_id) const = 0;
+
+	virtual uint32_t get_glyph_index(const FontID &p_font_id, char32_t p_char) const = 0;
+	virtual bool get_font_metrics(float &r_ascent, float &r_descent, const FontID &p_font_id, int p_size, int p_oversampling) const = 0;
+	virtual Vector2 get_font_kerning(const FontID &p_font_id, char32_t p_char, char32_t p_next_char, int p_size, int p_oversampling) const = 0;
 
 	virtual void clear_glyph_cache(const GlyphCacheKey &p_cache_key) = 0;
 	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index) = 0;
@@ -195,6 +203,9 @@ public:
 	static void initialize(int p_driver);
 	static int get_driver_count();
 	static FontDriver *get_driver(int p_driver);
+	static FontDriver *get_driver_for_font(const FontID &p_font_id);
+	static Error load_font_file(FontID &r_font_id, const String &p_path);
+	static Error load_font_data(FontID &r_font_id, const PoolVector<uint8_t> &p_data);
 };
 
 class FontServer : public Object {
@@ -236,6 +247,10 @@ public:
 private:
 	static FontServer *singleton;
 
+	FontID default_font_id;
+
+	_FORCE_INLINE_ bool _ensure_default_font_id();
+
 	_FORCE_INLINE_ void _font_clear_caches(Font *p_font);
 	_FORCE_INLINE_ bool _font_update_metrics(Font *p_font);
 
@@ -245,7 +260,7 @@ protected:
 public:
 	static FontServer *get_singleton();
 
-	RID font_create(int p_size = 1, int p_custom_flags = 0, bool p_use_mipmaps = true, bool p_use_filter = true);
+	RID font_create(int p_size = 16, bool p_use_mipmaps = true, bool p_use_filter = true, int p_custom_flags = -1);
 	void font_free(RID p_font);
 	void font_set_size(RID p_font, int p_size);
 	void font_set_use_mipmaps(RID p_font, bool p_use_mipmaps);
@@ -253,7 +268,6 @@ public:
 	void font_set_custom_flags(RID p_font, int p_custom_flags);
 	bool font_set_data(RID p_font, const PoolVector<uint8_t> &p_font_data);
 	bool font_set_path(RID p_font, const String &p_font_path);
-	bool font_set_builtin_data(RID p_font, int p_builtin_index = 0);
 	bool font_set_index(RID p_font, int p_font_index);
 	float font_get_ascent(RID p_font) const;
 	float font_get_descent(RID p_font) const;
@@ -264,7 +278,11 @@ public:
 	void font_set_spacing(RID p_font, SpacingType p_spcing_type, int p_spacing);
 	int font_get_spacing(RID p_font, SpacingType p_spcing_type) const;
 
+	Vector2 font_get_kerning(RID p_font, char32_t p_char, char32_t p_next_char) const;
+
+	Vector<FontID> font_get_fallback_font_ids(RID p_font) const;
 	GlyphInfo font_get_glyph_info(RID p_font, char32_t p_char) const;
+	GlyphInfo font_get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index) const;
 	RID font_get_glyph_texture_rid(RID p_font, const GlyphInfo &p_glyph_info) const;
 
 	FontServer();
