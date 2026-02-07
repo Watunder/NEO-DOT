@@ -201,10 +201,10 @@ Ref<TextLine> TextHelper::create_text_line(RID p_font, const String &p_line) {
 
 	text_line->height = FontServer::get_singleton()->font_get_ascent(p_font) + FontServer::get_singleton()->font_get_descent(p_font);
 
-	GlyphCacheKey cache_key = FontServer::get_singleton()->font_get_cache_key(p_font);
-	text_line->font_id = cache_key.get_font_id();
-	text_line->font_size = cache_key.font_size;
-	text_line->font_oversampling = cache_key.font_oversampling;
+	GlyphCacheKey glyph_key = FontServer::get_singleton()->font_get_glyph_key(p_font);
+	text_line->font_id = glyph_key.get_font_id();
+	text_line->font_size = glyph_key.font_size;
+	text_line->font_oversampling = glyph_key.font_oversampling;
 
 	text_line->fallback_font_ids = FontServer::get_singleton()->font_get_fallback_font_ids(p_font);
 
@@ -284,10 +284,10 @@ Vector2 TextHelper::draw_char_in_text_line(const Ref<TextLine> &p_text_line, int
 			ofs += FontServer::get_singleton()->font_get_kerning(p_text_line->font, char_info.get_char_code(), next_info.get_char_code());
 		}
 	} else if (char_info.get_type() == CharInfo::SHAPED) {
-		GlyphCacheKey cache_key = FontServer::get_singleton()->font_get_cache_key(p_text_line->font);
-		GlyphCacheKey temp_cache_key = cache_key.create_temp_key(char_info.get_glyph_font_id());
+		GlyphCacheKey glyph_key = FontServer::get_singleton()->font_get_glyph_key(p_text_line->font);
+		GlyphCacheKey temp_glyph_key = glyph_key.create_temp_key(char_info.get_glyph_font_id());
 
-		const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(temp_cache_key, char_info.get_glyph_index());
+		const GlyphInfo &glyph_info = FontServer::get_singleton()->font_get_glyph_info(temp_glyph_key, char_info.get_glyph_index());
 		_draw_glyph(p_canvas_item, p_text_line->font, glyph_info, p_pos + ofs + char_info.get_glyph_offset(), p_modulate, p_preserve_color);
 
 		ofs += char_info.get_glyph_advance();

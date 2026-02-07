@@ -33,8 +33,6 @@
 #include "font_driver_freetype.h"
 #include "freetype_font.h"
 
-#include "servers/font_server.h"
-
 static FontDriverFreeType *freetype_driver = NULL;
 static Ref<ResourceFormatLoaderFreeTypeFont> resource_loader_freetype;
 

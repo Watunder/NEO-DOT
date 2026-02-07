@@ -49,14 +49,14 @@ class FontDriverFreeType : public FontDriver {
 
 	Vector<FontID> builtin_font_ids;
 
-	mutable HashMap<FontID, Ref<FontInfo>, FontIDHasher> font_id_to_info;
-	Map<FT_Face, Ref<FontInfo>> face_to_info;
+	mutable HashMap<FontID, FontInfo *, FontIDHasher> font_id_to_info;
+	Map<FT_Face, FontInfo *> face_to_info;
 
 	HashMap<GlyphCacheKey, Vector<ShelfPackTexture>, GlyphCacheKeyHasher> texture_map;
 	HashMap<GlyphCacheKey, HashMap<uint32_t, GlyphInfo>, GlyphCacheKeyHasher> glyph_info_map;
 
-	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(const GlyphCacheKey &p_cache_key, int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
-	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const GlyphCacheKey &p_cache_key, const FT_Bitmap &p_bitmap, int p_rect_range = 1);
+	_FORCE_INLINE_ ShelfPackTexture::Position _find_texture_pos(const GlyphCacheKey &p_glyph_key, int p_width, int p_height, int p_color_size, Image::Format p_image_format, int p_rect_range);
+	_FORCE_INLINE_ GlyphInfo _rasterize_bitmap(const GlyphCacheKey &p_glyph_key, const FT_Bitmap &p_bitmap, int p_rect_range = 1);
 
 	friend _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_info_ptr, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face);
 	friend _FORCE_INLINE_ void _ft_face_finalizer(void *p_ft_face);
@@ -79,14 +79,15 @@ public:
 	Ref<FontInfo> get_font_info(const FT_Face &p_ft_face) const;
 
 	virtual bool owns_font(const FontID &p_font_id) const;
-	virtual bool validate_font(const FontID &p_font_id) const;
+	virtual bool validate_font(const FontID &p_font_id);
+	virtual void finalize_font(const FontID &p_font_id);
 
 	virtual uint32_t get_glyph_index(const FontID &p_font_id, char32_t p_char) const;
 	virtual bool get_font_metrics(float &r_ascent, float &r_descent, const FontID &p_font_id, int p_size, int p_oversampling) const;
 	virtual Vector2 get_font_kerning(const FontID &p_font_id, char32_t p_char, char32_t p_next_char, int p_size, int p_oversampling) const;
 
-	virtual void clear_glyph_cache(const GlyphCacheKey &p_cache_key);
-	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index);
+	virtual void clear_glyph_cache(const GlyphCacheKey &p_glyph_key);
+	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_glyph_key, uint32_t p_glyph_index);
 	virtual RID get_glyph_texture_rid(const GlyphInfo &p_glyph_info);
 
 	FontDriverFreeType();

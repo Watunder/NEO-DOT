@@ -434,6 +434,14 @@ FontDriverBMFont::FontDriverBMFont() {
 }
 
 FontDriverBMFont::~FontDriverBMFont() {
+	const FontID *k = NULL;
+	while ((k = font_id_to_info.next(k)) != NULL) {
+		FontInfo *info = font_id_to_info[*k];
+		info->driver = NULL;
+		memdelete(info);
+	}
+
+	font_id_to_info.clear();
 	fonts.clear();
 }
 
@@ -592,19 +600,32 @@ Vector<FontID> FontDriverBMFont::get_builtin_font_ids() const {
 	return builtin_font_ids;
 }
 
-Ref<FontInfo> FontDriverBMFont::get_font_info(const FontID &p_font_id) const {
+Ref<FontDriver::FontInfo> FontDriverBMFont::get_font_info(const FontID &p_font_id) const {
 	ERR_FAIL_COND_V(!p_font_id.is_valid(), Ref<FontInfo>());
 
 	const BMFontInstance *font_instance = fonts.getptr(p_font_id);
 	if (!font_instance) {
 		return Ref<FontInfo>();
 	}
-	Ref<FontInfo> info;
-	info.instance();
-	info->id = p_font_id;
+
+	FontInfo **cached = font_id_to_info.getptr(p_font_id);
+	if (cached && *cached) {
+		return Ref<FontInfo>(*cached);
+	}
+
+	FontInfo *info = memnew(FontInfo);
 	info->face_count = 1;
 	info->path = font_instance->data->page_files.size() ? font_instance->data->page_files[0].get_base_dir().plus_file("font.fnt") : String();
-	return info;
+	info->driver = const_cast<FontDriverBMFont *>(this);
+	info->font_id = p_font_id;
+
+	font_id_to_info[p_font_id] = info;
+	return Ref<FontInfo>(info);
+}
+
+void FontDriverBMFont::finalize_font(const FontID &p_font_id) {
+	font_id_to_info.erase(p_font_id);
+	fonts.erase(p_font_id);
 }
 
 bool FontDriverBMFont::owns_font(const FontID &p_font_id) const {
@@ -613,7 +634,7 @@ bool FontDriverBMFont::owns_font(const FontID &p_font_id) const {
 	return fonts.has(p_font_id);
 }
 
-bool FontDriverBMFont::validate_font(const FontID &p_font_id) const {
+bool FontDriverBMFont::validate_font(const FontID &p_font_id) {
 	ERR_FAIL_COND_V(!p_font_id.is_valid(), false);
 
 	const BMFontInstance *font_instance = fonts.getptr(p_font_id);
@@ -664,32 +685,32 @@ Vector2 FontDriverBMFont::get_font_kerning(const FontID &p_font_id, char32_t p_c
 	return kerning ? Vector2(*kerning, 0) : Vector2();
 }
 
-void FontDriverBMFont::clear_glyph_cache(const GlyphCacheKey &p_cache_key) {
-	if (glyph_info_map.has(p_cache_key)) {
-		glyph_info_map.erase(p_cache_key);
+void FontDriverBMFont::clear_glyph_cache(const GlyphCacheKey &p_glyph_key) {
+	if (glyph_info_map.has(p_glyph_key)) {
+		glyph_info_map.erase(p_glyph_key);
 	}
 
-	if (texture_map.has(p_cache_key)) {
-		texture_map.erase(p_cache_key);
+	if (texture_map.has(p_glyph_key)) {
+		texture_map.erase(p_glyph_key);
 	}
 }
 
-GlyphInfo FontDriverBMFont::get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index) {
+GlyphInfo FontDriverBMFont::get_glyph_info(const GlyphCacheKey &p_glyph_key, uint32_t p_glyph_index) {
 	GlyphInfo glyph_info{};
 
-	BMFontInstance *font_instance = fonts.getptr(p_cache_key.font_id);
+	BMFontInstance *font_instance = fonts.getptr(p_glyph_key.font_id);
 	ERR_FAIL_COND_V(!font_instance, glyph_info);
 
 	const BMFontChar *ch = font_instance->data->chars.getptr(p_glyph_index);
 	ERR_FAIL_COND_V(!ch, glyph_info);
 
-	HashMap<uint32_t, GlyphInfo> *glyph_map = glyph_info_map.getptr(p_cache_key);
+	HashMap<uint32_t, GlyphInfo> *glyph_map = glyph_info_map.getptr(p_glyph_key);
 	if (glyph_map && glyph_map->has(p_glyph_index)) {
 		return (*glyph_map)[p_glyph_index];
 	}
 
-	if (!texture_map.has(p_cache_key)) {
-		Vector<RID> &textures = texture_map[p_cache_key];
+	if (!texture_map.has(p_glyph_key)) {
+		Vector<RID> &textures = texture_map[p_glyph_key];
 		textures.resize(font_instance->page_images.size());
 	}
 
@@ -702,16 +723,16 @@ GlyphInfo FontDriverBMFont::get_glyph_info(const GlyphCacheKey &p_cache_key, uin
 	glyph_info.texture_size = Size2((float)ch->width, (float)ch->height);
 	glyph_info.texture_rect_uv = Rect2((float)ch->x, (float)ch->y, (float)ch->width, (float)ch->height);
 	glyph_info.texture_format = font_instance->page_images[ch->page]->get_format();
-	if (p_cache_key.font_use_mipmaps) {
+	if (p_glyph_key.font_use_mipmaps) {
 		glyph_info.texture_flags |= Texture::FLAG_MIPMAPS;
 	}
-	if (p_cache_key.font_use_filter) {
+	if (p_glyph_key.font_use_filter) {
 		glyph_info.texture_flags |= Texture::FLAG_FILTER;
 	}
-	glyph_info.cache_key = p_cache_key;
+	glyph_info.cache_key = p_glyph_key;
 
 	if (glyph_info.found) {
-		HashMap<uint32_t, GlyphInfo> &glyph_map = glyph_info_map[p_cache_key];
+		HashMap<uint32_t, GlyphInfo> &glyph_map = glyph_info_map[p_glyph_key];
 		glyph_map[p_glyph_index] = glyph_info;
 	}
 

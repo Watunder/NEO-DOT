@@ -81,6 +81,9 @@ struct BMFontInstance {
 
 class FontDriverBMFont : public FontDriver {
 	HashMap<FontID, BMFontInstance, FontIDHasher> fonts;
+
+	mutable HashMap<FontID, FontInfo *, FontIDHasher> font_id_to_info;
+
 	HashMap<GlyphCacheKey, Vector<RID>, GlyphCacheKeyHasher> texture_map;
 	HashMap<GlyphCacheKey, HashMap<uint32_t, GlyphInfo>, GlyphCacheKeyHasher> glyph_info_map;
 
@@ -101,14 +104,15 @@ public:
 	virtual Ref<FontInfo> get_font_info(const FontID &p_font_id) const;
 
 	virtual bool owns_font(const FontID &p_font_id) const;
-	virtual bool validate_font(const FontID &p_font_id) const;
+	virtual bool validate_font(const FontID &p_font_id);
+	virtual void finalize_font(const FontID &p_font_id);
 
 	virtual uint32_t get_glyph_index(const FontID &p_font_id, char32_t p_char) const;
 	virtual bool get_font_metrics(float &r_ascent, float &r_descent, const FontID &p_font_id, int p_size, int p_oversampling) const;
 	virtual Vector2 get_font_kerning(const FontID &p_font_id, char32_t p_char, char32_t p_next_char, int p_size, int p_oversampling) const;
 
-	virtual void clear_glyph_cache(const GlyphCacheKey &p_cache_key);
-	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_cache_key, uint32_t p_glyph_index);
+	virtual void clear_glyph_cache(const GlyphCacheKey &p_glyph_key);
+	virtual GlyphInfo get_glyph_info(const GlyphCacheKey &p_glyph_key, uint32_t p_glyph_index);
 	virtual RID get_glyph_texture_rid(const GlyphInfo &p_glyph_info);
 
 	FontDriverBMFont();

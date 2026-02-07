@@ -175,6 +175,9 @@ void initialize_font() {
 	for (int i = 0; i < TextShaperManager::get_shaper_count(); i++) {
 		TextShaperManager::initialize(i);
 	}
+
+	ERR_FAIL_COND(!font_server);
+	font_server->init();
 }
 
 // FIXME: Could maybe be moved to PhysicsServerManager and Physics2DServerManager directly
