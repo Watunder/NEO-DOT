@@ -160,8 +160,8 @@ static _FORCE_INLINE_ void _shape_run(FontDriverFreeType *p_driver, const char32
 				ShapedData *sd = memnew(ShapedData);
 				sd->glyph_font_id = p_run_font;
 				sd->glyph_index = glyph.index;
-				sd->glyph_offset = Vector2((float)glyph.x_offset / 64.0, -(float)glyph.y_offset / 64.0);
-				sd->glyph_advance = Vector2((float)glyph.x_advance / 64.0, (float)glyph.y_advance / 64.0);
+				sd->glyph_offset = Vector2((float)glyph.x_offset / 64.0, -(float)glyph.y_offset / 64.0) / p_font_oversampling;
+				sd->glyph_advance = Vector2((float)glyph.x_advance / 64.0, (float)glyph.y_advance / 64.0) / p_font_oversampling;
 				sd->cluster_glyph_count = cluster_glyph_count;
 				sd->cluster_glyph_index = cluster_glyph_index;
 

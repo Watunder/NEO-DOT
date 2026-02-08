@@ -212,8 +212,7 @@ Ref<TextLine> TextHelper::create_text_line(RID p_font, const String &p_line) {
 	for (int i = 0; i < text_line->fallback_font_ids.size(); i++) {
 		h = h * 31 + text_line->fallback_font_ids[i].hash();
 	}
-	h = h * 31 + text_line->font_size;
-	h = h * 31 + text_line->font_oversampling;
+	h = h * 31 + (text_line->font_size * text_line->font_oversampling);
 
 	text_line->cache_header = h;
 

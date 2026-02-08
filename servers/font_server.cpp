@@ -192,7 +192,7 @@ RID FontServer::font_create(int p_size, bool p_use_mipmaps, bool p_use_filter, i
 	Font *font = memnew(Font);
 
 	font->glyph_key.font_size = p_size;
-	font->glyph_key.font_oversampling = 1;
+	font->glyph_key.font_oversampling = 2;
 	font->glyph_key.font_use_mipmaps = p_use_mipmaps;
 	font->glyph_key.font_use_filter = p_use_filter;
 	font->glyph_key.font_custom_flags = p_custom_flags;

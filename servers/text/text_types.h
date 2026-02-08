@@ -159,8 +159,8 @@ struct TextLine : Reference {
 
 	FontID font_id;
 	Vector<FontID> fallback_font_ids;
-	uint16_t font_size = 1;
-	uint8_t font_oversampling = 1;
+	uint32_t font_size = 1;
+	uint32_t font_oversampling = 1;
 
 	uint64_t cache_header = 0;
 

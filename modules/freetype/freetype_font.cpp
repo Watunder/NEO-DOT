@@ -50,7 +50,7 @@ void FreeTypeFont::_bind_methods() {
 
 	ADD_GROUP("Settings", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "face_index", PROPERTY_HINT_RANGE, "0,1024,1"), "set_face_index", "get_face_index");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "face_size", PROPERTY_HINT_RANGE, "0,1024,1"), "set_face_size", "get_face_size");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "face_size", PROPERTY_HINT_RANGE, "1,1024,1"), "set_face_size", "get_face_size");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hinting", PROPERTY_HINT_ENUM, "None,Auto,Light,Normal"), "set_hinting", "get_hinting");
 
 	BIND_ENUM_CONSTANT(HINTING_NONE);

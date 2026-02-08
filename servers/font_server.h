@@ -71,16 +71,15 @@ struct FontIDHasher {
 
 struct GlyphCacheKey {
 	FontID font_id;
-	uint16_t font_size = 0;
-	uint8_t font_oversampling = 1;
+	uint32_t font_size = 1;
+	uint32_t font_oversampling = 1;
 	bool font_use_mipmaps = false;
 	bool font_use_filter = false;
 	uint32_t font_custom_flags = 0;
 
 	_FORCE_INLINE_ bool operator==(const GlyphCacheKey &p_key) const {
 		return (font_id == p_key.font_id &&
-				font_size == p_key.font_size &&
-				font_oversampling == p_key.font_oversampling &&
+				(font_size * font_oversampling) == (p_key.font_size * p_key.font_oversampling) &&
 				font_use_mipmaps == p_key.font_use_mipmaps &&
 				font_use_filter == p_key.font_use_filter &&
 				font_custom_flags == p_key.font_custom_flags);
@@ -88,8 +87,7 @@ struct GlyphCacheKey {
 
 	_FORCE_INLINE_ bool operator!=(const GlyphCacheKey &p_key) const {
 		return (font_id != p_key.font_id ||
-				font_size != p_key.font_size ||
-				font_oversampling != p_key.font_oversampling ||
+				(font_size * font_oversampling) != (p_key.font_size * p_key.font_oversampling) ||
 				font_use_mipmaps != p_key.font_use_mipmaps ||
 				font_use_filter != p_key.font_use_filter ||
 				font_custom_flags != p_key.font_custom_flags);
@@ -97,8 +95,7 @@ struct GlyphCacheKey {
 
 	_FORCE_INLINE_ uint64_t hash() const {
 		uint64_t h = font_id.hash();
-		h = h * 31 + font_size;
-		h = h * 31 + font_oversampling;
+		h = h * 31 + (font_size * font_oversampling);
 		h = h * 31 + (font_use_mipmaps ? 1 : 0);
 		h = h * 31 + (font_use_filter ? 1 : 0);
 		h = h * 31 + font_custom_flags;
