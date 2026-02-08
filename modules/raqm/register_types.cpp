@@ -30,6 +30,8 @@
 
 #include "register_types.h"
 
-void register_raqm_types() {}
+void register_raqm_types(ModuleLevel p_level) {
+}
 
-void unregister_raqm_types() {}
+void unregister_raqm_types(ModuleLevel p_level) {
+}

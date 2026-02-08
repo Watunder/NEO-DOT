@@ -31,7 +31,9 @@
 #ifndef RAQM_REGISTER_TYPES_H
 #define RAQM_REGISTER_TYPES_H
 
-void register_raqm_types();
-void unregister_raqm_types();
+#include "modules/register_module_types.h"
+
+void register_raqm_types(ModuleLevel p_level);
+void unregister_raqm_types(ModuleLevel p_level);
 
 #endif // RAQM_REGISTER_TYPES_H

@@ -33,9 +33,13 @@
 #include "core/engine.h"
 #include "lightmap_denoiser.h"
 
-void register_denoise_types() {
+void register_denoise_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	LightmapDenoiserOIDN::make_default_denoiser();
 }
 
-void unregister_denoise_types() {
+void unregister_denoise_types(ModuleLevel p_level) {
 }

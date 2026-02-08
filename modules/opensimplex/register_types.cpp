@@ -32,10 +32,14 @@
 #include "noise_texture.h"
 #include "open_simplex_noise.h"
 
-void register_opensimplex_types() {
+void register_opensimplex_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	ClassDB::register_class<OpenSimplexNoise>();
 	ClassDB::register_class<NoiseTexture>();
 }
 
-void unregister_opensimplex_types() {
+void unregister_opensimplex_types(ModuleLevel p_level) {
 }

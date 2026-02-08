@@ -35,14 +35,19 @@
 #include "grid_map_editor_plugin.h"
 #endif
 
-void register_gridmap_types() {
+void register_gridmap_types(ModuleLevel p_level) {
 #ifndef _3D_DISABLED
-	ClassDB::register_class<GridMap>();
+	if (p_level == MODULE_LEVEL_SCENE) {
+		ClassDB::register_class<GridMap>();
+	}
+
 #ifdef TOOLS_ENABLED
-	EditorPlugins::add_by_type<GridMapEditorPlugin>();
+	if (p_level == MODULE_LEVEL_EDITOR) {
+		EditorPlugins::add_by_type<GridMapEditorPlugin>();
+	}
 #endif
 #endif
 }
 
-void unregister_gridmap_types() {
+void unregister_gridmap_types(ModuleLevel p_level) {
 }

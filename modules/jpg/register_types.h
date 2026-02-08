@@ -31,7 +31,9 @@
 #ifndef JPG_REGISTER_TYPES_H
 #define JPG_REGISTER_TYPES_H
 
-void register_jpg_types();
-void unregister_jpg_types();
+#include "modules/register_module_types.h"
+
+void register_jpg_types(ModuleLevel p_level);
+void unregister_jpg_types(ModuleLevel p_level);
 
 #endif // JPG_REGISTER_TYPES_H

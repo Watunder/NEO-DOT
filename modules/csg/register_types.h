@@ -31,7 +31,9 @@
 #ifndef CSG_REGISTER_TYPES_H
 #define CSG_REGISTER_TYPES_H
 
-void register_csg_types();
-void unregister_csg_types();
+#include "modules/register_module_types.h"
+
+void register_csg_types(ModuleLevel p_level);
+void unregister_csg_types(ModuleLevel p_level);
 
 #endif // CSG_REGISTER_TYPES_H

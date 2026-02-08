@@ -252,7 +252,11 @@ Vector<Ref<GDNative>> singleton_gdnatives;
 Ref<GDNativeLibraryResourceLoader> resource_loader_gdnlib;
 Ref<GDNativeLibraryResourceSaver> resource_saver_gdnlib;
 
-void register_gdnative_types() {
+void register_gdnative_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_MISC) {
+		return;
+	}
+
 #ifdef TOOLS_ENABLED
 
 	EditorNode::add_init_callback(editor_init_callback);
@@ -317,7 +321,11 @@ void register_gdnative_types() {
 	}
 }
 
-void unregister_gdnative_types() {
+void unregister_gdnative_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_MISC) {
+		return;
+	}
+
 	for (int i = 0; i < singleton_gdnatives.size(); i++) {
 		if (singleton_gdnatives[i].is_null()) {
 			continue;

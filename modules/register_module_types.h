@@ -31,9 +31,15 @@
 #ifndef REGISTER_MODULE_TYPES_H
 #define REGISTER_MODULE_TYPES_H
 
-//
+enum ModuleLevel {
+	MODULE_LEVEL_CORE,
+	MODULE_LEVEL_SERVERS,
+	MODULE_LEVEL_SCENE,
+	MODULE_LEVEL_EDITOR,
+	MODULE_LEVEL_MISC,
+};
 
-void register_module_types();
-void unregister_module_types();
+void register_module_types(ModuleLevel p_level);
+void unregister_module_types(ModuleLevel p_level);
 
 #endif

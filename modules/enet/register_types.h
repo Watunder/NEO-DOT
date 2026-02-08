@@ -31,7 +31,9 @@
 #ifndef ENET_REGISTER_TYPES_H
 #define ENET_REGISTER_TYPES_H
 
-void register_enet_types();
-void unregister_enet_types();
+#include "modules/register_module_types.h"
+
+void register_enet_types(ModuleLevel p_level);
+void unregister_enet_types(ModuleLevel p_level);
 
 #endif // ENET_REGISTER_TYPES_H

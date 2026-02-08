@@ -41,7 +41,11 @@ static void _editor_init() {
 }
 #endif
 
-void register_fbx_types() {
+void register_fbx_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_EDITOR) {
+		return;
+	}
+
 #ifdef TOOLS_ENABLED
 	ClassDB::APIType prev_api = ClassDB::get_current_api();
 	ClassDB::set_current_api(ClassDB::API_EDITOR);
@@ -54,5 +58,5 @@ void register_fbx_types() {
 #endif
 }
 
-void unregister_fbx_types() {
+void unregister_fbx_types(ModuleLevel p_level) {
 }

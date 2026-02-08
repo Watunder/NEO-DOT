@@ -32,9 +32,13 @@
 
 #include "lightmap_raycaster.h"
 
-void register_raycast_types() {
+void register_raycast_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	LightmapRaycasterEmbree::make_default_raycaster();
 }
 
-void unregister_raycast_types() {
+void unregister_raycast_types(ModuleLevel p_level) {
 }

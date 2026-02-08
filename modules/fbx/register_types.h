@@ -31,7 +31,9 @@
 #ifndef FBX_REGISTER_TYPES_H
 #define FBX_REGISTER_TYPES_H
 
-void register_fbx_types();
-void unregister_fbx_types();
+#include "modules/register_module_types.h"
+
+void register_fbx_types(ModuleLevel p_level);
+void unregister_fbx_types(ModuleLevel p_level);
 
 #endif // FBX_REGISTER_TYPES_H

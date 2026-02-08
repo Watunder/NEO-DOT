@@ -31,7 +31,9 @@
 #ifndef XATLAS_UNWRAP_REGISTER_TYPES_H
 #define XATLAS_UNWRAP_REGISTER_TYPES_H
 
-void register_xatlas_unwrap_types();
-void unregister_xatlas_unwrap_types();
+#include "modules/register_module_types.h"
+
+void register_xatlas_unwrap_types(ModuleLevel p_level);
+void unregister_xatlas_unwrap_types(ModuleLevel p_level);
 
 #endif // XATLAS_UNWRAP_REGISTER_TYPES_H

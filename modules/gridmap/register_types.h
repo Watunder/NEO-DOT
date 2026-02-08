@@ -31,7 +31,9 @@
 #ifndef GRIDMAP_REGISTER_TYPES_H
 #define GRIDMAP_REGISTER_TYPES_H
 
-void register_gridmap_types();
-void unregister_gridmap_types();
+#include "modules/register_module_types.h"
+
+void register_gridmap_types(ModuleLevel p_level);
+void unregister_gridmap_types(ModuleLevel p_level);
 
 #endif // GRIDMAP_REGISTER_TYPES_H

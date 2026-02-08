@@ -34,11 +34,19 @@
 
 static ImageLoaderJPG *image_loader_jpg = NULL;
 
-void register_jpg_types() {
+void register_jpg_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	image_loader_jpg = memnew(ImageLoaderJPG);
 	ImageLoader::add_image_format_loader(image_loader_jpg);
 }
 
-void unregister_jpg_types() {
+void unregister_jpg_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	memdelete(image_loader_jpg);
 }

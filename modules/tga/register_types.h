@@ -31,7 +31,9 @@
 #ifndef TGA_REGISTER_TYPES_H
 #define TGA_REGISTER_TYPES_H
 
-void register_tga_types();
-void unregister_tga_types();
+#include "modules/register_module_types.h"
+
+void register_tga_types(ModuleLevel p_level);
+void unregister_tga_types(ModuleLevel p_level);
 
 #endif // TGA_REGISTER_TYPES_H

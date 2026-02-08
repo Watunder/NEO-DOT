@@ -31,7 +31,9 @@
 #ifndef EMBED_WINDOW_REGISTER_TYPES_H
 #define EMBED_WINDOW_REGISTER_TYPES_H
 
-void register_embed_window_types();
-void unregister_embed_window_types();
+#include "modules/register_module_types.h"
+
+void register_embed_window_types(ModuleLevel p_level);
+void unregister_embed_window_types(ModuleLevel p_level);
 
 #endif // EMBED_WINDOW_REGISTER_TYPES_H

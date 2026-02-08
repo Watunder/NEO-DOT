@@ -31,7 +31,9 @@
 #ifndef MINIMP3_REGISTER_TYPES_H
 #define MINIMP3_REGISTER_TYPES_H
 
-void register_minimp3_types();
-void unregister_minimp3_types();
+#include "modules/register_module_types.h"
+
+void register_minimp3_types(ModuleLevel p_level);
+void unregister_minimp3_types(ModuleLevel p_level);
 
 #endif // MINIMP3_REGISTER_TYPES_H

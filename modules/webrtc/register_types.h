@@ -31,7 +31,9 @@
 #ifndef WEBRTC_REGISTER_TYPES_H
 #define WEBRTC_REGISTER_TYPES_H
 
-void register_webrtc_types();
-void unregister_webrtc_types();
+#include "modules/register_module_types.h"
+
+void register_webrtc_types(ModuleLevel p_level);
+void unregister_webrtc_types(ModuleLevel p_level);
 
 #endif // WEBRTC_REGISTER_TYPES_H

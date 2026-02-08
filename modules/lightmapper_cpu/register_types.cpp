@@ -40,7 +40,11 @@ static Lightmapper *create_lightmapper_cpu() {
 }
 #endif
 
-void register_lightmapper_cpu_types() {
+void register_lightmapper_cpu_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SCENE) {
+		return;
+	}
+
 	GLOBAL_DEF("rendering/cpu_lightmapper/quality/low_quality_ray_count", 64);
 	GLOBAL_DEF("rendering/cpu_lightmapper/quality/medium_quality_ray_count", 256);
 	GLOBAL_DEF("rendering/cpu_lightmapper/quality/high_quality_ray_count", 512);
@@ -50,5 +54,5 @@ void register_lightmapper_cpu_types() {
 #endif
 }
 
-void unregister_lightmapper_cpu_types() {
+void unregister_lightmapper_cpu_types(ModuleLevel p_level) {
 }
