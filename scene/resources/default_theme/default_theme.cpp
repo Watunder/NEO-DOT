@@ -30,13 +30,19 @@
 
 #include "default_theme.h"
 
-#include "scene/resources/theme.h"
-
-#include "core/os/os.h"
 #include "theme_data.h"
 
-#include "font_hidpi.inc"
-#include "font_lodpi.inc"
+#include "core/os/os.h"
+#include "core/project_settings.h"
+#include "scene/resources/font.h"
+#include "scene/resources/theme.h"
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include "modules/freetype/freetype_font.h"
+#else
+#include "scene/resources/bitmap_font.h"
+#endif
 
 typedef Map<const void *, Ref<ImageTexture>> TexCacheMap;
 
@@ -145,40 +151,6 @@ static Ref<Texture> flip_icon(Ref<Texture> p_texture, bool p_flip_y = false, boo
 
 	texture->create_from_image(img);
 	return texture;
-}
-
-static Ref<BitmapFont> make_font(int p_height, int p_ascent, int p_charcount, const int *p_char_rects, int p_kerning_count, const int *p_kernings, int p_w, int p_h, const unsigned char *p_img) {
-	Ref<BitmapFont> font(memnew(BitmapFont));
-
-	Ref<Image> image = memnew(Image(p_img));
-	Ref<ImageTexture> tex = memnew(ImageTexture);
-	tex->create_from_image(image);
-
-	font->add_texture(tex);
-
-	for (int i = 0; i < p_charcount; i++) {
-		const int *c = &p_char_rects[i * 8];
-
-		int chr = c[0];
-		Rect2 frect;
-		frect.position.x = c[1];
-		frect.position.y = c[2];
-		frect.size.x = c[3];
-		frect.size.y = c[4];
-		Point2 align(c[6], c[5]);
-		int advance = c[7];
-
-		font->add_char(chr, 0, frect, align, advance);
-	}
-
-	for (int i = 0; i < p_kerning_count; i++) {
-		font->add_kerning_pair(p_kernings[i * 3 + 0], p_kernings[i * 3 + 1], p_kernings[i * 3 + 2]);
-	}
-
-	font->set_height(p_height);
-	font->set_ascent(p_ascent);
-
-	return font;
 }
 
 static Ref<StyleBox> make_empty_stylebox(float p_margin_left = -1, float p_margin_top = -1, float p_margin_right = -1, float p_margin_bottom = -1) {
@@ -403,7 +375,6 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 
 	theme->set_color("font_color", "Label", Color(1, 1, 1));
 	theme->set_color("font_color_shadow", "Label", Color(0, 0, 0, 0));
-	theme->set_color("font_outline_modulate", "Label", Color(1, 1, 1));
 
 	theme->set_constant("shadow_offset_x", "Label", 1 * scale);
 	theme->set_constant("shadow_offset_y", "Label", 1 * scale);
@@ -908,6 +879,28 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	memdelete(tex_cache);
 }
 
+static Ref<Font> make_default_font() {
+	Ref<Font> default_font;
+
+#ifdef MODULE_FREETYPE_ENABLED
+	Ref<FreeTypeFont> font;
+	font.instance();
+	font->set_use_filter(true);
+	font->set_use_mipmaps(true);
+
+	default_font = font;
+#else
+	Ref<BitmapFont> font;
+	font.instance();
+	font->set_use_filter(true);
+	font->set_use_mipmaps(true);
+
+	default_font = font;
+#endif
+
+	return default_font;
+}
+
 void make_default_theme(bool p_hidpi, Ref<Font> p_font) {
 	Ref<Theme> t;
 	t.instance();
@@ -917,10 +910,8 @@ void make_default_theme(bool p_hidpi, Ref<Font> p_font) {
 	Ref<Font> default_font;
 	if (p_font.is_valid()) {
 		default_font = p_font;
-	} else if (p_hidpi) {
-		default_font = make_font(_hidpi_font_height, _hidpi_font_ascent, _hidpi_font_charcount, &_hidpi_font_charrects[0][0], _hidpi_font_kerning_pair_count, &_hidpi_font_kerning_pairs[0][0], _hidpi_font_img_width, _hidpi_font_img_height, _hidpi_font_img_data);
 	} else {
-		default_font = make_font(_lodpi_font_height, _lodpi_font_ascent, _lodpi_font_charcount, &_lodpi_font_charrects[0][0], _lodpi_font_kerning_pair_count, &_lodpi_font_kerning_pairs[0][0], _lodpi_font_img_width, _lodpi_font_img_height, _lodpi_font_img_data);
+		default_font = make_default_font();
 	}
 	Ref<Font> large_font = default_font;
 	fill_default_theme(t, default_font, large_font, default_icon, default_style, p_hidpi ? 2.0 : 1.0);

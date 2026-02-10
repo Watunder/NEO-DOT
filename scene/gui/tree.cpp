@@ -1021,7 +1021,7 @@ void Tree::draw_item_rect(const TreeItem::Cell &p_cell, const Rect2i &p_rect, co
 	}
 
 	rect.position.y += Math::floor((rect.size.y - font->get_height()) / 2.0) + font->get_ascent();
-	font->draw(ci, rect.position, text, p_color, rect.size.x);
+	draw_string(font, rect.position, text, p_color, rect.size.x);
 }
 
 int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 &p_draw_size, TreeItem *p_item) {
@@ -1242,7 +1242,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 						Ref<Texture> downarrow = cache.select_arrow;
 
-						font->draw(ci, text_pos, s, col, item_rect.size.x - downarrow->get_width());
+						draw_string(font, text_pos, s, col, item_rect.size.x - downarrow->get_width());
 
 						Point2i arrow_pos = item_rect.position;
 						arrow_pos.x += item_rect.size.x - downarrow->get_width();
@@ -1257,7 +1257,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 						if (p_item->cells[i].suffix != String())
 							valtext += " " + p_item->cells[i].suffix;
 
-						font->draw(ci, text_pos, valtext, col, item_rect.size.x - updown->get_width());
+						draw_string(font, text_pos, valtext, col, item_rect.size.x - updown->get_width());
 
 						if (!p_item->cells[i].editable)
 							break;
@@ -2820,7 +2820,7 @@ void Tree::_notification(int p_what) {
 				ofs2 += tbrect.size.width;
 				//text
 				int clip_w = tbrect.size.width - sb->get_minimum_size().width;
-				f->draw_halign(ci, tbrect.position + Point2i(sb->get_offset().x, (tbrect.size.height - f->get_height()) / 2 + f->get_ascent()), HALIGN_CENTER, clip_w, columns[i].title, cache.title_button_color);
+				draw_string_aligned(f, tbrect.position + Point2i(sb->get_offset().x, (tbrect.size.height - f->get_height()) / 2 + f->get_ascent()), HALIGN_CENTER, clip_w, columns[i].title, cache.title_button_color);
 			}
 		}
 	}

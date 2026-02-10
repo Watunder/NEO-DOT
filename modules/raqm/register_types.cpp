@@ -30,7 +30,20 @@
 
 #include "register_types.h"
 
+#include "text_shaper_raqm.h"
+
+#include "core/os/memory.h"
+#include "servers/text/text_shaper.h"
+
+static TextShaperRaqm *text_shaper_raqm = NULL;
+
 void register_raqm_types(ModuleLevel p_level) {
+	if (p_level != MODULE_LEVEL_SERVERS) {
+		return;
+	}
+
+	text_shaper_raqm = memnew(TextShaperRaqm);
+	TextShaperManager::add_shaper(text_shaper_raqm);
 }
 
 void unregister_raqm_types(ModuleLevel p_level) {

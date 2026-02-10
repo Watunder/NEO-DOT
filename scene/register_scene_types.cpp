@@ -30,6 +30,7 @@
 
 #include "register_scene_types.h"
 
+#include "configs/modules_enabled.gen.h"
 #include "core/class_db.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
@@ -129,6 +130,7 @@
 #include "scene/main/viewport.h"
 #include "scene/resources/audio_stream_sample.h"
 #include "scene/resources/bit_map.h"
+#include "scene/resources/bitmap_font.h"
 #include "scene/resources/box_shape.h"
 #include "scene/resources/capsule_shape.h"
 #include "scene/resources/capsule_shape_2d.h"
@@ -139,7 +141,6 @@
 #include "scene/resources/convex_polygon_shape_2d.h"
 #include "scene/resources/cylinder_shape.h"
 #include "scene/resources/default_theme/default_theme.h"
-#include "scene/resources/dynamic_font.h"
 #include "scene/resources/gradient.h"
 #include "scene/resources/height_map_shape.h"
 #include "scene/resources/immediate_mesh.h"
@@ -213,12 +214,10 @@
 static Ref<ResourceFormatSaverText> resource_saver_text;
 static Ref<ResourceFormatLoaderText> resource_loader_text;
 
-static Ref<ResourceFormatLoaderDynamicFont> resource_loader_dynamic_font;
+static Ref<ResourceFormatLoaderBitmapFont> resource_loader_bitmap_font;
 
 static Ref<ResourceFormatLoaderStreamTexture> resource_loader_stream_texture;
 static Ref<ResourceFormatLoaderTextureLayered> resource_loader_texture_layered;
-
-static Ref<ResourceFormatLoaderBMFont> resource_loader_bmfont;
 
 static Ref<ResourceFormatSaverShader> resource_saver_shader;
 static Ref<ResourceFormatLoaderShader> resource_loader_shader;
@@ -230,8 +229,8 @@ void register_scene_types() {
 
 	Node::init_node_hrcr();
 
-	resource_loader_dynamic_font.instance();
-	ResourceLoader::add_resource_format_loader(resource_loader_dynamic_font);
+	resource_loader_bitmap_font.instance();
+	ResourceLoader::add_resource_format_loader(resource_loader_bitmap_font);
 
 	resource_loader_stream_texture.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_stream_texture);
@@ -250,9 +249,6 @@ void register_scene_types() {
 
 	resource_loader_shader.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_shader, true);
-
-	resource_loader_bmfont.instance();
-	ResourceLoader::add_resource_format_loader(resource_loader_bmfont, true);
 
 	OS::get_singleton()->yield(); //may take time to init
 
@@ -661,16 +657,12 @@ void register_scene_types() {
 	ClassDB::register_class<Texture3D>();
 	ClassDB::register_class<TextureArray>();
 	ClassDB::register_class<Animation>();
-	ClassDB::register_virtual_class<Font>();
-	ClassDB::register_class<BitmapFont>();
 	ClassDB::register_class<Curve>();
 
 	ClassDB::register_class<TextFile>();
 
-	ClassDB::register_class<DynamicFontData>();
-	ClassDB::register_class<DynamicFont>();
-
-	DynamicFont::initialize_dynamic_fonts();
+	ClassDB::register_virtual_class<Font>();
+	ClassDB::register_class<BitmapFont>();
 
 	ClassDB::register_virtual_class<StyleBox>();
 	ClassDB::register_class<StyleBoxEmpty>();
@@ -738,31 +730,32 @@ void register_scene_types() {
 
 	bool default_theme_hidpi = GLOBAL_DEF("gui/theme/use_hidpi", false);
 	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/use_hidpi", PropertyInfo(Variant::BOOL, "gui/theme/use_hidpi", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
-	String theme_path = GLOBAL_DEF_RST("gui/theme/custom", "");
+	String custom_theme_path = GLOBAL_DEF_RST("gui/theme/custom", "");
 	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom", PropertyInfo(Variant::STRING, "gui/theme/custom", PROPERTY_HINT_FILE, "*.tres,*.res,*.theme", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
-	String font_path = GLOBAL_DEF_RST("gui/theme/custom_font", "");
-	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom_font", PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.font", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
+	String custom_font_path = GLOBAL_DEF_RST("gui/theme/custom_font", "");
+	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom_font", PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.ttf,*.ttc,*.otf,*.otc", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
 
-	Ref<Font> font;
-	if (font_path != String()) {
-		font = ResourceLoader::load(font_path);
-		if (!font.is_valid()) {
-			ERR_PRINTS("Error loading custom font '" + font_path + "'");
+	Ref<Font> custom_font;
+
+	if (custom_font_path != String()) {
+		custom_font = ResourceLoader::load(custom_font_path);
+		if (!custom_font.is_valid()) {
+			ERR_PRINTS("Error loading custom font '" + custom_font_path + "'");
 		}
 	}
 
 	// Always make the default theme to avoid invalid default font/icon/style in the given theme
-	make_default_theme(default_theme_hidpi, font);
+	make_default_theme(default_theme_hidpi, custom_font);
 
-	if (theme_path != String()) {
-		Ref<Theme> theme = ResourceLoader::load(theme_path);
+	if (custom_theme_path != String()) {
+		Ref<Theme> theme = ResourceLoader::load(custom_theme_path);
 		if (theme.is_valid()) {
 			Theme::set_project_default(theme);
-			if (font.is_valid()) {
-				Theme::set_default_font(font);
+			if (custom_font.is_valid()) {
+				Theme::set_default_font(custom_font);
 			}
 		} else {
-			ERR_PRINTS("Error loading custom theme '" + theme_path + "'");
+			ERR_PRINTS("Error loading custom theme '" + custom_theme_path + "'");
 		}
 	}
 }
@@ -770,16 +763,14 @@ void register_scene_types() {
 void unregister_scene_types() {
 	clear_default_theme();
 
-	ResourceLoader::remove_resource_format_loader(resource_loader_dynamic_font);
-	resource_loader_dynamic_font.unref();
+	ResourceLoader::remove_resource_format_loader(resource_loader_bitmap_font);
+	resource_loader_bitmap_font.unref();
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);
 	resource_loader_texture_layered.unref();
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_stream_texture);
 	resource_loader_stream_texture.unref();
-
-	DynamicFont::finish_dynamic_fonts();
 
 	ResourceSaver::remove_resource_format_saver(resource_saver_text);
 	resource_saver_text.unref();
@@ -792,9 +783,6 @@ void unregister_scene_types() {
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_shader);
 	resource_loader_shader.unref();
-
-	ResourceLoader::remove_resource_format_loader(resource_loader_bmfont);
-	resource_loader_bmfont.unref();
 
 	//SpatialMaterial is not initialised when 3D is disabled, so it shouldn't be cleaned up either
 #ifndef _3D_DISABLED

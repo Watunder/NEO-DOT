@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+
+Import("env")
+
+import glob
+from platform_methods import run_in_subprocess
+import bmfont_builders
+
+env.add_source_files(env.servers_sources, "*.cpp")
+
+
+# Find all font files to use as dependencies
+path = env.Dir(".").abspath
+bmfont_fnt_files = glob.glob(path + "/../../thirdparty/fonts/bmfont/*.fnt")
+bmfont_fnt_files.sort()
+
+env.Depends(
+    ["#servers/font/builtin_bitmap_fonts.gen.h", "#servers/font/builtin_bitmap_fonts.gen.cpp"],
+    bmfont_fnt_files,
+)
+env.CommandNoCache(
+    ["#servers/font/builtin_bitmap_fonts.gen.h", "#servers/font/builtin_bitmap_fonts.gen.cpp"],
+    bmfont_fnt_files,
+    run_in_subprocess(bmfont_builders.make_builtin_bitmap_fonts),
+)
+
+# Don't warn about duplicate entry here, we need it registered manually for first build,
+# even if later builds will pick it up twice due to above *.cpp globbing.
+env.add_source_files(env.servers_sources, "#servers/font/builtin_bitmap_fonts.gen.cpp", warn_duplicates=False)

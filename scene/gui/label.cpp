@@ -32,6 +32,7 @@
 #include "core/print_string.h"
 #include "core/project_settings.h"
 #include "core/translation.h"
+#include "servers/text/text_helper.h"
 
 void Label::set_autowrap(bool p_autowrap) {
 	if (autowrap == p_autowrap) {
@@ -93,7 +94,6 @@ void Label::_notification(int p_what) {
 		bool use_outline = get_constant("shadow_as_outline");
 		Point2 shadow_ofs(get_constant("shadow_offset_x"), get_constant("shadow_offset_y"));
 		int line_spacing = get_constant("line_spacing");
-		Color font_outline_modulate = get_color("font_outline_modulate");
 
 		style->draw(ci, Rect2(Point2(0, 0), get_size()));
 
@@ -149,7 +149,6 @@ void Label::_notification(int p_what) {
 
 		int line = 0;
 		int line_to = lines_skipped + (lines_visible > 0 ? lines_visible : 1);
-		FontDrawer drawer(font, font_outline_modulate);
 		while (wc) {
 			/* handle lines not meant to be drawn quickly */
 			if (line >= line_to)
@@ -221,23 +220,23 @@ void Label::_notification(int p_what) {
 					}
 				}
 
+				String sub_xl_text = xl_text.substr(pos, from->word_len);
+				if (uppercase) {
+					sub_xl_text = sub_xl_text.to_upper();
+				}
+				Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), sub_xl_text);
+
 				if (font_color_shadow.a > 0) {
 					int chars_total_shadow = chars_total; //save chars drawn
 					float x_ofs_shadow = x_ofs;
+
 					for (int i = 0; i < from->word_len; i++) {
 						if (visible_chars < 0 || chars_total_shadow < visible_chars) {
-							char32_t c = xl_text[i + pos];
-							char32_t n = xl_text[i + pos + 1];
-							if (uppercase) {
-								c = String::char_uppercase(c);
-								n = String::char_uppercase(n);
-							}
-
-							float move = drawer.draw_char(ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, c, n, font_color_shadow);
+							float move = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, font_color_shadow, false).x;
 							if (use_outline) {
-								drawer.draw_char(ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), c, n, font_color_shadow);
-								drawer.draw_char(ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), c, n, font_color_shadow);
-								drawer.draw_char(ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), c, n, font_color_shadow);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, shadow_ofs.y), font_color_shadow, false);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(shadow_ofs.x, -shadow_ofs.y), font_color_shadow, false);
+								TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs_shadow, y_ofs) + Vector2(-shadow_ofs.x, -shadow_ofs.y), font_color_shadow, false);
 							}
 							x_ofs_shadow += move;
 							chars_total_shadow++;
@@ -246,14 +245,9 @@ void Label::_notification(int p_what) {
 				}
 				for (int i = 0; i < from->word_len; i++) {
 					if (visible_chars < 0 || chars_total < visible_chars) {
-						char32_t c = xl_text[i + pos];
-						char32_t n = xl_text[i + pos + 1];
-						if (uppercase) {
-							c = String::char_uppercase(c);
-							n = String::char_uppercase(n);
-						}
-
-						x_ofs += drawer.draw_char(ci, Point2(x_ofs, y_ofs), c, n, font_color);
+						Vector2 ofs = TextHelper::draw_char_in_text_line(text_line, i, ci, Point2(x_ofs, y_ofs), font_color);
+						x_ofs += ofs.x;
+						y_ofs += ofs.y;
 						chars_total++;
 					}
 				}
@@ -297,11 +291,14 @@ int Label::get_longest_line_width() const {
 	real_t max_line_width = 0;
 	real_t line_width = 0;
 
-	for (int i = 0; i < xl_text.size(); i++) {
-		char32_t current = xl_text[i];
-		if (uppercase)
-			current = String::char_uppercase(current);
+	String current_xl_text = xl_text;
+	if (uppercase) {
+		current_xl_text = current_xl_text.to_upper();
+	}
+	Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), current_xl_text);
 
+	for (int i = 0; i < current_xl_text.size(); i++) {
+		char32_t current = current_xl_text[i];
 		if (current < 32) {
 			if (current == '\n') {
 				if (line_width > max_line_width)
@@ -309,7 +306,7 @@ int Label::get_longest_line_width() const {
 				line_width = 0;
 			}
 		} else {
-			real_t char_width = font->get_char_size(current, xl_text[i + 1]).width;
+			real_t char_width = TextHelper::get_char_size_in_text_line(text_line, i).width;
 			line_width += char_width;
 		}
 	}
@@ -372,11 +369,14 @@ void Label::regenerate_word_cache() {
 
 	WordCache *last = NULL;
 
-	for (int i = 0; i <= xl_text.length(); i++) {
-		char32_t current = i < xl_text.length() ? xl_text[i] : U' '; //always a space at the end, so the algo works
+	String current_xl_text = xl_text;
+	if (uppercase) {
+		current_xl_text = current_xl_text.to_upper();
+	}
+	Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), current_xl_text);
 
-		if (uppercase)
-			current = String::char_uppercase(current);
+	for (int i = 0; i <= current_xl_text.length(); i++) {
+		char32_t current = i < current_xl_text.length() ? current_xl_text[i] : U' '; //always a space at the end, so the algo works
 
 		// ranges taken from https://en.wikipedia.org/wiki/Plane_(Unicode)
 		// if your language is not well supported, consider helping improve
@@ -408,7 +408,7 @@ void Label::regenerate_word_cache() {
 				wc->space_count = space_count;
 				current_word_size = 0;
 				space_count = 0;
-			} else if ((i == xl_text.length() || current == '\n') && last != nullptr && space_count != 0) {
+			} else if ((i == current_xl_text.length() || current == '\n') && last != nullptr && space_count != 0) {
 				//in case there are trailing white spaces we add a placeholder word cache with just the spaces
 				WordCache *wc = memnew(WordCache);
 				if (word_cache) {
@@ -432,7 +432,7 @@ void Label::regenerate_word_cache() {
 				total_char_cache++;
 			}
 
-			if (i < xl_text.length() && xl_text[i] == ' ') {
+			if (i < current_xl_text.length() && current_xl_text[i] == ' ') {
 				if (line_width > 0 || last == NULL || last->char_pos != WordCache::CHAR_WRAPLINE) {
 					space_count++;
 					line_width += space_width;
@@ -446,7 +446,7 @@ void Label::regenerate_word_cache() {
 			if (current_word_size == 0) {
 				word_pos = i;
 			}
-			char_width = font->get_char_size(current, xl_text[i + 1]).width;
+			char_width = TextHelper::get_char_size_in_text_line(text_line, i).width;
 			current_word_size += char_width;
 			line_width += char_width;
 			total_char_cache++;

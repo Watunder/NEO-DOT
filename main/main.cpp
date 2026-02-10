@@ -64,9 +64,12 @@
 #include "scene/resources/packed_scene.h"
 #include "servers/audio_server.h"
 #include "servers/camera_server.h"
+#include "servers/font/font_driver_bmfont.h"
+#include "servers/font_server.h"
 #include "servers/physics_2d_server.h"
 #include "servers/physics_server.h"
 #include "servers/register_server_types.h"
+#include "servers/text/text_shaper.h"
 #include "tests/runtime/test_main.h"
 
 #ifdef TOOLS_ENABLED
@@ -95,6 +98,7 @@ static MessageQueue *message_queue = NULL;
 // Initialized in setup2()
 static AudioServer *audio_server = NULL;
 static CameraServer *camera_server = NULL;
+static FontServer *font_server = NULL;
 static PhysicsServer *physics_server = NULL;
 static Physics2DServer *physics_2d_server = NULL;
 // We error out if setup2() doesn't turn this true
@@ -158,6 +162,22 @@ static String get_full_version_string() {
 	if (hash.length() != 0)
 		hash = "." + hash.left(9);
 	return String(VERSION_FULL_BUILD) + hash;
+}
+
+void initialize_font() {
+	FontDriverBMFont *driver_bm = memnew(FontDriverBMFont);
+	FontDriverManager::add_driver(driver_bm);
+
+	for (int i = 0; i < FontDriverManager::get_driver_count(); i++) {
+		FontDriverManager::initialize(i);
+	}
+
+	for (int i = 0; i < TextShaperManager::get_shaper_count(); i++) {
+		TextShaperManager::initialize(i);
+	}
+
+	ERR_FAIL_COND(!font_server);
+	font_server->init();
 }
 
 // FIXME: Could maybe be moved to PhysicsServerManager and Physics2DServerManager directly
@@ -1005,6 +1025,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	GLOBAL_DEF("rendering/quality/driver/fallback_to_gles2", false);
 
+	GLOBAL_DEF("rendering/font/use_oversampling", true);
+
 	// Assigning here, to be sure that it appears in docs
 	GLOBAL_DEF("rendering/2d/options/use_nvidia_rect_flicker_workaround", false);
 
@@ -1262,6 +1284,8 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 		OS::get_singleton()->set_window_position(init_custom_pos);
 	}
 
+	font_server = memnew(FontServer);
+
 	// right moment to create and initialize the audio server
 
 	audio_server = memnew(AudioServer);
@@ -1391,6 +1415,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 	MAIN_PRINT("Main: Load Scene Types");
 
+	initialize_font();
 	register_scene_types();
 	register_module_types(MODULE_LEVEL_SCENE);
 
@@ -1738,7 +1763,7 @@ bool Main::start() {
 			bool snap_controls = GLOBAL_DEF("gui/common/snap_controls_to_pixels", true);
 			sml->get_root()->set_snap_controls_to_pixels(snap_controls);
 
-			bool font_oversampling = GLOBAL_DEF("rendering/quality/dynamic_fonts/use_oversampling", true);
+			bool font_oversampling = GLOBAL_GET("rendering/font/use_oversampling");
 			sml->set_use_font_oversampling(font_oversampling);
 
 		} else {
@@ -1751,7 +1776,6 @@ bool Main::start() {
 			sml->set_auto_accept_quit(GLOBAL_DEF("application/config/auto_accept_quit", true));
 			sml->set_quit_on_go_back(GLOBAL_DEF("application/config/quit_on_go_back", true));
 			GLOBAL_DEF("gui/common/snap_controls_to_pixels", true);
-			GLOBAL_DEF("rendering/quality/dynamic_fonts/use_oversampling", true);
 		}
 
 		String local_game_path;
@@ -2099,6 +2123,10 @@ void Main::cleanup(bool p_force) {
 
 	if (camera_server) {
 		memdelete(camera_server);
+	}
+
+	if (font_server) {
+		memdelete(font_server);
 	}
 
 	OS::get_singleton()->finalize();

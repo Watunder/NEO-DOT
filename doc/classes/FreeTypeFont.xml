@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FreeTypeFont" inherits="Font" version="3.3">
+	<brief_description>
+		The font uses the [url=https://www.freetype.org/]FreeType[/url] library.
+	</brief_description>
+	<description>
+		The [FreeTypeFont] that is loaded from a vector font file. ([code]*.ttf[/code], [code]*.ttc[/code], [code]*.otf[/code], [code]*.otc[/code])
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+	</methods>
+	<members>
+	</members>
+	<constants>
+	</constants>
+</class>

@@ -31,6 +31,7 @@
 #include "item_list.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "servers/text/text_helper.h"
 
 void ItemList::add_item(const String &p_item, const Ref<Texture> &p_texture, bool p_selectable) {
 	Item item;
@@ -1048,8 +1049,10 @@ void ItemList::_notification(int p_what) {
 					int ss = items[i].text.length();
 					float ofs = 0;
 					int line = 0;
+
+					Ref<TextLine> text_line = TextHelper::create_text_line(font->get_rid(), items[i].text);
 					for (int j = 0; j <= ss; j++) {
-						int cs = j < ss ? font->get_char_size(items[i].text[j], items[i].text[j + 1]).x : 0;
+						int cs = j < ss ? TextHelper::get_char_size_in_text_line(text_line, j).width : 0;
 						if (ofs + cs > max_len || j == ss) {
 							line_limit_cache.write[line] = j;
 							line_size_cache.write[line] = ofs;
@@ -1070,7 +1073,6 @@ void ItemList::_notification(int p_what) {
 					text_ofs += base_ofs;
 					text_ofs += items[i].rect_cache.position;
 
-					FontDrawer drawer(font, Color(1, 1, 1));
 					for (int j = 0; j < ss; j++) {
 						if (j == line_limit_cache[line]) {
 							line++;
@@ -1078,7 +1080,9 @@ void ItemList::_notification(int p_what) {
 							if (line >= max_text_lines)
 								break;
 						}
-						ofs += drawer.draw_char(get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], items[i].text[j + 1], modulate);
+						float line_ofs_x = ofs + (max_len - line_size_cache[line]) / 2;
+						float line_ofs_y = line * (font_height + line_separation);
+						ofs += TextHelper::draw_char_in_text_line(text_line, j, get_canvas_item(), text_ofs + Vector2(line_ofs_x, line_ofs_y).floor(), modulate).x;
 					}
 
 					//special multiline mode

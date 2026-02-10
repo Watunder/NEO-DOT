@@ -1378,7 +1378,7 @@ void CustomPropertyEditor::_draw_easing() {
 		prev = h;
 	}
 
-	f->draw(ci, Point2(10, 10 + f->get_ascent()), String::num(exp, 2), color);
+	easing_draw->draw_string(f, Point2(10, 10 + f->get_ascent()), String::num(exp, 2), color);
 }
 
 void CustomPropertyEditor::_text_edit_changed() {

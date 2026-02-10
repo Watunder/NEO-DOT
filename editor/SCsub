@@ -71,13 +71,6 @@ if env["tools"]:
     env.Depends("#editor/translations.gen.h", tlist)
     env.CommandNoCache("#editor/translations.gen.h", tlist, run_in_subprocess(editor_builders.make_translations_header))
 
-    # Fonts
-    flist = glob.glob(path + "/../thirdparty/fonts/*.ttf")
-    flist.extend(glob.glob(path + "/../thirdparty/fonts/*.otf"))
-    flist.sort()
-    env.Depends("#editor/builtin_fonts.gen.h", flist)
-    env.CommandNoCache("#editor/builtin_fonts.gen.h", flist, run_in_subprocess(editor_builders.make_fonts_header))
-
     env.add_source_files(env.editor_sources, "*.cpp")
 
     SConscript("collada/SCsub")

@@ -38,7 +38,13 @@
 #include "editor_settings.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/separator.h"
-#include "scene/resources/dynamic_font.h"
+
+#include "configs/modules_enabled.gen.h"
+#ifdef MODULE_FREETYPE_ENABLED
+#include "modules/freetype/freetype_font.h"
+#else
+#error "this file requires the freetype module"
+#endif
 
 void GotoLineDialog::popup_find_line(TextEdit *p_edit) {
 	text_editor = p_edit;
@@ -713,16 +719,16 @@ void CodeTextEditor::_text_editor_gui_input(const Ref<InputEvent> &p_event) {
 
 	Ref<InputEventMagnifyGesture> magnify_gesture = p_event;
 	if (magnify_gesture.is_valid()) {
-		Ref<DynamicFont> font = text_editor->get_font("font");
+		Ref<FreeTypeFont> font = text_editor->get_font("font");
 
 		if (font.is_valid()) {
-			if (font->get_size() != (int)font_size) {
-				font_size = font->get_size();
+			if (font->get_face_size() != (int)font_size) {
+				font_size = font->get_face_size();
 			}
 
 			font_size *= powf(magnify_gesture->get_factor(), 0.25);
 
-			_add_font_size((int)font_size - font->get_size());
+			_add_font_size((int)font_size - font->get_face_size());
 		}
 		return;
 	}
@@ -760,11 +766,11 @@ void CodeTextEditor::_zoom_changed() {
 }
 
 void CodeTextEditor::_reset_zoom() {
-	Ref<DynamicFont> font = text_editor->get_font("font"); // Reset source font size to default.
+	Ref<FreeTypeFont> font = text_editor->get_font("font"); // Reset source font size to default.
 
 	if (font.is_valid()) {
 		EditorSettings::get_singleton()->set("interface/editor/code_font_size", 14);
-		font->set_size(14);
+		font->set_face_size(14);
 	}
 }
 
@@ -872,14 +878,14 @@ void CodeTextEditor::_font_resize_timeout() {
 }
 
 bool CodeTextEditor::_add_font_size(int p_delta) {
-	Ref<DynamicFont> font = text_editor->get_font("font");
+	Ref<FreeTypeFont> font = text_editor->get_font("font");
 
 	if (font.is_valid()) {
-		int new_size = CLAMP(font->get_size() + p_delta, 8 * EDSCALE, 96 * EDSCALE);
+		int new_size = CLAMP(font->get_face_size() + p_delta, 8 * EDSCALE, 96 * EDSCALE);
 
-		if (new_size != font->get_size()) {
+		if (new_size != font->get_face_size()) {
 			EditorSettings::get_singleton()->set("interface/editor/code_font_size", new_size / EDSCALE);
-			font->set_size(new_size);
+			font->set_face_size(new_size);
 		}
 
 		return true;
