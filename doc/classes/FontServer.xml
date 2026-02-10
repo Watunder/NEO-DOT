@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FontServer" inherits="Object" version="3.3">
+	<brief_description>
+		Server interface for the fonts.
+	</brief_description>
+	<description>
+		Server interface for the fonts.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+	</methods>
+	<members>
+	</members>
+	<constants>
+	</constants>
+</class>

@@ -615,7 +615,7 @@ Ref<FontDriver::FontInfo> FontDriverBMFont::get_font_info(const FontID &p_font_i
 
 	FontInfo *info = memnew(FontInfo);
 	info->face_count = 1;
-	info->path = font_instance->data->page_files.size() ? font_instance->data->page_files[0].get_base_dir().plus_file("font.fnt") : String();
+	info->path = font_instance->data->page_files.size() ? font_instance->data->page_files[0].get_base_dir() : String();
 	info->driver = const_cast<FontDriverBMFont *>(this);
 	info->font_id = p_font_id;
 
@@ -624,8 +624,18 @@ Ref<FontDriver::FontInfo> FontDriverBMFont::get_font_info(const FontID &p_font_i
 }
 
 void FontDriverBMFont::finalize_font(const FontID &p_font_id) {
+	FontInfo **p_info = font_id_to_info.getptr(p_font_id);
+	if (!p_info || !*p_info) {
+		return;
+	}
+
+	FontInfo *info = *p_info;
+
+	if (!info->path.empty()) {
+		fonts.erase(p_font_id);
+	}
+
 	font_id_to_info.erase(p_font_id);
-	fonts.erase(p_font_id);
 }
 
 bool FontDriverBMFont::owns_font(const FontID &p_font_id) const {

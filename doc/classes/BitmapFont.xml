@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BitmapFont" inherits="Font" version="3.3">
+	<brief_description>
+		The font under the [url=https://angelcode.com/products/bmfont/]BMFont[/url] format.
+	</brief_description>
+	<description>
+		The [BitmapFont] that is loaded from a bitmap font file. ([code]*.fnt[/code])
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+	</methods>
+	<members>
+	</members>
+	<constants>
+	</constants>
+</class>
