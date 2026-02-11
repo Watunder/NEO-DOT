@@ -37,7 +37,7 @@
 #include <graphemebreak.h>
 #include <linebreak.h>
 
-LRUCache<uint64_t, Vector<CharInfo>> TextHelper::char_infos_cache(1024);
+LRUCache<CharInfoCacheKey, Vector<CharInfo>, CharInfoCacheKeyHasher> TextHelper::char_infos_cache(1024);
 LRUCache<String, Vector<String>> TextHelper::graphemes_cache(1024);
 
 _FORCE_INLINE_ void TextHelper::_process_shapeless_grapheme(CharInfo *p_char_info, char32_t p_char) {
@@ -149,10 +149,11 @@ Vector<CharInfo> TextHelper::get_char_infos(const Ref<TextLine> &p_text_line) {
 		const String &grapheme = graphemes[i];
 		int grapheme_len = grapheme.length();
 
-		uint64_t h = p_text_line->cache_header;
-		h = h * 31 + grapheme.hash();
+		CharInfoCacheKey char_info_key;
+		char_info_key.header = p_text_line->cache_header;
+		char_info_key.grapheme = grapheme;
 
-		const Vector<CharInfo> *cached = char_infos_cache.getptr(h);
+		const Vector<CharInfo> *cached = char_infos_cache.getptr(char_info_key);
 		if (cached) {
 			for (int j = 0; j < grapheme_len; j++) {
 				char_infos_ptr[char_idx + j] = (*cached)[j];
@@ -180,7 +181,7 @@ Vector<CharInfo> TextHelper::get_char_infos(const Ref<TextLine> &p_text_line) {
 				sub_char_infos.write[j] = char_infos_ptr[char_idx - grapheme_len + j];
 			}
 
-			char_infos_cache.insert(h, sub_char_infos);
+			char_infos_cache.insert(char_info_key, sub_char_infos);
 		}
 	}
 
