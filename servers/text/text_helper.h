@@ -32,6 +32,7 @@
 #define TEXT_HELPER_H
 
 #include "core/hash_map.h"
+#include "core/hashfuncs.h"
 #include "core/math/vector2.h"
 #include "core/object.h"
 #include "core/rid.h"
@@ -41,10 +42,37 @@
 #include "text_shaper.h"
 #include "text_types.h"
 
+struct CharInfoCacheKey {
+	uint64_t header = 0;
+	String grapheme;
+
+	_FORCE_INLINE_ bool operator==(const CharInfoCacheKey &p_key) const {
+		return (header == p_key.header &&
+				grapheme == p_key.grapheme);
+	}
+
+	_FORCE_INLINE_ bool operator!=(const CharInfoCacheKey &p_key) const {
+		return (header != p_key.header ||
+				grapheme != p_key.grapheme);
+	}
+
+	_FORCE_INLINE_ uint64_t hash() const {
+		uint64_t h = header;
+		h = h * 31 + grapheme.hash();
+		return h;
+	}
+};
+
+struct CharInfoCacheKeyHasher {
+	static _FORCE_INLINE_ uint32_t hash(const CharInfoCacheKey &p_key) {
+		return HashMapHasherDefault::hash(p_key.hash());
+	}
+};
+
 /*************************************************************************/
 
 class TextHelper {
-	static LRUCache<uint64_t, Vector<CharInfo>> char_infos_cache;
+	static LRUCache<CharInfoCacheKey, Vector<CharInfo>, CharInfoCacheKeyHasher> char_infos_cache;
 	static LRUCache<String, Vector<String>> graphemes_cache;
 
 	static _FORCE_INLINE_ void _process_shapeless_grapheme(CharInfo *p_char_info, char32_t p_char);
