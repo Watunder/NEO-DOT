@@ -121,6 +121,7 @@
 #include "scene/gui/tree.h"
 #include "scene/gui/video_player.h"
 #include "scene/gui/viewport_container.h"
+#include "scene/gui/virtual_scroll_list.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/http_request.h"
 #include "scene/main/instance_placeholder.h"
@@ -321,6 +322,8 @@ void register_scene_types() {
 
 	ClassDB::register_class<LineEdit>();
 	ClassDB::register_class<VideoPlayer>();
+
+	ClassDB::register_class<VirtualScrollList>();
 
 #ifndef ADVANCED_GUI_DISABLED
 
