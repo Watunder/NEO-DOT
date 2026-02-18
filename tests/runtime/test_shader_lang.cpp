@@ -172,6 +172,8 @@ static String dump_node_code(SL::Node *p_node, int p_level) {
 
 			//code+=dump_node_code(pnode->body,p_level);
 		} break;
+		case SL::Node::TYPE_STRUCT: {
+		} break;
 		case SL::Node::TYPE_FUNCTION: {
 		} break;
 		case SL::Node::TYPE_BLOCK: {
@@ -208,6 +210,9 @@ static String dump_node_code(SL::Node *p_node, int p_level) {
 			code = vnode->name;
 		} break;
 		case SL::Node::TYPE_ARRAY_DECLARATION: {
+			// FIXME: Implement
+		} break;
+		case SL::Node::TYPE_ARRAY_CONSTRUCT: {
 			// FIXME: Implement
 		} break;
 		case SL::Node::TYPE_CONSTANT: {

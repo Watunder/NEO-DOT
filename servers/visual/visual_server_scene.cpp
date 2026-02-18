@@ -2603,6 +2603,7 @@ void VisualServerScene::_bake_gi_probe_light(const GIProbeDataHeader *header, co
 			float distance_adv = _get_normal_advance(light_axis);
 
 			int success_count = 0;
+			(void)success_count; // unused
 
 			// uint64_t us = OS::get_singleton()->get_ticks_usec();
 

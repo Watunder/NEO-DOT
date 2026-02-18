@@ -99,6 +99,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport) {
 
 	if (!p_viewport->hide_canvas) {
 		int i = 0;
+		(void)i; // unused
 
 		Map<Viewport::CanvasKey, Viewport::CanvasData *> canvas_map;
 
@@ -109,6 +110,7 @@ void VisualServerViewport::_draw_viewport(Viewport *p_viewport) {
 		Rect2 shadow_rect;
 
 		int light_count = 0;
+		(void)light_count; // unused
 
 		for (Map<RID, Viewport::CanvasData>::Element *E = p_viewport->canvas_map.front(); E; E = E->next()) {
 			VisualServerCanvas::Canvas *canvas = static_cast<VisualServerCanvas::Canvas *>(E->get().canvas);

@@ -968,8 +968,6 @@ void EditorPropertyEasing::_drag_easing(const Ref<InputEvent> &p_ev) {
 }
 
 void EditorPropertyEasing::_draw_easing() {
-	RID ci = easing_draw->get_canvas_item();
-
 	Size2 s = easing_draw->get_size();
 
 	const int points = 48;
@@ -1981,7 +1979,7 @@ void EditorPropertyNodePath::update_property() {
 			}
 		}
 	} else {
-		p = NodePath(v);
+		p = v;
 	}
 
 	assign->set_tooltip(p);

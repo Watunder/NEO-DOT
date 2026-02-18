@@ -20,7 +20,7 @@
 #endif
 
 #if defined(__WIN32__) && !defined(__MINGW32__)
-#if (__MSV_VER <= 1700)
+#if (__MSV_VER <= 1700) && !defined(__clang__)
 namespace std
 {
   __forceinline bool isinf ( const float x ) { return _finite(x) == 0; }

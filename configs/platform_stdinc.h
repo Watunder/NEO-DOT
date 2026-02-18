@@ -36,6 +36,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/*************************************************************************/
+
+#if (__cplusplus >= 201402L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
+#define CPP14_OR_GREATER 1
+#endif
+
+#if !defined(CPP14_OR_GREATER)
+#error this project requires C++14
+#endif
+
+/*************************************************************************/
+
 #if defined(PLATFORM_WINDOWS)
 
 #include <malloc.h>

@@ -35,6 +35,7 @@
 #ifndef __ENET_GODOT_H__
 #define __ENET_GODOT_H__
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_WINDOWS
 #include <stdint.h>
 #include <winsock2.h>

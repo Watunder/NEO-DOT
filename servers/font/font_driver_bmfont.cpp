@@ -249,6 +249,7 @@ static _FORCE_INLINE_ Ref<BMFontData> _load_bmfont_binary(const PoolVector<uint8
 
 	int pos = 3;
 	uint8_t version = src[pos++];
+	(void)version; // unused
 
 	while (pos + 5 <= len) {
 		uint8_t block_type = src[pos++];
@@ -333,7 +334,7 @@ static _FORCE_INLINE_ Ref<BMFontData> _load_bmfont_binary(const PoolVector<uint8
 					int16_t xadv = (int16_t)(block[bpos] | (block[bpos + 1] << 8));
 					bpos += 2;
 					uint8_t page = block[bpos++];
-					block[bpos++];
+					bpos++;
 
 					BMFontChar ch;
 					ch.x = x;

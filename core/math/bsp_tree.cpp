@@ -267,6 +267,7 @@ static int _bsp_find_best_half_plane(const Face3 *p_faces, const Vector<int> &p_
 		Plane p = f.get_plane();
 
 		int num_over = 0, num_under = 0, num_spanning = 0;
+		(void)num_spanning; // unused
 
 		for (int j = 0; j < ic; j++) {
 			if (i == j)
