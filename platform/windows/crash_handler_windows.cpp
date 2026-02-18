@@ -186,7 +186,7 @@ DWORD CrashHandlerException(EXCEPTION_POINTERS *ep) {
 				std::string fnName = symbol(process, frame.AddrPC.Offset).undecorated_name();
 
 				if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &offset_from_symbol, &line))
-					fprintf(stderr, "[%d] %s (%s:%d)\n", n, fnName.c_str(), line.FileName, line.LineNumber);
+					fprintf(stderr, "[%d] %s (%s:%lu)\n", n, fnName.c_str(), line.FileName, line.LineNumber);
 				else
 					fprintf(stderr, "[%d] %s\n", n, fnName.c_str());
 			} else

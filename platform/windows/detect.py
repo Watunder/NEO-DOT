@@ -206,6 +206,14 @@ def configure_msvc(env, manual_msvc_config):
 
     ## Compile/link flags
 
+    if env["use_llvm"]:
+        env["CC"] = "clang-cl"
+        env["CXX"] = "clang-cl"
+        env["LINK"] = "lld-link"
+        env["AR"] = "llvm-lib"
+
+        env.extra_suffix = ".llvm" + env.extra_suffix
+
     if env["use_static_cpp"]:
         env.AppendUnique(CCFLAGS=["/MT"])
     else:
@@ -214,7 +222,6 @@ def configure_msvc(env, manual_msvc_config):
     env.AppendUnique(CCFLAGS=["/Gd", "/GR", "/nologo"])
     # Force to use Unicode encoding
     env.AppendUnique(CCFLAGS=["/utf-8"])
-    env.AppendUnique(CXXFLAGS=["/TP"])  # assume all sources are C++
     if manual_msvc_config:  # should be automatic if SCons found it
         if os.getenv("WindowsSdkDir") is not None:
             env.Prepend(CPPPATH=[os.getenv("WindowsSdkDir") + "/Include"])
@@ -261,6 +268,12 @@ def configure_msvc(env, manual_msvc_config):
         "dwmapi",
     ]
 
+    if env["use_llvm"]:
+        if env["bits"] == "64":
+            LIBS += ["clang_rt.builtins-x86_64"]
+        else:
+            LIBS += ["clang_rt.builtins-i386"]
+
     if env["use_angle"]:
         env.Append(LIBPATH=["#bin/"])
         LIBS += ["libEGL.dll", "libGLESv2.dll"]
@@ -278,12 +291,15 @@ def configure_msvc(env, manual_msvc_config):
     ## LTO
 
     if env["use_lto"]:
-        env.AppendUnique(CCFLAGS=["/GL"])
-        env.AppendUnique(ARFLAGS=["/LTCG"])
+        if env["use_llvm"]:
+            env.AppendUnique(CCFLAGS=["-flto"])
+        else:
+            env.AppendUnique(CCFLAGS=["/GL"])
         if env["progress"]:
             env.AppendUnique(LINKFLAGS=["/LTCG:STATUS"])
         else:
             env.AppendUnique(LINKFLAGS=["/LTCG"])
+        env.AppendUnique(ARFLAGS=["/LTCG"])
 
     if manual_msvc_config:
         env.Prepend(CPPPATH=[p for p in os.getenv("INCLUDE").split(";")])

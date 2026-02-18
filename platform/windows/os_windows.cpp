@@ -103,7 +103,7 @@ static String format_error_message(DWORD id) {
 	size_t size = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&messageBuffer, 0, NULL);
 
-	String msg = "Error " + itos(id) + ": " + String::utf16((const char16_t *)messageBuffer);
+	String msg = "Error " + itos(id) + ": " + String::utf16((const char16_t *)messageBuffer, size);
 
 	LocalFree(messageBuffer);
 

@@ -223,7 +223,9 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 
 		DirAccess *d = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 		if (!d->file_exists(temp_library_path)) {
-			Error copy_err = d->copy(entry_lib_path, temp_library_path);
+			if (d->copy(entry_lib_path, temp_library_path) != OK) {
+				ERR_PRINTS("Can't create temp libraray '" + temp_library_path + "'.");
+			}
 		}
 		memdelete(d);
 
@@ -462,7 +464,9 @@ bool GDNative::terminate() {
 	DirAccess *d = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	String temp_lib_path = library->get_temp_library_path();
 	if (d->file_exists(temp_lib_path)) {
-		Error remove_err = d->remove(temp_lib_path);
+		if (d->remove(temp_lib_path) != OK) {
+			ERR_PRINTS("Can't remove temp libraray '" + temp_lib_path + "'.");
+		}
 	}
 	memdelete(d);
 #endif

@@ -59,6 +59,7 @@ extern "C" {
 // Pick values that fit natural register size.
 
 // -- GODOT -- start
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 #define BITS 16
 #else

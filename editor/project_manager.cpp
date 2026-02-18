@@ -508,6 +508,7 @@ private:
 					Vector<String> failed_files;
 
 					int idx = 0;
+					(void)idx; // unused
 					while (ret == UNZ_OK) {
 						//get filename
 						unz_file_info info;

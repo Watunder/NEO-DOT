@@ -393,7 +393,7 @@ if selected_platform in platform_list:
         env.Prepend(CCFLAGS=["/std:c++14"])
 
     # Configure compiler warnings
-    if env.msvc:  # MSVC
+    if env.msvc and not methods.using_clang(env):  # MSVC
         # Truncations, narrowing conversions, signed/unsigned comparisons...
         disable_nonessential_warnings = ["/wd4267", "/wd4244", "/wd4305", "/wd4018", "/wd4800"]
         if env["warnings"] == "extra":
@@ -410,6 +410,9 @@ if selected_platform in platform_list:
         if env["werror"]:
             env.Append(CCFLAGS=["/WX"])
     else:  # GCC, Clang
+        if env.msvc:
+            env.Append(CCFLAGS=["/EHsc"])
+
         version = methods.get_compiler_version(env) or [-1, -1]
 
         common_warnings = []
@@ -418,15 +421,27 @@ if selected_platform in platform_list:
             common_warnings += ["-Wno-misleading-indentation"]
             if version[0] >= 7:
                 common_warnings += ["-Wshadow-local"]
+            if version[0] < 11:
+                # Regression in GCC 9/10, spams so much in our variadic templates
+                # that we need to outright disable it.
+                common_warnings += ["-Wno-type-limits"]
+            if version[0] >= 12:  # False positives in our error macros, see GH-58747.
+                common_warnings += ["-Wno-return-type"]
         elif methods.using_clang(env) or methods.using_emcc(env):
+            common_warnings += ["-Wshadow-field-in-constructor", "-Wshadow-uncaptured-local"]
             # We often implement `operator<` for structs of pointers as a requirement
             # for putting them in `Set` or `Map`. We don't mind about unreliable ordering.
             common_warnings += ["-Wno-ordered-compare-function-pointers"]
+            # Allow overriding method without `override` keyword.
+            common_warnings += ["-Wno-inconsistent-missing-override"]
+
+        # clang-cl will interpret `-Wall` as `-Weverything`, workaround with compatibility cast
+        W_ALL = "-Wall" if not env.msvc else "-W3"
 
         if env["warnings"] == "extra":
             # Note: enable -Wimplicit-fallthrough for Clang (already part of -Wextra for GCC)
             # once we switch to C++11 or later (necessary for our FALLTHROUGH macro).
-            env.Append(CCFLAGS=["-Wall", "-Wextra", "-Wwrite-strings", "-Wno-unused-parameter"] + common_warnings)
+            env.Append(CCFLAGS=[W_ALL, "-Wextra", "-Wwrite-strings", "-Wno-unused-parameter"] + common_warnings)
             env.Append(CXXFLAGS=["-Wctor-dtor-privacy", "-Wnon-virtual-dtor"])
             if methods.using_gcc(env):
                 env.Append(
@@ -441,10 +456,14 @@ if selected_platform in platform_list:
                 env.Append(CXXFLAGS=["-Wnoexcept", "-Wplacement-new=1"])
                 if version[0] >= 9:
                     env.Append(CCFLAGS=["-Wattribute-alias=2"])
+                if version[0] >= 11:
+                    env.Append(CCFLAGS=["-Wlogical-op"])
+            elif methods.using_clang(env) or methods.using_emcc(env):
+                env.Append(CCFLAGS=["-Wimplicit-fallthrough"])
         elif env["warnings"] == "all":
-            env.Append(CCFLAGS=["-Wall"] + common_warnings)
+            env.Append(CCFLAGS=[W_ALL] + common_warnings)
         elif env["warnings"] == "moderate":
-            env.Append(CCFLAGS=["-Wall", "-Wno-unused"] + common_warnings)
+            env.Append(CCFLAGS=[W_ALL, "-Wno-unused"] + common_warnings)
         else:  # 'no'
             env.Append(CCFLAGS=["-w"])
 

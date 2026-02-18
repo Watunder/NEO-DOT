@@ -1761,8 +1761,6 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 	if (mb.is_valid()) {
 		gui.key_event_accepted = false;
 
-		Control *over = NULL;
-
 		Point2 mpos = mb->get_position();
 		if (mb->is_pressed()) {
 			Size2 pos = mpos;

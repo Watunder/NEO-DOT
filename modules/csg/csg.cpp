@@ -699,7 +699,7 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 	}
 }
 
-void CSGBrushOperation::MeshMerge::add_face(const Vector3 p_points[], const Vector2 p_uvs[], bool p_smooth, bool p_invert, const Ref<Material> &p_material, bool p_from_b) {
+void CSGBrushOperation::MeshMerge::add_face(const Vector3 p_points[3], const Vector2 p_uvs[3], bool p_smooth, bool p_invert, const Ref<Material> &p_material, bool p_from_b) {
 	int indices[3];
 	for (int i = 0; i < 3; i++) {
 		VertexKey vk;
@@ -1338,6 +1338,7 @@ void CSGBrushOperation::update_faces(const CSGBrush &p_brush_a, const int p_face
 
 	// Ensure B has points either side of or in the plane of A.
 	int in_plane_count = 0, over_count = 0, under_count = 0;
+	(void)in_plane_count; // unused
 	Plane plane_a(vertices_a[0], vertices_a[1], vertices_a[2]);
 	ERR_FAIL_COND_MSG(plane_a.normal == Vector3(), "Couldn't form plane from Brush A face.");
 

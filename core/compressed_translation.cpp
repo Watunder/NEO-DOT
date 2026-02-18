@@ -63,6 +63,7 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 	int idx = 0;
 	int total_compression_size = 0;
 	int total_string_size = 0;
+	(void)total_string_size; // unused
 
 	for (List<StringName>::Element *E = keys.front(); E; E = E->next()) {
 		//hash string
@@ -145,6 +146,7 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 
 	int btindex = 0;
 	int collisions = 0;
+	(void)collisions; // unused
 
 	for (int i = 0; i < size; i++) {
 		const Map<uint32_t, int> &t = table[i];

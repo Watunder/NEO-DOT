@@ -67,6 +67,16 @@
 	CASE_TYPE(PREFIX, OP, POOL_VECTOR3_ARRAY) \
 	CASE_TYPE(PREFIX, OP, POOL_COLOR_ARRAY)
 
+// Can't happen, but silences warning
+#define CASE_VARIANT_MAX(PREFIX, OP)   \
+	CASE_TYPE(PREFIX, OP, VARIANT_MAX) \
+	_RETURN_FAIL
+
+// Can't happen, but silences warning
+#define CASE_OP_MAX \
+	case OP_MAX:    \
+		_RETURN_FAIL
+
 #ifdef __GNUC__
 #define TYPE(PREFIX, OP, TYPE) &&PREFIX##_##OP##_##TYPE
 
@@ -99,6 +109,7 @@
 		TYPE(PREFIX, OP, POOL_VECTOR2_ARRAY), \
 		TYPE(PREFIX, OP, POOL_VECTOR3_ARRAY), \
 		TYPE(PREFIX, OP, POOL_COLOR_ARRAY),   \
+		TYPE(PREFIX, OP, VARIANT_MAX),        \
 }
 /* clang-format on */
 
@@ -500,6 +511,8 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			DEFAULT_OP_ARRAY_EQ(math, OP_EQUAL, POOL_VECTOR2_ARRAY, Vector2);
 			DEFAULT_OP_ARRAY_EQ(math, OP_EQUAL, POOL_VECTOR3_ARRAY, Vector3);
 			DEFAULT_OP_ARRAY_EQ(math, OP_EQUAL, POOL_COLOR_ARRAY, Color);
+
+			CASE_VARIANT_MAX(math, OP_EQUAL);
 		}
 
 		SWITCH_OP(math, OP_NOT_EQUAL, p_a.type) {
@@ -591,6 +604,8 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			DEFAULT_OP_ARRAY_NEQ(math, OP_NOT_EQUAL, POOL_VECTOR2_ARRAY, Vector2);
 			DEFAULT_OP_ARRAY_NEQ(math, OP_NOT_EQUAL, POOL_VECTOR3_ARRAY, Vector3);
 			DEFAULT_OP_ARRAY_NEQ(math, OP_NOT_EQUAL, POOL_COLOR_ARRAY, Color);
+
+			CASE_VARIANT_MAX(math, OP_NOT_EQUAL);
 		}
 
 		SWITCH_OP(math, OP_LESS, p_a.type) {
@@ -657,7 +672,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_LESS, COLOR)
 			CASE_TYPE(math, OP_LESS, NODE_PATH)
 			CASE_TYPE(math, OP_LESS, DICTIONARY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_LESS);
 		}
 
 		SWITCH_OP(math, OP_LESS_EQUAL, p_a.type) {
@@ -694,7 +709,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_LESS_EQUAL, POOL_VECTOR2_ARRAY);
 			CASE_TYPE(math, OP_LESS_EQUAL, POOL_VECTOR3_ARRAY);
 			CASE_TYPE(math, OP_LESS_EQUAL, POOL_COLOR_ARRAY);
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_LESS_EQUAL);
 		}
 
 		SWITCH_OP(math, OP_GREATER, p_a.type) {
@@ -761,7 +776,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_GREATER, COLOR)
 			CASE_TYPE(math, OP_GREATER, NODE_PATH)
 			CASE_TYPE(math, OP_GREATER, DICTIONARY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_GREATER);
 		}
 
 		SWITCH_OP(math, OP_GREATER_EQUAL, p_a.type) {
@@ -798,7 +813,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_GREATER_EQUAL, POOL_VECTOR2_ARRAY);
 			CASE_TYPE(math, OP_GREATER_EQUAL, POOL_VECTOR3_ARRAY);
 			CASE_TYPE(math, OP_GREATER_EQUAL, POOL_COLOR_ARRAY);
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_GREATER_EQUAL);
 		}
 
 		SWITCH_OP(math, OP_ADD, p_a.type) {
@@ -847,7 +862,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_ADD, _RID)
 			CASE_TYPE(math, OP_ADD, OBJECT)
 			CASE_TYPE(math, OP_ADD, DICTIONARY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_ADD);
 		}
 
 		SWITCH_OP(math, OP_SUBTRACT, p_a.type) {
@@ -879,7 +894,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_SUBTRACT, POOL_VECTOR2_ARRAY);
 			CASE_TYPE(math, OP_SUBTRACT, POOL_VECTOR3_ARRAY);
 			CASE_TYPE(math, OP_SUBTRACT, POOL_COLOR_ARRAY);
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_SUBTRACT);
 		}
 
 		SWITCH_OP(math, OP_MULTIPLY, p_a.type) {
@@ -962,7 +977,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_MULTIPLY, POOL_VECTOR2_ARRAY);
 			CASE_TYPE(math, OP_MULTIPLY, POOL_VECTOR3_ARRAY);
 			CASE_TYPE(math, OP_MULTIPLY, POOL_COLOR_ARRAY);
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_MULTIPLY);
 		}
 
 		SWITCH_OP(math, OP_DIVIDE, p_a.type) {
@@ -1005,7 +1020,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_DIVIDE, POOL_VECTOR2_ARRAY);
 			CASE_TYPE(math, OP_DIVIDE, POOL_VECTOR3_ARRAY);
 			CASE_TYPE(math, OP_DIVIDE, POOL_COLOR_ARRAY);
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_DIVIDE);
 		}
 
 		SWITCH_OP(math, OP_POSITIVE, p_a.type) {
@@ -1037,7 +1052,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_POSITIVE, POOL_VECTOR2_ARRAY)
 			CASE_TYPE(math, OP_POSITIVE, POOL_VECTOR3_ARRAY)
 			CASE_TYPE(math, OP_POSITIVE, POOL_COLOR_ARRAY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_POSITIVE);
 		}
 
 		SWITCH_OP(math, OP_NEGATE, p_a.type) {
@@ -1070,7 +1085,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_NEGATE, POOL_VECTOR2_ARRAY)
 			CASE_TYPE(math, OP_NEGATE, POOL_VECTOR3_ARRAY)
 			CASE_TYPE(math, OP_NEGATE, POOL_COLOR_ARRAY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_NEGATE);
 		}
 
 		SWITCH_OP(math, OP_MODULE, p_a.type) {
@@ -1130,13 +1145,14 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_MODULE, POOL_VECTOR2_ARRAY)
 			CASE_TYPE(math, OP_MODULE, POOL_VECTOR3_ARRAY)
 			CASE_TYPE(math, OP_MODULE, POOL_COLOR_ARRAY)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_MODULE);
 		}
 
 		SWITCH_OP(math, OP_STRING_CONCAT, p_a.type) {
 			CASE_TYPE_ALL(math, OP_STRING_CONCAT)
 
 			_RETURN(p_a.operator String() + p_b.operator String());
+			CASE_VARIANT_MAX(math, OP_STRING_CONCAT);
 		}
 
 		SWITCH_OP(math, OP_SHIFT_LEFT, p_a.type) {
@@ -1149,7 +1165,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_SHIFT_LEFT)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_SHIFT_LEFT);
 		}
 
 		SWITCH_OP(math, OP_SHIFT_RIGHT, p_a.type) {
@@ -1162,7 +1178,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_SHIFT_RIGHT)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_SHIFT_RIGHT);
 		}
 
 		SWITCH_OP(math, OP_BIT_AND, p_a.type) {
@@ -1173,7 +1189,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_BIT_AND)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_BIT_AND);
 		}
 
 		SWITCH_OP(math, OP_BIT_OR, p_a.type) {
@@ -1184,7 +1200,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_BIT_OR)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_BIT_OR);
 		}
 
 		SWITCH_OP(math, OP_BIT_XOR, p_a.type) {
@@ -1195,7 +1211,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_BIT_XOR)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_BIT_XOR);
 		}
 
 		SWITCH_OP(math, OP_BIT_NEGATE, p_a.type) {
@@ -1204,7 +1220,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			}
 
 			CASE_TYPE_ALL_BUT_INT(math, OP_BIT_NEGATE)
-			_RETURN_FAIL;
+			CASE_VARIANT_MAX(math, OP_BIT_NEGATE);
 		}
 
 		SWITCH_OP(math, OP_AND, p_a.type) {
@@ -1214,6 +1230,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 
 				_RETURN(l && r);
 			}
+			CASE_VARIANT_MAX(math, OP_AND);
 		}
 
 		SWITCH_OP(math, OP_OR, p_a.type) {
@@ -1223,6 +1240,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 
 				_RETURN(l || r);
 			}
+			CASE_VARIANT_MAX(math, OP_OR);
 		}
 
 		SWITCH_OP(math, OP_XOR, p_a.type) {
@@ -1232,6 +1250,7 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 
 				_RETURN((l || r) && !(l && r));
 			}
+			CASE_VARIANT_MAX(math, OP_XOR);
 		}
 
 		SWITCH_OP(math, OP_NOT, p_a.type) {
@@ -1239,12 +1258,16 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 				bool l = p_a.booleanize();
 				_RETURN(!l);
 			}
+			CASE_VARIANT_MAX(math, OP_NOT);
 		}
 
 		SWITCH_OP(math, OP_IN, p_a.type) {
 			CASE_TYPE_ALL(math, OP_IN)
 			_RETURN(p_b.in(p_a, &r_valid));
+			CASE_VARIANT_MAX(math, OP_IN);
 		}
+
+		CASE_OP_MAX;
 	}
 }
 
