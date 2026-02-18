@@ -10,7 +10,7 @@ env_bullet = env_modules.Clone()
 thirdparty_obj = []
 
 if env["builtin_bullet"]:
-    # Build only version 2 for now (as of 2.89)
+    # Using Bullet 2 API
     # Sync file list with relevant upstream CMakeLists.txt for each folder.
     thirdparty_dir = "#thirdparty/bullet/"
 
@@ -152,15 +152,11 @@ if env["builtin_bullet"]:
         "BulletDynamics/Featherstone/btMultiBodyMLCPConstraintSolver.cpp",
         "BulletDynamics/Featherstone/btMultiBodyPoint2Point.cpp",
         "BulletDynamics/Featherstone/btMultiBodySliderConstraint.cpp",
+        # "BulletDynamics/Featherstone/btMultiBodySphericalJointLimit.cpp",
         "BulletDynamics/Featherstone/btMultiBodySphericalJointMotor.cpp",
         "BulletDynamics/MLCPSolvers/btDantzigLCP.cpp",
         "BulletDynamics/MLCPSolvers/btMLCPSolver.cpp",
         "BulletDynamics/MLCPSolvers/btLemkeAlgorithm.cpp",
-        # BulletInverseDynamics
-        "BulletInverseDynamics/IDMath.cpp",
-        "BulletInverseDynamics/MultiBodyTree.cpp",
-        "BulletInverseDynamics/details/MultiBodyTreeInitCache.cpp",
-        "BulletInverseDynamics/details/MultiBodyTreeImpl.cpp",
         # BulletSoftBody
         "BulletSoftBody/btSoftBody.cpp",
         "BulletSoftBody/btSoftBodyConcaveCollisionAlgorithm.cpp",
@@ -177,8 +173,11 @@ if env["builtin_bullet"]:
         "BulletSoftBody/btDeformableContactProjection.cpp",
         "BulletSoftBody/btDeformableMultiBodyDynamicsWorld.cpp",
         "BulletSoftBody/btDeformableContactConstraint.cpp",
-        # clew
-        "clew/clew.c",
+        # "BulletSoftBody/BulletReducedDeformableBody/btReducedDeformableBody.cpp",
+        # "BulletSoftBody/BulletReducedDeformableBody/btReducedDeformableBodyHelpers.cpp",
+        # "BulletSoftBody/BulletReducedDeformableBody/btReducedDeformableBodySolver.cpp",
+        # "BulletSoftBody/BulletReducedDeformableBody/btReducedDeformableContactConstraint.cpp",
+        "BulletSoftBody/poly34.cpp",
         # LinearMath
         "LinearMath/btAlignedAllocator.cpp",
         "LinearMath/btConvexHull.cpp",
@@ -186,6 +185,7 @@ if env["builtin_bullet"]:
         "LinearMath/btGeometryUtil.cpp",
         "LinearMath/btPolarDecomposition.cpp",
         "LinearMath/btQuickprof.cpp",
+        # "LinearMath/btReducedVector.cpp",
         "LinearMath/btSerializer.cpp",
         "LinearMath/btSerializer64.cpp",
         "LinearMath/btThreads.cpp",
@@ -197,15 +197,9 @@ if env["builtin_bullet"]:
 
     thirdparty_sources = [thirdparty_dir + file for file in bullet2_src]
 
-    # Treat Bullet headers as system headers to avoid raising warnings. Not supported on MSVC.
-    if not env.msvc:
-        env_bullet.Append(CPPFLAGS=["-isystem", Dir(thirdparty_dir).path])
-    else:
-        env_bullet.Prepend(CPPPATH=[thirdparty_dir])
-    # if env['target'] == "debug" or env['target'] == "release_debug":
-    #     env_bullet.Append(CPPDEFINES=['BT_DEBUG'])
+    env_bullet.Prepend(CPPPATH=[thirdparty_dir])
 
-    env_bullet.Append(CPPDEFINES=["BT_USE_OLD_DAMPING_METHOD"])
+    env_bullet.Append(CPPDEFINES=["BT_USE_OLD_DAMPING_METHOD", "BT_THREADSAFE"])
 
     env_thirdparty = env_bullet.Clone()
     env_thirdparty.disable_warnings()

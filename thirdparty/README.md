@@ -8,12 +8,14 @@ readability.
 ## bullet
 
 - Upstream: https://github.com/bulletphysics/bullet3
-- Version: 2.89 (830f0a9565b1829a07e21e2f16be2aa9966bd28c, 2019)
+- Version: 3.25 (2c204c49e56ed15ec5fcfa71d199ab6d6570b3f5, 2025)
 - License: zlib
 
 Files extracted from upstream source:
 
-- src/* apart from CMakeLists.txt and premake4.lua files
+- the `src/` folder, recursively:
+  - All the `.cpp`, `.h` files
+  - Except `Bullet3*`, `BulletInverseDynamics` and `clew` folders
 - LICENSE.txt
 
 
