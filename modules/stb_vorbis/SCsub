@@ -9,7 +9,7 @@ env_stb_vorbis = env_modules.Clone()
 
 thirdparty_obj = []
 
-thirdparty_sources = ["#thirdparty/misc/stb_vorbis.c"]
+thirdparty_sources = ["#thirdparty/stb/stb_vorbis.c"]
 
 env_thirdparty = env_stb_vorbis.Clone()
 env_thirdparty.disable_warnings()
