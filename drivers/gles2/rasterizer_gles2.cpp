@@ -95,7 +95,6 @@ Error RasterizerGLES2::is_viable() {
 #else
 	if (GL_EXT_multisampled_render_to_texture) {
 		glRenderbufferStorageMultisample = glRenderbufferStorageMultisampleEXT;
-		glFramebufferTexture2DMultisample = glFramebufferTexture2DMultisampleEXT;
 	}
 #endif
 	return OK;

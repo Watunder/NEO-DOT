@@ -5,7 +5,7 @@
  *
  * Generator: C/C++
  * Specification: gl
- * Extensions: 2
+ * Extensions: 3
  *
  * APIs:
  *  - gles2=3.0
@@ -19,10 +19,10 @@
  *  - ON_DEMAND = False
  *
  * Commandline:
- *    --api='gles2=3.0' --extensions='GL_EXT_multisampled_render_to_texture,GL_OES_texture_half_float' c --loader
+ *    --api='gles2=3.0' --extensions='GL_ANGLE_framebuffer_multisample,GL_EXT_multisampled_render_to_texture,GL_OES_texture_half_float' c --loader
  *
  * Online:
- *    http://gen.glad.sh/#api=gles2%3D3.0&extensions=GL_EXT_multisampled_render_to_texture%2CGL_OES_texture_half_float&generator=c&options=LOADER
+ *    http://gen.glad.sh/#api=gles2%3D3.0&extensions=GL_ANGLE_framebuffer_multisample%2CGL_EXT_multisampled_render_to_texture%2CGL_OES_texture_half_float&generator=c&options=LOADER
  *
  */
 
@@ -373,6 +373,7 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS 0x8CD9
 #define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT 0x8CD7
 #define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE 0x8D56
+#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_ANGLE 0x8D56
 #define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT 0x8D56
 #define GL_FRAMEBUFFER_UNDEFINED 0x8219
 #define GL_FRAMEBUFFER_UNSUPPORTED 0x8CDD
@@ -454,6 +455,7 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_MAX_PROGRAM_TEXEL_OFFSET 0x8905
 #define GL_MAX_RENDERBUFFER_SIZE 0x84E8
 #define GL_MAX_SAMPLES 0x8D57
+#define GL_MAX_SAMPLES_ANGLE 0x8D57
 #define GL_MAX_SAMPLES_EXT 0x8D57
 #define GL_MAX_SERVER_WAIT_TIMEOUT 0x9111
 #define GL_MAX_TEXTURE_IMAGE_UNITS 0x8872
@@ -548,6 +550,7 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_RENDERBUFFER_INTERNAL_FORMAT 0x8D44
 #define GL_RENDERBUFFER_RED_SIZE 0x8D50
 #define GL_RENDERBUFFER_SAMPLES 0x8CAB
+#define GL_RENDERBUFFER_SAMPLES_ANGLE 0x8CAB
 #define GL_RENDERBUFFER_SAMPLES_EXT 0x8CAB
 #define GL_RENDERBUFFER_STENCIL_SIZE 0x8D55
 #define GL_RENDERBUFFER_WIDTH 0x8D42
@@ -878,6 +881,8 @@ typedef void (GLAD_API_PTR *GLVULKANPROCNV)(void);
 GLAD_API_CALL int GLAD_GL_ES_VERSION_2_0;
 #define GL_ES_VERSION_3_0 1
 GLAD_API_CALL int GLAD_GL_ES_VERSION_3_0;
+#define GL_ANGLE_framebuffer_multisample 1
+GLAD_API_CALL int GLAD_GL_ANGLE_framebuffer_multisample;
 #define GL_EXT_multisampled_render_to_texture 1
 GLAD_API_CALL int GLAD_GL_EXT_multisampled_render_to_texture;
 #define GL_OES_texture_half_float 1
@@ -1051,6 +1056,7 @@ typedef void (GLAD_API_PTR *PFNGLREADPIXELSPROC)(GLint x, GLint y, GLsizei width
 typedef void (GLAD_API_PTR *PFNGLRELEASESHADERCOMPILERPROC)(void);
 typedef void (GLAD_API_PTR *PFNGLRENDERBUFFERSTORAGEPROC)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 typedef void (GLAD_API_PTR *PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (GLAD_API_PTR *PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 typedef void (GLAD_API_PTR *PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 typedef void (GLAD_API_PTR *PFNGLRESUMETRANSFORMFEEDBACKPROC)(void);
 typedef void (GLAD_API_PTR *PFNGLSAMPLECOVERAGEPROC)(GLfloat value, GLboolean invert);
@@ -1467,6 +1473,8 @@ GLAD_API_CALL PFNGLRENDERBUFFERSTORAGEPROC glad_glRenderbufferStorage;
 #define glRenderbufferStorage glad_glRenderbufferStorage
 GLAD_API_CALL PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glad_glRenderbufferStorageMultisample;
 #define glRenderbufferStorageMultisample glad_glRenderbufferStorageMultisample
+GLAD_API_CALL PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC glad_glRenderbufferStorageMultisampleANGLE;
+#define glRenderbufferStorageMultisampleANGLE glad_glRenderbufferStorageMultisampleANGLE
 GLAD_API_CALL PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC glad_glRenderbufferStorageMultisampleEXT;
 #define glRenderbufferStorageMultisampleEXT glad_glRenderbufferStorageMultisampleEXT
 GLAD_API_CALL PFNGLRESUMETRANSFORMFEEDBACKPROC glad_glResumeTransformFeedback;

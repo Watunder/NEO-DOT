@@ -1731,6 +1731,11 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	} else {
 #if defined(OPENGL_ENABLED)
 		bool gles3_context = true;
+#if defined(ANGLE_ENABLED)
+		gles3_context = false;
+		p_video_driver = VIDEO_DRIVER_GLES2;
+		WARN_PRINT("Only supports the GLES2 driver when using ANGLE");
+#endif
 		if (p_video_driver == VIDEO_DRIVER_GLES2) {
 			gles3_context = false;
 		}
@@ -2662,11 +2667,18 @@ void *OS_Windows::get_native_handle(int p_handle_type) {
 			return NULL; // Do we have a value to return here?
 		case WINDOW_HANDLE:
 			return hWnd;
-#ifdef OPENGL_ENABLED
+#if defined(OPENGL_ENABLED)
+#if defined(ANGLE_ENABLED)
+		case WINDOW_VIEW:
+			return gl_context->get_egl_display();
+		case OPENGL_CONTEXT:
+			return gl_context->get_egl_context();
+#elif defined(WGL_ENABLED)
 		case WINDOW_VIEW:
 			return gl_context->get_hdc();
 		case OPENGL_CONTEXT:
 			return gl_context->get_hglrc();
+#endif
 #endif
 		default:
 			return NULL;

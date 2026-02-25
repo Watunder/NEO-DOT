@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  context_gl_windows.h                                                 */
+/*  context_gl_windows_angle.h                                           */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,24 +28,24 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#if defined(OPENGL_ENABLED) && defined(WGL_ENABLED)
+#if defined(OPENGL_ENABLED) && defined(ANGLE_ENABLED)
 
-// Author: Juan Linietsky <reduzio@gmail.com>, (C) 2008
+#ifndef CONTEXT_GL_WINDOWS_ANGLE_H
+#define CONTEXT_GL_WINDOWS_ANGLE_H
 
-#ifndef CONTEXT_GL_WIN_H
-#define CONTEXT_GL_WIN_H
-
+#include "configs/platform_gl.h"
 #include "core/error_list.h"
 #include "core/os/os.h"
 
 #include <windows.h>
 
 class ContextGL_Windows {
-	HDC hDC;
-	HGLRC hRC;
-	unsigned int pixel_format;
 	HWND hWnd;
 	bool opengl_3_context;
+	EGLDisplay egl_display;
+	EGLSurface egl_surface;
+	EGLContext egl_context;
+	EGLConfig egl_config;
 	bool use_vsync;
 	bool vsync_via_compositor;
 
@@ -56,8 +56,8 @@ public:
 
 	void make_current();
 
-	HDC get_hdc();
-	HGLRC get_hglrc();
+	EGLDisplay get_egl_display() const;
+	EGLContext get_egl_context() const;
 
 	int get_window_width();
 	int get_window_height();

@@ -187,7 +187,12 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 
 		} break;
 		case Image::FORMAT_DXT1: {
-			if (config.s3tc_supported) {
+#ifdef ANGLE_ENABLED
+			if (config.dxt1_supported)
+#else
+			if (config.s3tc_supported)
+#endif
+			{
 				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
@@ -198,7 +203,12 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 
 		} break;
 		case Image::FORMAT_DXT3: {
-			if (config.s3tc_supported) {
+#ifdef ANGLE_ENABLED
+			if (config.dxt3_supported)
+#else
+			if (config.s3tc_supported)
+#endif
+			{
 				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
@@ -209,7 +219,12 @@ Ref<Image> RasterizerStorageGLES2::_get_gl_image_and_format(const Ref<Image> &p_
 
 		} break;
 		case Image::FORMAT_DXT5: {
-			if (config.s3tc_supported) {
+#ifdef ANGLE_ENABLED
+			if (config.dxt5_supported)
+#else
+			if (config.s3tc_supported)
+#endif
+			{
 				r_gl_internal_format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				r_gl_format = GL_RGBA;
 				r_gl_type = GL_UNSIGNED_BYTE;
@@ -4389,7 +4404,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 	Image::Format image_format;
 
 	if (rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
-#ifdef GLES_OVER_GL
+#if defined(GLES_OVER_GL) || defined(ANGLE_ENABLED)
 		color_internal_format = GL_RGBA8;
 #else
 		color_internal_format = GL_RGBA;
@@ -4397,7 +4412,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		color_format = GL_RGBA;
 		image_format = Image::FORMAT_RGBA8;
 	} else {
-#ifdef GLES_OVER_GL
+#if defined(GLES_OVER_GL) || defined(ANGLE_ENABLED)
 		color_internal_format = GL_RGB8;
 #else
 		color_internal_format = GL_RGB;
@@ -4519,18 +4534,15 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 		glGenRenderbuffers(1, &rt->multisample_depth);
 		glBindRenderbuffer(GL_RENDERBUFFER, rt->multisample_depth);
+#ifdef ANGLE_ENABLED
+		glRenderbufferStorageMultisampleANGLE(GL_RENDERBUFFER, msaa, config.depth_buffer_internalformat, rt->width, rt->height);
+#else
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, config.depth_buffer_internalformat, rt->width, rt->height);
+#endif
 
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->multisample_depth);
 
-#if defined(GLES_OVER_GL)
-
-		glGenRenderbuffers(1, &rt->multisample_color);
-		glBindRenderbuffer(GL_RENDERBUFFER, rt->multisample_color);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, color_internal_format, rt->width, rt->height);
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rt->multisample_color);
-#elif PLATFORM_ANDROID
+#ifdef PLATFORM_ANDROID
 		// Render to a texture in android
 		glGenTextures(1, &rt->multisample_color);
 		glBindTexture(GL_TEXTURE_2D, rt->multisample_color);
@@ -4541,7 +4553,17 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		glFramebufferTexture2DMultisample(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->multisample_color, 0, msaa);
+		glFramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->multisample_color, 0, msaa);
+#else
+		glGenRenderbuffers(1, &rt->multisample_color);
+		glBindRenderbuffer(GL_RENDERBUFFER, rt->multisample_color);
+#ifdef ANGLE_ENABLED
+		glRenderbufferStorageMultisampleANGLE(GL_RENDERBUFFER, msaa, color_internal_format, rt->width, rt->height);
+#else
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, color_internal_format, rt->width, rt->height);
+#endif
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rt->multisample_color);
 #endif
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -5455,6 +5477,17 @@ bool RasterizerStorageGLES2::has_os_feature(const String &p_feature) const {
 	if (p_feature == "s3tc")
 		return config.s3tc_supported;
 
+#ifdef ANGLE_ENABLED
+	if (p_feature == "dxt1")
+		return config.dxt1_supported;
+
+	if (p_feature == "dxt3")
+		return config.dxt3_supported;
+
+	if (p_feature == "dxt5")
+		return config.dxt5_supported;
+#endif
+
 	if (p_feature == "etc")
 		return config.etc1_supported;
 
@@ -5583,6 +5616,11 @@ void RasterizerStorageGLES2::initialize() {
 #else
 	config.float_texture_supported = config.extensions.has("GL_ARB_texture_float") || config.extensions.has("GL_OES_texture_float");
 	config.s3tc_supported = config.extensions.has("GL_EXT_texture_compression_s3tc") || config.extensions.has("WEBGL_compressed_texture_s3tc");
+#ifdef ANGLE_ENABLED
+	config.dxt1_supported = config.extensions.has("GL_ANGLE_texture_compression_dxt1");
+	config.dxt3_supported = config.extensions.has("GL_ANGLE_texture_compression_dxt3");
+	config.dxt5_supported = config.extensions.has("GL_ANGLE_texture_compression_dxt5");
+#endif
 	config.etc1_supported = config.extensions.has("GL_OES_compressed_ETC1_RGB8_texture") || config.extensions.has("WEBGL_compressed_texture_etc1");
 	config.pvrtc_supported = config.extensions.has("GL_IMG_texture_compression_pvrtc") || config.extensions.has("WEBGL_compressed_texture_pvrtc");
 	config.support_npot_repeat_mipmap = config.extensions.has("GL_OES_texture_npot");
@@ -5600,14 +5638,18 @@ void RasterizerStorageGLES2::initialize() {
 		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT24_OES;
 		config.depth_type = GL_UNSIGNED_INT;
 	} else {
-		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT16;
+		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT;
 		config.depth_type = GL_UNSIGNED_SHORT;
 	}
 #endif
 #endif
 
 	// Check for multisample support
-	config.multisample_supported = config.extensions.has("GL_EXT_framebuffer_multisample") || config.extensions.has("GL_EXT_multisampled_render_to_texture") || config.extensions.has("GL_APPLE_framebuffer_multisample");
+#ifdef ANGLE_ENABLED
+	config.multisample_supported = config.extensions.has("GL_ANGLE_framebuffer_multisample");
+#else
+	config.multisample_supported = config.extensions.has("GL_EXT_framebuffer_multisample") || config.extensions.has("GL_EXT_multisampled_render_to_texture");
+#endif
 
 #ifdef GLES_OVER_GL
 	//TODO: causes huge problems with desktop video drivers. Making false for now, needs to be true to render SCREEN_TEXTURE mipmaps
@@ -5653,8 +5695,8 @@ void RasterizerStorageGLES2::initialize() {
 		config.support_half_float_vertices = false;
 	}
 
-	config.rgtc_supported = config.extensions.has("GL_EXT_texture_compression_rgtc") || config.extensions.has("GL_ARB_texture_compression_rgtc") || config.extensions.has("EXT_texture_compression_rgtc");
-	config.bptc_supported = config.extensions.has("GL_ARB_texture_compression_bptc") || config.extensions.has("EXT_texture_compression_bptc");
+	config.rgtc_supported = config.extensions.has("GL_EXT_texture_compression_rgtc") || config.extensions.has("GL_ARB_texture_compression_rgtc");
+	config.bptc_supported = config.extensions.has("GL_EXT_texture_compression_bptc") || config.extensions.has("GL_ARB_texture_compression_bptc");
 
 	config.anisotropic_level = 1.0;
 	config.use_anisotropic_filter = config.extensions.has("GL_EXT_texture_filter_anisotropic");

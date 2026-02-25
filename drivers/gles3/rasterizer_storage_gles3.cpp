@@ -689,6 +689,10 @@ void RasterizerStorageGLES3::texture_set_data(RID p_texture, const Ref<Image> &p
 
 	texture->ignore_mipmaps = compressed && !img->has_mipmaps();
 
+#ifndef GLES_OVER_GL
+	texture->ignore_mipmaps = texture->ignore_mipmaps || internal_format == GL_SRGB8;
+#endif
+
 	if ((texture->flags & VS::TEXTURE_FLAG_MIPMAPS) && !texture->ignore_mipmaps)
 		if (texture->flags & VS::TEXTURE_FLAG_FILTER) {
 			glTexParameteri(texture->target, GL_TEXTURE_MIN_FILTER, config.use_fast_texture_filter ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
@@ -7711,8 +7715,8 @@ void RasterizerStorageGLES3::initialize() {
 
 #else
 	config.etc2_supported = true;
-	config.s3tc_supported = config.extensions.has("GL_EXT_texture_compression_dxt1") || config.extensions.has("GL_EXT_texture_compression_s3tc") || config.extensions.has("WEBGL_compressed_texture_s3tc");
-	config.rgtc_supported = config.extensions.has("GL_EXT_texture_compression_rgtc") || config.extensions.has("GL_ARB_texture_compression_rgtc") || config.extensions.has("EXT_texture_compression_rgtc");
+	config.s3tc_supported = config.extensions.has("GL_EXT_texture_compression_s3tc") || config.extensions.has("WEBGL_compressed_texture_s3tc");
+	config.rgtc_supported = config.extensions.has("GL_EXT_texture_compression_rgtc") || config.extensions.has("GL_ARB_texture_compression_rgtc");
 	config.texture_float_linear_supported = config.extensions.has("GL_OES_texture_float_linear");
 	config.framebuffer_float_supported = config.extensions.has("GL_EXT_color_buffer_float");
 	config.framebuffer_half_float_supported = config.extensions.has("GL_EXT_color_buffer_half_float") || config.framebuffer_float_supported;
