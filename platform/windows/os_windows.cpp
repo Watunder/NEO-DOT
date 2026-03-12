@@ -1049,6 +1049,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		} break;
 
 		case WM_SIZE: {
+#if defined(ANGLE_ENABLED)
+			gl_context->wait_native();
+#endif
 			// Ignore size when a SIZE_MINIMIZED event is triggered
 			if (wParam != SIZE_MINIMIZED) {
 				int window_w = LOWORD(lParam);
@@ -1731,14 +1734,15 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	} else {
 #if defined(OPENGL_ENABLED)
 		bool gles3_context = true;
-#if defined(ANGLE_ENABLED)
-		gles3_context = false;
-		p_video_driver = VIDEO_DRIVER_GLES2;
-		WARN_PRINT("Only supports the GLES2 driver when using ANGLE");
-#endif
 		if (p_video_driver == VIDEO_DRIVER_GLES2) {
 			gles3_context = false;
 		}
+
+#if defined(ANGLE_ENABLED)
+		gles3_context = false;
+		p_video_driver = VIDEO_DRIVER_GLES2;
+		WARN_PRINT("Currently only supports the GLES2 driver when using ANGLE");
+#endif
 
 		bool editor = Engine::get_singleton()->is_editor_hint();
 		Error gl_error = OK;

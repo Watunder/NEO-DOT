@@ -42,6 +42,10 @@ void ContextGL_Windows::make_current() {
 	eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
 }
 
+void ContextGL_Windows::wait_native() {
+	eglWaitNative(EGL_CORE_NATIVE_ENGINE);
+}
+
 EGLDisplay ContextGL_Windows::get_egl_display() const {
 	return egl_display;
 }
@@ -102,7 +106,7 @@ bool ContextGL_Windows::is_using_vsync() const {
 Error ContextGL_Windows::initialize() {
 	const EGLint display_attribs[] = {
 		EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-		EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE,
+		EGL_PLATFORM_ANGLE_TYPE_DEFAULT_ANGLE,
 		EGL_NONE
 	};
 

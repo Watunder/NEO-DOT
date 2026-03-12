@@ -56,6 +56,8 @@ public:
 
 	void make_current();
 
+	void wait_native();
+
 	EGLDisplay get_egl_display() const;
 	EGLContext get_egl_context() const;
 

@@ -5638,7 +5638,7 @@ void RasterizerStorageGLES2::initialize() {
 		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT24_OES;
 		config.depth_type = GL_UNSIGNED_INT;
 	} else {
-		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT;
+		config.depth_buffer_internalformat = GL_DEPTH_COMPONENT16;
 		config.depth_type = GL_UNSIGNED_SHORT;
 	}
 #endif
@@ -5687,7 +5687,7 @@ void RasterizerStorageGLES2::initialize() {
 
 	config.support_half_float_vertices = true;
 //every platform should support this except web, iOS has issues with their support, so add option to disable
-#ifdef PLATFORM_EMSCRIPTEN
+#if defined(PLATFORM_EMSCRIPTEN) || defined(ANGLE_ENABLED)
 	config.support_half_float_vertices = false;
 #endif
 	bool disable_half_float = GLOBAL_GET("rendering/gles2/compatibility/disable_half_float");
