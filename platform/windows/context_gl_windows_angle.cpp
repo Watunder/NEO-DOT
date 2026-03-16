@@ -104,9 +104,34 @@ bool ContextGL_Windows::is_using_vsync() const {
 }
 
 Error ContextGL_Windows::initialize() {
+	EGLint display_type = EGL_PLATFORM_ANGLE_TYPE_DEFAULT_ANGLE;
+
+	List<String> args = OS::get_singleton()->get_cmdline_args();
+	List<String>::Element *I = args.front();
+	while (I) {
+		if (I->get() == "--angle-backend") {
+			if (I->next()) {
+				String angle_backend = I->next()->get();
+
+				if (angle_backend == "Vulkan") {
+					display_type = EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE;
+				} else if (angle_backend == "OpenGL") {
+					display_type = EGL_PLATFORM_ANGLE_TYPE_OPENGL_ANGLE;
+				} else if (angle_backend == "D3D11") {
+					display_type = EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE;
+				} else {
+					OS::get_singleton()->print("Unknown ANGLE backend '%s'.\nValid options are Vulkan, OpenGL and D3D11.\n", angle_backend.utf8().get_data());
+				}
+			} else {
+				OS::get_singleton()->print("Missing ANGLE backend argument.\n");
+			}
+		}
+		I = I->next();
+	}
+
 	const EGLint display_attribs[] = {
 		EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-		EGL_PLATFORM_ANGLE_TYPE_DEFAULT_ANGLE,
+		display_type,
 		EGL_NONE
 	};
 
