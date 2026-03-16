@@ -5,6 +5,18 @@ respective folder names. Use two empty lines to separate categories for
 readability.
 
 
+## angle
+
+- Upstream:  https://chromium.googlesource.com/angle/angle
+- Version: git (455477231ca690a7bfeaaec12570a571d1c532ec, 2026)
+- License: BSD-3-clause
+
+Files extracted from upstream source:
+
+- the `include/EGL` folder as `EGL/`, except from `.clang-format` and `eglplatform.h`
+- `LICENSE.txt`
+
+
 ## bullet
 
 - Upstream: https://github.com/bulletphysics/bullet3
