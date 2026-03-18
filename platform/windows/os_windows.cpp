@@ -1739,9 +1739,11 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		}
 
 #if defined(ANGLE_ENABLED)
-		gles3_context = false;
-		p_video_driver = VIDEO_DRIVER_GLES2;
-		WARN_PRINT("Currently only supports the GLES2 driver when using ANGLE");
+		if (gles3_context) {
+			gles3_context = false;
+			p_video_driver = VIDEO_DRIVER_GLES2;
+			WARN_PRINT("Currently only supports the GLES2 driver when using ANGLE");
+		}
 #endif
 
 		bool editor = Engine::get_singleton()->is_editor_hint();
