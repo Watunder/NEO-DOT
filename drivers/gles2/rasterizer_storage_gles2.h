@@ -72,6 +72,11 @@ public:
 
 		bool float_texture_supported;
 		bool s3tc_supported;
+#ifdef ANGLE_ENABLED
+		bool dxt1_supported;
+		bool dxt3_supported;
+		bool dxt5_supported;
+#endif
 		bool etc1_supported;
 		bool pvrtc_supported;
 		bool rgtc_supported;

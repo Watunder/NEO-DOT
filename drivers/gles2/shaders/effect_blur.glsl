@@ -298,7 +298,7 @@ void main() {
 	}
 
 	if (k_accum > 0.0) {
-		color_accum.rgb /= k_accum / dof_kernel_size;
+		color_accum.rgb /= k_accum / float(dof_kernel_size);
 	}
 	color_accum.a = max(color_accum.a, sqrt(max_accum));
 

@@ -1049,6 +1049,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		} break;
 
 		case WM_SIZE: {
+#if defined(ANGLE_ENABLED)
+			gl_context->wait_native();
+#endif
 			// Ignore size when a SIZE_MINIMIZED event is triggered
 			if (wParam != SIZE_MINIMIZED) {
 				int window_w = LOWORD(lParam);
@@ -1734,6 +1737,14 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 		if (p_video_driver == VIDEO_DRIVER_GLES2) {
 			gles3_context = false;
 		}
+
+#if defined(ANGLE_ENABLED)
+		if (gles3_context) {
+			gles3_context = false;
+			p_video_driver = VIDEO_DRIVER_GLES2;
+			WARN_PRINT("Currently only supports the GLES2 driver when using ANGLE");
+		}
+#endif
 
 		bool editor = Engine::get_singleton()->is_editor_hint();
 		Error gl_error = OK;
@@ -2662,11 +2673,18 @@ void *OS_Windows::get_native_handle(int p_handle_type) {
 			return NULL; // Do we have a value to return here?
 		case WINDOW_HANDLE:
 			return hWnd;
-#ifdef OPENGL_ENABLED
+#if defined(OPENGL_ENABLED)
+#if defined(ANGLE_ENABLED)
+		case WINDOW_VIEW:
+			return gl_context->get_egl_display();
+		case OPENGL_CONTEXT:
+			return gl_context->get_egl_context();
+#elif defined(WGL_ENABLED)
 		case WINDOW_VIEW:
 			return gl_context->get_hdc();
 		case OPENGL_CONTEXT:
 			return gl_context->get_hglrc();
+#endif
 #endif
 		default:
 			return NULL;
