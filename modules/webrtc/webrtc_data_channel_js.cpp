@@ -28,10 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
-#include "webrtc_data_channel_js.h"
 #include "emscripten.h"
+#include "webrtc_data_channel_js.h"
 
 extern "C" {
 typedef void (*RTCChOnOpen)(void *p_obj);

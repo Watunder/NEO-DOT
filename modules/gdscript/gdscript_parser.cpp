@@ -7039,6 +7039,7 @@ GDScriptParser::DataType GDScriptParser::_reduce_function_call_type(const Operat
 	List<DataType> arg_types;
 	int default_args_count = 0;
 	int arg_count = p_call->arguments.size();
+	(void)arg_count; // unused in release builds
 	String callee_name;
 	bool is_vararg = false;
 

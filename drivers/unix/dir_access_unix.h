@@ -31,14 +31,14 @@
 #ifndef DIR_ACCESS_UNIX_H
 #define DIR_ACCESS_UNIX_H
 
-#if defined(UNIX_ENABLED) || defined(LIBC_FILEIO_ENABLED)
-
 #include "core/os/dir_access.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#if defined(UNIX_ENABLED)
 
 class DirAccessUnix : public DirAccess {
 	DIR *dir_stream;

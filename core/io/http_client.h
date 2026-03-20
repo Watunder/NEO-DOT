@@ -31,6 +31,7 @@
 #ifndef HTTP_CLIENT_H
 #define HTTP_CLIENT_H
 
+#include "configs/platform_defines.h"
 #include "core/io/ip.h"
 #include "core/io/stream_peer.h"
 #include "core/io/stream_peer_tcp.h"
@@ -187,7 +188,7 @@ private:
 	Error _get_http_data(uint8_t *p_buffer, int p_bytes, int &r_received);
 
 #else
-#include "platform/javascript/http_client.h.inc"
+#include "platform/emscripten/http_client.h.inc"
 #endif
 
 	PoolStringArray _get_response_headers();

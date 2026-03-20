@@ -51,6 +51,7 @@ Ref<Resource> TranslationLoaderPO::load_translation(FileAccess *f, Error *r_erro
 
 	Ref<Translation> translation = Ref<Translation>(memnew(Translation));
 	int line = 1;
+	(void)line; // unused in release builds
 	bool skip_this = false;
 	bool skip_next = false;
 	bool is_eof = false;

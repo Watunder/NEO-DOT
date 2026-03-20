@@ -80,8 +80,8 @@ def make_builtin_bitmap_fonts(target, source, env):
         builtin_fonts_h.write("extern const unsigned char *const _font_" + name + "_page[];\n\n")
 
         # Generate cpp file
-        builtin_fonts_cpp.write("static const int _font_" + name + "_fnt_size = " + str(len(fnt_buf)) + ";\n")
-        builtin_fonts_cpp.write("static const unsigned char _font_" + name + "_fnt[] = {\n")
+        builtin_fonts_cpp.write("const int _font_" + name + "_fnt_size = " + str(len(fnt_buf)) + ";\n")
+        builtin_fonts_cpp.write("const unsigned char _font_" + name + "_fnt[] = {\n")
         for j in range(len(fnt_buf)):
             builtin_fonts_cpp.write("\t" + byte_to_str(fnt_buf[j]) + ",\n")
         builtin_fonts_cpp.write("};\n\n")
@@ -97,18 +97,18 @@ def make_builtin_bitmap_fonts(target, source, env):
             page_sizes.append(len(page_buf))
             page_bufs.append(page_buf)
             builtin_fonts_cpp.write(
-                "static const int _font_" + name + "_page" + str(i) + "_size = " + str(len(page_buf)) + ";\n"
+                "const int _font_" + name + "_page" + str(i) + "_size = " + str(len(page_buf)) + ";\n"
             )
-            builtin_fonts_cpp.write("static const unsigned char _font_" + name + "_page" + str(i) + "[] = {\n")
+            builtin_fonts_cpp.write("const unsigned char _font_" + name + "_page" + str(i) + "[] = {\n")
             for j in range(len(page_buf)):
                 builtin_fonts_cpp.write("\t" + byte_to_str(page_buf[j]) + ",\n")
             builtin_fonts_cpp.write("};\n\n")
 
         n = len(page_bufs)
-        builtin_fonts_cpp.write("static const int _font_" + name + "_page_count = " + str(n) + ";\n")
-        builtin_fonts_cpp.write("static const int _font_" + name + "_page_sizes[] = { ")
+        builtin_fonts_cpp.write("const int _font_" + name + "_page_count = " + str(n) + ";\n")
+        builtin_fonts_cpp.write("const int _font_" + name + "_page_sizes[] = { ")
         builtin_fonts_cpp.write(", ".join("_font_" + name + "_page" + str(i) + "_size" for i in range(n)) + " };\n")
-        builtin_fonts_cpp.write("static const unsigned char *const _font_" + name + "_page[] = { ")
+        builtin_fonts_cpp.write("const unsigned char *const _font_" + name + "_page[] = { ")
         builtin_fonts_cpp.write(", ".join("_font_" + name + "_page" + str(i) for i in range(n)) + " };\n\n")
 
     builtin_fonts_h.write("#endif\n")

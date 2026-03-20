@@ -31,6 +31,7 @@
 #ifndef EMWSSERVER_H
 #define EMWSSERVER_H
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
 #include "core/reference.h"

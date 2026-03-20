@@ -38,6 +38,7 @@
 #include "core/script_language.h"
 
 class SceneTree;
+class RuntimeNodeSelector;
 
 class ScriptDebuggerRemote : public ScriptDebugger {
 	friend class RuntimeNodeSelector;

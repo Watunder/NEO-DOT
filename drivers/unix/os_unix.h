@@ -31,10 +31,10 @@
 #ifndef OS_UNIX_H
 #define OS_UNIX_H
 
-#ifdef UNIX_ENABLED
-
 #include "core/os/os.h"
 #include "drivers/unix/ip_unix.h"
+
+#ifdef UNIX_ENABLED
 
 class OS_Unix : public OS {
 protected:

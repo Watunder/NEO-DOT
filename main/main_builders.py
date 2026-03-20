@@ -112,7 +112,7 @@ def make_default_controller_mappings(target, source, env):
         "Mac OS X": "#if defined(PLATFORM_APPLE) && TARGET_OSX",
         "iOS": "#if defined(PLATFORM_APPLE) && TARGET_IOS",
         "Android": "#if defined(PLATFORM_ANDROID)",
-        "Javascript": "#if defined(PLATFORM_EMSCRIPTEN)",
+        "Emscripten": "#if defined(PLATFORM_EMSCRIPTEN)",
     }
 
     g.write("const char* DefaultControllerMappings::mappings[] = {\n")

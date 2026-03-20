@@ -31,6 +31,7 @@
 #ifndef EMWSPEER_H
 #define EMWSPEER_H
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"

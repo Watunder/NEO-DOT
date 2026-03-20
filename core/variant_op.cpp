@@ -113,7 +113,7 @@
 }
 /* clang-format on */
 
-#define CASES(PREFIX) static const void *switch_table_##PREFIX[25][27] = { \
+#define CASES(PREFIX) static const void *switch_table_##PREFIX[25][28] = { \
 	TYPES(PREFIX, OP_EQUAL),                                               \
 	TYPES(PREFIX, OP_NOT_EQUAL),                                           \
 	TYPES(PREFIX, OP_LESS),                                                \
@@ -1267,7 +1267,9 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_VARIANT_MAX(math, OP_IN);
 		}
 
+#ifndef __GNUC__
 		CASE_OP_MAX;
+#endif
 	}
 }
 

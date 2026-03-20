@@ -28,9 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "syslog_logger.h"
+
 #ifdef UNIX_ENABLED
 
-#include "syslog_logger.h"
 #include "core/print_string.h"
 #include <syslog.h>
 

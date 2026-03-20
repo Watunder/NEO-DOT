@@ -94,7 +94,7 @@ if env["builtin_harfbuzz"]:
     thirdparty_harfbuzz_sources = [thirdparty_harfbuzz_dir + file for file in thirdparty_harfbuzz_sources]
 
     if env["platform"] not in ["windows"]:
-        env_harfbuzz.Append(CCFLAGS=["HAVE_PTHREAD"])
+        env_harfbuzz.Append(CPPDEFINES=["HAVE_PTHREAD"])
 
     env_harfbuzz.Prepend(CPPPATH=[thirdparty_harfbuzz_dir])
 

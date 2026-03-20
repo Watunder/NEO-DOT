@@ -211,7 +211,7 @@ _FORCE_INLINE_ GlyphInfo FontDriverFreeType::_rasterize_bitmap(const GlyphCacheK
 	return glyph_info;
 }
 
-static _FORCE_INLINE_ void _ft_face_finalizer(void *p_ft_face) {
+_FORCE_INLINE_ void _ft_face_finalizer(void *p_ft_face) {
 	FT_Face ft_face = (FT_Face)p_ft_face;
 	if (!ft_face || !ft_face->generic.data) {
 		return;
@@ -238,7 +238,7 @@ static _FORCE_INLINE_ void _ft_face_finalizer(void *p_ft_face) {
 	}
 }
 
-static _FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_info_ptr, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
+_FORCE_INLINE_ FT_Error _ftc_manager_requester(FTC_FaceID p_font_info_ptr, FT_Library p_library, FT_Pointer p_request_data, FT_Face *r_face) {
 	FontDriver::FontInfo *font_info_ptr = (FontDriver::FontInfo *)p_font_info_ptr;
 	FontDriver::FontInfo *base_font_info_ptr = font_info_ptr->get_owner();
 

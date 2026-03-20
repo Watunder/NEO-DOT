@@ -31,9 +31,9 @@
 #ifndef SYSLOG_LOGGER_H
 #define SYSLOG_LOGGER_H
 
-#ifdef UNIX_ENABLED
-
 #include "core/io/logger.h"
+
+#ifdef UNIX_ENABLED
 
 class SyslogLogger : public Logger {
 public:

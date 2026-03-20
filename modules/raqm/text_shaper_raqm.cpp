@@ -190,7 +190,15 @@ bool TextShaperRaqm::shape_text(CharInfo *r_char_infos, const FontID &p_font_id,
 	FontDriver *driver = FontDriverManager::get_driver_for_font(run_font);
 	ERR_FAIL_COND_V(!driver, false);
 
+#ifndef NO_SAFE_CAST
 	FontDriverFreeType *driver_ft = dynamic_cast<FontDriverFreeType *>(driver);
+#else
+	if (String(driver->get_name()) != "FreeType") {
+		return false;
+	}
+
+	FontDriverFreeType *driver_ft = static_cast<FontDriverFreeType *>(driver);
+#endif
 	if (driver_ft && driver_ft->owns_font(run_font)) {
 		_shape_run(driver_ft, p_text, 0, p_char_count, run_font, p_font_size, p_font_oversampling, r_char_infos);
 	} else {

@@ -26,3 +26,8 @@ jobs:
     name: 🏁 Windows
     needs: static-checks
     uses: ./.github/workflows/windows_builds.yml
+
+  emscripten-build:
+    name: 🌐 Emscripten
+    needs: static-checks
+    uses: ./.github/workflows/emscripten_builds.yml
