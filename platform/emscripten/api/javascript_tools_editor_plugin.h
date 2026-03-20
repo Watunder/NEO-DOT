@@ -31,7 +31,9 @@
 #ifndef JAVASCRIPT_TOOLS_EDITOR_PLUGIN_H
 #define JAVASCRIPT_TOOLS_EDITOR_PLUGIN_H
 
-#if defined(TOOLS_ENABLED)
+#include "configs/platform_defines.h"
+#if defined(TOOLS_ENABLED) && defined(PLATFORM_EMSCRIPTEN)
+
 #include "core/io/zip_io.h"
 #include "editor/editor_plugin.h"
 

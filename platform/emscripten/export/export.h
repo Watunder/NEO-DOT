@@ -28,4 +28,4 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-void register_javascript_exporter();
+void register_emscripten_exporter();

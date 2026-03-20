@@ -200,8 +200,8 @@ public:
 	}
 };
 
-class EditorExportPlatformJavaScript : public EditorExportPlatform {
-	GDCLASS(EditorExportPlatformJavaScript, EditorExportPlatform);
+class EditorExportPlatformEmscripten : public EditorExportPlatform {
+	GDCLASS(EditorExportPlatformEmscripten, EditorExportPlatform);
 
 	Ref<ImageTexture> logo;
 	Ref<ImageTexture> run_icon;
@@ -272,11 +272,11 @@ public:
 	virtual void resolve_platform_feature_priorities(const Ref<EditorExportPreset> &p_preset, Set<String> &p_features) {
 	}
 
-	EditorExportPlatformJavaScript();
-	~EditorExportPlatformJavaScript();
+	EditorExportPlatformEmscripten();
+	~EditorExportPlatformEmscripten();
 };
 
-void EditorExportPlatformJavaScript::_fix_html(Vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug, int p_flags, const Vector<SharedObject> p_shared_objects, const Dictionary &p_file_sizes) {
+void EditorExportPlatformEmscripten::_fix_html(Vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug, int p_flags, const Vector<SharedObject> p_shared_objects, const Dictionary &p_file_sizes) {
 	String str_template = String::utf8(reinterpret_cast<const char *>(p_html.ptr()), p_html.size());
 	String str_export;
 	Vector<String> lines = str_template.split("\n");
@@ -315,7 +315,7 @@ void EditorExportPlatformJavaScript::_fix_html(Vector<uint8_t> &p_html, const Re
 	}
 }
 
-void EditorExportPlatformJavaScript::get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
+void EditorExportPlatformEmscripten::get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
 	if (p_preset->get("vram_texture_compression/for_desktop")) {
 		r_features->push_back("s3tc");
 	}
@@ -339,7 +339,7 @@ void EditorExportPlatformJavaScript::get_preset_features(const Ref<EditorExportP
 	}
 }
 
-void EditorExportPlatformJavaScript::get_export_options(List<ExportOption> *r_options) {
+void EditorExportPlatformEmscripten::get_export_options(List<ExportOption> *r_options) {
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/debug", PROPERTY_HINT_GLOBAL_FILE, "*.zip"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/release", PROPERTY_HINT_GLOBAL_FILE, "*.zip"), ""));
 
@@ -352,19 +352,19 @@ void EditorExportPlatformJavaScript::get_export_options(List<ExportOption> *r_op
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "html/experimental_virtual_keyboard"), false));
 }
 
-String EditorExportPlatformJavaScript::get_name() const {
+String EditorExportPlatformEmscripten::get_name() const {
 	return "HTML5";
 }
 
-String EditorExportPlatformJavaScript::get_os_name() const {
+String EditorExportPlatformEmscripten::get_os_name() const {
 	return "HTML5";
 }
 
-Ref<Texture> EditorExportPlatformJavaScript::get_logo() const {
+Ref<Texture> EditorExportPlatformEmscripten::get_logo() const {
 	return logo;
 }
 
-bool EditorExportPlatformJavaScript::can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
+bool EditorExportPlatformEmscripten::can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 	String err;
 	bool valid = false;
 	ExportMode mode = (ExportMode)(int)p_preset->get("variant/export_type");
@@ -405,13 +405,13 @@ bool EditorExportPlatformJavaScript::can_export(const Ref<EditorExportPreset> &p
 	return valid;
 }
 
-List<String> EditorExportPlatformJavaScript::get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
+List<String> EditorExportPlatformEmscripten::get_binary_extensions(const Ref<EditorExportPreset> &p_preset) const {
 	List<String> list;
 	list.push_back("html");
 	return list;
 }
 
-Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags) {
+Error EditorExportPlatformEmscripten::export_project(const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags) {
 	ExportNotifier notifier(*this, p_preset, p_debug, p_path, p_flags);
 
 	String custom_debug = p_preset->get("custom_template/debug");
@@ -596,7 +596,7 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 	return OK;
 }
 
-bool EditorExportPlatformJavaScript::poll_export() {
+bool EditorExportPlatformEmscripten::poll_export() {
 	Ref<EditorExportPreset> preset;
 
 	for (int i = 0; i < EditorExport::get_singleton()->get_export_preset_count(); i++) {
@@ -621,15 +621,15 @@ bool EditorExportPlatformJavaScript::poll_export() {
 	return menu_options != prev;
 }
 
-Ref<ImageTexture> EditorExportPlatformJavaScript::get_option_icon(int p_index) const {
+Ref<ImageTexture> EditorExportPlatformEmscripten::get_option_icon(int p_index) const {
 	return p_index == 1 ? stop_icon : EditorExportPlatform::get_option_icon(p_index);
 }
 
-int EditorExportPlatformJavaScript::get_options_count() const {
+int EditorExportPlatformEmscripten::get_options_count() const {
 	return menu_options;
 }
 
-Error EditorExportPlatformJavaScript::run(const Ref<EditorExportPreset> &p_preset, int p_option, int p_debug_flags) {
+Error EditorExportPlatformEmscripten::run(const Ref<EditorExportPreset> &p_preset, int p_option, int p_debug_flags) {
 	if (p_option == 1) {
 		server_lock.lock();
 		server->stop();
@@ -677,12 +677,12 @@ Error EditorExportPlatformJavaScript::run(const Ref<EditorExportPreset> &p_prese
 	return OK;
 }
 
-Ref<Texture> EditorExportPlatformJavaScript::get_run_icon() const {
+Ref<Texture> EditorExportPlatformEmscripten::get_run_icon() const {
 	return run_icon;
 }
 
-void EditorExportPlatformJavaScript::_server_thread_poll(void *data) {
-	EditorExportPlatformJavaScript *ej = (EditorExportPlatformJavaScript *)data;
+void EditorExportPlatformEmscripten::_server_thread_poll(void *data) {
+	EditorExportPlatformEmscripten *ej = (EditorExportPlatformEmscripten *)data;
 	while (!ej->server_quit) {
 		OS::get_singleton()->delay_usec(1000);
 		ej->server_lock.lock();
@@ -691,15 +691,15 @@ void EditorExportPlatformJavaScript::_server_thread_poll(void *data) {
 	}
 }
 
-EditorExportPlatformJavaScript::EditorExportPlatformJavaScript() {
+EditorExportPlatformEmscripten::EditorExportPlatformEmscripten() {
 	server.instance();
 	server_thread.start(_server_thread_poll, this);
 
-	Ref<Image> img = memnew(Image(_javascript_logo));
+	Ref<Image> img = memnew(Image(_emscripten_logo));
 	logo.instance();
 	logo->create_from_image(img);
 
-	img = Ref<Image>(memnew(Image(_javascript_run_icon)));
+	img = Ref<Image>(memnew(Image(_emscripten_run_icon)));
 	run_icon.instance();
 	run_icon->create_from_image(img);
 
@@ -710,18 +710,18 @@ EditorExportPlatformJavaScript::EditorExportPlatformJavaScript() {
 		stop_icon.instance();
 }
 
-EditorExportPlatformJavaScript::~EditorExportPlatformJavaScript() {
+EditorExportPlatformEmscripten::~EditorExportPlatformEmscripten() {
 	server->stop();
 	server_quit = true;
 	server_thread.wait_to_finish();
 }
 
-void register_javascript_exporter() {
+void register_emscripten_exporter() {
 	EDITOR_DEF("export/web/http_host", "localhost");
 	EDITOR_DEF("export/web/http_port", 8060);
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::INT, "export/web/http_port", PROPERTY_HINT_RANGE, "1,65535,1"));
 
-	Ref<EditorExportPlatformJavaScript> platform;
+	Ref<EditorExportPlatformEmscripten> platform;
 	platform.instance();
 	EditorExport::get_singleton()->add_export_platform(platform);
 }

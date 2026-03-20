@@ -39,10 +39,7 @@
 #include <sys/types.h>
 
 #include <errno.h>
-
-#if defined(UNIX_ENABLED)
 #include <unistd.h>
-#endif
 
 #ifndef PLATFORM_ANDROID
 #include <sys/statvfs.h>

@@ -28,7 +28,9 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#if defined(TOOLS_ENABLED)
+#include "configs/platform_defines.h"
+#if defined(TOOLS_ENABLED) && defined(PLATFORM_EMSCRIPTEN)
+
 #include "javascript_tools_editor_plugin.h"
 
 #include "core/engine.h"

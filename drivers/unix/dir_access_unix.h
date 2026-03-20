@@ -33,12 +33,12 @@
 
 #include "core/os/dir_access.h"
 
+#if defined(UNIX_ENABLED)
+
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#if defined(UNIX_ENABLED)
 
 class DirAccessUnix : public DirAccess {
 	DIR *dir_stream;
