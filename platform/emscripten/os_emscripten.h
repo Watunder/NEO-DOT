@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  os_javascript.h                                                      */
+/*  os_emscripten.h                                                      */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef OS_JAVASCRIPT_H
-#define OS_JAVASCRIPT_H
+#ifndef OS_EMSCRIPTEN_H
+#define OS_EMSCRIPTEN_H
 
 #include "audio_driver_javascript.h"
 #include "drivers/unix/os_unix.h"
@@ -39,7 +39,7 @@
 
 #include <emscripten/html5.h>
 
-class OS_JavaScript : public OS_Unix {
+class OS_Emscripten : public OS_Unix {
 private:
 	VideoMode video_mode;
 	bool window_maximized;
@@ -117,7 +117,7 @@ public:
 	bool check_size_force_redraw();
 
 	// Override return type to make writing static callbacks less tedious.
-	static OS_JavaScript *get_singleton();
+	static OS_Emscripten *get_singleton();
 
 	virtual bool has_virtual_keyboard() const;
 	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2(), bool p_multiline = false, int p_max_input_length = -1, int p_cursor_start = -1, int p_cursor_end = -1);
@@ -197,7 +197,7 @@ public:
 
 	virtual bool is_userfs_persistent() const;
 	Error open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path);
-	OS_JavaScript();
+	OS_Emscripten();
 };
 
 #endif

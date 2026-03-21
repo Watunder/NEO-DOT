@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  os_javascript.cpp                                                    */
+/*  os_emscripten.cpp                                                    */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "os_javascript.h"
+#include "os_emscripten.h"
 
 #include "core/io/json.h"
 #include "drivers/gles2/rasterizer_gles2.h"
@@ -57,16 +57,16 @@
 #define DOM_BUTTON_XBUTTON2 4
 
 // Quit
-void OS_JavaScript::request_quit_callback() {
-	OS_JavaScript *os = get_singleton();
+void OS_Emscripten::request_quit_callback() {
+	OS_Emscripten *os = get_singleton();
 	if (os && os->get_main_loop()) {
 		os->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
 	}
 }
 
 // Files drop (implemented in JS for now).
-void OS_JavaScript::drop_files_callback(char **p_filev, int p_filec) {
-	OS_JavaScript *os = get_singleton();
+void OS_Emscripten::drop_files_callback(char **p_filev, int p_filec) {
+	OS_Emscripten *os = get_singleton();
 	if (!os || !os->get_main_loop()) {
 		return;
 	}
@@ -77,8 +77,8 @@ void OS_JavaScript::drop_files_callback(char **p_filev, int p_filec) {
 	os->get_main_loop()->drop_files(files);
 }
 
-void OS_JavaScript::send_notification_callback(int p_notification) {
-	OS_JavaScript *os = get_singleton();
+void OS_Emscripten::send_notification_callback(int p_notification) {
+	OS_Emscripten *os = get_singleton();
 	if (!os) {
 		return;
 	}
@@ -93,18 +93,18 @@ void OS_JavaScript::send_notification_callback(int p_notification) {
 
 // Window (canvas)
 
-Point2 OS_JavaScript::compute_position_in_canvas(int p_x, int p_y) {
+Point2 OS_Emscripten::compute_position_in_canvas(int p_x, int p_y) {
 	int point[2];
 	godot_js_display_compute_position(p_x, p_y, point, point + 1);
 	return Point2(point[0], point[1]);
 }
 
-bool OS_JavaScript::check_size_force_redraw() {
+bool OS_Emscripten::check_size_force_redraw() {
 	return godot_js_display_size_update() != 0;
 }
 
-EM_BOOL OS_JavaScript::fullscreen_change_callback(int p_event_type, const EmscriptenFullscreenChangeEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::fullscreen_change_callback(int p_event_type, const EmscriptenFullscreenChangeEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 	// Empty ID is canvas.
 	String target_id = String::utf8(p_event->id);
 	if (target_id.empty() || target_id == String::utf8(&(os->canvas_id[1]))) {
@@ -122,26 +122,26 @@ EM_BOOL OS_JavaScript::fullscreen_change_callback(int p_event_type, const Emscri
 	return false;
 }
 
-EM_BOOL OS_JavaScript::blur_callback(int p_event_type, const EmscriptenFocusEvent *p_event, void *p_user_data) {
+EM_BOOL OS_Emscripten::blur_callback(int p_event_type, const EmscriptenFocusEvent *p_event, void *p_user_data) {
 	get_singleton()->input->release_pressed_events();
 	return false;
 }
 
-void OS_JavaScript::set_video_mode(const VideoMode &p_video_mode, int p_screen) {
+void OS_Emscripten::set_video_mode(const VideoMode &p_video_mode, int p_screen) {
 	video_mode = p_video_mode;
 }
 
-OS::VideoMode OS_JavaScript::get_video_mode(int p_screen) const {
+OS::VideoMode OS_Emscripten::get_video_mode(int p_screen) const {
 	return video_mode;
 }
 
-Size2 OS_JavaScript::get_screen_size(int p_screen) const {
+Size2 OS_Emscripten::get_screen_size(int p_screen) const {
 	int size[2];
 	godot_js_display_screen_size_get(size, size + 1);
 	return Size2(size[0], size[1]);
 }
 
-void OS_JavaScript::set_window_size(const Size2 p_size) {
+void OS_Emscripten::set_window_size(const Size2 p_size) {
 	if (video_mode.fullscreen) {
 		window_maximized = false;
 		set_window_fullscreen(false);
@@ -154,13 +154,13 @@ void OS_JavaScript::set_window_size(const Size2 p_size) {
 	}
 }
 
-Size2 OS_JavaScript::get_window_size() const {
+Size2 OS_Emscripten::get_window_size() const {
 	int size[2];
 	godot_js_display_window_size_get(size, size + 1);
 	return Size2(size[0], size[1]);
 }
 
-void OS_JavaScript::set_window_maximized(bool p_enabled) {
+void OS_Emscripten::set_window_maximized(bool p_enabled) {
 #ifndef TOOLS_ENABLED
 	if (video_mode.fullscreen) {
 		window_maximized = p_enabled;
@@ -182,11 +182,11 @@ void OS_JavaScript::set_window_maximized(bool p_enabled) {
 #endif
 }
 
-bool OS_JavaScript::is_window_maximized() const {
+bool OS_Emscripten::is_window_maximized() const {
 	return window_maximized;
 }
 
-void OS_JavaScript::set_window_fullscreen(bool p_enabled) {
+void OS_Emscripten::set_window_fullscreen(bool p_enabled) {
 	if (p_enabled == video_mode.fullscreen) {
 		return;
 	}
@@ -208,23 +208,23 @@ void OS_JavaScript::set_window_fullscreen(bool p_enabled) {
 	}
 }
 
-bool OS_JavaScript::is_window_fullscreen() const {
+bool OS_Emscripten::is_window_fullscreen() const {
 	return video_mode.fullscreen;
 }
 
-void OS_JavaScript::get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen) const {
+void OS_Emscripten::get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen) const {
 	Size2 screen = get_screen_size();
 	p_list->push_back(OS::VideoMode(screen.width, screen.height, true));
 }
 
-bool OS_JavaScript::get_window_per_pixel_transparency_enabled() const {
+bool OS_Emscripten::get_window_per_pixel_transparency_enabled() const {
 	if (!is_layered_allowed()) {
 		return false;
 	}
 	return transparency_enabled;
 }
 
-void OS_JavaScript::set_window_per_pixel_transparency_enabled(bool p_enabled) {
+void OS_Emscripten::set_window_per_pixel_transparency_enabled(bool p_enabled) {
 	if (!is_layered_allowed()) {
 		return;
 	}
@@ -261,8 +261,8 @@ static Ref<InputEventKey> setup_key_event(const EmscriptenKeyboardEvent *emscrip
 	return ev;
 }
 
-EM_BOOL OS_JavaScript::keydown_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::keydown_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 	Ref<InputEventKey> ev = setup_key_event(p_event);
 	ev->set_pressed(true);
 	if (ev->get_unicode() == 0 && keycode_has_unicode(ev->get_scancode())) {
@@ -277,14 +277,14 @@ EM_BOOL OS_JavaScript::keydown_callback(int p_event_type, const EmscriptenKeyboa
 	return true;
 }
 
-EM_BOOL OS_JavaScript::keypress_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::keypress_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 	os->deferred_key_event->set_unicode(p_event->charCode);
 	os->input->parse_input_event(os->deferred_key_event);
 	return true;
 }
 
-EM_BOOL OS_JavaScript::keyup_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
+EM_BOOL OS_Emscripten::keyup_callback(int p_event_type, const EmscriptenKeyboardEvent *p_event, void *p_user_data) {
 	Ref<InputEventKey> ev = setup_key_event(p_event);
 	ev->set_pressed(false);
 	get_singleton()->input->parse_input_event(ev);
@@ -293,16 +293,16 @@ EM_BOOL OS_JavaScript::keyup_callback(int p_event_type, const EmscriptenKeyboard
 
 // Mouse
 
-Point2 OS_JavaScript::get_mouse_position() const {
+Point2 OS_Emscripten::get_mouse_position() const {
 	return input->get_mouse_position();
 }
 
-int OS_JavaScript::get_mouse_button_state() const {
+int OS_Emscripten::get_mouse_button_state() const {
 	return input->get_mouse_button_mask();
 }
 
-EM_BOOL OS_JavaScript::mouse_button_callback(int p_event_type, const EmscriptenMouseEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::mouse_button_callback(int p_event_type, const EmscriptenMouseEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 
 	Ref<InputEventMouseButton> ev;
 	ev.instance();
@@ -375,8 +375,8 @@ EM_BOOL OS_JavaScript::mouse_button_callback(int p_event_type, const EmscriptenM
 	return true;
 }
 
-EM_BOOL OS_JavaScript::mousemove_callback(int p_event_type, const EmscriptenMouseEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::mousemove_callback(int p_event_type, const EmscriptenMouseEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 
 	int input_mask = os->input->get_mouse_button_mask();
 	Point2 pos = compute_position_in_canvas(p_event->clientX, p_event->clientY);
@@ -442,7 +442,7 @@ static const char *godot2dom_cursor(OS::CursorShape p_shape) {
 	}
 }
 
-void OS_JavaScript::set_cursor_shape(CursorShape p_shape) {
+void OS_Emscripten::set_cursor_shape(CursorShape p_shape) {
 	ERR_FAIL_INDEX(p_shape, CURSOR_MAX);
 	if (cursor_shape == p_shape) {
 		return;
@@ -451,7 +451,7 @@ void OS_JavaScript::set_cursor_shape(CursorShape p_shape) {
 	godot_js_display_cursor_set_shape(godot2dom_cursor(cursor_shape));
 }
 
-void OS_JavaScript::set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+void OS_Emscripten::set_custom_mouse_cursor(const Ref<Resource> &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
 	if (p_cursor.is_valid()) {
 		Ref<Texture> texture = p_cursor;
 		Ref<AtlasTexture> atlas_texture = p_cursor;
@@ -529,7 +529,7 @@ void OS_JavaScript::set_custom_mouse_cursor(const Ref<Resource> &p_cursor, Curso
 	}
 }
 
-void OS_JavaScript::set_mouse_mode(OS::MouseMode p_mode) {
+void OS_Emscripten::set_mouse_mode(OS::MouseMode p_mode) {
 	ERR_FAIL_COND_MSG(p_mode == MOUSE_MODE_CONFINED, "MOUSE_MODE_CONFINED is not supported for the HTML5 platform.");
 	if (p_mode == get_mouse_mode())
 		return;
@@ -550,7 +550,7 @@ void OS_JavaScript::set_mouse_mode(OS::MouseMode p_mode) {
 	}
 }
 
-OS::MouseMode OS_JavaScript::get_mouse_mode() const {
+OS::MouseMode OS_Emscripten::get_mouse_mode() const {
 	if (godot_js_display_cursor_is_hidden())
 		return MOUSE_MODE_HIDDEN;
 
@@ -561,9 +561,9 @@ OS::MouseMode OS_JavaScript::get_mouse_mode() const {
 
 // Wheel
 
-EM_BOOL OS_JavaScript::wheel_callback(int p_event_type, const EmscriptenWheelEvent *p_event, void *p_user_data) {
+EM_BOOL OS_Emscripten::wheel_callback(int p_event_type, const EmscriptenWheelEvent *p_event, void *p_user_data) {
 	ERR_FAIL_COND_V(p_event_type != EMSCRIPTEN_EVENT_WHEEL, false);
-	OS_JavaScript *os = get_singleton();
+	OS_Emscripten *os = get_singleton();
 	if (!godot_js_display_canvas_is_focused()) {
 		if (os->cursor_inside_canvas) {
 			godot_js_display_canvas_focus();
@@ -612,12 +612,12 @@ EM_BOOL OS_JavaScript::wheel_callback(int p_event_type, const EmscriptenWheelEve
 
 // Touch
 
-bool OS_JavaScript::has_touchscreen_ui_hint() const {
+bool OS_Emscripten::has_touchscreen_ui_hint() const {
 	return godot_js_display_touchscreen_is_available();
 }
 
-EM_BOOL OS_JavaScript::touch_press_callback(int p_event_type, const EmscriptenTouchEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::touch_press_callback(int p_event_type, const EmscriptenTouchEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 	Ref<InputEventScreenTouch> ev;
 	ev.instance();
 	int lowest_id_index = -1;
@@ -639,8 +639,8 @@ EM_BOOL OS_JavaScript::touch_press_callback(int p_event_type, const EmscriptenTo
 	return true;
 }
 
-EM_BOOL OS_JavaScript::touchmove_callback(int p_event_type, const EmscriptenTouchEvent *p_event, void *p_user_data) {
-	OS_JavaScript *os = get_singleton();
+EM_BOOL OS_Emscripten::touchmove_callback(int p_event_type, const EmscriptenTouchEvent *p_event, void *p_user_data) {
+	OS_Emscripten *os = get_singleton();
 	Ref<InputEventScreenDrag> ev;
 	ev.instance();
 	int lowest_id_index = -1;
@@ -662,7 +662,7 @@ EM_BOOL OS_JavaScript::touchmove_callback(int p_event_type, const EmscriptenTouc
 }
 
 // Gamepad
-void OS_JavaScript::gamepad_callback(int p_index, int p_connected, const char *p_id, const char *p_guid) {
+void OS_Emscripten::gamepad_callback(int p_index, int p_connected, const char *p_id, const char *p_guid) {
 	InputDefault *input = get_singleton()->input;
 	if (p_connected) {
 		input->joy_connection_changed(p_index, true, String::utf8(p_id), String::utf8(p_guid));
@@ -671,7 +671,7 @@ void OS_JavaScript::gamepad_callback(int p_index, int p_connected, const char *p
 	}
 }
 
-void OS_JavaScript::process_joypads() {
+void OS_Emscripten::process_joypads() {
 	int32_t pads = godot_js_display_gamepad_sample_count();
 	int32_t s_btns_num = 0;
 	int32_t s_axes_num = 0;
@@ -706,21 +706,21 @@ void OS_JavaScript::process_joypads() {
 	}
 }
 
-bool OS_JavaScript::is_joy_known(int p_device) {
+bool OS_Emscripten::is_joy_known(int p_device) {
 	return input->is_joy_mapped(p_device);
 }
 
-String OS_JavaScript::get_joy_guid(int p_device) const {
+String OS_Emscripten::get_joy_guid(int p_device) const {
 	return input->get_joy_guid_remapped(p_device);
 }
 
 // Video
 
-int OS_JavaScript::get_video_driver_count() const {
+int OS_Emscripten::get_video_driver_count() const {
 	return VIDEO_DRIVER_MAX;
 }
 
-const char *OS_JavaScript::get_video_driver_name(int p_driver) const {
+const char *OS_Emscripten::get_video_driver_name(int p_driver) const {
 	switch (p_driver) {
 		case VIDEO_DRIVER_GLES3:
 			return "GLES3";
@@ -732,41 +732,41 @@ const char *OS_JavaScript::get_video_driver_name(int p_driver) const {
 
 // Audio
 
-int OS_JavaScript::get_audio_driver_count() const {
+int OS_Emscripten::get_audio_driver_count() const {
 	return 1;
 }
 
-const char *OS_JavaScript::get_audio_driver_name(int p_driver) const {
+const char *OS_Emscripten::get_audio_driver_name(int p_driver) const {
 	return "JavaScript";
 }
 
 // Clipboard
-void OS_JavaScript::update_clipboard_callback(const char *p_text) {
+void OS_Emscripten::update_clipboard_callback(const char *p_text) {
 	// Only call set_clipboard from OS (sets local clipboard)
 	get_singleton()->OS::set_clipboard(p_text);
 }
 
-void OS_JavaScript::set_clipboard(const String &p_text) {
+void OS_Emscripten::set_clipboard(const String &p_text) {
 	OS::set_clipboard(p_text);
 	int err = godot_js_display_clipboard_set(p_text.utf8().get_data());
 	ERR_FAIL_COND_MSG(err, "Clipboard API is not supported.");
 }
 
-String OS_JavaScript::get_clipboard() const {
+String OS_Emscripten::get_clipboard() const {
 	godot_js_display_clipboard_get(update_clipboard_callback);
 	return this->OS::get_clipboard();
 }
 
 // Lifecycle
-int OS_JavaScript::get_current_video_driver() const {
+int OS_Emscripten::get_current_video_driver() const {
 	return video_driver_index;
 }
 
-void OS_JavaScript::initialize_core() {
+void OS_Emscripten::initialize_core() {
 	OS_Unix::initialize_core();
 }
 
-Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
+Error OS_Emscripten::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 	video_mode = p_desired;
 	// fullscreen_change_callback will correct this if the request is successful.
 	video_mode.fullscreen = false;
@@ -775,64 +775,68 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 
 	swap_ok_cancel = godot_js_display_is_swap_ok_cancel() == 1;
 
-	EmscriptenWebGLContextAttributes attributes;
-	emscripten_webgl_init_context_attributes(&attributes);
-	attributes.alpha = GLOBAL_GET("display/window/per_pixel_transparency/allowed");
-	attributes.antialias = false;
-	attributes.explicitSwapControl = true;
-	ERR_FAIL_INDEX_V(p_video_driver, VIDEO_DRIVER_MAX, ERR_INVALID_PARAMETER);
-
 	if (p_desired.layered) {
 		set_window_per_pixel_transparency_enabled(true);
 	}
 
-#ifdef TOOLS_ENABLED
-	bool gles3 = false;
-#else
-	bool gles3 = true;
+	bool gles3_context = true;
 	if (p_video_driver == VIDEO_DRIVER_GLES2) {
-		gles3 = false;
+		gles3_context = false;
 	}
-#endif
 
-	bool gl_initialization_error = false;
+	bool editor = Engine::get_singleton()->is_editor_hint();
+	Error gl_error = OK;
 
-	webgl_ctx = emscripten_webgl_create_context(canvas_id, &attributes);
-	if (emscripten_webgl_make_context_current(webgl_ctx) != EMSCRIPTEN_RESULT_SUCCESS) {
-		gl_initialization_error = true;
-	}
+	EmscriptenWebGLContextAttributes attributes;
+	emscripten_webgl_init_context_attributes(&attributes);
+	attributes.alpha = is_layered_allowed();
+	attributes.antialias = false;
+	attributes.explicitSwapControl = true;
 
 	while (true) {
-		if (gles3) {
-			if (godot_js_display_has_webgl(2) && RasterizerGLES3::is_viable() == OK) {
+		if (gles3_context) {
+			if (godot_js_display_has_webgl(2)) {
 				attributes.majorVersion = 2;
-				RasterizerGLES3::register_config();
-				RasterizerGLES3::make_current();
 				break;
 			} else {
-				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2")) {
+				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
+					WARN_PRINT("Falling back to the GLES2 driver");
 					p_video_driver = VIDEO_DRIVER_GLES2;
-					gles3 = false;
+					gles3_context = false;
 					continue;
 				} else {
-					gl_initialization_error = true;
+					gl_error = FAILED;
 					break;
 				}
 			}
 		} else {
-			if (godot_js_display_has_webgl(1) && RasterizerGLES2::is_viable() == OK) {
+			if (godot_js_display_has_webgl(1)) {
 				attributes.majorVersion = 1;
-				RasterizerGLES2::register_config();
-				RasterizerGLES2::make_current();
-				break;
 			} else {
-				gl_initialization_error = true;
-				break;
+				gl_error = FAILED;
 			}
+			break;
 		}
 	}
 
-	if (gl_initialization_error) {
+	if (gl_error == OK) {
+		webgl_ctx = emscripten_webgl_create_context(canvas_id, &attributes);
+		gl_error = emscripten_webgl_make_context_current(webgl_ctx) == EMSCRIPTEN_RESULT_SUCCESS ? OK : FAILED;
+	}
+
+	if (gl_error == OK) {
+		if (gles3_context) {
+			gl_error = RasterizerGLES3::is_viable();
+			RasterizerGLES3::register_config();
+			RasterizerGLES3::make_current();
+		} else {
+			gl_error = RasterizerGLES2::is_viable();
+			RasterizerGLES2::register_config();
+			RasterizerGLES2::make_current();
+		}
+	}
+
+	if (gl_error != OK) {
 		OS::get_singleton()->alert("Your browser does not support any of the supported WebGL versions.\n"
 								   "Please update your browser version.",
 				"Unable to initialize Video driver");
@@ -878,14 +882,14 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 
 	// For APIs that are not (sufficiently) exposed, a
 	// library is used below (implemented in library_godot_display.js).
-	godot_js_display_notification_cb(&OS_JavaScript::send_notification_callback,
+	godot_js_display_notification_cb(&OS_Emscripten::send_notification_callback,
 			MainLoop::NOTIFICATION_WM_MOUSE_ENTER,
 			MainLoop::NOTIFICATION_WM_MOUSE_EXIT,
 			MainLoop::NOTIFICATION_WM_FOCUS_IN,
 			MainLoop::NOTIFICATION_WM_FOCUS_OUT);
-	godot_js_display_paste_cb(&OS_JavaScript::update_clipboard_callback);
-	godot_js_display_drop_files_cb(&OS_JavaScript::drop_files_callback);
-	godot_js_display_gamepad_cb(&OS_JavaScript::gamepad_callback);
+	godot_js_display_paste_cb(&OS_Emscripten::update_clipboard_callback);
+	godot_js_display_drop_files_cb(&OS_Emscripten::drop_files_callback);
+	godot_js_display_gamepad_cb(&OS_Emscripten::gamepad_callback);
 	godot_js_display_vk_cb(&input_text_callback);
 
 	visual_server->init();
@@ -893,8 +897,8 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 	return OK;
 }
 
-void OS_JavaScript::input_text_callback(const char *p_text, int p_cursor) {
-	OS_JavaScript *os = OS_JavaScript::get_singleton();
+void OS_Emscripten::input_text_callback(const char *p_text, int p_cursor) {
+	OS_Emscripten *os = OS_Emscripten::get_singleton();
 	if (!os || !os->get_main_loop()) {
 		return;
 	}
@@ -914,50 +918,50 @@ void OS_JavaScript::input_text_callback(const char *p_text, int p_cursor) {
 	}
 }
 
-bool OS_JavaScript::has_virtual_keyboard() const {
+bool OS_Emscripten::has_virtual_keyboard() const {
 	return godot_js_display_vk_available() != 0;
 }
 
-void OS_JavaScript::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect, bool p_multiline, int p_max_input_length, int p_cursor_start, int p_cursor_end) {
+void OS_Emscripten::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect, bool p_multiline, int p_max_input_length, int p_cursor_start, int p_cursor_end) {
 	godot_js_display_vk_show(p_existing_text.utf8().get_data(), p_multiline, p_cursor_start, p_cursor_end);
 }
 
-void OS_JavaScript::hide_virtual_keyboard() {
+void OS_Emscripten::hide_virtual_keyboard() {
 	godot_js_display_vk_hide();
 }
 
-bool OS_JavaScript::get_swap_ok_cancel() {
+bool OS_Emscripten::get_swap_ok_cancel() {
 	return swap_ok_cancel;
 }
 
-void OS_JavaScript::swap_buffers() {
+void OS_Emscripten::swap_buffers() {
 	emscripten_webgl_commit_frame();
 }
 
-void OS_JavaScript::set_main_loop(MainLoop *p_main_loop) {
+void OS_Emscripten::set_main_loop(MainLoop *p_main_loop) {
 	main_loop = p_main_loop;
 	input->set_main_loop(p_main_loop);
 }
 
-MainLoop *OS_JavaScript::get_main_loop() const {
+MainLoop *OS_Emscripten::get_main_loop() const {
 	return main_loop;
 }
 
-void OS_JavaScript::resume_audio() {
+void OS_Emscripten::resume_audio() {
 	if (audio_driver_javascript) {
 		audio_driver_javascript->resume();
 	}
 }
 
-void OS_JavaScript::fs_sync_callback() {
+void OS_Emscripten::fs_sync_callback() {
 	get_singleton()->idb_is_syncing = false;
 }
 
-bool OS_JavaScript::main_loop_iterate() {
+bool OS_Emscripten::main_loop_iterate() {
 	if (is_userfs_persistent() && idb_needs_sync && !idb_is_syncing) {
 		idb_is_syncing = true;
 		idb_needs_sync = false;
-		godot_js_os_fs_sync(&OS_JavaScript::fs_sync_callback);
+		godot_js_os_fs_sync(&OS_Emscripten::fs_sync_callback);
 	}
 
 	if (godot_js_display_gamepad_sample() == OK)
@@ -979,24 +983,24 @@ bool OS_JavaScript::main_loop_iterate() {
 	return Main::iteration();
 }
 
-int OS_JavaScript::get_screen_dpi(int p_screen) const {
+int OS_Emscripten::get_screen_dpi(int p_screen) const {
 	return godot_js_display_screen_dpi_get();
 }
 
-float OS_JavaScript::get_screen_scale(int p_screen) const {
+float OS_Emscripten::get_screen_scale(int p_screen) const {
 	return godot_js_display_pixel_ratio_get();
 }
 
-float OS_JavaScript::get_screen_max_scale() const {
+float OS_Emscripten::get_screen_max_scale() const {
 	return get_screen_scale();
 }
 
-void OS_JavaScript::delete_main_loop() {
+void OS_Emscripten::delete_main_loop() {
 	memdelete(main_loop);
 	main_loop = NULL;
 }
 
-void OS_JavaScript::finalize() {
+void OS_Emscripten::finalize() {
 	memdelete(input);
 	visual_server->finish();
 	emscripten_webgl_commit_frame();
@@ -1009,7 +1013,7 @@ void OS_JavaScript::finalize() {
 
 // Miscellaneous
 
-Error OS_JavaScript::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
+Error OS_Emscripten::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
 	Array args;
 	for (const List<String>::Element *E = p_arguments.front(); E; E = E->next()) {
 		args.push_back(E->get());
@@ -1020,19 +1024,19 @@ Error OS_JavaScript::execute(const String &p_path, const List<String> &p_argumen
 	return OK;
 }
 
-Error OS_JavaScript::kill(const ProcessID &p_pid) {
+Error OS_Emscripten::kill(const ProcessID &p_pid) {
 	ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "OS::kill() is not available on the HTML5 platform.");
 }
 
-int OS_JavaScript::get_process_id() const {
+int OS_Emscripten::get_process_id() const {
 	ERR_FAIL_V_MSG(0, "OS::get_process_id() is not available on the HTML5 platform.");
 }
 
-int OS_JavaScript::get_processor_count() const {
+int OS_Emscripten::get_processor_count() const {
 	return godot_js_os_hw_concurrency_get();
 }
 
-bool OS_JavaScript::_check_internal_feature_support(const String &p_feature) {
+bool OS_Emscripten::_check_internal_feature_support(const String &p_feature) {
 	if (p_feature == "HTML5" || p_feature == "web") {
 		return true;
 	}
@@ -1056,15 +1060,15 @@ bool OS_JavaScript::_check_internal_feature_support(const String &p_feature) {
 	return false;
 }
 
-void OS_JavaScript::alert(const String &p_alert, const String &p_title) {
+void OS_Emscripten::alert(const String &p_alert, const String &p_title) {
 	godot_js_display_alert(p_alert.utf8().get_data());
 }
 
-void OS_JavaScript::set_window_title(const String &p_title) {
+void OS_Emscripten::set_window_title(const String &p_title) {
 	godot_js_display_window_title_set(p_title.utf8().get_data());
 }
 
-void OS_JavaScript::set_icon(const Ref<Image> &p_icon) {
+void OS_Emscripten::set_icon(const Ref<Image> &p_icon) {
 	ERR_FAIL_COND(p_icon.is_null());
 	Ref<Image> icon = p_icon;
 	if (icon->is_compressed()) {
@@ -1098,57 +1102,57 @@ void OS_JavaScript::set_icon(const Ref<Image> &p_icon) {
 	godot_js_display_window_icon_set(r.ptr(), len);
 }
 
-String OS_JavaScript::get_executable_path() const {
+String OS_Emscripten::get_executable_path() const {
 	return OS::get_executable_path();
 }
 
-Error OS_JavaScript::shell_open(String p_uri) {
+Error OS_Emscripten::shell_open(String p_uri) {
 	// Open URI in a new tab, browser will deal with it by protocol.
 	godot_js_os_shell_open(p_uri.utf8().get_data());
 	return OK;
 }
 
-String OS_JavaScript::get_name() const {
+String OS_Emscripten::get_name() const {
 	return "HTML5";
 }
 
-bool OS_JavaScript::can_draw() const {
+bool OS_Emscripten::can_draw() const {
 	return true; // Always?
 }
 
-String OS_JavaScript::get_user_data_dir() const {
+String OS_Emscripten::get_user_data_dir() const {
 	return "/userfs";
 };
 
-String OS_JavaScript::get_cache_path() const {
+String OS_Emscripten::get_cache_path() const {
 	return "/home/web_user/.cache";
 }
 
-String OS_JavaScript::get_config_path() const {
+String OS_Emscripten::get_config_path() const {
 	return "/home/web_user/.config";
 }
 
-String OS_JavaScript::get_data_path() const {
+String OS_Emscripten::get_data_path() const {
 	return "/home/web_user/.local/share";
 }
 
-OS::PowerState OS_JavaScript::get_power_state() {
+OS::PowerState OS_Emscripten::get_power_state() {
 	WARN_PRINT_ONCE("Power management is not supported for the HTML5 platform, defaulting to POWERSTATE_UNKNOWN");
 	return OS::POWERSTATE_UNKNOWN;
 }
 
-int OS_JavaScript::get_power_seconds_left() {
+int OS_Emscripten::get_power_seconds_left() {
 	WARN_PRINT_ONCE("Power management is not supported for the HTML5 platform, defaulting to -1");
 	return -1;
 }
 
-int OS_JavaScript::get_power_percent_left() {
+int OS_Emscripten::get_power_percent_left() {
 	WARN_PRINT_ONCE("Power management is not supported for the HTML5 platform, defaulting to -1");
 	return -1;
 }
 
-void OS_JavaScript::file_access_close_callback(const String &p_file, int p_flags) {
-	OS_JavaScript *os = get_singleton();
+void OS_Emscripten::file_access_close_callback(const String &p_file, int p_flags) {
+	OS_Emscripten *os = get_singleton();
 
 	if (!(os->is_userfs_persistent() && p_flags & FileAccess::WRITE)) {
 		return; // FS persistence is not working or we are not writing.
@@ -1163,22 +1167,22 @@ void OS_JavaScript::file_access_close_callback(const String &p_file, int p_flags
 	}
 }
 
-bool OS_JavaScript::is_userfs_persistent() const {
+bool OS_Emscripten::is_userfs_persistent() const {
 	return idb_available;
 }
 
-Error OS_JavaScript::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
+Error OS_Emscripten::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
 	String path = p_path.get_file();
 	p_library_handle = dlopen(path.utf8().get_data(), RTLD_NOW);
 	ERR_FAIL_COND_V_MSG(!p_library_handle, ERR_CANT_OPEN, "Can't open dynamic library: " + p_path + ". Error: " + dlerror());
 	return OK;
 }
 
-OS_JavaScript *OS_JavaScript::get_singleton() {
-	return static_cast<OS_JavaScript *>(OS::get_singleton());
+OS_Emscripten *OS_Emscripten::get_singleton() {
+	return static_cast<OS_Emscripten *>(OS::get_singleton());
 }
 
-OS_JavaScript::OS_JavaScript() {
+OS_Emscripten::OS_Emscripten() {
 	// Expose method for requesting quit.
 	godot_js_os_request_quit_cb(&request_quit_callback);
 	// Set canvas ID
