@@ -30,10 +30,10 @@
 
 #include "thread_posix.h"
 
-#if defined(UNIX_ENABLED) && !defined(NO_THREADS)
-
 #include "core/os/thread.h"
 #include "core/ustring.h"
+
+#if defined(UNIX_ENABLED) && !defined(NO_THREADS)
 
 #ifdef PTHREAD_BSD_SET_NAME
 #include <pthread_np.h>

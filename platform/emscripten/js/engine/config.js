@@ -273,9 +273,7 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 				return {};
 			},
 			'locateFile': function (path) {
-				if (path.endsWith('.worker.js')) {
-					return `${loadPath}.worker.js`;
-				} else if (path.endsWith('.audio.worklet.js')) {
+				if (path.endsWith('.audio.worklet.js')) {
 					return `${loadPath}.audio.worklet.js`;
 				} else if (path.endsWith('.js')) {
 					return `${loadPath}.js`;

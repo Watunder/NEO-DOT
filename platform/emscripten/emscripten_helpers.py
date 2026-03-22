@@ -16,7 +16,7 @@ def run_closure_compiler(target, source, env, for_signature):
 
 
 def get_build_version():
-    import version
+    from configs import version
 
     name = "custom_build"
     if os.getenv("BUILD_NAME") != None:
@@ -66,7 +66,7 @@ def create_template_zip(env, js, wasm, extra):
         # And logo/favicon
         in_files.append("#misc/dist/html/logo.svg")
         out_files.append(zip_dir.File("logo.svg"))
-        in_files.append("#icon.png")
+        in_files.append("#platform/emscripten/icon.png")
         out_files.append(zip_dir.File("favicon.png"))
         # PWA
         service_worker = env.Substfile(

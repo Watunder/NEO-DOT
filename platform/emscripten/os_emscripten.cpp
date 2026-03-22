@@ -714,22 +714,6 @@ String OS_Emscripten::get_joy_guid(int p_device) const {
 	return input->get_joy_guid_remapped(p_device);
 }
 
-// Video
-
-int OS_Emscripten::get_video_driver_count() const {
-	return VIDEO_DRIVER_MAX;
-}
-
-const char *OS_Emscripten::get_video_driver_name(int p_driver) const {
-	switch (p_driver) {
-		case VIDEO_DRIVER_GLES3:
-			return "GLES3";
-		case VIDEO_DRIVER_GLES2:
-			return "GLES2";
-	}
-	ERR_FAIL_V_MSG(NULL, "Invalid video driver index: " + itos(p_driver) + ".");
-}
-
 // Audio
 
 int OS_Emscripten::get_audio_driver_count() const {

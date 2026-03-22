@@ -21,6 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: Editor (target=release_debug, tools=yes, threads_enabled=yes)
+            cache-name: emscripten-editor
+            target: release_debug
+            tools: yes
+            sconsflags: threads_enabled=yes
+
           - name: Template (target=release, tools=no)
             cache-name: emscripten-template
             target: release
@@ -55,7 +61,7 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          sconsflags: ${{ env.SCONSFLAGS }}
+          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: emscripten
           target: ${{ matrix.target }}
           tools: ${{ matrix.tools }}

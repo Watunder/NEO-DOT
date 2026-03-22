@@ -44,7 +44,6 @@ if env["gdnative_enabled"]:
     # Configure it as a main module (dynamic linking support).
     sys_env.Append(CCFLAGS=["-s", "MAIN_MODULE=1"])
     sys_env.Append(LINKFLAGS=["-s", "MAIN_MODULE=1"])
-    sys_env.Append(CCFLAGS=["-s", "EXPORT_ALL=1"])
     sys_env.Append(LINKFLAGS=["-s", "EXPORT_ALL=1"])
     sys_env.Append(LINKFLAGS=["-s", "WARN_ON_UNDEFINED_SYMBOLS=0"])
     # Force exporting the standard library (printf, malloc, etc.)

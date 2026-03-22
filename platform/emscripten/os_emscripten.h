@@ -160,9 +160,6 @@ public:
 	virtual bool is_joy_known(int p_device);
 	virtual String get_joy_guid(int p_device) const;
 
-	virtual int get_video_driver_count() const;
-	virtual const char *get_video_driver_name(int p_driver) const;
-
 	virtual int get_audio_driver_count() const;
 	virtual const char *get_audio_driver_name(int p_driver) const;
 

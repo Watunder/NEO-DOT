@@ -11,7 +11,6 @@ const CACHED_FILES = [
 	"godot.tools.html",
 	"offline.html",
 	"godot.tools.js",
-	"godot.tools.worker.js",
 	"godot.tools.audio.worklet.js",
 	"logo.svg",
 	"favicon.png",
