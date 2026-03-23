@@ -55,6 +55,11 @@ jobs:
           echo "$EMSDK_PATH" >> $GITHUB_PATH
           echo "$EMSDK_PATH/upstream/emscripten" >> $GITHUB_PATH
 
+      - name: Patch Emscripten SDK
+        shell: bash
+        run: |
+          patch -d "emsdk/upstream/emscripten" -p1 < ".github/patches/emscripten-3.1.74-fix-crash-in-getifaddrs.patch"
+
       - name: Setup python and scons
         uses: ./.github/actions/godot-deps
 
