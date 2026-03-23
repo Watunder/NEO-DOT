@@ -95,9 +95,6 @@ public:
 		} else if (req[1] == basereq + ".audio.worklet.js") {
 			filepath = cache_path.plus_file(req[1].get_file());
 			ctype = "application/javascript";
-		} else if (req[1] == basereq + ".service.worker.js") {
-			filepath = cache_path.plus_file(req[1].get_file());
-			ctype = "application/javascript";
 		} else if (req[1] == basereq + ".pck") {
 			filepath = cache_path.plus_file(req[1].get_file());
 			ctype = "application/octet-stream";
@@ -643,7 +640,6 @@ Error EditorExportPlatformEmscripten::run(const Ref<EditorExportPreset> &p_prese
 		// Export generates several files, clean them up on failure.
 		DirAccess::remove_file_or_error(basepath + ".html");
 		DirAccess::remove_file_or_error(basepath + ".js");
-		DirAccess::remove_file_or_error(basepath + ".service.worker.js");
 		DirAccess::remove_file_or_error(basepath + ".audio.worklet.js");
 		DirAccess::remove_file_or_error(basepath + ".pck");
 		DirAccess::remove_file_or_error(basepath + ".png");
