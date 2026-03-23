@@ -777,30 +777,17 @@ Error OS_Emscripten::initialize(const VideoMode &p_desired, int p_video_driver, 
 	attributes.antialias = false;
 	attributes.explicitSwapControl = true;
 
-	while (true) {
-		if (gles3_context) {
-			if (godot_js_display_has_webgl(2)) {
-				attributes.majorVersion = 2;
-				break;
-			} else {
-				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor) {
-					WARN_PRINT("Falling back to the GLES2 driver");
-					p_video_driver = VIDEO_DRIVER_GLES2;
-					gles3_context = false;
-					continue;
-				} else {
-					gl_error = FAILED;
-					break;
-				}
-			}
-		} else {
-			if (godot_js_display_has_webgl(1)) {
-				attributes.majorVersion = 1;
-			} else {
-				gl_error = FAILED;
-			}
-			break;
+	if (godot_js_display_has_webgl(2)) {
+		attributes.majorVersion = 2;
+	} else if (godot_js_display_has_webgl(1)) {
+		if (gles3_context && (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2") || editor)) {
+			WARN_PRINT("Falling back to the GLES2 driver");
+			p_video_driver = VIDEO_DRIVER_GLES2;
+			gles3_context = false;
 		}
+		attributes.majorVersion = 1;
+	} else {
+		gl_error = FAILED;
 	}
 
 	if (gl_error == OK) {
