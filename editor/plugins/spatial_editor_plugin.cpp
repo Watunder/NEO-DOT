@@ -2527,9 +2527,9 @@ void SpatialEditorViewport::_draw() {
 	if (message_time > 0) {
 		Ref<Font> font = get_font("font", "Label");
 		Point2 msgpos = Point2(5, get_size().y - 20);
-		draw_string(font, msgpos + Point2(1, 1), message, Color(0, 0, 0, 0.8));
-		draw_string(font, msgpos + Point2(-1, -1), message, Color(0, 0, 0, 0.8));
-		draw_string(font, msgpos, message, Color(1, 1, 1, 1));
+		surface->draw_string(font, msgpos + Point2(1, 1), message, Color(0, 0, 0, 0.8));
+		surface->draw_string(font, msgpos + Point2(-1, -1), message, Color(0, 0, 0, 0.8));
+		surface->draw_string(font, msgpos, message, Color(1, 1, 1, 1));
 	}
 
 	if (_edit.mode == TRANSFORM_ROTATE) {
