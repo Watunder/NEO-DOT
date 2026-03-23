@@ -29,7 +29,8 @@ def get_opts():
     from SCons.Variables import BoolVariable
 
     return [
-        ("initial_memory", "Initial WASM memory (in MiB)", 32),
+        ("initial_memory", "Initial WebAssembly memory (in MiB)", 32),
+        ("stack_size", "WebAssembly stack size (in KiB)", 5120),
         BoolVariable("use_assertions", "Use Emscripten runtime assertions", False),
         BoolVariable("use_thinlto", "Use ThinLTO", False),
         BoolVariable("use_ubsan", "Use Emscripten undefined behavior sanitizer (UBSAN)", False),
@@ -39,6 +40,7 @@ def get_opts():
         # eval() can be a security concern, so it can be disabled.
         BoolVariable("javascript_eval", "Enable JavaScript eval interface", True),
         BoolVariable("threads_enabled", "Enable WebAssembly Threads support (limited browser support)", False),
+        ("default_pthread_stack_size", "WebAssembly pthread default stack size (in KiB)", 2048),
         BoolVariable("gdnative_enabled", "Enable WebAssembly GDNative support (produces bigger binaries)", False),
         BoolVariable("use_closure_compiler", "Use closure compiler to minimize JavaScript code", False),
     ]
@@ -92,9 +94,9 @@ def configure(env):
         if not env["threads_enabled"]:
             print("Threads must be enabled to build the editor. Please add the 'threads_enabled=yes' option")
             sys.exit(255)
-        if env["initial_memory"] < 32:
+        if env["initial_memory"] < 64:
             print("Editor build requires at least 32MiB of initial memory. Forcing it.")
-            env["initial_memory"] = 32
+            env["initial_memory"] = 64
     else:
         # Disable exceptions and rtti on non-tools (template) builds
         # These flags help keep the file size down.
@@ -103,6 +105,7 @@ def configure(env):
         env.Append(CPPDEFINES=["NO_SAFE_CAST"])
 
     env.Append(LINKFLAGS=["-s", "INITIAL_MEMORY=%sMB" % env["initial_memory"]])
+    env.Append(LINKFLAGS=["-s", "STACK_SIZE=%sKB" % env["stack_size"]])
 
     ## Copy env variables.
     env["ENV"] = os.environ
@@ -189,6 +192,7 @@ def configure(env):
         env.Append(CPPDEFINES=["PTHREAD_NO_RENAME"])
         env.Append(CCFLAGS=["-s", "USE_PTHREADS=1"])
         env.Append(LINKFLAGS=["-s", "USE_PTHREADS=1"])
+        env.Append(LINKFLAGS=["-s", "DEFAULT_PTHREAD_STACK_SIZE=%sKB" % env["default_pthread_stack_size"]])
         env.Append(LINKFLAGS=["-s", "PTHREAD_POOL_SIZE=8"])
         env.Append(LINKFLAGS=["-s", "WASM_MEM_MAX=2048MB"])
         env.extra_suffix = ".threads" + env.extra_suffix
