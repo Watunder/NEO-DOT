@@ -103,6 +103,40 @@
 			padding: 0.6rem 1.8rem;
 		}
 
+		.progress-bar {
+			position: fixed;
+			bottom: 1rem;
+			right: 1rem;
+			z-index: 1;
+			width: 48px;
+			height: 48px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			pointer-events: none;
+		}
+
+		.progress-bar.circle {
+			background: conic-gradient(#699ce8 0%, #699ce8 calc(var(--percent, 0) * 1%), #eeeeee calc(var(--percent, 0) * 1%), #eeeeee 100%);
+			border: 1px solid #4c5270;
+			mask: radial-gradient(transparent, transparent 49%, #000 51%, #000 100%);
+			border-radius: 50%;
+		}
+
+		.progress-bar.text {
+			color: #eef2ff;
+			font-size: 0.7rem;
+		}
+
+		#progress-bar {
+			transition: all 0.2s ease;
+			opacity: 0;
+		}
+
+		#progress-bar.visible {
+			opacity: 1;
+		}
+
 		.menu-toggle {
 			position: fixed;
 			bottom: 1rem;
@@ -315,8 +349,27 @@
 </head>
 
 <body class="loader-mode">
-	<div class="menu-toggle" id="menu-toggle" role="button" tabindex="0">☰</div>
+	<div id="welcome-modal" class="welcome-modal" role="dialog"
+		onclick="if (event.target === this) closeWelcomeModal(false)">
+		<div class="welcome-modal-content">
+			<h2>Important - Please read before continuing</h2>
+			<p> The Godot Web Editor has some limitations compared to the native version. Its main focus is education
+				and experimentation.</p>
+			<p><strong>This is Not recommendedfor production use</strong>, refer to the <a
+					href="https://docs.godotengine.org/en/latest/tutorials/editor/using_the_web_editor.html"
+					target="_blank" rel="noopener">Web editor documentation</a> for more details.
+			</p>
+			<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal(true)">OK, don't
+				show again</button>
+		</div>
+	</div>
 
+	<div class="progress-bar" id="progress-bar">
+		<div class="progress-bar circle" id="progress-bar-circle"></div>
+		<div class="progress-bar text" id="progress-bar-text">0%</div>
+	</div>
+
+	<div class="menu-toggle" id="menu-toggle" role="button" tabindex="0">☰</div>
 	<div id="tabs-buttons">
 		<button id="btn-tab-loader" class="btn tab-btn" onclick="showTab('loader')">Loader</button>
 		<button id="btn-tab-editor" class="btn tab-btn" disabled="disabled" onclick="showTab('editor')">Editor</button>
@@ -332,17 +385,13 @@
 					<option value="GLES2" selected="selected">GLES2 (WebGL 1.0)</option>
 					<option value="GLES3">GLES3 (WebGL 2.0)</option>
 				</select>
-
 				<input id="zip-file" type="file" accept=".zip" />
-
 				<img src="logo.svg" alt="Godot Engine logo" width="1024" height="414"
 					style="width: auto; height: auto; max-width: 85%; max-height: 220px" />
-
 				<div id="tab-loader-btns">
 					<button class="btn start-btn" onclick="startEditor()">Start Godot editor</button>
 					<button class="btn" onclick="deletePersistence()">Delete persistent data</button>
 				</div>
-
 				<div class="version-text">@GODOT_VERSION@</div>
 			</div>
 		</div>
@@ -360,23 +409,18 @@
 		</div>
 	</div>
 
-	<div id="welcome-modal" class="welcome-modal" role="dialog"
-		onclick="if (event.target === this) closeWelcomeModal(false)">
-		<div class="welcome-modal-content">
-			<h2>Important - Please read before continuing</h2>
-			<p> The Godot Web Editor has some limitations compared to the native version. Its main focus is education
-				and experimentation.</p>
-			<p><strong>This is Not recommendedfor production use</strong>, refer to the <a
-					href="https://docs.godotengine.org/en/latest/tutorials/editor/using_the_web_editor.html"
-					target="_blank" rel="noopener">Web editor documentation</a> for more details
-			</p>
-			<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal(true)">OK, don't
-				show again</button>
-		</div>
-	</div>
-
 	<script type="text/javascript" src="godot.tools.js"></script>
 	<script type="text/javascript">//<![CDATA[
+		const progressBar = document.getElementById("progress-bar");
+		const progressBarCircle = document.getElementById("progress-bar-circle");
+		const progressBarText = document.getElementById("progress-bar-text");
+
+		function updateProgress(value) {
+			let percent = Math.min(Math.ceil(value * 100), 100);
+			progressBarCircle.style.setProperty("--percent", percent);
+			progressBarText.innerText = percent + "%";
+		}
+
 		const menuToggle = document.getElementById("menu-toggle");
 		const buttonsBar = document.getElementById("tabs-buttons");
 		let menuVisible = false;
@@ -495,7 +539,7 @@
 		};
 
 		function setButtonEnabled(id, enabled) {
-			let btn = document.getElementById(id);
+			const btn = document.getElementById(id);
 			if (btn) btn.disabled = !enabled;
 		}
 
@@ -520,9 +564,11 @@
 		}
 
 		function startEditor() {
+			progressBar.classList.add("visible");
+
 			const persistentPaths = ["/home/web_user"];
-			let editorCanvas = document.getElementById("editor-canvas");
-			let gameCanvas = document.getElementById("game-canvas");
+			const editorCanvas = document.getElementById("editor-canvas");
+			const gameCanvas = document.getElementById("game-canvas");
 
 			let initializing = true;
 			let animationCallbacks = [];
@@ -603,7 +649,7 @@
 			}
 
 			function preloadZip() {
-				let fileInput = document.getElementById("zip-file");
+				const fileInput = document.getElementById("zip-file");
 				return new Promise((resolve) => {
 					if (fileInput.files.length > 0) {
 						fileInput.files[0].arrayBuffer().then(resolve).catch(() => resolve());
@@ -613,10 +659,17 @@
 				});
 			}
 
+			let lastLoadedSize = 0;
+
 			const editorConfig = {
 				unloadAfterInit: false,
 				onProgress: (current, total) => {
-					// TODO: Implement the progress bar
+					if (total > 0) {
+						updateProgress(current / total);
+					} else {
+						updateProgress(1.1 * lastLoadedSize / current);
+						lastLoadedSize = current;
+					}
 				},
 				canvas: editorCanvas,
 				canvasResizePolicy: 0,
@@ -640,6 +693,8 @@
 			} else {
 				preloadZip().then(zip => {
 					editor.init("godot.tools").then(() => {
+						progressBar.classList.remove("visible");
+
 						try {
 							editor.copyToFS("/home/web_user/keep", new Uint8Array());
 							if (zip) {
