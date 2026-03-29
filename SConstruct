@@ -57,7 +57,7 @@ platform_arg = ARGUMENTS.get("platform", ARGUMENTS.get("p", False))
 
 if os.name == "nt" and (platform_arg == "android" or methods.get_cmdline_bool("use_mingw", False)):
     custom_tools = ["mingw"]
-elif platform_arg == "javascript":
+elif platform_arg == "emscripten":
     # Use generic POSIX build toolchain for Emscripten.
     custom_tools = ["cc", "c++", "ar", "link", "textfile", "zip"]
 

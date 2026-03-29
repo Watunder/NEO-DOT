@@ -35,6 +35,7 @@
 #include "core/safe_refcount.h"
 
 #include <stddef.h>
+#include <type_traits>
 
 #ifndef PAD_ALIGN
 #define PAD_ALIGN 16 //must always be greater than this at much

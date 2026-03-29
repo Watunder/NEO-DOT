@@ -58,15 +58,15 @@
 
 /*************************************************************************/
 
-#elif defined(__ANDROID__)
+#elif defined(__EMSCRIPTEN__)
 
-#define PLATFORM_ANDROID 1
+#define PLATFORM_EMSCRIPTEN 1
 
 /*************************************************************************/
 
-#elif defined(__linux__)
+#elif defined(__ANDROID__)
 
-#define PLATFORM_LINUX 1
+#define PLATFORM_ANDROID 1
 
 /*************************************************************************/
 
@@ -99,9 +99,9 @@
 
 /*************************************************************************/
 
-#elif defined(__EMSCRIPTEN__)
+#elif defined(__linux__)
 
-#define PLATFORM_EMSCRIPTEN 1
+#define PLATFORM_LINUX 1
 
 /*************************************************************************/
 

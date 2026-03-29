@@ -261,7 +261,7 @@ uint64_t OS_Unix::get_ticks_usec() const {
 Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
 #ifdef PLATFORM_EMSCRIPTEN
 	// Don't compile this code at all to avoid undefined references.
-	// Actual virtual call goes to OS_JavaScript.
+	// Actual virtual call goes to OS_Emscripten.
 	ERR_FAIL_V(ERR_BUG);
 #else
 	if (p_blocking && r_pipe) {

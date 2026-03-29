@@ -28,11 +28,12 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "configs/platform_defines.h"
 #ifndef PLATFORM_EMSCRIPTEN
 
-#include "wsl_client.h"
 #include "core/io/ip.h"
 #include "core/project_settings.h"
+#include "wsl_client.h"
 
 void WSLClient::_do_handshake() {
 	if (_requested < _request.size() - 1) {

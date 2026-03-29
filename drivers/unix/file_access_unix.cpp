@@ -30,7 +30,7 @@
 
 #include "file_access_unix.h"
 
-#if defined(UNIX_ENABLED) || defined(LIBC_FILEIO_ENABLED)
+#if defined(UNIX_ENABLED)
 
 #include "core/os/os.h"
 #include "core/print_string.h"
@@ -39,10 +39,7 @@
 #include <sys/types.h>
 
 #include <errno.h>
-
-#if defined(UNIX_ENABLED)
 #include <unistd.h>
-#endif
 
 #ifndef PLATFORM_ANDROID
 #include <sys/statvfs.h>

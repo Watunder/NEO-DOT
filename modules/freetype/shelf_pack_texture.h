@@ -33,6 +33,8 @@
 
 #include "scene/resources/texture.h"
 
+#include <limits.h>
+
 struct ShelfPackTexture {
 	enum {
 		MIN_TEXTURE_SIZE = 256,

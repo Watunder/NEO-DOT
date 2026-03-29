@@ -28,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
 #ifndef WEBRTC_DATA_CHANNEL_JS_H

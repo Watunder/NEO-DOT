@@ -31,6 +31,7 @@
 #ifndef WSLCLIENT_H
 #define WSLCLIENT_H
 
+#include "configs/platform_defines.h"
 #ifndef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"

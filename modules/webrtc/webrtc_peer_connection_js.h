@@ -31,6 +31,7 @@
 #ifndef WEBRTC_PEER_CONNECTION_JS_H
 #define WEBRTC_PEER_CONNECTION_JS_H
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
 #include "webrtc_peer_connection.h"

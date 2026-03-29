@@ -28,10 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
-#include "emws_server.h"
 #include "core/os/os.h"
+#include "emws_server.h"
 
 Error EMWSServer::listen(int p_port, Vector<String> p_protocols, bool gd_mp_api) {
 	return FAILED;

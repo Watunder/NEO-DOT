@@ -28,12 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include "configs/platform_defines.h"
 #ifdef PLATFORM_EMSCRIPTEN
 
-#include "emws_client.h"
 #include "core/io/ip.h"
 #include "core/project_settings.h"
 #include "emscripten.h"
+#include "emws_client.h"
 
 void EMWSClient::_esws_on_connect(void *obj, char *proto) {
 	EMWSClient *client = static_cast<EMWSClient *>(obj);

@@ -31,6 +31,7 @@
 #ifndef WSLSERVER_H
 #define WSLSERVER_H
 
+#include "configs/platform_defines.h"
 #ifndef PLATFORM_EMSCRIPTEN
 
 #include "websocket_server.h"

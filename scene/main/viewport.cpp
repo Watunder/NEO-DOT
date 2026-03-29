@@ -1499,6 +1499,8 @@ void Viewport::_gui_show_tooltip() {
 	// Controls can implement `make_custom_tooltip` to provide their own tooltip.
 	// This should be a Control node which will be added as child to the tooltip owner.
 	bool custom_tooltip = true;
+	(void)custom_tooltip; // unused in most situations
+
 	gui.tooltip_popup = tooltip_owner->make_custom_tooltip(tooltip_text);
 
 	// If no custom tooltip is given, use a default implementation.

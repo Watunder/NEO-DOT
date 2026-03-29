@@ -31,6 +31,7 @@
 #ifndef WSLPEER_H
 #define WSLPEER_H
 
+#include "configs/platform_defines.h"
 #ifndef PLATFORM_EMSCRIPTEN
 
 #include "core/error_list.h"

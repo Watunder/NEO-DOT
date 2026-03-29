@@ -1,0 +1,83 @@
+name: 🌐 Emscripten Builds
+on:
+  workflow_call:
+
+# Global Settings
+env:
+  # Only used for the cache key. Increment version to force clean build.
+  GODOT_BASE_BRANCH: 3.3
+  SCONSFLAGS: verbose=yes warnings=all werror=yes debug_symbols=no
+  EM_VERSION: 3.1.74
+
+concurrency:
+  group: ci-${{ github.actor }}-${{ github.head_ref || github.run_number }}-${{ github.ref }}-emscripten_builds
+  cancel-in-progress: true
+
+jobs:
+  build-emscripten:
+    runs-on: ubuntu-22.04
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Editor (target=release_debug, tools=yes, threads_enabled=yes)
+            cache-name: emscripten-editor
+            target: release_debug
+            tools: yes
+            sconsflags: threads_enabled=yes
+
+          - name: Template (target=release, tools=no)
+            cache-name: emscripten-template
+            target: release
+            tools: no
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Godot build cache
+        uses: ./.github/actions/godot-cache-restore
+        with:
+          cache-name: ${{ matrix.cache-name }}
+        continue-on-error: true
+
+      - name: Setup Emscripten SDK
+        shell: bash
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+
+          cd emsdk
+          ./emsdk install ${{ env.EM_VERSION }}
+          ./emsdk activate ${{ env.EM_VERSION }}
+          source ./emsdk_env.sh
+
+          EMSDK_PATH=$(pwd)
+          echo "$EMSDK_PATH" >> $GITHUB_PATH
+          echo "$EMSDK_PATH/upstream/emscripten" >> $GITHUB_PATH
+
+      - name: Patch Emscripten SDK
+        shell: bash
+        run: |
+          patch -d "emsdk/upstream/emscripten" -p1 < ".github/patches/emscripten-3.1.74-fix-crash-in-getifaddrs.patch"
+
+      - name: Setup python and scons
+        uses: ./.github/actions/godot-deps
+
+      - name: Compilation
+        uses: ./.github/actions/godot-build
+        with:
+          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
+          platform: emscripten
+          target: ${{ matrix.target }}
+          tools: ${{ matrix.tools }}
+
+      - name: Save Godot build cache
+        uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: ${{ matrix.cache-name }}
+        continue-on-error: true
+
+      - name: Upload artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: ${{ matrix.cache-name }}

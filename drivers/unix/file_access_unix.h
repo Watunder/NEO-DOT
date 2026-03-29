@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 
-#if defined(UNIX_ENABLED) || defined(LIBC_FILEIO_ENABLED)
+#if defined(UNIX_ENABLED)
 
 typedef void (*CloseNotificationFunc)(const String &p_file, int p_flags);
 

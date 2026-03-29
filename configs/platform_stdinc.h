@@ -70,7 +70,7 @@
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PLATFORM_EMSCRIPTEN)
 
 #include <alloca.h>
 
@@ -90,7 +90,7 @@
 
 /*************************************************************************/
 
-#elif defined(PLATFORM_EMSCRIPTEN)
+#elif defined(PLATFORM_LINUX)
 
 #include <alloca.h>
 

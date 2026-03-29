@@ -48,6 +48,10 @@ RasterizerScene *RasterizerGLES3::get_scene() {
 Error RasterizerGLES3::is_viable() {
 #ifndef GLES_OVER_GL
 	int version = gladLoaderLoadGLES2();
+
+	if (!GLAD_GL_ES_VERSION_3_0) {
+		return ERR_UNAVAILABLE;
+	}
 #else
 	int version = gladLoaderLoadGL();
 

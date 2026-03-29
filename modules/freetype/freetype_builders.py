@@ -34,8 +34,8 @@ def make_builtin_vector_fonts(target, source, env):
         builtin_fonts_h.write("extern const int _font_" + name + "_size;\n")
         builtin_fonts_h.write("extern const unsigned char _font_" + name + "[];\n")
 
-        builtin_fonts_cpp.write("static const int _font_" + name + "_size = " + str(len(buf)) + ";\n")
-        builtin_fonts_cpp.write("static const unsigned char _font_" + name + "[] = {\n")
+        builtin_fonts_cpp.write("const int _font_" + name + "_size = " + str(len(buf)) + ";\n")
+        builtin_fonts_cpp.write("const unsigned char _font_" + name + "[] = {\n")
         for j in range(len(buf)):
             builtin_fonts_cpp.write("\t" + byte_to_str(buf[j]) + ",\n")
         builtin_fonts_cpp.write("};\n")

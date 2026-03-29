@@ -28,12 +28,12 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#if defined(UNIX_ENABLED) && !defined(NO_THREADS)
-
 #include "thread_posix.h"
 
 #include "core/os/thread.h"
 #include "core/ustring.h"
+
+#if defined(UNIX_ENABLED) && !defined(NO_THREADS)
 
 #ifdef PTHREAD_BSD_SET_NAME
 #include <pthread_np.h>
