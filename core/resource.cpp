@@ -467,7 +467,7 @@ void ResourceCache::dump(const char *p_file, bool p_short) {
 	FileAccess *f = NULL;
 	if (p_file) {
 		f = FileAccess::open(p_file, FileAccess::WRITE);
-		ERR_FAIL_COND_MSG(!f, "Cannot create file at path '" + String(p_file) + "'.");
+		ERR_FAIL_COND_MSG(!f, "Cannot create file at path '" + String::utf8(p_file) + "'.");
 	}
 
 	const String *K = NULL;
