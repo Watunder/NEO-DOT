@@ -81,3 +81,9 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
+
+      - name: Upload artifact for GitHub Pages
+        if: ${{ matrix.tools == 'yes' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: bin/.javascript_zip/
