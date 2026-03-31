@@ -32,13 +32,13 @@ jobs:
     needs: static-checks
     uses: ./.github/workflows/emscripten_builds.yml
 
-  deploy-emscripten:
+  deploy-web-editor:
     permissions:
       pages: write
       id-token: write
 
     environment:
-      name: github-pages
+      name: web-editor
       url: "${{ steps.deployment.outputs.page_url }}godot.tools.html"
 
     runs-on: ubuntu-22.04
