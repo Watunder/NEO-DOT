@@ -302,7 +302,8 @@ const GodotOS = {
 
 	godot_js_os_hw_concurrency_get__sig: 'i',
 	godot_js_os_hw_concurrency_get: function () {
-		return navigator.hardwareConcurrency || 1;
+		// do the same thing for PTHREAD_POOL_SIZE
+		return Math.min(navigator.hardwareConcurrency ?? 2, 16);
 	},
 };
 
