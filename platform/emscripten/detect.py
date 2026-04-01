@@ -193,7 +193,7 @@ def configure(env):
         env.Append(CCFLAGS=["-s", "USE_PTHREADS=1"])
         env.Append(LINKFLAGS=["-s", "USE_PTHREADS=1"])
         env.Append(LINKFLAGS=["-s", "DEFAULT_PTHREAD_STACK_SIZE=%sKB" % env["default_pthread_stack_size"]])
-        env.Append(LINKFLAGS=["-s", "PTHREAD_POOL_SIZE=8"])
+        env.Append(LINKFLAGS=["-s", "PTHREAD_POOL_SIZE=%s" % "Math.min(navigator.hardwareConcurrency ?? 2, 16)"])
         env.Append(LINKFLAGS=["-s", "WASM_MEM_MAX=2048MB"])
         env.extra_suffix = ".threads" + env.extra_suffix
     else:
