@@ -1,4 +1,4 @@
-name: 🔗 GHA for the PR (v0.0.2)
+name: 🔗 GHA for the PR
 run-name: |
   ${{
     (github.event.pull_request.draft && format('📝 Draft PR | {0}', github.event.pull_request.title))

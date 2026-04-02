@@ -1,4 +1,4 @@
-name: ⚙️ Plugin Builds (v0.0.2)
+name: ⚙️ Plugin Builds
 on:
   workflow_dispatch:
     inputs:
