@@ -1,4 +1,4 @@
-name: 🏁 Windows Builds (v0.0.2)
+name: 🏁 Windows Builds
 on:
   workflow_call:
   workflow_dispatch:

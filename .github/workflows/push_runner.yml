@@ -1,4 +1,4 @@
-name: 🔗 GHA for the push (v0.0.2)
+name: 🔗 GHA for the push
 run-name: |
   ${{
     (github.ref == 'refs/heads/master' && format('🚀 Production | {0}', github.event.head_commit.message))
