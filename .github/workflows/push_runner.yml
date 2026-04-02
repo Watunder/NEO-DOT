@@ -43,6 +43,7 @@ jobs:
 
     runs-on: ubuntu-22.04
     needs: emscripten-build
+    if: ${{ github.ref == 'refs/heads/develop_ci_github' }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
