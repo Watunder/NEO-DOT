@@ -81,3 +81,36 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
+
+  deploy-web-editor:
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: build-emscripten
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: emscripten-editor
+          path: "${{ runner.temp }}/emscripten-editor/"
+
+      - name: Prepare dist
+        shell: bash
+        run: |
+          mkdir web-editor-dist && cd $_
+          7z x "${{ runner.temp }}/emscripten-editor/godot.emscripten.opt.tools.threads.zip"
+
+      - name: Deploy to Cloudflare Pages
+        uses: andykenward/github-actions-cloudflare-pages@v3.2.2
+        with:
+          cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          cloudflare-project-name: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: web-editor-dist
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-environment: ${{ (github.ref == 'refs/heads/master' && 'web-editor-production') || 'web-editor-preview' }}
