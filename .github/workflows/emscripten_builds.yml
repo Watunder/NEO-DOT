@@ -81,15 +81,3 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
-
-      - name: Patch artifact for GitHub Pages
-        if: ${{ github.ref == 'refs/heads/master' && matrix.tools == 'yes' }}
-        shell: bash
-        run: |
-          patch -d "bin/.javascript_zip/" -p1 < ".github/patches/github-pages-fix-coop-coep.patch"
-
-      - name: Upload artifact for GitHub Pages
-        if: ${{ github.ref == 'refs/heads/master' && matrix.tools == 'yes' }}
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: bin/.javascript_zip/
