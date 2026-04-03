@@ -27,6 +27,8 @@ jobs:
     uses: ./.github/workflows/emscripten_builds.yml
 
   deploy-web-editor:
+    environment: web-editor-preview
+
     permissions:
       contents: read
       deployments: write
@@ -49,19 +51,23 @@ jobs:
           mkdir web-editor-dist && cd $_
           7z x "${{ runner.temp }}/emscripten-editor/godot.emscripten.opt.tools.threads.zip"
           mv -f godot.tools.html index.html
+          mv -f godot.tools.wasm godot.tools.wasm.orig
+          brotli -f -q 6 godot.tools.wasm.orig -o godot.tools.wasm
+          rm -f godot.tools.wasm.orig
 
           cat > _headers << 'EOF'
           /*
             Cross-Origin-Opener-Policy: same-origin
             Cross-Origin-Embedder-Policy: require-corp
+          /godot.tools.wasm
+            Content-Type: application/wasm
+            Content-Encoding: br
           EOF
 
       - name: Deploy to Cloudflare Pages
-        uses: andykenward/github-actions-cloudflare-pages@v3.3.2
+        uses: cloudflare/wrangler-action@v3
         with:
-          cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          cloudflare-account-id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          cloudflare-project-name: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
-          directory: web-editor-dist
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: 'web-editor-preview'
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web-editor-dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
