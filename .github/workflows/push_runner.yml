@@ -31,21 +31,3 @@ jobs:
     name: 🌐 Emscripten
     needs: static-checks
     uses: ./.github/workflows/emscripten_builds.yml
-
-  deploy-web-editor:
-    if: ${{ github.ref == 'refs/heads/master' }}
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: web-editor
-      url: "${{ steps.deployment.outputs.page_url }}godot.tools.html"
-
-    runs-on: ubuntu-22.04
-    needs: emscripten-build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

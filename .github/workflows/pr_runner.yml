@@ -25,3 +25,61 @@ jobs:
     name: 🌐 Emscripten
     needs: static-checks
     uses: ./.github/workflows/emscripten_builds.yml
+
+  deploy-web-editor:
+    environment: web-editor-preview
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    needs: emscripten-build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: emscripten-editor
+          path: "${{ runner.temp }}/emscripten-editor/"
+
+      - name: Prepare dist
+        shell: bash
+        run: |
+          mkdir web-editor-dist && cd $_
+          7z x "${{ runner.temp }}/emscripten-editor/godot.emscripten.opt.tools.threads.zip"
+          mv -f godot.tools.html index.html
+          mv -f godot.tools.wasm godot.tools.wasm.orig
+          brotli -f -q 6 godot.tools.wasm.orig -o godot.tools.wasm
+          rm -f godot.tools.wasm.orig
+
+          cat > _headers << 'EOF'
+          /*
+            Cross-Origin-Opener-Policy: same-origin
+            Cross-Origin-Embedder-Policy: require-corp
+          /godot.tools.wasm
+            Content-Type: application/wasm
+            Content-Encoding: br
+          EOF
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy-cloudflare-pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web-editor-dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=preview
+
+      - name: Add PR comment
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: cloudflare-pages-infos
+          message: |
+            Deployed build to Cloudflare!
+
+            |                         |   |
+            | ----------------------- | - |
+            | **Last commit:**        | ${{ github.event.pull_request.head.sha }} |
+            | **Preview URL**:        | ${{ steps.deploy-cloudflare-pages.outputs.deployment-url }} |
+            | **Branch Preview URL**: | ${{ steps.deploy-cloudflare-pages.outputs.pages-deployment-alias-url }} |
