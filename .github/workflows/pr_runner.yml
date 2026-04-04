@@ -31,7 +31,6 @@ jobs:
 
     permissions:
       contents: read
-      deployments: write
       pull-requests: write
 
     runs-on: ubuntu-22.04
@@ -65,8 +64,22 @@ jobs:
           EOF
 
       - name: Deploy to Cloudflare Pages
+        id: deploy-cloudflare-pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy web-editor-dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=preview
+
+      - name: Add PR comment
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: cloudflare-pages-infos
+          message: |
+            Deployed build to Cloudflare!
+
+            |                         |   |
+            | ----------------------- | - |
+            | **Last commit:**        | ${{ github.event.pull_request.head.sha }} |
+            | **Preview URL**:        | ${{ steps.deploy-cloudflare-pages.outputs.deployment-url }} |
+            | **Branch Preview URL**: | ${{ steps.deploy-cloudflare-pages.outputs.pages-deployment-alias-url }} |
